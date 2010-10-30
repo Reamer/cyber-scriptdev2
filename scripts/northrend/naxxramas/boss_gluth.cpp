@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Gluth
-SD%Complete: 70
+SD%Complete: 80
 SDComment:
 SDCategory: Naxxramas
 EndScriptData */
@@ -72,10 +72,9 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
     {
         m_uiMortalWoundTimer = 8000;
         m_uiDecimateTimer = 110000;
-        m_uiEnrageTimer = 60000;
+        m_uiEnrageTimer = 30000;
         m_uiSummonTimer = 10000;
-
-        m_uiBerserkTimer = MINUTE*7*IN_MILLISECONDS;
+        m_uiBerserkTimer = 7*MINUTE*IN_MILLISECONDS;
 
         m_uiRangeCheck_Timer = 1000;
         m_lZombieGUIDList.clear();
@@ -125,14 +124,26 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        // Enrage
+        if (m_uiEnrageTimer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
+            m_uiEnrageTimer = 20000;
+        }else m_uiEnrageTimer -= uiDiff;
+
+        // Berserk
+        if (m_uiBerserkTimer < uiDiff)
+        {
+            DoCast(m_creature, SPELL_BERSERK);
+            m_uiBerserkTimer = 300000;
+        }else m_uiBerserkTimer -= uiDiff;
+
         // Mortal Wound
         if (m_uiMortalWoundTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND);
             m_uiMortalWoundTimer = 10000;
-        }
-        else
-            m_uiMortalWoundTimer -= uiDiff;
+        }else m_uiMortalWoundTimer -= uiDiff;
 
         //Decimate_Timer
         if (m_uiDecimateTimer < uiDiff)
@@ -165,17 +176,8 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
                             pTemp->AddThreat(m_creature, 1000000000.0f); // force move toward to Gluth
                         }
             }
-            m_uiDecimateTimer = (m_bIsRegularMode ? 100000 : 120000);
+            m_uiDecimateTimer = 104000;
         }else m_uiDecimateTimer -= uiDiff;
-
-        // Enrage
-        if (m_uiEnrageTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
-            m_uiEnrageTimer = 60000;
-        }
-        else
-            m_uiEnrageTimer -= uiDiff;
 
         if (m_uiRangeCheck_Timer < uiDiff)
         {
@@ -204,18 +206,7 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
             }
 
             m_uiSummonTimer = 10000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
-
-        // Berserk
-        if (m_uiBerserkTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
-            m_uiBerserkTimer = MINUTE*5*IN_MILLISECONDS;
-        }
-        else
-            m_uiBerserkTimer -= uiDiff;
+        }else m_uiSummonTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

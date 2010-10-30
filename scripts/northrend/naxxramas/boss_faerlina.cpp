@@ -126,8 +126,8 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
                 m_creature->RemoveAurasDueToSpell(SPELL_ENRAGE);
                 m_uiEnrageTimer = 60000;
 
-                /*if (!m_bIsRegularMode) //hack worshipper should die
-                    pCaster->DealDamage(pCaster, pCaster->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);*/ 
+                //if (!m_bIsRegularMode) //hack worshipper should die
+                //    pCaster->DealDamage(pCaster, pCaster->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
             }else m_uiEnrageTimer += 30000;
         }
@@ -186,7 +186,7 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
         //Enrage_Timer
         if (m_uiEnrageTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ENRAGE : H_SPELL_ENRAGE);
+            DoCast(m_creature, m_bIsRegularMode ? SPELL_ENRAGE : H_SPELL_ENRAGE);
             m_uiEnrageTimer = 60000;
         }else m_uiEnrageTimer -= uiDiff;
 
@@ -224,7 +224,7 @@ struct MANGOS_DLL_DECL mob_worshipperAI : public ScriptedAI
 
 	void JustDied(Unit* pKiller)
 	{
-       // if (m_bIsRegularMode) //only 10 mode
+        //if (m_bIsRegularMode) //only 10 mode
             m_creature->CastSpell(m_creature, SPELL_WIDOWS_EMBRACE, true, 0, 0, pKiller->GetGUID());
 	}
 

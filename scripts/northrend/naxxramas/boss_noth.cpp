@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Noth
-SD%Complete: 60
+SD%Complete: 95
 SDComment: Summons need tuning, timers need tuning, need to add berserk "phase" after last skeleton phase
 SDCategory: Naxxramas
 EndScriptData */
@@ -106,7 +106,7 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
     {
         m_uiPhase = PHASE_GROUND;
         m_uiPhaseSub = PHASE_GROUND;
-        m_uiPhaseTimer = 110000;
+        m_uiPhaseTimer = 90000;
 
         m_uiBlinkTimer = 25000;
         m_uiCurseTimer = 4000;
@@ -152,11 +152,11 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
             m_pInstance->SetData(TYPE_NOTH, FAIL);
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
-    {
-        if (pCaster == m_creature && pSpell->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_LEAP)
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H);
-    }
+    //void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
+    //{
+    //    if (pCaster == m_creature && pSpell->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_LEAP)
+    //        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H);
+    //}
 
     void UpdateAI(const uint32 uiDiff)
     {
@@ -173,41 +173,35 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
                 {
                     DoScriptText(EMOTE_TELEPORT, m_creature);
                     m_creature->GetMotionMaster()->MoveIdle();
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     m_uiPhaseTimer = 70000;
                     m_uiPhase = PHASE_BALCONY;
                     ++m_uiPhaseSub;
                     return;
                 }
-            }
-            else
-                m_uiPhaseTimer -= uiDiff;
+            }else m_uiPhaseTimer -= uiDiff;
 
-            if (m_bIsRegularMode)
+            if (m_uiBlinkTimer < uiDiff)
             {
-                if (m_uiBlinkTimer < uiDiff)
+                static uint32 const auiSpellBlink[4] =
                 {
-                    static uint32 const auiSpellBlink[4] =
-                    {
-                        SPELL_BLINK_1, SPELL_BLINK_2, SPELL_BLINK_3, SPELL_BLINK_4
-                    };
+                    SPELL_BLINK_1, SPELL_BLINK_2, SPELL_BLINK_3, SPELL_BLINK_4
+                };
 
-                    if (DoCastSpellIfCan(m_creature, auiSpellBlink[urand(0,3)]) == CAST_OK)
-                    {
-                        DoResetThreat();
-                        m_uiBlinkTimer = 25000;
-                    }
+                DoCast(m_creature, m_bIsRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H);
+
+                if (DoCastSpellIfCan(m_creature, auiSpellBlink[urand(0,3)]) == CAST_OK)
+                {
+                    DoResetThreat();
+                    m_uiBlinkTimer = 25000;
                 }
-                else
-                    m_uiBlinkTimer -= uiDiff;
-            }
+            }else m_uiBlinkTimer -= uiDiff;
 
             if (m_uiCurseTimer < uiDiff)
             {
                 DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CURSE_PLAGUEBRINGER : SPELL_CURSE_PLAGUEBRINGER_H);
                 m_uiCurseTimer = 28000;
-            }
-            else
-                m_uiCurseTimer -= uiDiff;
+            }else m_uiCurseTimer -= uiDiff;
 
             if (m_uiSummonTimer < uiDiff)
             {
@@ -224,15 +218,11 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
                     for(uint8 i = 0; i < 2; ++i)
                         DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedWarrior[urand(0,2)], CAST_TRIGGERED);
                 }
-                else
-                {
+                else 
                     DoCastSpellIfCan(m_creature, SPELL_SUMMON_WARRIOR_THREE, CAST_TRIGGERED);
-                }
-
-                m_uiSummonTimer = 30000;
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
+                
+                m_uiSummonTimer = m_bIsRegularMode ? 30000 : 15000;
+            }else m_uiSummonTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }
@@ -244,13 +234,13 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
                 {
                     DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                    m_uiPhaseTimer = 90000;
+                    if(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    m_uiPhaseTimer = 110000;
                     m_uiPhase = PHASE_GROUND;
                     return;
                 }
-            }
-            else
-                m_uiPhaseTimer -= uiDiff;
+            }else m_uiPhaseTimer -= uiDiff;
 
             if (m_uiSummonTimer < uiDiff)
             {
@@ -291,10 +281,8 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
                     }
                 }
 
-                m_uiSummonTimer = 30000;
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
+                m_uiSummonTimer = 15000;
+            }else m_uiSummonTimer -= uiDiff;
         }
     }
 };

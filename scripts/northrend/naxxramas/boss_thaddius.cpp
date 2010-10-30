@@ -121,7 +121,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
 		PolarityClearTimer = 0;
 		PolarityDamageTimer = 1000;
 		ChainLightningTimer = 12000+urand(0,5000);
-		BerserkTimer = 360000;
+		BerserkTimer = 365000;
 		BallLightningTimer = 3000;
 
         RemoveCharges();
@@ -256,14 +256,23 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
 			return;
 		}
 
+        if (BerserkTimer)
+        {
+            if (BerserkTimer <= diff)
+            {
+                DoCast(m_creature, SPELL_BESERK);
+                BerserkTimer = 0;
+            }else BerserkTimer -= diff;
+        } 
+
 		if(PolarityShiftTimer <= diff)
 		{
 			DoScriptText(SAY_ELECT,m_creature);
 
 			DoCast(m_creature,SPELL_POLARITYSHIFT);
 			PolarityShiftTimer = 30000;
-			PolarityClearTimer = 2000;
-            PolarityDamageTimer = 5000;
+			PolarityClearTimer = 500;
+            PolarityDamageTimer = 8000;
 		} else PolarityShiftTimer -= diff;
 
 		if(PolarityClearTimer)
@@ -286,9 +295,9 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
 					Map::PlayerList const& plList = m_pInstance->instance->GetPlayers();
 					for(Map::PlayerList::const_iterator ittr = plList.begin(); ittr != plList.end(); ++ittr)
                     {
-						if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_NEGATIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr),m_bIsRegularMode ? 10.0f : 5.0f))
+						if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
 							(*itr)->CastSpell((*itr),SPELL_CHARGE_POSITIVE_NEARDMG,true);
-                        if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_POSITIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr),m_bIsRegularMode ? 10.0f : 5.0f))
+                        if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_POSITIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
                             ++charge;
                     }
                     (*itr)->RemoveAura(SPELL_CHARGE_POSITIVE_DMGBUFF, EFFECT_INDEX_0);
@@ -308,9 +317,9 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
 					Map::PlayerList const& plList = m_pInstance->instance->GetPlayers();
 					for(Map::PlayerList::const_iterator ittr = plList.begin(); ittr != plList.end(); ++ittr)
                     {
-                        if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_POSITIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr),m_bIsRegularMode ? 10.0f : 5.0f))
+                        if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
 							(*itr)->CastSpell((*itr),SPELL_CHARGE_NEGATIVE_NEARDMG,true);
-                        if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_NEGATIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr),m_bIsRegularMode ? 10.0f : 5.0f))
+                        if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_NEGATIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
                             ++charge;
                     }
                     (*itr)->RemoveAura(SPELL_CHARGE_NEGATIVE_DMGBUFF, EFFECT_INDEX_0);
@@ -327,7 +336,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
 		{
 			DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0),m_bIsRegularMode?SPELL_CHAIN_LIGHTNING:SPELL_CHAIN_LIGHTNING_H);
 			ChainLightningTimer = 12000+urand(0,5000);
-		} else ChainLightningTimer -= diff;
+		}else ChainLightningTimer -= diff;
 
 		if(!m_creature->getVictim()->IsWithinDistInMap(m_creature,ATTACK_DISTANCE))
 		{
@@ -335,19 +344,10 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
 			{
 				DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),SPELL_BALL_LIGHTNING);
 				BallLightningTimer = 2500;
-			} else BallLightningTimer -= diff;
+			}else BallLightningTimer -= diff;
 		}
-        
-        if (BerserkTimer)
-        {
-            if (BerserkTimer <= diff)
-            {
-                DoCast(m_creature, SPELL_BESERK);
-                BerserkTimer = 0;
-            }else BerserkTimer -= diff;
-         }
 
-		DoMeleeAttackIfReady();
+    	DoMeleeAttackIfReady();
 	}
 };
 
