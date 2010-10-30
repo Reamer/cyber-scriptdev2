@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Grobbulus
-SD%Complete: 0
+SD%Complete: 90
 SDComment: Place holder
 SDCategory: Naxxramas
 EndScriptData */
@@ -56,13 +56,15 @@ struct MANGOS_DLL_DECL boss_grobbulusAI : public ScriptedAI
     uint32 MutatingInjection_Timer;
     uint32 SlimeSpray_Timer;
     uint32 Enrage_Timer;
+    uint32 MutatingInjection_Count;
 
     void Reset()
     {
         PoisonCloud_Timer = 15000;
         MutatingInjection_Timer = 20000;
         SlimeSpray_Timer = 15000+rand()%15000;
-        Enrage_Timer = 720000;
+        Enrage_Timer = 12*MINUTE*IN_MILLISECONDS;
+        MutatingInjection_Count = 0;
 
         Despawnall();
         if (m_pInstance)
@@ -97,6 +99,16 @@ struct MANGOS_DLL_DECL boss_grobbulusAI : public ScriptedAI
         } 
     }
 
+    void SpawnFalloutSlime(Unit *target)
+    {
+        if (Creature* pTemp = m_creature->SummonCreature(MOB_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
+            {
+                pTemp->AddThreat(pTarget,0.0f);
+                pTemp->AI()->AttackStart(pTarget);
+            }
+    }
+
     void Aggro(Unit *who)
     {
         if (m_pInstance)
@@ -105,23 +117,14 @@ struct MANGOS_DLL_DECL boss_grobbulusAI : public ScriptedAI
 
     void SpellHitTarget(Unit *target, const SpellEntry *spell)
     {
-        if(spell->Id == SPELL_SLIME_SPRAY || spell->Id == H_SPELL_SLIME_SPRAY)
+        if(spell->Id == SPELL_SLIME_SPRAY)
         {
-            if (Creature* pTemp = m_creature->SummonCreature(MOB_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000))
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
-                {
-                    pTemp->AddThreat(pTarget,0.0f);
-                    pTemp->AI()->AttackStart(pTarget);
-                }
+            SpawnFalloutSlime(target);
         }
-        if(spell->Id == H_SPELL_SLIME_SPRAY)
+        else if(spell->Id == H_SPELL_SLIME_SPRAY)
         {
-            if (Creature* pTemp = m_creature->SummonCreature(MOB_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000))
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
-                {
-                    pTemp->AddThreat(pTarget,0.0f);
-                    pTemp->AI()->AttackStart(pTarget);
-                }
+            SpawnFalloutSlime(target);
+            SpawnFalloutSlime(target);
         }
     }
 
@@ -130,9 +133,15 @@ struct MANGOS_DLL_DECL boss_grobbulusAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        if (Enrage_Timer < diff)
+        {
+            DoCast(m_creature, SPELL_BERSERK);
+            Enrage_Timer = 300000;
+        }else Enrage_Timer -= diff;
+
         if (PoisonCloud_Timer < diff)
         {
-            DoCast(m_creature, SPELL_POISON_CLOUD);
+            DoCastSpellIfCan(m_creature, SPELL_POISON_CLOUD);
             PoisonCloud_Timer = 15000;
         }else PoisonCloud_Timer -= diff;
 
@@ -141,22 +150,19 @@ struct MANGOS_DLL_DECL boss_grobbulusAI : public ScriptedAI
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,1))
 				if (target->GetTypeId() == TYPEID_PLAYER)
 				{
-					DoCast(target, SPELL_MUTATING_INJECTION);
-					MutatingInjection_Timer = 20000;
+					DoCastSpellIfCan(target, SPELL_MUTATING_INJECTION);
+                    MutatingInjection_Timer = (MutatingInjection_Count <= 20) ? 20000 : 10000;
+                    MutatingInjection_Count++;
 				}
 		}else MutatingInjection_Timer -= diff;
 
         if (SlimeSpray_Timer < diff)
         {
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_SLIME_SPRAY : H_SPELL_SLIME_SPRAY);
+            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SLIME_SPRAY : H_SPELL_SLIME_SPRAY);
             SlimeSpray_Timer = 15000+rand()%15000;
         }else SlimeSpray_Timer -= diff;
 
-        if (Enrage_Timer < diff)
-        {
-            DoCast(m_creature, SPELL_BERSERK);
-            Enrage_Timer = 300000;
-        }else Enrage_Timer -= diff;
+
 
         DoMeleeAttackIfReady();
     }

@@ -90,6 +90,13 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
+
+        for(int i=0;i<4;i++)
+        {
+            if(Creature* Understudy = (Creature*) m_creature->GetMap()->GetUnit(m_pInstance->GetData64(m_uiDeathKnightUnderstudy[i])))
+                if(Understudy->isAlive())
+                    Understudy->CastSpell(Understudy, SPELL_HOPELESS, true);
+        }
     }
 
     void Aggro(Unit* pWho)
@@ -127,18 +134,14 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
         {
             DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE);
             m_uiUnbalancingStrikeTimer = 30000;
-        }
-        else
-            m_uiUnbalancingStrikeTimer -= uiDiff;
+        }else m_uiUnbalancingStrikeTimer -= uiDiff;
 
         // Disrupting Shout
         if (m_uiDisruptingShoutTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H);
             m_uiDisruptingShoutTimer = 25000;
-        }
-        else
-            m_uiDisruptingShoutTimer -= uiDiff;
+        }else m_uiDisruptingShoutTimer -= uiDiff;
 
         // Jagged Knife
         if (m_uiJaggedKnifeTimer < uiDiff)
@@ -146,9 +149,7 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 DoCastSpellIfCan(pTarget, SPELL_JAGGED_KNIFE);
             m_uiJaggedKnifeTimer = 10000;
-        }
-        else
-            m_uiJaggedKnifeTimer -= uiDiff;
+        }else m_uiJaggedKnifeTimer -= uiDiff;
 
         // Random say
         if (m_uiCommandSoundTimer < uiDiff)
@@ -162,9 +163,7 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
             }
 
             m_uiCommandSoundTimer = 40000;
-        }
-        else
-            m_uiCommandSoundTimer -= uiDiff;
+        }else m_uiCommandSoundTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

@@ -100,11 +100,9 @@ struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
         {
             if (m_uiBerserkTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature, SPELL_BERSERK);
+                DoCast(m_creature, SPELL_BERSERK);
                 m_uiBerserkTimer = 300000;
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
+            }else  m_uiBerserkTimer -= uiDiff;
         }
         
         // Inevitable Doom
@@ -112,9 +110,7 @@ struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
         {
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
             m_uiInevitableDoomTimer = (m_uiNecroticAuraCount <= 40) ? 30000 : 15000;
-        }
-        else
-            m_uiInevitableDoomTimer -= uiDiff;
+        }else m_uiInevitableDoomTimer -= uiDiff;
 
         // Necrotic Aura
         if (m_uiNecroticAuraTimer < uiDiff)
@@ -136,27 +132,21 @@ struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
                     break;
             }
             m_uiNecroticAuraCount++;
-        }
-        else
-            m_uiNecroticAuraTimer -= uiDiff;
+        }else m_uiNecroticAuraTimer -= uiDiff;
 
         // Summon
         if (m_uiSummonTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE);
             m_uiSummonTimer = m_bIsRegularMode ? 36000 : 18000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
+        }else m_uiSummonTimer -= uiDiff;
 
         // Deathbloom
         if (m_uiDeathbloomTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DEATHBLOOM : SPELL_DEATHBLOOM_H);
             m_uiDeathbloomTimer = 30000;
-        }
-        else
-            m_uiDeathbloomTimer -= uiDiff;
+        }else m_uiDeathbloomTimer -= uiDiff;
             
         DoMeleeAttackIfReady();
     }

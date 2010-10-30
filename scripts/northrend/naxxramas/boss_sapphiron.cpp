@@ -118,11 +118,10 @@ struct MANGOS_DLL_DECL boss_sapphironAI : public ScriptedAI
         m_creature->SetInCombatWithZone();
         DoCast(m_creature, m_bIsRegularMode ? SPELL_FROST_AURA : H_SPELL_FROST_AURA);
 
-        if(Creature* pFrostBreathTarget = m_creature->SummonCreature(NPC_FROST_BREATH_TARGET, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(),0.f,TEMPSUMMON_DEAD_DESPAWN,0))
+        if(Creature* pFrostBreathTarget = m_creature->SummonCreature(NPC_FROST_BREATH_TARGET, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(),0.f,TEMPSUMMON_MANUAL_DESPAWN,0))
         {
             pFrostBreathTarget->SetSpeedRate(MOVE_WALK,0.0f,true);
             pFrostBreathTarget->SetSpeedRate(MOVE_RUN,0.0f,true);
-            //pFrostBreathTarget->SetDisplayId(16586);
             m_uiFrostBreathTargetGUID = pFrostBreathTarget->GetGUID();
         }
     }

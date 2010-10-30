@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_KelThuzad
-SD%Complete: 75
-SDComment: Timers will need adjustments, along with tweaking positions and amounts
+SD%Complete: 80
+SDComment: Chains of Kelthuzad need Coresupport
 SDCategory: Naxxramas
 EndScriptData */
 
@@ -452,17 +452,13 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT : SPELL_FROST_BOLT_H) == CAST_OK)
                     m_uiFrostBoltTimer = urand(1000, 60000);
-            }
-            else
-                m_uiFrostBoltTimer -= uiDiff;
+            }else m_uiFrostBoltTimer -= uiDiff;
 
             if (m_uiFrostBoltNovaTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT_NOVA : SPELL_FROST_BOLT_NOVA_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROST_BOLT_NOVA : SPELL_FROST_BOLT_NOVA_H) == CAST_OK)
                     m_uiFrostBoltNovaTimer = 15000;
-            }
-            else
-                m_uiFrostBoltNovaTimer -= uiDiff;
+            }else m_uiFrostBoltNovaTimer -= uiDiff;
 
                         //Check for Mana Detonation
             if (m_uiManaDetonationTimer < uiDiff)
@@ -513,9 +509,7 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                     }
                 }
                 m_uiShadowFissureTimer = m_bIsRegularMode ? 25000: 10000;
-            }
-            else
-                m_uiShadowFissureTimer -= uiDiff;
+            }else m_uiShadowFissureTimer -= uiDiff;
 
             if(m_uiShadowFissureActiveTimer)
                 if(m_uiShadowFissureActiveTimer < uiDiff)
@@ -533,9 +527,7 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                     for (Map::PlayerList::const_iterator itr = pPlayers.begin(); itr != pPlayers.end(); ++itr)
                         if(itr->getSource()->GetDistance2d(pFissure) < 2.0f)
                             pFissure->DealDamage(itr->getSource(),itr->getSource()->GetHealth(),NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                }
-                else 
-                    m_uiShadowFissureActiveTimer -= uiDiff;
+                }else m_uiShadowFissureActiveTimer -= uiDiff;
 
             if (m_uiFrostBlastTimer < uiDiff)
             {
@@ -546,24 +538,20 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
 
                     m_uiFrostBlastTimer = urand(30000, 60000);
                 }
-            }
-            else
-                m_uiFrostBlastTimer -= uiDiff;
+            }else m_uiFrostBlastTimer -= uiDiff;
 
-            // not sure if this is right
+            // need core support
             //if (!m_bIsRegularMode)
             //{
-                if (m_uiChainsTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
-                    {
-                        DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, m_creature);
+                //if (m_uiChainsTimer < uiDiff)
+                //{
+                //    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
+                //    {
+                //        DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, m_creature);
 
-                        m_uiChainsTimer = urand(30000, 60000);
-                    }
-                }
-                else
-                    m_uiChainsTimer -= uiDiff;
+                //        m_uiChainsTimer = urand(30000, 60000);
+                //    }
+                //}else m_uiChainsTimer -= uiDiff;
             //}
 
             if (m_uiPhase == PHASE_NORMAL)
@@ -585,9 +573,7 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                     // Summon a Guardian of Icecrown in a random alcove
                     SummonMob(NPC_GUARDIAN);
                     m_uiGuardiansTimer = 5000;
-                }
-                else
-                    m_uiGuardiansTimer -= uiDiff;
+                }else  m_uiGuardiansTimer -= uiDiff;
             }
 
             DoMeleeAttackIfReady();

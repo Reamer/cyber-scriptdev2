@@ -91,9 +91,13 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
 
     uint32 m_uiTeleportTimer;
     uint32 m_uiShadowboltTimer;
+    uint32 m_uiHarvestSoulTimer;
+
 
     void Reset()
     {
+   
+
         m_uiPhase = PHASE_SPEECH;
 
         m_uiSpeechCount = 0;
@@ -102,12 +106,17 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
         m_uiSummonCount = 0;
         m_uiSummonTimer = 5000;
 
-        m_uiTeleportTimer = 15000;
+        m_uiTeleportTimer = 20000;
         m_uiShadowboltTimer = 2500;
+
+        m_uiHarvestSoulTimer = 21000;
+
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     }
 
     void Aggro(Unit* pWho)
     {
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetInCombatWithZone();
 
         DoScriptText(SAY_SPEECH_1, m_creature);
@@ -119,6 +128,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
 
         m_pInstance->SetGothTriggers();
     }
+
 
     bool HasPlayersInLeftSide()
     {
@@ -186,7 +196,31 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
             if (uiCount == 0)
                 break;
 
-            m_creature->SummonCreature(uiSummonEntry, (*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ(), (*itr)->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+
+            Creature* pSummond = m_creature->SummonCreature(uiSummonEntry, (*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ(), (*itr)->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+            pSummond->setFaction(m_creature->getFaction());
+            Unit* pTarget;
+           
+
+            Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+
+            pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+
+            for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+            {
+                if (Player* pPlayer = itr->getSource())
+                {
+                    if (m_pInstance->IsInRightSideGothArea(pPlayer)){
+                        pTarget = pPlayer;
+                        break;
+                    }
+                }
+            }
+
+            if (pTarget){
+                pSummond->AI()->AttackStart(pTarget);
+            }
+        
             --uiCount;
         }
     }
@@ -243,6 +277,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                 {
                     if (m_uiSummonCount >= MAX_WAVES)
                     {
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         DoScriptText(SAY_TELEPORT, m_creature);
                         DoScriptText(EMOTE_TO_FRAY, m_creature);
                         DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RIGHT);
@@ -292,49 +327,58 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                 break;
             }
             case PHASE_GROUND:
-            case PHASE_END:
-            {
-                if (m_uiPhase == PHASE_GROUND)
+                if (m_uiTeleportTimer < uiDiff)
                 {
-                    if (m_creature->GetHealthPercent() < 30.0f)
+                    uint32 uiTeleportSpell = m_pInstance->IsInRightSideGothArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
+
+                    if (DoCastSpellIfCan(m_creature, uiTeleportSpell) == CAST_OK)
                     {
                         if (m_pInstance->IsInRightSideGothArea(m_creature))
-                        {
-                            DoScriptText(EMOTE_GATE, m_creature);
-                            m_pInstance->SetData(TYPE_GOTHIK, SPECIAL);
-                            m_uiPhase = PHASE_END;
-                            m_uiShadowboltTimer = 2000;
-                            return;
-                        }
+                            m_creature->NearTeleportTo(2706.43f, -3396.23f, 267.68f, 2.1f); 
+                            //m_creature->GetMap()->CreatureRelocation(m_creature, 2706.43f, -3396.23f, 267.68f, 2.1f);
+                        DoResetThreat();
+                        m_uiTeleportTimer = 20000;
+                        m_uiShadowboltTimer = 2000;
+                        return;
                     }
-
-                    if (m_uiTeleportTimer < uiDiff)
-                    {
-                        uint32 uiTeleportSpell = m_pInstance->IsInRightSideGothArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
-
-                        if (DoCastSpellIfCan(m_creature, uiTeleportSpell) == CAST_OK)
-                        {
-                            DoResetThreat();
-                            m_uiTeleportTimer = 15000;
-                            m_uiShadowboltTimer = 2000;
-                            return;
-                        }
-                    }
-                    else
-                        m_uiTeleportTimer -= uiDiff;
-                }
+                }else m_uiTeleportTimer -= uiDiff;
 
                 if (m_uiShadowboltTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ?  SPELL_SHADOWBOLT: SPELL_SHADOWBOLT_H) == CAST_OK)
                         m_uiShadowboltTimer = 1500;
-                }
-                else
-                    m_uiShadowboltTimer -= uiDiff;
+                }else m_uiShadowboltTimer -= uiDiff;
 
-                DoMeleeAttackIfReady();                     // possibly no melee at all
+                if (m_uiHarvestSoulTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
+                        m_uiHarvestSoulTimer = 21000;
+                }else m_uiHarvestSoulTimer -= uiDiff;
+
+                
+                
+                if (m_creature->GetHealthPercent() < 30.0f)
+                {
+                    DoScriptText(EMOTE_GATE, m_creature);
+                    m_pInstance->SetData(TYPE_GOTHIK, SPECIAL);
+                    m_uiPhase = PHASE_END;
+                    m_uiShadowboltTimer = 2000;
+                }
+                
+            case PHASE_END:         
+                if (m_uiShadowboltTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ?  SPELL_SHADOWBOLT: SPELL_SHADOWBOLT_H) == CAST_OK)
+                        m_uiShadowboltTimer = 1500;
+                }else m_uiShadowboltTimer -= uiDiff;
+
+                if (m_uiHarvestSoulTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
+                        m_uiHarvestSoulTimer = 21000;
+                }else m_uiHarvestSoulTimer -= uiDiff;
+               
                 break;
-            }
         }
     }
 };
@@ -413,11 +457,44 @@ bool EffectDummyCreature_spell_anchor(Unit* pCaster, uint32 uiSpellId, SpellEffe
                     uiNpcEntry = NPC_SPECT_DEATH_KNIGTH;
                 else if (uiSpellId == SPELL_C_TO_SKULL)
                     uiNpcEntry = NPC_SPECT_RIDER;
+                
+                
 
-                pGoth->SummonCreature(uiNpcEntry, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
+                Creature* mSummoned = pGoth->SummonCreature(uiNpcEntry, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+                mSummoned->setFaction(pGoth->getFaction());
 
-                if (uiNpcEntry == NPC_SPECT_RIDER)
-                    pGoth->SummonCreature(NPC_SPECT_HORSE, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
+                Unit* pTarget;
+           
+
+                Map::PlayerList const& lPlayers = pInstance->instance->GetPlayers();
+
+                pTarget = pGoth->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+
+                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                {
+                    if (Player* pPlayer = itr->getSource())
+                    {
+                        if (!pInstance->IsInRightSideGothArea(pPlayer)){
+                            pTarget = pPlayer;
+                            break;
+                        }
+                    }
+                }
+
+   
+                if (pTarget){
+
+                    mSummoned->AI()->AttackStart(pTarget);
+                }
+                   
+                if (uiNpcEntry == NPC_SPECT_RIDER){
+                    Creature* mSummonedHorse = pGoth->SummonCreature(NPC_SPECT_HORSE, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+                    mSummoned->setFaction(pGoth->getFaction());
+
+                    if (pTarget){
+                        mSummonedHorse->AI()->AttackStart(pTarget);
+                    }
+                }
             }
             return true;
         }

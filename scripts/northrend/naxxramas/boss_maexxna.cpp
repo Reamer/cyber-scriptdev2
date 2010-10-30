@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Maexxna
-SD%Complete: 70
+SD%Complete: 95
 SDComment: Need to correct web wrap ability
 SDCategory: Naxxramas
 EndScriptData */
@@ -39,8 +39,8 @@ enum
     SPELL_POISONSHOCK           = 28741,
     SPELL_POISONSHOCK_H         = 54122,
 
-    SPELL_NECROTICPOISON        = 28776,
-    SPELL_NECROTICPOISON_H      = 54121,
+    SPELL_NECROTICPOISON        = 54121,
+    SPELL_NECROTICPOISON_H      = 28776,
 
     SPELL_FRENZY                = 54123,
     SPELL_FRENZY_H              = 54124,
@@ -168,7 +168,7 @@ struct MANGOS_DLL_DECL boss_maexxnaAI : public ScriptedAI
         }
 
         // cut down to size if we have more than 3 targets
-        while(targets.size() > m_bIsRegularMode ? 1 : 3)
+        while(targets.size() > (m_bIsRegularMode ? 1 : 3))
             targets.erase(targets.begin()+rand()%targets.size());
 
         int i = 0;
@@ -222,10 +222,8 @@ struct MANGOS_DLL_DECL boss_maexxnaAI : public ScriptedAI
         {
             DoCastWebWrap();
             DoScriptText(EMOTE_SPIN_WEB, m_creature);
-            m_uiWebWrapTimer = 40000;
-        }
-        else
-            m_uiWebWrapTimer -= uiDiff;
+            m_uiWebWrapTimer = m_bIsRegularMode ? 40000 : 20000;
+        }else m_uiWebWrapTimer -= uiDiff;
 
         // Web Spray
         if (m_uiWebSprayTimer < uiDiff)
@@ -233,39 +231,31 @@ struct MANGOS_DLL_DECL boss_maexxnaAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WEBSPRAY : SPELL_WEBSPRAY_H) == CAST_OK)
             {
                 DoScriptText(EMOTE_SPRAY, m_creature);
-                m_uiWebSprayTimer = 40000;
+                m_uiWebSprayTimer = m_bIsRegularMode ? 40000 : 30000;
             }
-        }
-        else
-            m_uiWebSprayTimer -= uiDiff;
+        }else m_uiWebSprayTimer -= uiDiff;
 
         // Poison Shock
         if (m_uiPoisonShockTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_POISONSHOCK : SPELL_POISONSHOCK_H);
             m_uiPoisonShockTimer = 20000;
-        }
-        else
-            m_uiPoisonShockTimer -= uiDiff;
+        }else m_uiPoisonShockTimer -= uiDiff;
 
         // Necrotic Poison
         if (m_uiNecroticPoisonTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_NECROTICPOISON : SPELL_NECROTICPOISON_H);
             m_uiNecroticPoisonTimer = 30000;
-        }
-        else
-            m_uiNecroticPoisonTimer -= uiDiff;
+        }else m_uiNecroticPoisonTimer -= uiDiff;
 
         // Summon Spiderling
         if (m_uiSummonSpiderlingTimer < uiDiff)
         {
             SummonSpiderlings();
             DoScriptText(EMOTE_SPIDERLING, m_creature);
-            m_uiSummonSpiderlingTimer = 40000;
-        }
-        else
-            m_uiSummonSpiderlingTimer -= uiDiff;
+            m_uiSummonSpiderlingTimer = m_bIsRegularMode ? 40000 : 20000;
+        }else m_uiSummonSpiderlingTimer -= uiDiff;
 
         // Enrage if not already enraged and below 30%
         if (!m_bEnraged && m_creature->GetHealthPercent() < 30.0f)

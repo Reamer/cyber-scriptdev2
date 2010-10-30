@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Anubrekhan
-SD%Complete: 70
+SD%Complete: 95
 SDComment:
 SDCategory: Naxxramas
 EndScriptData */
@@ -76,7 +76,7 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
     void Reset()
     {
         m_uiImpaleTimer = 15000;                            // 15 seconds
-        m_uiLocustSwarmTimer = urand(70000, 120000);        // Random time between 80 seconds and 2 minutes for initial cast
+        m_uiLocustSwarmTimer = urand(80000, 120000);        // Random time between 80 seconds and 2 minutes for initial cast
         m_uiCryptGuardTimer = 0;                       
     }
 
@@ -143,6 +143,7 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
 
         ScriptedAI::MoveInLineOfSight(pWho);
     }
+
     void SummonGuard()
     {
         m_creature->SummonCreature(NPC_CRYPT_GUARD,m_creature->GetPositionX()+rand()%5,
@@ -163,25 +164,20 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
             //Do NOT cast it when we are afflicted by locust swarm
             if (!m_creature->HasAura(SPELL_LOCUSTSWARM) || !m_creature->HasAura(SPELL_LOCUSTSWARM_H))
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,1))
                     DoCastSpellIfCan(target, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H);
-            }
-
-            m_uiImpaleTimer = 15000;
-        }
-        else
-            m_uiImpaleTimer -= uiDiff;
+                    m_uiImpaleTimer = 15000;
+            }         
+        }else m_uiImpaleTimer -= uiDiff;
 
         // Locust Swarm
         if (m_uiLocustSwarmTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LOCUSTSWARM :SPELL_LOCUSTSWARM_H);
-            m_uiLocustSwarmTimer = 90000;
-            //spawn crypt guards with swarm on 10man mode
+            DoCast(m_creature, m_bIsRegularMode ? SPELL_LOCUSTSWARM :SPELL_LOCUSTSWARM_H);
+            m_uiLocustSwarmTimer = 80000;
+            //spawn crypt guards with swarm due boss will bug through floor
             m_uiCryptGuardTimer = 2000;
-        }
-        else
-            m_uiLocustSwarmTimer -= uiDiff;
+        }else m_uiLocustSwarmTimer -= uiDiff;
 
         // Summon crypt guard
         if (m_uiCryptGuardTimer < uiDiff)
@@ -192,9 +188,7 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
 
             //DoCastSpellIfCan(m_creature, SPELL_SUMMONGUARD);
             m_uiCryptGuardTimer = 30000;
-        }
-        else
-            m_uiCryptGuardTimer -= uiDiff;
+        }else m_uiCryptGuardTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -259,13 +253,13 @@ struct MANGOS_DLL_DECL mob_crypt_guardAI : public ScriptedAI
 
         if (AcidSpit_Timer < diff)
         {
-            DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ACID_SPIT : SPELL_ACID_SPIT_H);
+            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ACID_SPIT : SPELL_ACID_SPIT_H);
             AcidSpit_Timer = 10000 + rand()%1000;
         }else AcidSpit_Timer -= diff;
 
         if (Cleave_Timer < diff)
         {
-            DoCast(m_creature->getVictim(), SPELL_CLEAVE);
+            DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE);
             Cleave_Timer = 5000 + rand()%5000;
         }else Cleave_Timer -= diff;
 

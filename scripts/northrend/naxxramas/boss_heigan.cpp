@@ -138,7 +138,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
             DoCast(m_creature, SPELL_TELEPORT_SELF);
 
             Phase_Timer = 45000;
-            PlagueCloudTimer = 2000;
+            PlagueCloudTimer = 1000;
         }
     }
     void Aggro(Unit *who)
@@ -176,31 +176,29 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
 
         if (Phase_Timer < diff)
         {
-            if ( phase == 1)
+            if (phase == 1)
                 SetPhase(2);
-            else
-                SetPhase(1);
+            else SetPhase(1);
         }else Phase_Timer -= diff;
 
         if ( phase == 2 && PlagueCloudTimer < diff)
         {
-            DoCast(m_creature, SPELL_PLAGUE_CLOUD);
+            DoCastSpellIfCan(m_creature, SPELL_PLAGUE_CLOUD);
             PlagueCloudTimer  = 999999;
-        }
-        else
-            PlagueCloudTimer -= diff;
+        }else PlagueCloudTimer -= diff;
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || phase != 1)
-            return;
+            return; 
+
         if (Disruption_Timer < diff)
         {
-            DoCast(m_creature->getVictim(), SPELL_DISRUPTION);
+            DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISRUPTION);
             Disruption_Timer = 5000+rand()%10000;
         }else Disruption_Timer -= diff;
 
         if (Feaver_Timer < diff)
         {
-            DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DECREPIT_FEVER_N : SPELL_DECREPIT_FEVER_H);
+            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DECREPIT_FEVER_N : SPELL_DECREPIT_FEVER_H);
             Feaver_Timer = 30000+rand()%10000;
         }else Feaver_Timer -= diff;
 
@@ -284,8 +282,8 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                         if (pPlayer->isAlive())
                         {
                             if(pPlayer->GetDistance((*itr)) <= 4.0f)
-                                //We use originalCaster for deal damage by Plague Fissure
-                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID());                        }
+                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                        }
                     }
                 }
             }
@@ -325,7 +323,8 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                         if (pPlayer->isAlive())
                         {
                             if(pPlayer->GetDistance((*itr)) <= 4.0f)
-                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID());                        }
+                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                        }
                     }
                 }
             }
@@ -363,7 +362,8 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                         if (pPlayer->isAlive())
                         {
                             if(pPlayer->GetDistance((*itr)) <= 4.0f)
-                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID());                        }
+                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                        }
                     }
                 }
             }
@@ -401,7 +401,7 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                         if (pPlayer->isAlive())
                         {
                             if(pPlayer->GetDistance((*itr)) <= 4.0f)
-                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID());
+                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
                         }
                     }
                 }
@@ -443,6 +443,7 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                 phase = 2;
                 phaseTimer = 45000;
                 safeSpot = 1;
+                fastTimer = 3500; //reset timer for phase 2
             }
             else
             {
@@ -465,6 +466,7 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                 // Slow dance again
                 phase = 1;
                 phaseTimer = 90000;
+                slowTimer = 10500; //reset timer for phase 1
                 safeSpot = 1;
             }
             else 

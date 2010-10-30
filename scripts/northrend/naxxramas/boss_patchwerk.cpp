@@ -34,9 +34,9 @@ enum
     EMOTE_BERSERK         = -1533021,
     EMOTE_ENRAGE          = -1533022,
 
-    SPELL_HATEFULSTRIKE   = 28308,
+    SPELL_HATEFULSTRIKE   = 41926,
     SPELL_HATEFULSTRIKE_H = 59192,
-    SPELL_ENRAGE          = 28131,
+    SPELL_FRENZY          = 28131,
     SPELL_BERSERK         = 26662,
     SPELL_SLIMEBOLT       = 32309
 };
@@ -132,21 +132,12 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // Hateful Strike
-        if (m_uiHatefulStrikeTimer < uiDiff)
-        {
-            DoHatefulStrike();
-            m_uiHatefulStrikeTimer = 1000;
-        }
-        else
-            m_uiHatefulStrikeTimer -= uiDiff;
-
         // Soft Enrage at 5%
         if (!m_bEnraged)
         {
             if (m_creature->GetHealthPercent() < 5.0f)
             {
-                DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
+                DoCast(m_creature, SPELL_FRENZY);
                 DoScriptText(EMOTE_ENRAGE, m_creature);
                 m_bEnraged = true;
             }
@@ -157,12 +148,10 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
         {
             if (m_uiBerserkTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature, SPELL_BERSERK);
+                DoCast(m_creature, SPELL_BERSERK);
                 DoScriptText(EMOTE_BERSERK, m_creature);
                 m_bBerserk = true;
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
+            }else m_uiBerserkTimer -= uiDiff;
         }
         else
         {
@@ -171,10 +160,15 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
             {
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_SLIMEBOLT);
                 m_uiSlimeboltTimer = 5000;
-            }
-            else
-                m_uiSlimeboltTimer -= uiDiff;
+            }else m_uiSlimeboltTimer -= uiDiff;
         }
+
+        // Hateful Strike
+        if (m_uiHatefulStrikeTimer < uiDiff)
+        {
+            DoHatefulStrike();
+            m_uiHatefulStrikeTimer = 1000;
+        }else m_uiHatefulStrikeTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
