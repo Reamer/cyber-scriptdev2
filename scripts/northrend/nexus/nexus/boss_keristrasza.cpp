@@ -78,6 +78,7 @@ struct MANGOS_DLL_DECL boss_keristraszaAI : public ScriptedAI
 
         m_bIsEnraged = false;
 
+
         if (!m_pInstance)
             return;
 
@@ -85,7 +86,11 @@ struct MANGOS_DLL_DECL boss_keristraszaAI : public ScriptedAI
         {
             if (m_pInstance->GetData(TYPE_KERISTRASZA) != SPECIAL)
                 m_creature->CastSpell(m_creature, SPELL_FROZEN_PRISON, true);
+            else
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_OOC_NOT_ATTACKABLE);
         }
+      
+        
     }
 
     void Aggro(Unit* pWho)
@@ -138,32 +143,7 @@ struct MANGOS_DLL_DECL boss_keristraszaAI : public ScriptedAI
                         uiCrystalChainTimer = 30000;
                     }
                 }
-                else
-                {
-                    if (Unit* pSource = m_creature->getVictim())
-                    {
-                        uiCrystalChainTimer = 15000;
-
-                        Player* pPlayer = pSource->GetCharmerOrOwnerPlayerOrPlayerItself();
-
-                        if (!pPlayer)
-                            return;
-
-                        if (Group* pGroup = pPlayer->GetGroup())
-                        {
-                            for(GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
-                            {
-                                if (Player* pMember = pRef->getSource())
-                                {
-                                    if (pMember->isAlive() && pMember->IsWithinDistInMap(m_creature, 50.0f))
-                                        m_creature->CastSpell(pMember, SPELL_CRYSTAL_CHAINS, true);
-                                }
-                            }
-                        }
-                        else
-                            m_creature->CastSpell(pPlayer, SPELL_CRYSTAL_CHAINS, false);
-                    }
-                }
+       
             }
         }
         else
@@ -171,11 +151,11 @@ struct MANGOS_DLL_DECL boss_keristraszaAI : public ScriptedAI
 
         if (uiTailSweepTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_TAIL_SWEEP) == CAST_OK)
+             if (DoCastSpellIfCan(m_creature, SPELL_TAIL_SWEEP) == CAST_OK)
                 uiTailSweepTimer = urand(2500, 7500);
         }
         else
-            uiCrystalChainTimer -= uiDiff;
+            uiTailSweepTimer -= uiDiff;
 
         if (uiCrystalfireBreathTimer < uiDiff)
         {
