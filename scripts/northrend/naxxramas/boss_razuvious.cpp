@@ -107,7 +107,7 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
             case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
         }
-
+        m_creature->CallForHelp(40.0f);
         if (m_pInstance)
             m_pInstance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
     }
