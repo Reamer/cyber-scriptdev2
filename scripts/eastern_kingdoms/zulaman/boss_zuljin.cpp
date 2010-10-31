@@ -216,7 +216,7 @@ struct MANGOS_DLL_DECL boss_zuljinAI : public ScriptedAI
             if(Phase3Reached)
             {
                 FEATHER_VORTEX[i]->SetVisibility(VISIBILITY_OFF);
-                FEATHER_VORTEX[i]->setDeathState(JUST_DIED);
+                FEATHER_VORTEX[i]->SetDeathState(JUST_DIED);
             }
         }
     }
