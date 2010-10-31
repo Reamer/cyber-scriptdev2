@@ -295,7 +295,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
 					Map::PlayerList const& plList = m_pInstance->instance->GetPlayers();
 					for(Map::PlayerList::const_iterator ittr = plList.begin(); ittr != plList.end(); ++ittr)
                     {
-						if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
+						if(ittr->getSource() && ittr->getSource()->isAlive() && !ittr->getSource()->HasAura(SPELL_CHARGE_POSITIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
 							(*itr)->CastSpell((*itr),SPELL_CHARGE_POSITIVE_NEARDMG,true);
                         if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_POSITIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
                             ++charge;
@@ -317,7 +317,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
 					Map::PlayerList const& plList = m_pInstance->instance->GetPlayers();
 					for(Map::PlayerList::const_iterator ittr = plList.begin(); ittr != plList.end(); ++ittr)
                     {
-                        if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
+                        if(ittr->getSource() && ittr->getSource()->isAlive() && !ittr->getSource()->HasAura(SPELL_CHARGE_NEGATIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
 							(*itr)->CastSpell((*itr),SPELL_CHARGE_NEGATIVE_NEARDMG,true);
                         if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_NEGATIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
                             ++charge;
