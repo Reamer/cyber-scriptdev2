@@ -154,6 +154,7 @@ struct MANGOS_DLL_DECL boss_reliquary_of_soulsAI : public ScriptedAI
     uint32 SummonSoulTimer;
     uint32 AnimationTimer;
 
+	bool AlreadyStarted;
     bool IsDead;
     bool EndingPhase;
 
@@ -169,6 +170,7 @@ struct MANGOS_DLL_DECL boss_reliquary_of_soulsAI : public ScriptedAI
         SummonSoulTimer = 1000;
         AnimationTimer = 8000;
 
+		AlreadyStarted = false;
         IsDead = false;
         EndingPhase = false;
 
@@ -206,7 +208,7 @@ struct MANGOS_DLL_DECL boss_reliquary_of_soulsAI : public ScriptedAI
         if (who->isTargetableForAttack() && who->isInAccessablePlaceFor(m_creature) && m_creature->IsHostileTo(who))
         {
             float attackRadius = m_creature->GetAttackDistance(who);
-            if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE && m_creature->IsWithinLOSInMap(who))
+            if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE && m_creature->IsWithinLOSInMap(who) && !AlreadyStarted)
             {
                 who->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
@@ -216,6 +218,7 @@ struct MANGOS_DLL_DECL boss_reliquary_of_soulsAI : public ScriptedAI
                         m_pInstance->SetData(TYPE_RELIQUIARY, IN_PROGRESS);
 
                     Phase = 1;
+                    AlreadyStarted = true;
 
                     // I R ANNNGRRRY!
                     m_creature->SetUInt32Value(UNIT_NPC_EMOTESTATE,375);
@@ -588,7 +591,7 @@ struct MANGOS_DLL_DECL boss_essence_of_sufferingAI : public ScriptedAI
     void Aggro(Unit* pWho)
     {
         m_creature->SetInCombatWithZone();
-        DoCastSpellIfCan(pWho, AURA_OF_SUFFERING, CAST_TRIGGERED);
+        DoCast(m_creature, AURA_OF_SUFFERING);
         DoCastSpellIfCan(m_creature, ESSENCE_OF_SUFFERING_PASSIVE, CAST_TRIGGERED);
     }
 
@@ -683,7 +686,7 @@ struct MANGOS_DLL_DECL boss_essence_of_sufferingAI : public ScriptedAI
         if (SoulDrainTimer < diff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(target, SPELL_SOUL_DRAIN);
+                DoCast(target, SPELL_SOUL_DRAIN);
             SoulDrainTimer = 60000;
         }else SoulDrainTimer -= diff;
 
@@ -825,7 +828,7 @@ struct MANGOS_DLL_DECL boss_essence_of_angerAI : public ScriptedAI
     void Aggro(Unit* pWho)
     {
         m_creature->SetInCombatWithZone();
-        DoCastSpellIfCan(m_creature->getVictim(), AURA_OF_ANGER, CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, AURA_OF_ANGER, CAST_TRIGGERED);
     }
 
     void MoveInLineOfSight(Unit *who)
@@ -893,7 +896,7 @@ struct MANGOS_DLL_DECL boss_essence_of_angerAI : public ScriptedAI
 
         if (SoulScreamTimer < diff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_SOUL_SCREAM);
+            DoCastSpellIfCan(m_creature, SPELL_SOUL_SCREAM);
             SoulScreamTimer = 10000;
         }else SoulScreamTimer -= diff;
 
