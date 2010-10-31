@@ -132,23 +132,23 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
         // Unbalancing Strike
         if (m_uiUnbalancingStrikeTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE);
-            m_uiUnbalancingStrikeTimer = 30000;
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
+                m_uiUnbalancingStrikeTimer = 10000;
         }else m_uiUnbalancingStrikeTimer -= uiDiff;
 
         // Disrupting Shout
         if (m_uiDisruptingShoutTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H);
-            m_uiDisruptingShoutTimer = 25000;
+            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H) == CAST_OK)
+                m_uiDisruptingShoutTimer = 25000;
         }else m_uiDisruptingShoutTimer -= uiDiff;
 
         // Jagged Knife
         if (m_uiJaggedKnifeTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, SPELL_JAGGED_KNIFE);
-            m_uiJaggedKnifeTimer = 10000;
+                if (DoCastSpellIfCan(pTarget, SPELL_JAGGED_KNIFE) == CAST_OK)
+                    m_uiJaggedKnifeTimer = 10000;
         }else m_uiJaggedKnifeTimer -= uiDiff;
 
         // Random say
