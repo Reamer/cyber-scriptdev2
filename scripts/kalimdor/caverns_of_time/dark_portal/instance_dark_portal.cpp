@@ -204,7 +204,7 @@ struct MANGOS_DLL_DECL instance_dark_portal : public ScriptedInstance
             case TYPE_RIFT:
                 if (uiData == SPECIAL)
                 {
-                    if (m_uiRiftPortalCount < 7)
+                    //if (m_uiRiftPortalCount < 7)
                         m_uiNextPortal_Timer = 5000;
                 }
                 else
