@@ -27,6 +27,7 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
 
     uint32 m_auiEncounter[MAX_ENCOUNTER];
     std::string strInstData;
+	uint32 m_uiKiljaedenPhase;
 
     // Creatures
     uint64 m_uiKalecgos_DragonGUID;
@@ -61,6 +62,7 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
     void Initialize()
     {
         memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+		m_uiKiljaedenPhase				= 0;
 
         // Creatures
         m_uiKalecgos_DragonGUID         = 0;
@@ -109,7 +111,13 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
             case 24891: m_uiKalecgos_HumanGUID      = pCreature->GetGUID(); break;
             case 24892: m_uiSathrovarrGUID          = pCreature->GetGUID(); break;
             case 24882: m_uiBrutallusGUID           = pCreature->GetGUID(); break;
-            case 25038: m_uiFelmystGUID             = pCreature->GetGUID(); break;
+            case 25038: m_uiFelmystGUID             = pCreature->GetGUID();
+				if(m_auiEncounter[1] != DONE)
+				{
+					pCreature->SetDisplayId(11686);
+					pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+				}
+				break;
             case 25166: m_uiAlythessGUID            = pCreature->GetGUID(); break;
             case 25165: m_uiSacrolashGUID           = pCreature->GetGUID(); break;
             case 25741: m_uiMuruGUID                = pCreature->GetGUID(); break;
@@ -135,6 +143,8 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
                 break;
             case 188119:
                 m_uiIceBarrierGUID = pGo->GetGUID();
+				if(m_auiEncounter[1] != DONE)
+					pGo->SetGoState(GO_STATE_READY);
                 break;
             case 188075:
                 m_uiDoorFireBarrierGUID = pGo->GetGUID();
@@ -177,6 +187,7 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
             case TYPE_EREDAR_TWINS: return m_auiEncounter[3];
             case TYPE_MURU:         return m_auiEncounter[4];
             case TYPE_KILJAEDEN:    return m_auiEncounter[5];
+			case TYPE_KILJAEDEN_PHASE:	return m_uiKiljaedenPhase;
         }
 
         return 0;
@@ -199,6 +210,7 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
             case DATA_ANVEENA:              return m_uiAnveenaGUID;
             case DATA_KALECGOS:             return m_uiKalecgosGUID;
             case DATA_GO_FORCEFIELD:        return m_uiForceFieldGUID;
+			case DATA_GO_ICE_BARRIER:		return m_uiIceBarrierGUID;
         }
         return 0;
     }
@@ -208,20 +220,15 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
         switch(uiType)
         {
             case TYPE_KALECGOS:
-                if (uiData == IN_PROGRESS)
-                    SpectralRealmList.clear();
-
-                DoUseDoorOrButton(m_uiForceFieldGUID);
+				m_auiEncounter[0] = uiData;
+				DoUseDoorOrButton(m_uiForceFieldGUID);
                 DoUseDoorOrButton(m_uiBossCollision1GUID);
                 DoUseDoorOrButton(m_uiBossCollision2GUID);
-
-                m_auiEncounter[0] = uiData;
+                if (uiData == IN_PROGRESS)
+                    SpectralRealmList.clear();
                 break;
             case TYPE_BRUTALLUS:
-                if (uiData == SPECIAL)
-                    DoUseDoorOrButton(m_uiIceBarrierGUID,MINUTE);
-
-                m_auiEncounter[1] = uiData;
+				m_auiEncounter[1] = uiData;
                 break;
             case TYPE_FELMYST:
                 m_auiEncounter[2] = uiData;
@@ -243,6 +250,7 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
                 break;
             case TYPE_KILJAEDEN: m_auiEncounter[5] = uiData; break;
             case DATA_SET_SPECTRAL_CHECK:  m_uiSpectralRealmTimer = uiData; break;
+			case TYPE_KILJAEDEN_PHASE:	m_uiKiljaedenPhase = uiData; break;
         }
 
         if (uiData == DONE)
@@ -275,30 +283,8 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
     {
         debug_log("SD2: Ejecting Player %s from Spectral Realm", pPlayer->GetName());
 
-        // Put player back in Kalecgos(Dragon)'s threat list
-        /*if (Creature* pKalecgos = instance->GetCreature(m_uiKalecgos_DragonGUID))
-        {
-            if (pKalecgos->isAlive())
-            {
-                debug_log("SD2: Adding %s in Kalecgos' threatlist", pPlayer->GetName());
-                pKalecgos->AddThreat(pPlayer);
-            }
-        }
-
-        // Remove player from Sathrovarr's threat list
-        if (Creature* pSath = instance->GetCreature(m_uiSathrovarrGUID))
-        {
-            if (pSath->isAlive())
-            {
-                if (HostileReference* pRef = pSath->getThreatManager().getOnlineContainer().getReferenceByTarget(pPlayer))
-                {
-                    pRef->removeReference();
-                    debug_log("SD2: Deleting %s from Sathrovarr's threatlist", pPlayer->GetName());
-                }
-            }
-        }*/
-
-        pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_NORMAL_REALM, true);
+		pPlayer->TeleportTo(pPlayer->GetMapId(), pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ()+135.0f, pPlayer->GetOrientation());
+        //pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_NORMAL_REALM, true);	// spell not working right
         pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_EXHAUSTION, true);
     }
 
@@ -319,8 +305,6 @@ struct MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
                 EjectPlayer(plr);
             }
         }
-
-        //SpectralRealmList.clear();
     }
 
     void Update(uint32 uiDiff)

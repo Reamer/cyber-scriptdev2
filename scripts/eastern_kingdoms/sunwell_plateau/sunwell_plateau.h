@@ -15,6 +15,7 @@ enum InstanceSWP
     TYPE_EREDAR_TWINS           = 3,
     TYPE_MURU                   = 4,
     TYPE_KILJAEDEN              = 5,
+	TYPE_KILJAEDEN_PHASE		= 6,
 
     DATA_KALECGOS_DRAGON        = 6,
     DATA_KALECGOS_HUMAN         = 7,
@@ -40,6 +41,9 @@ enum InstanceSWP
     DATA_PLAYER_SPECTRAL_REALM  = 25,
     DATA_SET_SPECTRAL_CHECK     = 26,
 
+	DATA_GO_ICE_BARRIER			= 28,
+
+	SPELL_SUNWELL_RADIANCE				= 45769,
     SPELL_SPECTRAL_REALM                = 46021,
     SPELL_TELEPORT_NORMAL_REALM         = 46020,
     SPELL_TELEPORT_TO_SPECTRAL_REALM    = 46019,
