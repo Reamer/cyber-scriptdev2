@@ -13,13 +13,15 @@ enum
     NPC_KELESETH                = 23953,
     NPC_SKARVALD                = 24200,
     NPC_DALRONN                 = 24201,
+    NPC_INGVAR                  = 23954,
 
     GO_BELLOW_1                 = 186688,
     GO_BELLOW_2                 = 186689,
     GO_BELLOW_3                 = 186690,
     GO_FORGEFIRE_1              = 186692,
     GO_FORGEFIRE_2              = 186693,
-    GO_FORGEFIRE_3              = 186691
+    GO_FORGEFIRE_3              = 186691,
+    GO_INGVAR_DOOR              = 186612
 };
 
 #endif
