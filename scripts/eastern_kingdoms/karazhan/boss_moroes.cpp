@@ -34,7 +34,8 @@ enum
     SAY_KILL_3          = -1532016,
     SAY_DEATH           = -1532017,
 
-    SPELL_VANISH        = 29448,
+    SPELL_VANISH        = 33735, //Klingenwirbel 33735
+    //SPELL_VANISH        = 29448, restartet das event
     SPELL_GARROTE       = 37066,
     SPELL_BLIND         = 34694,
     SPELL_GOUGE         = 29425,
