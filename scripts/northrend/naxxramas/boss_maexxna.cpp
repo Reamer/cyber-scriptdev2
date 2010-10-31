@@ -217,6 +217,16 @@ struct MANGOS_DLL_DECL boss_maexxnaAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        // Enrage if not already enraged and below 30%
+        if (!m_bEnraged && m_creature->GetHealthPercent() < 30.0f)
+        {
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FRENZY : SPELL_FRENZY_H) == CAST_OK)
+            {
+                DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
+                m_bEnraged = true;
+            }
+        }
+
         // Web Wrap
         if (m_uiWebWrapTimer < uiDiff)
         {
@@ -231,7 +241,7 @@ struct MANGOS_DLL_DECL boss_maexxnaAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WEBSPRAY : SPELL_WEBSPRAY_H) == CAST_OK)
             {
                 DoScriptText(EMOTE_SPRAY, m_creature);
-                m_uiWebSprayTimer = m_bIsRegularMode ? 40000 : 30000;
+                m_uiWebSprayTimer = m_bIsRegularMode ? 40000 : 25000;
             }
         }else m_uiWebSprayTimer -= uiDiff;
 
@@ -246,7 +256,7 @@ struct MANGOS_DLL_DECL boss_maexxnaAI : public ScriptedAI
         if (m_uiNecroticPoisonTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_NECROTICPOISON : SPELL_NECROTICPOISON_H);
-            m_uiNecroticPoisonTimer = 30000;
+            m_uiNecroticPoisonTimer = m_bIsRegularMode ? 30000 : 15000;
         }else m_uiNecroticPoisonTimer -= uiDiff;
 
         // Summon Spiderling
@@ -256,16 +266,6 @@ struct MANGOS_DLL_DECL boss_maexxnaAI : public ScriptedAI
             DoScriptText(EMOTE_SPIDERLING, m_creature);
             m_uiSummonSpiderlingTimer = m_bIsRegularMode ? 40000 : 20000;
         }else m_uiSummonSpiderlingTimer -= uiDiff;
-
-        // Enrage if not already enraged and below 30%
-        if (!m_bEnraged && m_creature->GetHealthPercent() < 30.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FRENZY : SPELL_FRENZY_H) == CAST_OK)
-            {
-                DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
-                m_bEnraged = true;
-            }
-        }
 
         DoMeleeAttackIfReady();
     }
