@@ -101,6 +101,7 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
     uint32 m_uiBlinkTimer;
     uint32 m_uiCurseTimer;
     uint32 m_uiSummonTimer;
+    uint32 m_uiCrippleTimer;
 
     void Reset()
     {
@@ -111,6 +112,7 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
         m_uiBlinkTimer = 25000;
         m_uiCurseTimer = 4000;
         m_uiSummonTimer = 30000;
+        m_uiCrippleTimer = 24500; // just before blink
     }
 
     void Aggro(Unit* pWho)
@@ -155,7 +157,7 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
     //void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
     //{
     //    if (pCaster == m_creature && pSpell->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_LEAP)
-    //        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H);
+    //        DoCast(m_creature, m_bIsRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H);
     //}
 
     void UpdateAI(const uint32 uiDiff)
@@ -174,12 +176,26 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
                     DoScriptText(EMOTE_TELEPORT, m_creature);
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    m_uiPhaseTimer = 70000;
+
+                    if (m_uiPhaseSub == 0)
+                        m_uiPhaseTimer = 70000;
+                    else if (m_uiPhaseSub == 1)
+                        m_uiPhaseTimer = 97000;
+                    else m_uiPhaseTimer = 120000;
+
                     m_uiPhase = PHASE_BALCONY;
                     ++m_uiPhaseSub;
                     return;
                 }
             }else m_uiPhaseTimer -= uiDiff;
+
+            if (m_uiCrippleTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H) == CAST_OK)
+                {
+                    m_uiCrippleTimer = 25000;
+                }
+            }else m_uiCrippleTimer -= uiDiff;
 
             if (m_uiBlinkTimer < uiDiff)
             {
@@ -187,8 +203,6 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
                 {
                     SPELL_BLINK_1, SPELL_BLINK_2, SPELL_BLINK_3, SPELL_BLINK_4
                 };
-
-                DoCast(m_creature, m_bIsRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H);
 
                 if (DoCastSpellIfCan(m_creature, auiSpellBlink[urand(0,3)]) == CAST_OK)
                 {
@@ -236,7 +250,7 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                     if(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    m_uiPhaseTimer = 110000;
+                    m_uiPhaseTimer = (m_uiPhaseSub < 2) ? 110000 : 180000;
                     m_uiPhase = PHASE_GROUND;
                     return;
                 }
