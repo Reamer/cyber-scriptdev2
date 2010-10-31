@@ -35,6 +35,8 @@ struct MANGOS_DLL_DECL instance_zulaman : public ScriptedInstance
     uint32 m_uiEventTimer;
     uint32 m_uiEventMinuteStep;
 
+    uint32 m_uiDOOR_Timer;
+
     uint32 m_uiGongCount;
 
     uint64 m_uiAkilzonGUID;
@@ -61,6 +63,8 @@ struct MANGOS_DLL_DECL instance_zulaman : public ScriptedInstance
 
         m_uiEventTimer = MINUTE*IN_MILLISECONDS;
         m_uiEventMinuteStep = MINUTE/3;
+
+        m_uiDOOR_Timer = 0;
 
         m_uiGongCount = 0;
 
@@ -326,6 +330,14 @@ struct MANGOS_DLL_DECL instance_zulaman : public ScriptedInstance
 
     void Update(uint32 uiDiff)
     {
+        if(m_uiDOOR_Timer < uiDiff){
+
+		    DoUseDoorOrButton(m_uiMassiveGateGUID);
+            m_uiDOOR_Timer = 1200000000;
+        }
+        else
+               m_uiDOOR_Timer -= uiDiff;
+
         if (GetData(TYPE_EVENT_RUN) == IN_PROGRESS)
         {
             if (m_uiEventTimer <= uiDiff)
