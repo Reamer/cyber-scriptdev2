@@ -96,7 +96,7 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
             case 3: DoScriptText(SAY_AGGRO4, m_creature); break;
         }
-
+        m_creature->CallForHelp(40.0f);
         if (m_pInstance)
             m_pInstance->SetData(TYPE_FAERLINA, IN_PROGRESS);
     }
