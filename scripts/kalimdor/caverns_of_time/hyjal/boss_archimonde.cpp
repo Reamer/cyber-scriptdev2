@@ -217,10 +217,10 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
         WorldTreeGUID = 0;
 
         DrainNordrassilTimer = 0;
-        FearTimer = 42000;
-        AirBurstTimer = 30000;
-        GripOfTheLegionTimer = urand(5000, 25000);
-        DoomfireTimer = 20000;
+        FearTimer = 30000;
+        AirBurstTimer = 20000;
+        GripOfTheLegionTimer = urand(5000, 15000);
+        DoomfireTimer = 15000;
         MeleeRangeCheckTimer = 15000;
         HandOfDeathTimer = 2000;
         WispCount = 0;                                      // When ~30 wisps are summoned, Archimonde dies
@@ -261,17 +261,17 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
             case CLASS_PRIEST:
             case CLASS_PALADIN:
             case CLASS_WARLOCK:
-                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_RED, true);
+                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_RED, true, 0, 0, m_creature->GetGUID());
                 break;
             case CLASS_MAGE:
             case CLASS_ROGUE:
             case CLASS_WARRIOR:
-                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_YELLOW, true);
+                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_YELLOW, true, 0, 0, m_creature->GetGUID());
                 break;
             case CLASS_DRUID:
             case CLASS_SHAMAN:
             case CLASS_HUNTER:
-                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_GREEN, true);
+                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_GREEN, true, 0, 0, m_creature->GetGUID());
                 break;
         }
     }
@@ -355,11 +355,11 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
     {
         m_creature->SummonCreature(CREATURE_DOOMFIRE_SPIRIT,
             target->GetPositionX()+15.0,target->GetPositionY()+15.0,target->GetPositionZ(),0,
-            TEMPSUMMON_TIMED_DESPAWN, 27000);
+            TEMPSUMMON_TIMED_DESPAWN, 35000);
 
         m_creature->SummonCreature(CREATURE_DOOMFIRE,
             target->GetPositionX()-15.0,target->GetPositionY()-15.0,target->GetPositionZ(),0,
-            TEMPSUMMON_TIMED_DESPAWN, 27000);
+            TEMPSUMMON_TIMED_DESPAWN, 35000);
     }
 
     void UpdateAI(const uint32 diff)
@@ -454,7 +454,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
                 m_creature->GetMotionMaster()->MoveIdle();
 
                 //all members of raid must get this buff
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_PROTECTION_OF_ELUNE);
+                DoCastSpellIfCan(m_creature, SPELL_PROTECTION_OF_ELUNE);
                 HasProtected = true;
                 Enraged = true;
             }
@@ -474,7 +474,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
         {
             if (HandOfDeathTimer < diff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAND_OF_DEATH);
+                DoCastSpellIfCan(m_creature, SPELL_HAND_OF_DEATH);
                 HandOfDeathTimer = 2000;
             }else HandOfDeathTimer -= diff;
             return;                                         // Don't do anything after this point.
@@ -485,7 +485,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 DoCastSpellIfCan(pTarget, SPELL_GRIP_OF_THE_LEGION);
 
-            GripOfTheLegionTimer = urand(5000, 25000);
+            GripOfTheLegionTimer = urand(5000, 15000);
         }else GripOfTheLegionTimer -= diff;
 
         if (AirBurstTimer < diff)
@@ -497,13 +497,13 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             DoCastSpellIfCan(pTarget, SPELL_AIR_BURST);
-            AirBurstTimer = urand(25000, 40000);
+            AirBurstTimer = urand(15000, 20000);
         }else AirBurstTimer -= diff;
 
         if (FearTimer < diff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_FEAR);
-            FearTimer = 42000;
+            DoCastSpellIfCan(m_creature, SPELL_FEAR);
+            FearTimer = 30000;
         }else FearTimer -= diff;
 
         if (DoomfireTimer < diff)
@@ -521,7 +521,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
             SummonDoomfire(temp);
 
             //supposedly three doomfire can be up at the same time
-            DoomfireTimer = 20000;
+            DoomfireTimer = urand(10000, 15000);
         }else DoomfireTimer -= diff;
 
         if (MeleeRangeCheckTimer < diff)
