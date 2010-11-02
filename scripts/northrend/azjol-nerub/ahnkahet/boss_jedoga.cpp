@@ -64,8 +64,6 @@ enum
 
     SPELL_CYCLONE_STRIKE                = 56855,
     SPELL_CYCLONE_STRIKE_H              = 60030,
-
-    ACHIEVEMENT_VOLUNTEER_WORK          = 2056
 };
 
 const float volunteerPos[7][4] =
@@ -100,16 +98,15 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
 {
     boss_jedogaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ahnkahet* m_pInstance;
     bool m_bIsRegularMode;
 
     bool volunteerPhase;
-    bool getsAchievement;
 
     std::list<uint64> volunteerGUIDList;
 
@@ -136,16 +133,19 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
         lightingBallTimer = 4000;
         thundershockTimer = 6000;
         cycloneStrikeTimer = 8000;
-        getsAchievement = true;
 
-           pChosenVolunteerGUID = 0;
+        pChosenVolunteerGUID = 0;
         pVisualTriggerGUID = 0;
 
 
         volunteerGUIDList.clear();
 
         if(m_pInstance)
+        {
             m_pInstance->SetData(TYPE_JEDOGA,NOT_STARTED);
+            m_pInstance->SetAchiev(TYPE_JEDOGA, true);
+        }
+
 
         m_creature->NearTeleportTo(START_X,START_Y,START_Z,START_O);
         m_creature->GetMotionMaster()->MoveIdle();
@@ -178,17 +178,6 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
             m_pInstance->SetData(TYPE_JEDOGA,DONE);
         DoScriptText(SAY_DEATH, m_creature);
         DepawnVolunteers();
-
-        /*if(!m_bIsRegularMode && getsAchievement)
-        {
-            Map* pMap = m_creature->GetMap();
-            if (pMap && pMap->IsDungeon())
-            {
-                Map::PlayerList const &players = pMap->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                    *itr->getSource() //add Achievement here
-            }
-        }*/ 
     }
 
     void MoveInLineOfSight(Unit* pWho)
@@ -424,12 +413,12 @@ struct MANGOS_DLL_DECL mob_jedoga_volunteerAI : public ScriptedAI
 {
     mob_jedoga_volunteerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         SetCombatMovement(false);
         Reset();
     }
 
-    ScriptedInstance *m_pInstance;                          // the instance
+    instance_ahnkahet *m_pInstance;                          // the instance
 
     void Reset() { }
 
@@ -442,16 +431,12 @@ struct MANGOS_DLL_DECL mob_jedoga_volunteerAI : public ScriptedAI
     {
         if((pKiller->GetTypeId() == TYPEID_PLAYER) || (pKiller->GetOwner()) && (pKiller->GetOwner()->GetTypeId() == TYPEID_PLAYER))
             if (m_pInstance)
-                if (Creature* pJedoga = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_JEDOGA_SHADOWSEEKER)))
-                    if (boss_jedogaAI* pJedogaAI = dynamic_cast<boss_jedogaAI*>(pJedoga->AI()))
-                    {
-                        pJedogaAI->getsAchievement = false;
-                    }
+                m_pInstance->SetAchiev(TYPE_JEDOGA, false);
     }
 
     void UpdateAI(const uint32 uiDiff) 
-    { 
-
+    {
+        DoMeleeAttackIfReady();
     }
 };
 

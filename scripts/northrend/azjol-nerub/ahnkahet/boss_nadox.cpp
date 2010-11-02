@@ -40,9 +40,10 @@ enum
     SPELL_BERSERK                 = 26662,
     SPELL_BROOD_RAGE              = 59465,
 
-    // guardian aura done via EventAI
+    
     SPELL_GUARDIAN_AURA           = 56151,
     SPELL_GUARDIAN_AURA_TRIGGERED = 56153,
+    SPELL_GUARDIAN_SPRINT         = 56354,
 
     // JustSummoned is not called for spell summoned creatures
     SPELL_SUMMON_SWARM_GUARDIAN   = 56120,
@@ -61,11 +62,11 @@ struct MANGOS_DLL_DECL mob_ahnkahar_eggAI : public ScriptedAI
 {
     mob_ahnkahar_eggAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ahnkahet* m_pInstance;
 
     void Reset() {}
     void MoveInLineOfSight(Unit* pWho) {}
@@ -101,12 +102,12 @@ struct MANGOS_DLL_DECL boss_nadoxAI : public ScriptedAI
 {
     boss_nadoxAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ahnkahet* m_pInstance;
     bool m_bIsRegularMode;
 
     bool   m_bBerserk;
@@ -125,7 +126,10 @@ struct MANGOS_DLL_DECL boss_nadoxAI : public ScriptedAI
         m_uiBroodRageTimer = 20000;
         m_uiGuardCount = 0;
         if(m_pInstance)
+        {
             m_pInstance->SetData(TYPE_NADOX,NOT_STARTED);
+            m_pInstance->SetAchiev(TYPE_NADOX, true);
+        }
     }
 
     Creature* SelectRandomCreatureOfEntryInRange(uint32 uiEntry, float fRange)
@@ -232,6 +236,36 @@ CreatureAI* GetAI_boss_nadox(Creature* pCreature)
 {
     return new boss_nadoxAI(pCreature);
 }
+struct MANGOS_DLL_DECL mob_nadox_guardianAI : public ScriptedAI
+{
+    mob_nadox_guardianAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+
+    instance_ahnkahet* m_pInstance;
+    bool m_bIsRegularMode;
+
+    void Reset()
+    {
+        DoCast(m_creature, SPELL_GUARDIAN_SPRINT, true);
+        DoCast(m_creature, SPELL_GUARDIAN_AURA, true);
+    }
+    void JustDied(Unit* Killer) 
+    {
+        if(m_pInstance)
+            m_pInstance->SetAchiev(TYPE_NADOX, false);
+    }
+
+};
+
+
+CreatureAI* GetAI_mob_nadox_guardian(Creature* pCreature)
+{
+    return new mob_nadox_guardianAI(pCreature);
+}
 
 void AddSC_boss_nadox()
 {
@@ -245,5 +279,10 @@ void AddSC_boss_nadox()
     newscript = new Script;
     newscript->Name = "mob_ahnkahar_egg";
     newscript->GetAI = &GetAI_mob_ahnkahar_egg;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "mob_nadox_guardian";
+    newscript->GetAI = &GetAI_mob_nadox_guardian;
     newscript->RegisterSelf();
 }
