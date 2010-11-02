@@ -26,25 +26,25 @@ EndScriptData */
 
 enum
 {
-    EMOTE_ZOMBIE				= -1533119,
+    EMOTE_ZOMBIE                = -1533119,
 
-    SPELL_MORTALWOUND			= 25646,
-    SPELL_DECIMATE				= 28374,
-    SPELL_ENRAGE				= 28371,
-    SPELL_ENRAGE_H				= 54427,
-    SPELL_BERSERK				= 26662,
-	SPELL_ZOMBIE_CHOW_SEARCH	= 28404,			//don't work. Onehit for Player
+    SPELL_MORTALWOUND           = 25646,
+    SPELL_DECIMATE              = 28374,
+    SPELL_ENRAGE                = 28371,
+    SPELL_ENRAGE_H              = 54427,
+    SPELL_BERSERK               = 26662,
+    SPELL_ZOMBIE_CHOW_SEARCH    = 28404,            //don't work. Onehit for Player
 
-    NPC_ZOMBIE_CHOW				= 16360
+    NPC_ZOMBIE_CHOW             = 16360
 };
 
 const float ADD_SPAWN[5][3] =
-{	
-	{3269.5f, -3161.2f, 297.4f},
-	{3277.0f, -3190.1f, 297.4f},
-	{3316.0f, -3188.6f, 297.4f},
-	{3247.0f, -3139.2f, 297.4f},
-	{3258.0f, -3121.1f, 297.4f}
+{
+    {3269.5f, -3161.2f, 297.4f},
+    {3277.0f, -3190.1f, 297.4f},
+    {3316.0f, -3188.6f, 297.4f},
+    {3247.0f, -3139.2f, 297.4f},
+    {3258.0f, -3121.1f, 297.4f}
 };
 struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
 {
@@ -71,10 +71,10 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
     void Reset()
     {
         m_uiMortalWoundTimer = 8000;
-        m_uiDecimateTimer = 110000;
-        m_uiEnrageTimer = 30000;
-        m_uiSummonTimer = 10000;
-        m_uiBerserkTimer = 7*MINUTE*IN_MILLISECONDS;
+        m_uiDecimateTimer    = 110000;
+        m_uiEnrageTimer      = 30000;
+        m_uiSummonTimer      = 10000;
+        m_uiBerserkTimer     = 7*MINUTE*IN_MILLISECONDS;
 
         m_uiRangeCheck_Timer = 1000;
         m_lZombieGUIDList.clear();
@@ -198,11 +198,11 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         // Summon
         if (m_uiSummonTimer < uiDiff)
         {
-			SummonZombie();
+            SummonZombie();
 
             if (!m_bIsRegularMode)
             {
-				SummonZombie();
+                SummonZombie();
             }
 
             m_uiSummonTimer = 10000;
@@ -210,9 +210,9 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
 
         DoMeleeAttackIfReady();
     }
-	void SummonZombie()
-	{
-		uint32 ran = rand()%5;
+    void SummonZombie()
+    {
+        uint32 ran = rand()%5;
         if (Creature* pZombie = m_creature->SummonCreature(NPC_ZOMBIE_CHOW, ADD_SPAWN[ran][0], ADD_SPAWN[ran][1], ADD_SPAWN[ran][2], 0.0f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 80000))
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -221,7 +221,7 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
                 m_lZombieGUIDList.push_back(pZombie->GetGUID());
             }
         }
-	}
+    }
 
 };
 

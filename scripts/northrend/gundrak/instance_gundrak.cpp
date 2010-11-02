@@ -24,11 +24,11 @@ EndScriptData */
 #include "precompiled.h"
 #include "gundrak.h"
 
-#define NPC_BRIDGE_GUARD			105002
-#define BRIDGE_GUARD_X				1751.449951f
-#define BRIDGE_GUARD_Y				740.658020f
-#define BRIDGE_GUARD_Z				118.949997f
-#define BRIDGE_GUARD_O				2.434944f
+#define NPC_BRIDGE_GUARD            105002
+#define BRIDGE_GUARD_X              1751.449951f
+#define BRIDGE_GUARD_Y              740.658020f
+#define BRIDGE_GUARD_Z              118.949997f
+#define BRIDGE_GUARD_O              2.434944f
 
 bool GOHello_go_gundrak_altar(Player* pPlayer, GameObject* pGo)
 {
@@ -52,12 +52,12 @@ struct MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
 {
     instance_gundrak(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 
-	bool guardSpawnt;
+    bool guardSpawnt;
 
     uint32 m_auiEncounter[MAX_ENCOUNTER];
     std::string strInstData;
 
-	int bridgeCounter;
+    int bridgeCounter;
 
     uint64 m_uiEckDoorGUID;
     uint64 m_uiEckUnderwaterDoorGUID;
@@ -78,7 +78,7 @@ struct MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
     {
         memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-		guardSpawnt               = false;
+        guardSpawnt               = false;
 
         m_uiEckDoorGUID           = 0;
         m_uiEckUnderwaterDoorGUID = 0;
@@ -93,7 +93,7 @@ struct MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
         m_uiMammothKeyGUID        = 0;
         m_uiBridgeGUID            = 0;
 
-		bridgeCounter             = 0;
+        bridgeCounter             = 0;
 
         m_uiSladranGUID           = 0;
     }
@@ -169,7 +169,7 @@ struct MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
                 break;
         }
 
-		
+        
     }
     
     void SetData(uint32 uiType, uint32 uiData)
@@ -184,10 +184,10 @@ struct MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
                     if (GameObject* pGo = instance->GetGameObject(m_uiAltarOfSladranGUID))
                         pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
                 if (uiData == SPECIAL)
-				{
+                {
                     DoUseDoorOrButton(m_uiSnakeKeyGUID);
-					bridgeCounter++;
-				}
+                    bridgeCounter++;
+                }
                 break;
             case TYPE_MOORABI:
                 m_auiEncounter[1] = uiData;
@@ -199,10 +199,10 @@ struct MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
                         pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
                 }
                 if (uiData == SPECIAL)
-				{
+                {
                     DoUseDoorOrButton(m_uiMammothKeyGUID);
-					bridgeCounter++;
-				}
+                    bridgeCounter++;
+                }
                 break;
             case TYPE_COLOSSUS:
                 m_auiEncounter[2] = uiData;
@@ -210,10 +210,10 @@ struct MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
                     if (GameObject* pGo = instance->GetGameObject(m_uiAltarOfColossusGUID))
                         pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
                 if (uiData == SPECIAL)
-				{
+                {
                     DoUseDoorOrButton(m_uiTrollKeyGUID);
-					bridgeCounter++;
-				}
+                    bridgeCounter++;
+                }
                 break;
             case TYPE_GALDARAH:
                 m_auiEncounter[3] = uiData;
@@ -234,12 +234,12 @@ struct MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
                 break;
         }
 
-		if (bridgeCounter == 3 && !guardSpawnt)
-		{
-			if (GameObject* pGo = instance->GetGameObject(m_uiAltarOfColossusGUID))
-				pGo->SummonCreature(NPC_BRIDGE_GUARD, BRIDGE_GUARD_X, BRIDGE_GUARD_Y, BRIDGE_GUARD_Z, BRIDGE_GUARD_O, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 2000);
-			guardSpawnt = true;
-		}
+        if (bridgeCounter == 3 && !guardSpawnt)
+        {
+            if (GameObject* pGo = instance->GetGameObject(m_uiAltarOfColossusGUID))
+                pGo->SummonCreature(NPC_BRIDGE_GUARD, BRIDGE_GUARD_X, BRIDGE_GUARD_Y, BRIDGE_GUARD_Z, BRIDGE_GUARD_O, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 2000);
+            guardSpawnt = true;
+        }
 
         if (uiData == DONE)
         {

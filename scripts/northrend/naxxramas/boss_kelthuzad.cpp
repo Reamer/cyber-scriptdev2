@@ -509,7 +509,7 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (pTarget->GetTypeId() == TYPEID_PLAYER)
-				    {   
+                    {   
                         m_creature->CastSpell(pTarget,SPELL_SHADOW_FISSURE,true);
                         m_uiShadowFissureActiveTimer = 3000;
                         if (urand(0, 1))

@@ -143,7 +143,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
     }
     void Aggro(Unit *who)
     {
-		m_creature->SummonCreature(HEIGAN_TRIGGER, TRIGGER_X, TRIGGER_Y, TRIGGER_Z, TRIGGER_O, TEMPSUMMON_CORPSE_DESPAWN, 0);
+        m_creature->SummonCreature(HEIGAN_TRIGGER, TRIGGER_X, TRIGGER_Y, TRIGGER_Z, TRIGGER_O, TEMPSUMMON_CORPSE_DESPAWN, 0);
         SetPhase(1);
         switch (rand()%3)
         {
@@ -230,7 +230,7 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
  
         std::list<GameObject*> gameobjectList;
 
-		AllGameObjectsWithEntryInRangeCheck check(m_creature, entry, 100);
+        AllGameObjectsWithEntryInRangeCheck check(m_creature, entry, 100);
         MaNGOS::GameObjectListSearcher<AllGameObjectsWithEntryInRangeCheck> searcher(gameobjectList, check);
         TypeContainerVisitor<MaNGOS::GameObjectListSearcher<AllGameObjectsWithEntryInRangeCheck>, GridTypeMapContainer> visitor(searcher);
  

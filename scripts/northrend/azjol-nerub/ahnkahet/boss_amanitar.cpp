@@ -106,18 +106,18 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
     }
     void RemoveMiniAura()
     {
-		Map::PlayerList const& plList = m_pInstance->instance->GetPlayers();
+        Map::PlayerList const& plList = m_pInstance->instance->GetPlayers();
 
-		if(plList.isEmpty())
-			return;
+        if(plList.isEmpty())
+            return;
 
-		for(Map::PlayerList::const_iterator ittr = plList.begin(); ittr != plList.end(); ++ittr)
-		{
-			if(ittr->getSource())
-			{
-				ittr->getSource()->RemoveAurasDueToSpell(SPELL_MINI);
-			}
-		}
+        for(Map::PlayerList::const_iterator ittr = plList.begin(); ittr != plList.end(); ++ittr)
+        {
+            if(ittr->getSource())
+            {
+                ittr->getSource()->RemoveAurasDueToSpell(SPELL_MINI);
+            }
+        }
     }
 
     void Aggro(Unit* pWho)

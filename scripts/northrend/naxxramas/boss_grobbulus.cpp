@@ -60,10 +60,10 @@ struct MANGOS_DLL_DECL boss_grobbulusAI : public ScriptedAI
 
     void Reset()
     {
-        PoisonCloud_Timer = 15000;
+        PoisonCloud_Timer       = 15000;
         MutatingInjection_Timer = 20000;
-        SlimeSpray_Timer = 15000+rand()%15000;
-        Enrage_Timer = 12*MINUTE*IN_MILLISECONDS;
+        SlimeSpray_Timer        = 15000+rand()%15000;
+        Enrage_Timer            = 12*MINUTE*IN_MILLISECONDS;
         MutatingInjection_Count = 0;
 
         Despawnall();
@@ -148,13 +148,13 @@ struct MANGOS_DLL_DECL boss_grobbulusAI : public ScriptedAI
         if (MutatingInjection_Timer < diff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,1))
-				if (target->GetTypeId() == TYPEID_PLAYER)
-				{
-					DoCastSpellIfCan(target, SPELL_MUTATING_INJECTION);
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    DoCastSpellIfCan(target, SPELL_MUTATING_INJECTION);
                     MutatingInjection_Timer = (MutatingInjection_Count <= 20) ? 20000 : 10000;
                     MutatingInjection_Count++;
-				}
-		}else MutatingInjection_Timer -= diff;
+                }
+        }else MutatingInjection_Timer -= diff;
 
         if (SlimeSpray_Timer < diff)
         {

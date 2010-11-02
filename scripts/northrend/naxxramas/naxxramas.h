@@ -56,13 +56,13 @@ enum
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,
 
-	NPC_LOATHEB					= 16011,
+    NPC_LOATHEB                 = 16011,
 
     NPC_HEIGAN                  = 15936,
 
-	NPC_DEATH_KNIGHT_UNDERSTUDY  = 16803,
-	NPC_DEATH_KNIGHT_UNDERSTUDY_1= 168031,
-	NPC_DEATH_KNIGHT_UNDERSTUDY_2= 168032,
+    NPC_DEATH_KNIGHT_UNDERSTUDY  = 16803,
+    NPC_DEATH_KNIGHT_UNDERSTUDY_1= 168031,
+    NPC_DEATH_KNIGHT_UNDERSTUDY_2= 168032,
     NPC_DEATH_KNIGHT_UNDERSTUDY_3= 168033,
     NPC_DEATH_KNIGHT_UNDERSTUDY_4= 168034,
 
@@ -200,8 +200,8 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         uint64 m_uiFollowerGUID[2];
         uint8  m_uiFollowerCount;
 
-		uint64 m_uiDeathKnightUnderstudyGUID[4];
-		uint8  m_uiDeathKnightUnderstudyCount;
+        uint64 m_uiDeathKnightUnderstudyGUID[4];
+        uint8  m_uiDeathKnightUnderstudyCount;
 
         uint64 m_uiZeliekGUID;
         uint64 m_uiThaneGUID;
@@ -212,7 +212,7 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         uint64 m_uiStalaggGUID;
         uint64 m_uiFeugenGUID;
 
-		uint64 m_uiLoathebGUID;
+        uint64 m_uiLoathebGUID;
 
         uint64 m_uiHeiganGUID;
 

@@ -144,10 +144,10 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
         m_bIsInTimeForAchiev = true;
         SpeedKillTimer = 240000;
 
-		m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-		m_creature->SetVisibility(VISIBILITY_ON);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetVisibility(VISIBILITY_ON);
 
-		pTriggerTarget = NULL;
+        pTriggerTarget = NULL;
 
         i = 0;
 
@@ -171,8 +171,8 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
 
     void JustDied(Unit* pKiller)
     {
-		m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-		m_creature->SetVisibility(VISIBILITY_ON);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetVisibility(VISIBILITY_ON);
         DoScriptText(SAY_DEATH, m_creature);
         m_pInstance->SetData(TYPE_ANUBARAK, DONE);
 

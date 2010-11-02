@@ -49,10 +49,10 @@ enum
     SPELL_FLAME_ORB                 = 57750, // Flame orb damage    
     SPELL_FLAME_ORB_H               = 58937,
 
-	SPELL_FLAME_SPHERE_PERIODIC		= 55926,
-	SPELL_FLAME_SPHERE_VISUAL		= 55928,
+    SPELL_FLAME_SPHERE_PERIODIC     = 55926,
+    SPELL_FLAME_SPHERE_VISUAL       = 55928,
 
-	NPC_FLAME_ORB			        = 30702,
+    NPC_FLAME_ORB                   = 30702,
 
     FLAME_ORB_Z                     = 17,
 
@@ -86,38 +86,38 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
 
-	bool isInVanish;
-	bool isInVampyrMode;
+    bool isInVanish;
+    bool isInVampyrMode;
 
-	uint32 summonFlameOrbTimer;
-	uint32 vanishTimer;
-	uint32 bloodthirstTimer;
-	uint32 embraceOfTheVampyrTimer;
-	uint32 embraceOfTheVampyrInterruptDamage;
+    uint32 summonFlameOrbTimer;
+    uint32 vanishTimer;
+    uint32 bloodthirstTimer;
+    uint32 embraceOfTheVampyrTimer;
+    uint32 embraceOfTheVampyrInterruptDamage;
     uint32 embraceOfTheVampyrFinishedTimer;
     uint32 damageToInterrupt;
 
     void Reset()
     {
-		summonFlameOrbTimer = 12000;
-		vanishTimer = 14000;
-		bloodthirstTimer = 10000;
+        summonFlameOrbTimer = 12000;
+        vanishTimer = 14000;
+        bloodthirstTimer = 10000;
         embraceOfTheVampyrFinishedTimer = 20000;
-		isInVanish = false;
+        isInVanish = false;
         isInVampyrMode = false;
         m_creature->SetVisibility(VISIBILITY_ON);
-	
-		if (m_pInstance)
-			m_pInstance->SetData(TYPE_TALDARAM, NOT_STARTED);
+    
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_TALDARAM, NOT_STARTED);
     }
 
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
-		m_creature->RemoveAurasDueToSpell(SPELL_BEAM_VISUAL);
-		
-		if (m_pInstance)
-			m_pInstance->SetData(TYPE_TALDARAM, IN_PROGRESS);
+        m_creature->RemoveAurasDueToSpell(SPELL_BEAM_VISUAL);
+        
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_TALDARAM, IN_PROGRESS);
     }
 
     void KilledUnit(Unit* pVictim)
@@ -139,47 +139,47 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
     }
 
     void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
-	{
-		if (isInVampyrMode)
-			embraceOfTheVampyrInterruptDamage += uiDamage;
+    {
+        if (isInVampyrMode)
+            embraceOfTheVampyrInterruptDamage += uiDamage;
 
-		if (embraceOfTheVampyrInterruptDamage > damageToInterrupt)
-		{
+        if (embraceOfTheVampyrInterruptDamage > damageToInterrupt)
+        {
             m_creature->InterruptSpell(CURRENT_CHANNELED_SPELL);
-			m_creature->InterruptNonMeleeSpells(false);	
+            m_creature->InterruptNonMeleeSpells(false);    
             summonFlameOrbTimer = 4000;
-			isInVampyrMode = false;
-			embraceOfTheVampyrInterruptDamage = 0;
-		}
+            isInVampyrMode = false;
+            embraceOfTheVampyrInterruptDamage = 0;
+        }
         if(pDoneBy->GetEntry() == NPC_FLAME_ORB)
         {
             uiDamage = 0;
         }
-	}
+    }
 
-	void MoveInLineOfSight(Unit* pWho)
+    void MoveInLineOfSight(Unit* pWho)
     {
         if (m_pInstance)
         {
-			if (pWho->IsWithinDist(m_creature, 10.0f, true))
+            if (pWho->IsWithinDist(m_creature, 10.0f, true))
             {
                 if (m_creature->isAlive())
-				{
-					if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-					{
-						m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-						m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-					}
+                {
+                    if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    {
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                    }
                     AttackStart(pWho);
-				}
+                }
             }
         }
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
-		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-			return;
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
 
         if (!isInVanish && !isInVampyrMode)
         {
@@ -198,27 +198,27 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
             }else summonFlameOrbTimer -= uiDiff;
             
             if (bloodthirstTimer < uiDiff)
-		    {
-			    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLOODTHIRST) == CAST_OK)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLOODTHIRST) == CAST_OK)
                     bloodthirstTimer = m_bIsRegularMode ? 15000 : 8000;
-		    }else bloodthirstTimer -= uiDiff;
+            }else bloodthirstTimer -= uiDiff;
         }
 
 
         if (!isInVampyrMode)
             if(vanishTimer < uiDiff)
-		    {
+            {
                 //m_creature->CastSpell(m_creature,SPELL_VANISH,true);
                 m_creature->SetVisibility(VISIBILITY_OFF);
-			    isInVanish = true;
-			    embraceOfTheVampyrTimer = 2000;
-			    vanishTimer = 200000;
-		    }else vanishTimer -= uiDiff;
-		
-		if (isInVanish)
-		{
-			if (embraceOfTheVampyrTimer < uiDiff)
-			{
+                isInVanish = true;
+                embraceOfTheVampyrTimer = 2000;
+                vanishTimer = 200000;
+            }else vanishTimer -= uiDiff;
+        
+        if (isInVanish)
+        {
+            if (embraceOfTheVampyrTimer < uiDiff)
+            {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (pTarget->GetTypeId() == TYPEID_PLAYER)
@@ -226,16 +226,16 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
                         m_creature->SetVisibility(VISIBILITY_ON);
                         m_creature->NearTeleportTo(pTarget->GetPositionX() + 3.0f, pTarget->GetPositionY() + 3.0f, pTarget->GetPositionZ(), pTarget->GetOrientation());
                         m_creature->RemoveAurasDueToSpell(SPELL_VANISH);
-			            DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_EMBRACE_OF_THE_VAMPYR : SPELL_EMBRACE_OF_THE_VAMPYR_H);
+                        DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_EMBRACE_OF_THE_VAMPYR : SPELL_EMBRACE_OF_THE_VAMPYR_H);
                         embraceOfTheVampyrInterruptDamage = 0;
-			            isInVampyrMode = true;
-			            summonFlameOrbTimer += 20000;
-				        isInVanish = false;
-				        vanishTimer = 25000;
+                        isInVampyrMode = true;
+                        summonFlameOrbTimer += 20000;
+                        isInVanish = false;
+                        vanishTimer = 25000;
                     }
                 }
-			}else embraceOfTheVampyrTimer -= uiDiff;
-		}
+            }else embraceOfTheVampyrTimer -= uiDiff;
+        }
 
         // set VampyrMode false when Spell not stopped by damage
         if(isInVampyrMode)
@@ -368,7 +368,7 @@ void AddSC_boss_taldaram()
     newscript->GetAI = &GetAI_boss_taldaram;
     newscript->RegisterSelf();
 
-	newscript = new Script;
+    newscript = new Script;
     newscript->Name = "mob_taldaram_flame_orb";
     newscript->GetAI = &GetAI_mob_taldaram_flame_orb;
     newscript->RegisterSelf();
