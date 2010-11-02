@@ -33,8 +33,8 @@ enum
     SPELL_ECK_RESIDUE_DEBUFF    =   55817, 
     SPELL_ECK_SPITE             =   55814,
 
-    SPELL_ECK_SPRING_WHERE		=   55837,        // needs targetcoordinates in db. after Spring is casted Thread list will be resetted
-    SPELL_ECK_SPRING			=	55815,        //trigger spell 55837
+    SPELL_ECK_SPRING_WHERE      =   55837,        // needs targetcoordinates in db. after Spring is casted Thread list will be resetted
+    SPELL_ECK_SPRING            =    55815,        //trigger spell 55837
     
     SPELL_ECK_BIT               =   55813,
     SPELL_ECK_BERSERK           =   55816,
@@ -65,10 +65,10 @@ struct MANGOS_DLL_DECL boss_eck_the_ferociousAI : public ScriptedAI
         
     void Reset()
     {
-        m_uiEckSpiteTimer            = 15000;                 //incorrect    Timer ?
-        m_uiEckSpringTimer            = 8000;                     //incorrect Timer ?
-        m_uiEckBitTimer                = 5000;                     //incorrect Timer ?
-        m_uiEckBerserkTimer            = urand(60000 , 90000);  //enrange at 20% HP or after 60-90 seconds
+        m_uiEckSpiteTimer             = 15000;                 //incorrect    Timer ?
+        m_uiEckSpringTimer            = 8000;                  //incorrect Timer ?
+        m_uiEckBitTimer               = 5000;                  //incorrect Timer ?
+        m_uiEckBerserkTimer           = urand(60000 , 90000);  //enrange at 20% HP or after 60-90 seconds
         m_bBerserk = false;
 
         //we need to remove debuff if raid fail
@@ -77,7 +77,7 @@ struct MANGOS_DLL_DECL boss_eck_the_ferociousAI : public ScriptedAI
     }
     void Aggro(Unit* pWho)
     {
-		if (m_pInstance)
+        if (m_pInstance)
             m_pInstance->SetData(TYPE_ECK, IN_PROGRESS);
     }
     void JustDied(Unit* pKiller)
@@ -116,12 +116,12 @@ struct MANGOS_DLL_DECL boss_eck_the_ferociousAI : public ScriptedAI
         if (m_uiEckSpringTimer < uiDiff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
-			{
+            {
                 DoCastSpellIfCan(target, SPELL_ECK_SPRING);
-				m_creature->DeleteThreatList();
-				m_creature->AddThreat(target,0.0f);
-				m_uiEckSpringTimer = 8000;
-			}
+                m_creature->DeleteThreatList();
+                m_creature->AddThreat(target,0.0f);
+                m_uiEckSpringTimer = 8000;
+            }
         }
         else
             m_uiEckSpringTimer -= uiDiff;

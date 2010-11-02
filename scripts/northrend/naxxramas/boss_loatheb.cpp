@@ -29,7 +29,7 @@ enum
     EMOTE_AURA_BLOCKING     = -1533143,
     EMOTE_AURA_WANE         = -1533144,
     EMOTE_AURA_FADING       = -1533145,
-	//spells Loatheb
+    //spells Loatheb
     SPELL_DEATHBLOOM        = 29865,
     SPELL_DEATHBLOOM_H      = 55053,
     SPELL_INEVITABLE_DOOM   = 29204,
@@ -37,8 +37,8 @@ enum
     SPELL_NECROTIC_AURA     = 55593,
     SPELL_SUMMON_SPORE      = 29234,
     SPELL_BERSERK           = 26662,
-	//spells Spore
-	SPELL_FUNGAL_CREEP		= 29232,
+    //spells Spore
+    SPELL_FUNGAL_CREEP      = 29232,
 
     NPC_SPORE               = 16286
 };
@@ -90,7 +90,7 @@ struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
             m_pInstance->SetData(TYPE_LOATHEB, NOT_STARTED);
     }
 
-	void UpdateAI(const uint32 uiDiff)
+    void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -165,28 +165,28 @@ struct MANGOS_DLL_DECL mob_sporeAI : public ScriptedAI
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
-	instance_naxxramas* m_pInstance;
-	bool m_bIsRegularMode;
-	void Reset()
-	{
-		if (Creature* loatheb = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_LOATHEB)))
-			if (Unit* pTarget = loatheb->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-				m_creature->AddThreat(pTarget, 0);
+    instance_naxxramas* m_pInstance;
+    bool m_bIsRegularMode;
+    void Reset()
+    {
+        if (Creature* loatheb = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_LOATHEB)))
+            if (Unit* pTarget = loatheb->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                m_creature->AddThreat(pTarget, 0);
 
-	}
+    }
 
-	void UpdateAI(const uint32 uiDiff)
-	{
-		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-		DoMeleeAttackIfReady();
-	}
-	
-	void JustDied(Unit* pKiller)
-	{
-		m_creature->CastSpell(m_creature, SPELL_FUNGAL_CREEP, true);
-	}
+        DoMeleeAttackIfReady();
+    }
+    
+    void JustDied(Unit* pKiller)
+    {
+        m_creature->CastSpell(m_creature, SPELL_FUNGAL_CREEP, true);
+    }
 
 };
 
@@ -204,8 +204,8 @@ void AddSC_boss_loatheb()
     NewScript->GetAI = &GetAI_boss_loatheb;
     NewScript->RegisterSelf();
 
-	NewScript = new Script;
-	NewScript->Name = "mob_spore";
-	NewScript->GetAI = &GetAI_mob_spore;
-	NewScript->RegisterSelf();
+    NewScript = new Script;
+    NewScript->Name = "mob_spore";
+    NewScript->GetAI = &GetAI_mob_spore;
+    NewScript->RegisterSelf();
 }

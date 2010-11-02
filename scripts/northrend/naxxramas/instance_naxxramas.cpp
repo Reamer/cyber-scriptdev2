@@ -49,7 +49,7 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiStalaggGUID(0),
     m_uiFeugenGUID(0),
 
-	m_uiLoathebGUID(0),
+    m_uiLoathebGUID(0),
 
     m_uiHeiganGUID(0),
 
@@ -111,7 +111,7 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_THADDIUS:          m_uiThaddiusGUID = pCreature->GetGUID();    break;
         case NPC_STALAGG:           m_uiStalaggGUID = pCreature->GetGUID();     break;
         case NPC_FEUGEN:            m_uiFeugenGUID = pCreature->GetGUID();      break;
-		case NPC_LOATHEB:			m_uiLoathebGUID = pCreature->GetGUID();		break;
+        case NPC_LOATHEB:           m_uiLoathebGUID = pCreature->GetGUID();     break;
         case NPC_HEIGAN:            m_uiHeiganGUID = pCreature->GetGUID();      break;
         case NPC_ZELIEK:            m_uiZeliekGUID = pCreature->GetGUID();      break;
         case NPC_THANE:             m_uiThaneGUID = pCreature->GetGUID();       break;
@@ -122,7 +122,7 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetGUID()); break;
         case NPC_WORSHIPPER:        if(m_uiWorshipperCount<5) m_uiWorshipperGUID[m_uiWorshipperCount++] = pCreature->GetGUID(); break;
         case NPC_FOLLOWER:          if(m_uiFollowerCount<3) m_uiFollowerGUID[m_uiFollowerCount++] = pCreature->GetGUID(); break;
-		case NPC_DEATH_KNIGHT_UNDERSTUDY: if(m_uiDeathKnightUnderstudyCount<5) m_uiDeathKnightUnderstudyGUID[m_uiDeathKnightUnderstudyCount++] = pCreature->GetGUID(); break;
+        case NPC_DEATH_KNIGHT_UNDERSTUDY: if(m_uiDeathKnightUnderstudyCount<5) m_uiDeathKnightUnderstudyGUID[m_uiDeathKnightUnderstudyCount++] = pCreature->GetGUID(); break;
     }
 }
 
@@ -522,10 +522,10 @@ uint64 instance_naxxramas::GetData64(uint32 uiData)
             return m_uiFaerlinanGUID;
         case GO_MILI_GOTH_COMBAT_GATE:
             return m_uiGothCombatGateGUID;
-		case NPC_DEATH_KNIGHT_UNDERSTUDY_1:
-			return m_uiDeathKnightUnderstudyGUID[0];
-		case NPC_DEATH_KNIGHT_UNDERSTUDY_2:
-			return m_uiDeathKnightUnderstudyGUID[1];
+        case NPC_DEATH_KNIGHT_UNDERSTUDY_1:
+            return m_uiDeathKnightUnderstudyGUID[0];
+        case NPC_DEATH_KNIGHT_UNDERSTUDY_2:
+            return m_uiDeathKnightUnderstudyGUID[1];
         case NPC_DEATH_KNIGHT_UNDERSTUDY_3:
             return m_uiDeathKnightUnderstudyGUID[2];
         case NPC_DEATH_KNIGHT_UNDERSTUDY_4:
@@ -544,8 +544,8 @@ uint64 instance_naxxramas::GetData64(uint32 uiData)
             return m_uiStalaggGUID;
         case NPC_FEUGEN:
             return m_uiFeugenGUID;
-		case NPC_LOATHEB:
-			return m_uiLoathebGUID;
+        case NPC_LOATHEB:
+            return m_uiLoathebGUID;
         case NPC_HEIGAN:
             return m_uiHeiganGUID;
         case NPC_GOTHIK:

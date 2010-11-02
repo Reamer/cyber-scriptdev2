@@ -38,7 +38,7 @@ enum
     NPC_ANNHYLDE                = 24068,
     NPC_THROW_TARGET            = 23996,                    //the target, casting spell and target of moving dummy
     NPC_THROW_DUMMY             = 23997,                    //the axe, moving to target
-	NPC_INGVAR_ACHIEVEMENT		= 23980,					//use this mob to apply archievment
+    NPC_INGVAR_ACHIEVEMENT      = 23980,                    //use this mob to apply archievment
 
     //phase 1
     SPELL_CLEAVE                = 42724,
@@ -56,7 +56,7 @@ enum
     SPELL_DARK_SMASH            = 42723,
 
     SPELL_SHADOW_AXE_TRIGGER    = 42748,
-	SPELL_SHADOW_AXE            = 42750,
+    SPELL_SHADOW_AXE            = 42750,
     SPELL_SHADOW_AXE_H          = 59719,
 
     SPELL_DREADFUL_ROAR         = 42729,
@@ -78,7 +78,7 @@ enum
 #define PHASE_1_DISPLAY_ID      21953     
 #define PHASE_2_DISPLAY_ID      26351
 
-#define FAC_FRIENDLY			35
+#define FAC_FRIENDLY            35
 
 /*######
 ## boss_ingvar
@@ -106,7 +106,7 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
     uint32 m_uiDreadfulRoarTimer;
     uint32 m_uiDarkSmash;
     uint32 m_uiWoeStrike;
-	uint32 m_uiShadowAxeTimer;
+    uint32 m_uiShadowAxeTimer;
     uint32 m_uiSpotlightTimer;
     uint32 m_uiRescureTimer;
     uint32 m_uiRemoveBlackBubbleTimer;
@@ -124,7 +124,7 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
         m_uiSmashTimer = urand(8000, 15000);
         m_uiStaggeringRoarTimer = urand(10000, 25000);
         m_uiEnrageTimer = 30000;
-		m_uiShadowAxeTimer = 20000;
+        m_uiShadowAxeTimer = 20000;
         m_uiLastTargetDummyGUID = 0;
         m_uiAxeDummyGUID = 0;
     }
@@ -155,7 +155,7 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
 
             m_bRescureInProgress = true;
             m_uiSpotlightTimer = 4000;
-			m_uiRescureTimer = 9999999;
+            m_uiRescureTimer = 9999999;
         }
     }
 
@@ -206,7 +206,7 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
             if (m_uiSpotlightTimer < uiDiff)
             {
                 if (Creature* pValkyr = m_creature->SummonCreature(NPC_ANNHYLDE, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 5, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 16000))
-					//pValkyr->setFaction(FAC_FRIENDLY);
+                    //pValkyr->setFaction(FAC_FRIENDLY);
 
                 m_creature->CastSpell(m_creature, SPELL_SPOTLIGHT, true, 0, 0, ObjectGuid());
                 m_uiRescureTimer = 14000;
@@ -272,7 +272,7 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
                 m_uiEnrageTimer -= uiDiff;
         }
         else
-		{            
+        {            
             if (m_uiDreadfulRoarTimer < uiDiff)
             {
                 DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DREADFUL_ROAR : SPELL_DREADFUL_ROAR_H);
@@ -291,11 +291,11 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
                 m_uiDarkSmash = 20000;
             }else m_uiDarkSmash -= uiDiff;
 
-			if (m_uiShadowAxeTimer < uiDiff)
-			{
-				DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_SHADOW_AXE_TRIGGER);
-				m_uiShadowAxeTimer = 44000;
-			}else m_uiShadowAxeTimer -= uiDiff;
+            if (m_uiShadowAxeTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_SHADOW_AXE_TRIGGER);
+                m_uiShadowAxeTimer = 44000;
+            }else m_uiShadowAxeTimer -= uiDiff;
         }
 
         DoMeleeAttackIfReady();

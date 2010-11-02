@@ -88,7 +88,7 @@ enum
     H_SPELL_HOLY_WRATH      = 57466,
     SPELL_HOLY_BOLT         = 57376,
     H_SPELL_HOLY_BOLT       = 57465,
-    SPELL_CONDEMNATION		= 57377,
+    SPELL_CONDEMNATION      = 57377,
 
     // horseman spirits
     NPC_SPIRIT_OF_BLAUMEUX    = 16776,
@@ -260,8 +260,8 @@ struct MANGOS_DLL_DECL boss_lady_blaumeuxAI : public ScriptedAI
         // Mark of Blaumeux
         if (Mark_Timer < uiDiff)
         {
-			DoCast(m_creature,SPELL_MARK_OF_BLAUMEUX, true);
-			Mark_Timer = 12000;
+            DoCast(m_creature,SPELL_MARK_OF_BLAUMEUX, true);
+            Mark_Timer = 12000;
         }else Mark_Timer -= uiDiff;
 
         // Shield Wall - All 4 horsemen will shield wall at 50% hp and 20% hp for 20 seconds
@@ -269,27 +269,27 @@ struct MANGOS_DLL_DECL boss_lady_blaumeuxAI : public ScriptedAI
         {
             if (ShieldWall1)
             {
-				if (DoCastSpellIfCan(m_creature,SPELL_SHIELDWALL) == CAST_OK)
-					ShieldWall1 = false;
+                if (DoCastSpellIfCan(m_creature,SPELL_SHIELDWALL) == CAST_OK)
+                    ShieldWall1 = false;
             }
         }
         if (ShieldWall2 && m_creature->GetHealthPercent() < 20.0f)
         {
             if (ShieldWall2)
             {
-				if (DoCastSpellIfCan(m_creature,SPELL_SHIELDWALL) == CAST_OK)
-					ShieldWall2 = false;
+                if (DoCastSpellIfCan(m_creature,SPELL_SHIELDWALL) == CAST_OK)
+                    ShieldWall2 = false;
             }
         }
 
         // Void Zone
         if (VoidZone_Timer < uiDiff)
         {
-			if (DoCastSpellIfCan(m_creature->getVictim(),SPELL_VOIDZONE) == CAST_OK)
-				VoidZone_Timer = 12000;
+            if (DoCastSpellIfCan(m_creature->getVictim(),SPELL_VOIDZONE) == CAST_OK)
+                VoidZone_Timer = 12000;
         }else VoidZone_Timer -= uiDiff;
-		
-		// Cast
+        
+        // Cast
         if (Cast_Timer < uiDiff)
         {
             Unit *nearu = PickNearestPlayer();
@@ -712,7 +712,7 @@ struct MANGOS_DLL_DECL boss_sir_zeliekAI : public ScriptedAI
             Move_Check = false;
         }
 
-	    // Mark of Zeliek
+        // Mark of Zeliek
         if (Mark_Timer < uiDiff)
         {
             DoCast(m_creature, SPELL_MARK_OF_ZELIEK, true);
@@ -724,27 +724,27 @@ struct MANGOS_DLL_DECL boss_sir_zeliekAI : public ScriptedAI
         {
             if (ShieldWall1)
             {
-			    if (DoCastSpellIfCan(m_creature,SPELL_SHIELDWALL) == CAST_OK)
-				    ShieldWall1 = false;
+                if (DoCastSpellIfCan(m_creature,SPELL_SHIELDWALL) == CAST_OK)
+                    ShieldWall1 = false;
             }
         }
         if (ShieldWall2 && m_creature->GetHealthPercent() < 20.0f)
         {
             if (ShieldWall2)
             {
-			    if (DoCastSpellIfCan(m_creature,SPELL_SHIELDWALL) == CAST_OK)
-				    ShieldWall2 = false;
+                if (DoCastSpellIfCan(m_creature,SPELL_SHIELDWALL) == CAST_OK)
+                    ShieldWall2 = false;
             }
         }
 
         // Holy Wrath
         if (HolyWrath_Timer < uiDiff)
         {
-		    if (DoCastSpellIfCan(m_creature->getVictim(),SPELL_HOLY_WRATH) == CAST_OK)
-			    HolyWrath_Timer = 12000;
+            if (DoCastSpellIfCan(m_creature->getVictim(),SPELL_HOLY_WRATH) == CAST_OK)
+                HolyWrath_Timer = 12000;
         }else HolyWrath_Timer -= uiDiff;
-		
-	    // Cast
+        
+        // Cast
         if (Cast_Timer < uiDiff)
         {
             Unit *nearu = PickNearestPlayer();

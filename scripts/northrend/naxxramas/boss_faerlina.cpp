@@ -35,7 +35,7 @@ enum
     SAY_SLAY2                 = -1533015,
     SAY_DEATH                 = -1533016,
 
-	MOB_WORSHIPPER            = 16506,
+    MOB_WORSHIPPER            = 16506,
     MOB_FOLLOWER              = 16505,
 
     //SOUND_RANDOM_AGGRO        = 8955,                              //soundId containing the 4 aggro sounds, we not using this
@@ -49,10 +49,10 @@ enum
     SPELL_ENRAGE              = 28798,
     H_SPELL_ENRAGE            = 54100,
 
-	//MOB SPELLS
+    //MOB SPELLS
     SPELL_WIDOWS_EMBRACE      = 28732,
-	SPELL_FIRE_BALL			  = 54095,
-	H_SPELL_FIRE_BALL		  = 54096
+    SPELL_FIRE_BALL           = 54095,
+    H_SPELL_FIRE_BALL         = 54096
 };
 
 static uint32 m_uiWorshippers[4] = {NPC_WORSHIPPER_1,NPC_WORSHIPPER_2,NPC_WORSHIPPER_3,NPC_WORSHIPPER_4}; 
@@ -169,7 +169,7 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-		// Poison Bolt Volley
+        // Poison Bolt Volley
         if (m_uiPoisonBoltVolleyTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_POSIONBOLT_VOLLEY : H_SPELL_POSIONBOLT_VOLLEY);
@@ -210,31 +210,31 @@ struct MANGOS_DLL_DECL mob_worshipperAI : public ScriptedAI
         Reset();
     }
 
-	instance_naxxramas* m_pInstance;
-	bool m_bIsRegularMode;
+    instance_naxxramas* m_pInstance;
+    bool m_bIsRegularMode;
 
-	void Reset()
-	{
-	}
+    void Reset()
+    {
+    }
 
     void UpdateAI(const uint32 uiDiff)
-	{
-		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-		DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FIRE_BALL : H_SPELL_FIRE_BALL);
-	}
+        DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FIRE_BALL : H_SPELL_FIRE_BALL);
+    }
 
-	void JustDied(Unit* pKiller)
-	{
+    void JustDied(Unit* pKiller)
+    {
         //if (m_bIsRegularMode) //only 10 mode
             m_creature->CastSpell(m_creature, SPELL_WIDOWS_EMBRACE, true, 0, 0, pKiller->GetGUID());
-	}
+    }
 
 };
 
 CreatureAI* GetAI_mob_worshipper(Creature* pCreature)
 {
-	return new mob_worshipperAI(pCreature);
+    return new mob_worshipperAI(pCreature);
 }
 void AddSC_boss_faerlina()
 {
@@ -245,8 +245,8 @@ void AddSC_boss_faerlina()
     NewScript->GetAI = &GetAI_boss_faerlina;
     NewScript->RegisterSelf();
 
-	NewScript = new Script;
-	NewScript->Name = "mob_worshipper";
-	NewScript->GetAI = &GetAI_mob_worshipper;
-	NewScript->RegisterSelf();
+    NewScript = new Script;
+    NewScript->Name = "mob_worshipper";
+    NewScript->GetAI = &GetAI_mob_worshipper;
+    NewScript->RegisterSelf();
 }

@@ -40,13 +40,13 @@ enum
     WHISPER_DEATH                   = -1619044, 
 
     SPELL_INSANITY                  = 57496,
-	
-	SPELL_INSANITY_PHASE_16			= 57508,
-	SPELL_INSANITY_PHASE_32			= 57509,
-	SPELL_INSANITY_PHASE_64			= 57510,
-	SPELL_INSANITY_PHASE_128		= 57511,
-	SPELL_INSANITY_PHASE_256		= 57512,
-	
+    
+    SPELL_INSANITY_PHASE_16         = 57508,
+    SPELL_INSANITY_PHASE_32         = 57509,
+    SPELL_INSANITY_PHASE_64         = 57510,
+    SPELL_INSANITY_PHASE_128        = 57511,
+    SPELL_INSANITY_PHASE_256        = 57512,
+    
     SPELL_SHIVER                    = 57949, 
     SPELL_SHIVER_H                  = 59978, 
  
@@ -57,10 +57,10 @@ enum
     SPELL_MIND_FLAY_H               = 59974,
 
     // FIXME: these are not the right clone NPCs!
-    CLONE                      = 31627,
-    CLONE_H                    = 31627,
-    FAC_HOSTILE                = 16,
-    ACHIEVEMENT_QUICK_DEMISE   = 1862
+    CLONE                           = 31627,
+    CLONE_H                         = 31627,
+    FAC_HOSTILE                     = 16,
+    ACHIEVEMENT_QUICK_DEMISE        = 1862
 }; 
  
 enum clonehealth
@@ -133,20 +133,20 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
     bool isInInsanity; 
     bool phase66; 
     bool phase33; 
-	bool clone16;
-	bool clone32;
-	bool clone64;
-	bool clone128;
-	bool clone256;
+    bool clone16;
+    bool clone32;
+    bool clone64;
+    bool clone128;
+    bool clone256;
     bool startAchievement;
     bool getsAchievement;
  
     std::list<uint64> cloneGUIDList; 
-	std::list<uint64> clone16GUIDList;
-	std::list<uint64> clone32GUIDList;
-	std::list<uint64> clone64GUIDList;
-	std::list<uint64> clone128GUIDList;
-	std::list<uint64> clone256GUIDList;
+    std::list<uint64> clone16GUIDList;
+    std::list<uint64> clone32GUIDList;
+    std::list<uint64> clone64GUIDList;
+    std::list<uint64> clone128GUIDList;
+    std::list<uint64> clone256GUIDList;
  
     uint32 insanityEndTimer; 
     uint32 insanityTimer; 
@@ -162,28 +162,28 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         insanityEndTimer = 9999999; 
         createMirrorTimer = 9999999;
         achievementTimer = 120000; // 2minutes
-		shadowBoltSalveTimer = 6000;
-		shiverTimer = 13000;
-		mindFlayTimer = 9000;
-		cloneGUIDList.clear();
-		clone16GUIDList.clear();
-		clone32GUIDList.clear();
-		clone64GUIDList.clear();
-		clone128GUIDList.clear();
-		clone256GUIDList.clear();
+        shadowBoltSalveTimer = 6000;
+        shiverTimer = 13000;
+        mindFlayTimer = 9000;
+        cloneGUIDList.clear();
+        clone16GUIDList.clear();
+        clone32GUIDList.clear();
+        clone64GUIDList.clear();
+        clone128GUIDList.clear();
+        clone256GUIDList.clear();
 
-		isInInsanity = false;
-		phase66 = false;
-		phase33 = false;
-		clone16 = false;
-		clone32 = false;
-		clone64 = false;
-		clone128 = false;
-		clone256 = false;
+        isInInsanity = false;
+        phase66 = false;
+        phase33 = false;
+        clone16 = false;
+        clone32 = false;
+        clone64 = false;
+        clone128 = false;
+        clone256 = false;
         startAchievement = false;
         getsAchievement = true;
 
-		if (m_pInstance)
+        if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, NOT_STARTED);
     } 
  
@@ -193,13 +193,13 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
-	    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
             if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
                 DoScriptText(WHISPER_AGGRO,m_creature,target);
         
         startAchievement = true;
 
-		if (m_pInstance)
+        if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, IN_PROGRESS);
     } 
  
@@ -218,7 +218,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
-	    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
             if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
                 DoScriptText(textId-6,m_creature,target);
     } 
@@ -239,213 +239,213 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
             }
         }*/ 
 
-		if (m_pInstance)
+        if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, DONE);
     } 
 
-	void setPlayersPhase()
-	{
-		int i = 1;
+    void setPlayersPhase()
+    {
+        int i = 1;
 
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
-		for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
             if(Player* target = m_creature->GetMap()->GetPlayer(itr->getSource()->GetGUID())) 
-		    {
-			    switch(i)
-			    {
-				    case 1:
-					    target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
-					    break;
-				    case 2:
-					    target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
-					    break;
-				    case 3:
-					    target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
-					    break;
-				    case 4:
-					    target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
-					    break;
-				    case 5:
-					    target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
-					    break;
-				    default:
-					    break;
+            {
+                switch(i)
+                {
+                    case 1:
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
+                        break;
+                    case 2:
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
+                        break;
+                    case 3:
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
+                        break;
+                    case 4:
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
+                        break;
+                    case 5:
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                        break;
+                    default:
+                        break;
                 }
-				i++;
+                i++;
             }
-	}
+    }
  
     void createClassMirrors() 
     {
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
-	    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-		{ 
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+        { 
             if(Unit* pPlayer = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
-			{ 
-		        Unit* pClone = m_creature->SummonCreature(m_bIsRegularMode ? CLONE : CLONE_H, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), pPlayer->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+            { 
+                Unit* pClone = m_creature->SummonCreature(m_bIsRegularMode ? CLONE : CLONE_H, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), pPlayer->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
                 if (pClone) 
                 {
                     pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_PASSIVE);
                     pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
                     pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_OOC_NOT_ATTACKABLE);
                     pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_UNK_6);
-				    pClone->SetDisplayId(pPlayer->GetNativeDisplayId());
-				    pClone->SetName(pPlayer->GetName());
+                    pClone->SetDisplayId(pPlayer->GetNativeDisplayId());
+                    pClone->SetName(pPlayer->GetName());
                     pClone->setFaction(FAC_HOSTILE);
 
-				    switch (pPlayer->getClass()) 
-				    { 
-					    case CLASS_PRIEST: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PRIEST : CLONE_HEALTH_PRIEST_H); break;
+                    switch (pPlayer->getClass()) 
+                    { 
+                        case CLASS_PRIEST: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PRIEST : CLONE_HEALTH_PRIEST_H); break;
                         case CLASS_PALADIN: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PALA : CLONE_HEALTH_PALA_H); break;
-					    case CLASS_WARLOCK: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARLOCK : CLONE_HEALTH_WARLOCK_H); break;
-					    case CLASS_MAGE: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_MAGE : CLONE_HEALTH_MAGE_H); break;
-					    case CLASS_ROGUE: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_ROGUE : CLONE_HEALTH_ROGUE_H); break;
-				        case CLASS_WARRIOR: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARRIOR : CLONE_HEALTH_WARRIOR_H); break;
-					    case CLASS_DRUID: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DRUID : CLONE_HEALTH_DRUID_H); break;
-					    case CLASS_SHAMAN: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_SHAMAN : CLONE_HEALTH_SHAMAN_H); break;
-					    case CLASS_HUNTER: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_HUNT : CLONE_HEALTH_HUNT_H); break;
-					    case CLASS_DEATH_KNIGHT: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DK : CLONE_HEALTH_DK_H); break;
+                        case CLASS_WARLOCK: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARLOCK : CLONE_HEALTH_WARLOCK_H); break;
+                        case CLASS_MAGE: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_MAGE : CLONE_HEALTH_MAGE_H); break;
+                        case CLASS_ROGUE: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_ROGUE : CLONE_HEALTH_ROGUE_H); break;
+                        case CLASS_WARRIOR: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARRIOR : CLONE_HEALTH_WARRIOR_H); break;
+                        case CLASS_DRUID: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DRUID : CLONE_HEALTH_DRUID_H); break;
+                        case CLASS_SHAMAN: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_SHAMAN : CLONE_HEALTH_SHAMAN_H); break;
+                        case CLASS_HUNTER: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_HUNT : CLONE_HEALTH_HUNT_H); break;
+                        case CLASS_DEATH_KNIGHT: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DK : CLONE_HEALTH_DK_H); break;
                         default: break;
                     }
 
                     pClone->SetHealth(pClone->GetMaxHealth()); 
-				    pClone->Attack(pPlayer, true); 
-				    pClone->AddThreat(pPlayer, 10000.0f);
-				    cloneGUIDList.push_back(pClone->GetGUID()); 
-			    } 
+                    pClone->Attack(pPlayer, true); 
+                    pClone->AddThreat(pPlayer, 10000.0f);
+                    cloneGUIDList.push_back(pClone->GetGUID()); 
+                } 
                 
                 if (pPlayer->HasAura(SPELL_INSANITY_PHASE_16)) //Phase 16
                 {
                     pClone->SetPhaseMask(16, true);
-				    clone16GUIDList.push_back(pClone->GetGUID());
+                    clone16GUIDList.push_back(pClone->GetGUID());
                 }
                 else if (pPlayer->HasAura(SPELL_INSANITY_PHASE_32))//Phase 32
                 {
                     pClone->SetPhaseMask(32, true);
-				    clone32GUIDList.push_back(pClone->GetGUID());						    
+                    clone32GUIDList.push_back(pClone->GetGUID());                            
                 }
                 else if (pPlayer->HasAura(SPELL_INSANITY_PHASE_64))//Phase 64
                 {
                     pClone->SetPhaseMask(64, true);
-					clone64GUIDList.push_back(pClone->GetGUID());
+                    clone64GUIDList.push_back(pClone->GetGUID());
                 }
                 else if (pPlayer->HasAura(SPELL_INSANITY_PHASE_128))//Phase 128
                 {
                     pClone->SetPhaseMask(128, true);
-					clone128GUIDList.push_back(pClone->GetGUID());
+                    clone128GUIDList.push_back(pClone->GetGUID());
                 }
                 else if (pPlayer->HasAura(SPELL_INSANITY_PHASE_256))//Phase 256
                 {
                     pClone->SetPhaseMask(256, true);
-					clone256GUIDList.push_back(pClone->GetGUID());
+                    clone256GUIDList.push_back(pClone->GetGUID());
                 }
-			} 
-		} 
+            } 
+        } 
     } 
 
-	bool cloneAlive()
-	{
-		if (!cloneGUIDList.empty() && m_pInstance)
-		{
-			for (std::list<uint64>::iterator itr = cloneGUIDList.begin(); itr != cloneGUIDList.end(); ++itr)
-			{
-				if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
-				{
-					if (pClone->isAlive())
-						return true;
-				}
-			}
-		}
+    bool cloneAlive()
+    {
+        if (!cloneGUIDList.empty() && m_pInstance)
+        {
+            for (std::list<uint64>::iterator itr = cloneGUIDList.begin(); itr != cloneGUIDList.end(); ++itr)
+            {
+                if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
+                {
+                    if (pClone->isAlive())
+                        return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	bool clone16Alive()
-	{
-		if (!clone16GUIDList.empty() && m_pInstance)
-		{
-			for (std::list<uint64>::iterator itr = clone16GUIDList.begin(); itr != clone16GUIDList.end(); ++itr)
-			{
-				if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
-				{
-					if (pClone->isAlive())
-						return true;
-				}
-			}
-		}
+    bool clone16Alive()
+    {
+        if (!clone16GUIDList.empty() && m_pInstance)
+        {
+            for (std::list<uint64>::iterator itr = clone16GUIDList.begin(); itr != clone16GUIDList.end(); ++itr)
+            {
+                if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
+                {
+                    if (pClone->isAlive())
+                        return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	bool clone32Alive()
-	{
-		if (!clone32GUIDList.empty() && m_pInstance)
-		{
-			for (std::list<uint64>::iterator itr = clone32GUIDList.begin(); itr != clone32GUIDList.end(); ++itr)
-			{
-				if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
-				{
-					if (pClone->isAlive())
-						return true;
-				}
-			}
-		}
+    bool clone32Alive()
+    {
+        if (!clone32GUIDList.empty() && m_pInstance)
+        {
+            for (std::list<uint64>::iterator itr = clone32GUIDList.begin(); itr != clone32GUIDList.end(); ++itr)
+            {
+                if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
+                {
+                    if (pClone->isAlive())
+                        return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	bool clone64Alive()
-	{
-		if (!clone64GUIDList.empty() && m_pInstance)
-		{
-			for (std::list<uint64>::iterator itr = clone64GUIDList.begin(); itr != clone64GUIDList.end(); ++itr)
-			{
-				if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
-				{
-					if (pClone->isAlive())
-						return true;
-				}
-			}
-		}
+    bool clone64Alive()
+    {
+        if (!clone64GUIDList.empty() && m_pInstance)
+        {
+            for (std::list<uint64>::iterator itr = clone64GUIDList.begin(); itr != clone64GUIDList.end(); ++itr)
+            {
+                if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
+                {
+                    if (pClone->isAlive())
+                        return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	bool clone128Alive()
-	{
-		if (!clone128GUIDList.empty() && m_pInstance)
-		{
-			for (std::list<uint64>::iterator itr = clone128GUIDList.begin(); itr != clone128GUIDList.end(); ++itr)
-			{
-				if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
-				{
-					if (pClone->isAlive())
-						return true;
-				}
-			}
-		}
+    bool clone128Alive()
+    {
+        if (!clone128GUIDList.empty() && m_pInstance)
+        {
+            for (std::list<uint64>::iterator itr = clone128GUIDList.begin(); itr != clone128GUIDList.end(); ++itr)
+            {
+                if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
+                {
+                    if (pClone->isAlive())
+                        return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	bool clone256Alive()
-	{
-		if (!clone256GUIDList.empty() && m_pInstance)
-		{
-			for (std::list<uint64>::iterator itr = clone256GUIDList.begin(); itr != clone256GUIDList.end(); ++itr)
-			{
-				if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
-				{
-					if (pClone->isAlive())
-						return true;
-				}
-			}
-		}
+    bool clone256Alive()
+    {
+        if (!clone256GUIDList.empty() && m_pInstance)
+        {
+            for (std::list<uint64>::iterator itr = clone256GUIDList.begin(); itr != clone256GUIDList.end(); ++itr)
+            {
+                if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
+                {
+                    if (pClone->isAlive())
+                        return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
  
     void UpdateAI(const uint32 uiDiff) 
     {
@@ -464,148 +464,148 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         { 
             if (insanityEndTimer < uiDiff) 
             { 
-				if (!cloneAlive()) 
+                if (!cloneAlive()) 
                 {  
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
                     isInInsanity = false; 
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim()); 
                     m_creature->Attack(m_creature->getVictim(), true); 
                     insanityEndTimer = 9999999; 
-					clone16 = clone32 = clone64 = clone128 = clone256 = false;
-					return;
+                    clone16 = clone32 = clone64 = clone128 = clone256 = false;
+                    return;
                 }else 
                     insanityEndTimer = 1000; 
             }else insanityEndTimer -= uiDiff;
 
-			if (!clone16Alive() && !clone16)
-			{
-			    Map* pMap = m_creature->GetMap();
+            if (!clone16Alive() && !clone16)
+            {
+                Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
-		        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-				{ 
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+                { 
                     if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
-					{ 
+                    { 
                         if (target->HasAura(SPELL_INSANITY_PHASE_16))
-					    {
-						    target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
-						    if (!clone32)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
-						    else if (!clone64)
-						        target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
-						    else if (!clone128)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
-						    else if (!clone256)
-						        target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
-						}
-					} 
-				}
+                        {
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
+                            if (!clone32)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
+                            else if (!clone64)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
+                            else if (!clone128)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
+                            else if (!clone256)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                        }
+                    } 
+                }
 
-				clone16 = true;
-			}
+                clone16 = true;
+            }
 
-			if (!clone32Alive() && !clone32)
-			{
-			    Map* pMap = m_creature->GetMap();
+            if (!clone32Alive() && !clone32)
+            {
+                Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
-		        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-				{ 
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+                { 
                     if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
-					{ 
-					    if (target->HasAura(SPELL_INSANITY_PHASE_32))
-					    {
-					        target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
-						    if (!clone16)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
-						    else if (!clone64)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
-						    else if (!clone128)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
-						    else if (!clone256)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
-						}
-					} 
-				}
+                    { 
+                        if (target->HasAura(SPELL_INSANITY_PHASE_32))
+                        {
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
+                            if (!clone16)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
+                            else if (!clone64)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
+                            else if (!clone128)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
+                            else if (!clone256)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                        }
+                    } 
+                }
 
-				clone32 = true;
-			}
+                clone32 = true;
+            }
 
-			if (!clone64Alive() && !clone64)
-			{
-			    Map* pMap = m_creature->GetMap();
+            if (!clone64Alive() && !clone64)
+            {
+                Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
-		        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-				{ 
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+                { 
                     if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
-					{ 
-				        if (target->HasAura(SPELL_INSANITY_PHASE_64))
-					    {
-						    target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_64);
-						    if (!clone16)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
-						    else if (!clone32)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
-						    else if (!clone128)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
-						    else if (!clone256)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
-						}
-					} 
-				}
+                    { 
+                        if (target->HasAura(SPELL_INSANITY_PHASE_64))
+                        {
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_64);
+                            if (!clone16)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
+                            else if (!clone32)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
+                            else if (!clone128)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
+                            else if (!clone256)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                        }
+                    } 
+                }
 
-				clone64 = true;
-			}
+                clone64 = true;
+            }
 
-			if (!clone128Alive() && !clone128)
-			{
-			    Map* pMap = m_creature->GetMap();
+            if (!clone128Alive() && !clone128)
+            {
+                Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
-		        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-				{ 
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+                { 
                     if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
-					{ 
-					    if (target->HasAura(SPELL_INSANITY_PHASE_128))
-					    {
-						    target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_128);
-						    if (!clone16)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
-						    else if (!clone32)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
-						    else if (!clone64)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
-						    else if (!clone256)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
-						}
-					} 
-				}
+                    { 
+                        if (target->HasAura(SPELL_INSANITY_PHASE_128))
+                        {
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_128);
+                            if (!clone16)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
+                            else if (!clone32)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
+                            else if (!clone64)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
+                            else if (!clone256)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                        }
+                    } 
+                }
 
-				clone128 = true;
-			}
+                clone128 = true;
+            }
 
-			if (!clone256Alive() && !clone256)
-			{
-			    Map* pMap = m_creature->GetMap();
+            if (!clone256Alive() && !clone256)
+            {
+                Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
-		        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-				{ 
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+                { 
                     if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
-					{ 
-					    if (target->HasAura(SPELL_INSANITY_PHASE_256))
-					    {
-						    target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_256);
-						    if (!clone16)
-						        target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
-						    else if (!clone32)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
-						    else if (!clone64)
-							    target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
-						    else if (!clone128)
-						    target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
-						}
-					} 
-				}
+                    { 
+                        if (target->HasAura(SPELL_INSANITY_PHASE_256))
+                        {
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_256);
+                            if (!clone16)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
+                            else if (!clone32)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
+                            else if (!clone64)
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
+                            else if (!clone128)
+                            target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
+                        }
+                    } 
+                }
 
-				clone256 = true;
-			}
+                clone256 = true;
+            }
         } 
         else 
         { 
@@ -615,11 +615,11 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
                 Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
-		        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
                     if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
                         DoScriptText(WHISPER_INSANITY,m_creature,target);
 
-				m_creature->InterruptNonMeleeSpells(true);
+                m_creature->InterruptNonMeleeSpells(true);
                 phase66 = true; 
                 DoCastSpellIfCan(m_creature, SPELL_INSANITY); 
                 createMirrorTimer = 5000; 
@@ -634,11 +634,11 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
                 Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
-		        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
                     if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
                         DoScriptText(WHISPER_INSANITY,m_creature,target);
 
-				m_creature->InterruptNonMeleeSpells(true);
+                m_creature->InterruptNonMeleeSpells(true);
                 phase33 = true; 
                 DoCastSpellIfCan(m_creature, SPELL_INSANITY); 
                 createMirrorTimer = 5000; 
@@ -654,7 +654,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     setPlayersPhase();
                     createClassMirrors();
                     createMirrorTimer = 0; 
-				    insanityEndTimer = 5000;
+                    insanityEndTimer = 5000;
                 }else createMirrorTimer -= uiDiff; 
             }
  
@@ -675,8 +675,8 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), m_bIsRegularMode ? SPELL_SHIVER : SPELL_SHIVER_H) == CAST_OK)
                     shiverTimer = urand(13000, 14000); 
             }else shiverTimer -= uiDiff;
-			
-			DoMeleeAttackIfReady();     
+            
+            DoMeleeAttackIfReady();     
         }    
     } 
 }; 
@@ -711,18 +711,18 @@ struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI
     uint32 spellHunterTimer; 
         
     void Reset()
-	{
-		spellPriestTimer = 5000;	
-		spellRogueTimer = 5000;
-		spellMageTimer = 5000;
-		spellDeathKnightTimer = 5000;
-		spellShamanTimer = 5000;
-		spellWarlockTimer = 5000;
-		spellDruidTimer = 5000;
-		spellWarriorTimer = 5000;
-		spellPaladinTimer = 5000;
-		spellHunterTimer = 5000;
-	} 
+    {
+        spellPriestTimer       = 5000;    
+        spellRogueTimer        = 5000;
+        spellMageTimer         = 5000;
+        spellDeathKnightTimer  = 5000;
+        spellShamanTimer       = 5000;
+        spellWarlockTimer      = 5000;
+        spellDruidTimer        = 5000;
+        spellWarriorTimer      = 5000;
+        spellPaladinTimer      = 5000;
+        spellHunterTimer       = 5000;
+    } 
  
     void UpdateAI(const uint32 uiDiff) 
     { 
@@ -821,19 +821,19 @@ struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI
             if (spellPriestTimer < uiDiff) 
             { 
                 if (m_bIsRegularMode)
-				{
-					if (urand(0, 1))
-						DoCastSpellIfCan(m_creature->getVictim(), SPELL_PRIEST_2);
-					else
-						DoCastSpellIfCan(m_creature, SPELL_PRIEST_1);
-				}
+                {
+                    if (urand(0, 1))
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_PRIEST_2);
+                    else
+                        DoCastSpellIfCan(m_creature, SPELL_PRIEST_1);
+                }
                 else 
-				{
-					if (!urand(0, 3))
-						DoCastSpellIfCan(m_creature->getVictim(), SPELL_PRIEST_2_H);
-					else
-						DoCastSpellIfCan(m_creature, SPELL_PRIEST_1_H);
-				}
+                {
+                    if (!urand(0, 3))
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_PRIEST_2_H);
+                    else
+                        DoCastSpellIfCan(m_creature, SPELL_PRIEST_1_H);
+                }
                   
                 spellPriestTimer = urand (5000, 7000);  
             }else spellPriestTimer -= uiDiff; 
@@ -844,7 +844,7 @@ struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI
             { 
                 if (m_bIsRegularMode) 
                 { 
-					DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHAMAN); 
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHAMAN); 
                     spellShamanTimer = urand(4000, 6000); 
                 } 
                 else 
