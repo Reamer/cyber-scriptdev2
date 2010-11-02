@@ -122,12 +122,12 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 { 
     boss_volazjAI(Creature* pCreature) : ScriptedAI(pCreature) 
     { 
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData(); 
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData(); 
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty(); 
         Reset(); 
     } 
  
-    ScriptedInstance* m_pInstance; 
+    instance_ahnkahet* m_pInstance; 
     bool m_bIsRegularMode; 
  
     bool isInInsanity; 
@@ -690,12 +690,12 @@ struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI
 { 
     mob_volazj_cloneAI(Creature* pCreature) : ScriptedAI(pCreature) 
     { 
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData(); 
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData(); 
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty(); 
         Reset(); 
     } 
  
-    ScriptedInstance* m_pInstance; 
+    instance_ahnkahet* m_pInstance; 
  
     bool m_bIsRegularMode; 
  
