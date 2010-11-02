@@ -109,7 +109,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
         m_uiTeleportTimer = 20000;
         m_uiShadowboltTimer = 2500;
 
-        m_uiHarvestSoulTimer = 21000;
+        m_uiHarvestSoulTimer = 10000;
 
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     }
@@ -265,9 +265,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                         case 3: DoScriptText(SAY_SPEECH_4, m_creature); break;
                         case 4: m_uiPhase = PHASE_BALCONY; break;
                     }
-                }
-                else
-                    m_uiSpeechTimer -= uiDiff;
+                }else m_uiSpeechTimer -= uiDiff;
 
                 break;
             }
@@ -320,9 +318,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                     m_uiSummonTimer = auiSummonData[m_uiSummonCount][3];
 
                     ++m_uiSummonCount;
-                }
-                else
-                    m_uiSummonTimer -= uiDiff;
+                }else m_uiSummonTimer -= uiDiff;
 
                 break;
             }
@@ -334,7 +330,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                     if (DoCastSpellIfCan(m_creature, uiTeleportSpell) == CAST_OK)
                     {
                         if (m_pInstance->IsInRightSideGothArea(m_creature))
-                            m_creature->NearTeleportTo(2706.43f, -3396.23f, 267.68f, 2.1f); 
+                            //m_creature->NearTeleportTo(2706.43f, -3396.23f, 267.68f, 2.1f); 
                             //m_creature->GetMap()->CreatureRelocation(m_creature, 2706.43f, -3396.23f, 267.68f, 2.1f);
                         DoResetThreat();
                         m_uiTeleportTimer = 20000;
@@ -352,7 +348,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                 if (m_uiHarvestSoulTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
-                        m_uiHarvestSoulTimer = 21000;
+                        m_uiHarvestSoulTimer = 30000;
                 }else m_uiHarvestSoulTimer -= uiDiff;
 
                 
@@ -375,7 +371,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                 if (m_uiHarvestSoulTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
-                        m_uiHarvestSoulTimer = 21000;
+                        m_uiHarvestSoulTimer = 15000;
                 }else m_uiHarvestSoulTimer -= uiDiff;
                
                 break;
