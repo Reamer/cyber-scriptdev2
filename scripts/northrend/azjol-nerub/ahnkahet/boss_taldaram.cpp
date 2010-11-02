@@ -79,6 +79,7 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        damageToInterrupt = m_bIsRegularMode ? 20000 : 40000;
         Reset();
     }
 
@@ -98,7 +99,6 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
 
     void Reset()
     {
-        damageToInterrupt = m_bIsRegularMode ? 20000 : 40000;
 		summonFlameOrbTimer = 12000;
 		vanishTimer = 14000;
 		bloodthirstTimer = 10000;
@@ -147,6 +147,7 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
 		{
             m_creature->InterruptSpell(CURRENT_CHANNELED_SPELL);
 			m_creature->InterruptNonMeleeSpells(false);	
+            summonFlameOrbTimer = 4000;
 			isInVampyrMode = false;
 			embraceOfTheVampyrInterruptDamage = 0;
 		}
@@ -181,6 +182,7 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
 			return;
 
         if (!isInVanish && !isInVampyrMode)
+        {
             // Summon Flame Orb
             if(summonFlameOrbTimer <= uiDiff)
             {
@@ -194,6 +196,13 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
                 vanishTimer += 10000;
                 summonFlameOrbTimer = 16000 + rand()%10000;
             }else summonFlameOrbTimer -= uiDiff;
+            
+            if (bloodthirstTimer < uiDiff)
+		    {
+			    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLOODTHIRST) == CAST_OK)
+                    bloodthirstTimer = m_bIsRegularMode ? 15000 : 8000;
+		    }else bloodthirstTimer -= uiDiff;
+        }
 
 
         if (!isInVampyrMode)
@@ -210,24 +219,21 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
 		{
 			if (embraceOfTheVampyrTimer < uiDiff)
 			{
-                m_creature->SetVisibility(VISIBILITY_ON);
-                Player* pPlayer;
-
-                // get player enemy
-                do
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    pPlayer = (Player*) m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                    if (pTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        m_creature->SetVisibility(VISIBILITY_ON);
+                        m_creature->NearTeleportTo(pTarget->GetPositionX() + 3.0f, pTarget->GetPositionY() + 3.0f, pTarget->GetPositionZ(), pTarget->GetOrientation());
+                        m_creature->RemoveAurasDueToSpell(SPELL_VANISH);
+			            DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_EMBRACE_OF_THE_VAMPYR : SPELL_EMBRACE_OF_THE_VAMPYR_H);
+                        embraceOfTheVampyrInterruptDamage = 0;
+			            isInVampyrMode = true;
+			            summonFlameOrbTimer += 20000;
+				        isInVanish = false;
+				        vanishTimer = 25000;
+                    }
                 }
-                while (!pPlayer);
-
-			    m_creature->NearTeleportTo(pPlayer->GetPositionX() + 3.0f, pPlayer->GetPositionY() + 3.0f, pPlayer->GetPositionZ(), pPlayer->GetOrientation());
-                m_creature->RemoveAurasDueToSpell(SPELL_VANISH);
-			    DoCastSpellIfCan(pPlayer, m_bIsRegularMode ? SPELL_EMBRACE_OF_THE_VAMPYR : SPELL_EMBRACE_OF_THE_VAMPYR_H);
-                embraceOfTheVampyrInterruptDamage = 0;
-			    isInVampyrMode = true;
-			    summonFlameOrbTimer += 20000;
-				isInVanish = false;
-				vanishTimer = 25000;
 			}else embraceOfTheVampyrTimer -= uiDiff;
 		}
 
@@ -239,13 +245,6 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
                 embraceOfTheVampyrFinishedTimer = 20000;
             } else embraceOfTheVampyrFinishedTimer -= uiDiff;
             
-        if(!isInVampyrMode && !isInVanish)
-		    if (bloodthirstTimer < uiDiff)
-		    {
-			    DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLOODTHIRST); 
-			    bloodthirstTimer = m_bIsRegularMode ? 15000 : 8000;
-		    }else bloodthirstTimer -= uiDiff;
-
         DoMeleeAttackIfReady();
     }
 };
