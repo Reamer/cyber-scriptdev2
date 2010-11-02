@@ -113,8 +113,8 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
 
 	std::list<uint64> volunteerGUIDList;
 
-	Creature* pChosenVolunteer;
-	Creature* pVisualTrigger;
+	uint64 pChosenVolunteerGUID;
+	uint64 pVisualTriggerGUID;
 
 	uint32 volunteerDeathTimer;
 	uint32 volunteerPhaseTimer;
@@ -137,6 +137,10 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
 		thundershockTimer = 6000;
 		cycloneStrikeTimer = 8000;
         getsAchievement = true;
+
+       	pChosenVolunteerGUID = 0;
+    	pVisualTriggerGUID = 0;
+
 
 		volunteerGUIDList.clear();
 
@@ -229,31 +233,31 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
 		{
 			if (pVolunteer->isAlive())
 			{
+                if (Creature* pVisualTrigger = m_creature->SummonCreature(NPC_VISUAL_TRIGGER, CORD_CENTER_X, CORD_CENTER_Y, CORD_CENTER_X, 0, TEMPSUMMON_TIMED_DESPAWN, 20000))
+				{
+					pVisualTrigger->GetMotionMaster()->Clear();
+					pVisualTrigger->GetMotionMaster()->MoveIdle();
+					pVisualTrigger->SetVisibility(VISIBILITY_ON);
+					pVisualTrigger->CastSpell(pVisualTrigger, SPELL_SACRIFICE_VISUAL, true);
+                    pVisualTriggerGUID = pVisualTrigger->GetGUID();
+				}
 				pVolunteer->GetMotionMaster()->Clear();
-				pVolunteer->GetMotionMaster()->MovePoint(0, CORD_CENTER_X, CORD_CENTER_Y, CORD_CENTER_Z);
+                pVolunteer->GetMotionMaster()->MovePoint(0, CORD_CENTER_X, CORD_CENTER_Y, CORD_CENTER_Z);
+                pVolunteer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
 				pVolunteer->setFaction(FAC_HOSTILE);
                 pVolunteer->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
 				pVolunteer->RemoveAurasDueToSpell(SPELL_SPHERE_VISUAL);
-				pChosenVolunteer = pVolunteer;
+                pChosenVolunteerGUID = pVolunteer->GetGUID();
 				switch(urand(0, 1))
 				{
 					case 0: DoScriptText(SAY_CALL_SACRIFICE_1, pVolunteer); break;
 					case 1: DoScriptText(SAY_CALL_SACRIFICE_2, pVolunteer); break;
 				}
 
-				if (pVisualTrigger = m_creature->SummonCreature(NPC_VISUAL_TRIGGER, CORD_CENTER_X, CORD_CENTER_Y, CORD_CENTER_X, 0, TEMPSUMMON_TIMED_DESPAWN, 20000))
-				{
-					pVisualTrigger->GetMotionMaster()->Clear();
-					pVisualTrigger->GetMotionMaster()->MoveIdle();
-					pVisualTrigger->SetVisibility(VISIBILITY_ON);
-					pVisualTrigger->CastSpell(pVisualTrigger, SPELL_SACRIFICE_VISUAL, true);
-				}
 			}
 			else
 			{
 				MoveVolunteer();
-				if (pVisualTrigger)
-					pVisualTrigger->ForcedDespawn();
 			}
 		}
 	}
@@ -314,55 +318,65 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
 
 		if (volunteerPhase)
 		{
-			if (volunteerReachedTimer < uiDiff)
-			{
-				if (pChosenVolunteer && pChosenVolunteer->isAlive())
-				{
-					m_creature->CastSpell(m_creature, SPELL_GIFT_OF_THE_HERALD, true);
-					m_creature->CastSpell(pChosenVolunteer, SPELL_DARK_BEAM, true);
-					pChosenVolunteer->GetMotionMaster()->MoveIdle();
-					pChosenVolunteer->RemoveAllAuras();
-					pChosenVolunteer->setFaction(FAC_FRIENDLY);
-					pChosenVolunteer->SetHealth(m_creature->GetMaxHealth());
-					switch(urand(0, 1))
-					{
-						case 0: DoScriptText(SAY_SACRIFICE_1, pChosenVolunteer); break;
-						case 1: DoScriptText(SAY_SACRIFICE_2, pChosenVolunteer); break;
-					}
-				}
-				volunteerReachedTimer = 9999999;
-			}else volunteerReachedTimer -= uiDiff;
+            if (volunteerReachedTimer)
+            {
+			    if (volunteerReachedTimer < uiDiff)
+			    {
+                    if (Creature* pChosenVolunteer = m_creature->GetMap()->GetCreature(pChosenVolunteerGUID))
+                    {
+			            if (pChosenVolunteer->isAlive())
+			            {
+				            m_creature->CastSpell(m_creature, SPELL_GIFT_OF_THE_HERALD, true);
+				            m_creature->CastSpell(pChosenVolunteer, SPELL_DARK_BEAM, true);
+				            pChosenVolunteer->GetMotionMaster()->MoveIdle();
+				            pChosenVolunteer->RemoveAllAuras();
+				            pChosenVolunteer->setFaction(FAC_FRIENDLY);
+				            pChosenVolunteer->SetHealth(m_creature->GetMaxHealth());
+				            switch(urand(0, 1))
+				            {
+					            case 0: DoScriptText(SAY_SACRIFICE_1, pChosenVolunteer); break;
+					            case 1: DoScriptText(SAY_SACRIFICE_2, pChosenVolunteer); break;
+				            }
+			            }
+			            volunteerReachedTimer = 0;
+                    }
+			    }else volunteerReachedTimer -= uiDiff;
+            }
+            if (volunteerDeathTimer)
+            {
+			    if (volunteerDeathTimer < uiDiff)
+			    {
+                    volunteerGUIDList.remove(pChosenVolunteerGUID);
+                    
+                    if (Creature* pChosenVolunteer = m_creature->GetMap()->GetCreature(pChosenVolunteerGUID))
+                    {
+				        if (pChosenVolunteer->isAlive())
+					        pChosenVolunteer->DealDamage(pChosenVolunteer, pChosenVolunteer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
-			if (volunteerDeathTimer < uiDiff)
-			{
-				if (pChosenVolunteer)
-					volunteerGUIDList.remove(pChosenVolunteer->GetGUID());
+				        if (volunteerGUIDList.empty() || victimCounter >= 6)
+				        {
+					        DepawnVolunteers();
+					        SpawnVolunteers();
+					        victimCounter = 0;
+				        }
 
-				if (pChosenVolunteer && pChosenVolunteer->isAlive())
-					pChosenVolunteer->DealDamage(pChosenVolunteer, pChosenVolunteer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+				        m_creature->NearTeleportTo(CORD_CENTER_X, CORD_CENTER_Y, CORD_CENTER_Z, START_O);
+				        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+				        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+				        {
+					        m_creature->GetMotionMaster()->MoveChase(pTarget);
+					        m_creature->Attack(pTarget, true);
+				        }
 
-				if (volunteerGUIDList.empty() || victimCounter >= 6)
-				{
-					DepawnVolunteers();
-					SpawnVolunteers();
-					victimCounter = 0;
-				}
-
-				m_creature->NearTeleportTo(CORD_CENTER_X, CORD_CENTER_Y, CORD_CENTER_Z, START_O);
-				m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-				{
-					m_creature->GetMotionMaster()->MoveChase(pTarget);
-					m_creature->Attack(pTarget, true);
-				}
-
-				if (pVisualTrigger)
-					pVisualTrigger->ForcedDespawn();
-				
-				victimCounter++;
-				volunteerPhase = false;
-				volunteerDeathTimer = 9999999;
-			}else volunteerDeathTimer -= uiDiff;
+                        if (Creature* pVisualTrigger = m_creature->GetMap()->GetCreature(pVisualTriggerGUID))
+					        pVisualTrigger->ForcedDespawn();
+        				
+				        victimCounter++;
+				        volunteerPhase = false;
+				        volunteerDeathTimer = 0;
+                    }
+			    }else volunteerDeathTimer -= uiDiff;
+            }
 		}
 		else
 		{
