@@ -88,15 +88,10 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
+        DoCast(m_creature, SPELL_HOPELESS, true);
 
-        for(int i=0;i<4;i++)
-        {
-            if(Creature* Understudy = (Creature*) m_creature->GetMap()->GetUnit(m_pInstance->GetData64(m_uiDeathKnightUnderstudy[i])))
-                if(Understudy->isAlive())
-                    Understudy->CastSpell(Understudy, SPELL_HOPELESS, true);
-        }
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);     
     }
 
     void Aggro(Unit* pWho)
