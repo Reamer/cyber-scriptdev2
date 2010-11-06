@@ -121,10 +121,8 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
     uint32 m_uiChainsTimer;
     uint32 m_uiManaDetonationTimer;
     uint32 m_uiManaDetonationDmgTimer;
-    int32 m_uiManaReductionValue;
     uint32 m_uiShadowFissureTimer;
     uint32 m_uiFrostBlastTimer;
-    uint32 m_uiShadowFissureActiveTimer;
 
     uint32 m_uiPhase1Timer;
     uint32 m_uiSoldierTimer;
@@ -149,14 +147,12 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
         m_uiChainsTimer         = urand(30000, 60000);      //Cast no sooner than once every 30 seconds
         m_uiManaDetonationTimer = 20000;                    //Seems to cast about every 20 seconds
         m_uiManaDetonationDmgTimer = 0;
-        m_uiManaReductionValue = 0;
         m_uiShadowFissureTimer  = 25000;                    //25 seconds
         m_uiFrostBlastTimer     = urand(30000, 60000);      //Random time between 30-60 seconds
         m_uiGuardiansTimer      = 5000;                     //5 seconds for summoning each Guardian of Icecrown in phase 3
         m_uiGuardiansCount      = 0;
         m_uiSummonIntroTimer    = 0;
         m_uiIntroPackCount      = 0;
-        m_uiShadowFissureActiveTimer  = 0;
 
         m_uiPhase1Timer         = 228000;                   //Phase 1 lasts "3 minutes and 48 seconds"
         m_uiSoldierTimer        = 5000;
@@ -169,6 +165,8 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
 
         m_uiManaDetonationTargetGUID = 0;
 
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_KELTHUZAD, NOT_STARTED);
 
         // it may be some spell should be used instead, to control the intro phase
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -198,8 +196,8 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
         DespawnIntroCreatures();
         DespawnAdds();
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KELTHUZAD, NOT_STARTED);
+        /*if (m_pInstance)
+            m_pInstance->SetData(TYPE_KELTHUZAD, FAIL);*/
     }
 
     void MoveInLineOfSight(Unit* pWho)
@@ -208,12 +206,16 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);
+
+        if (m_pInstance->GetData(TYPE_KELTHUZAD) != IN_PROGRESS)
+            m_pInstance->SetData(TYPE_KELTHUZAD, IN_PROGRESS); 
     } 
 
     void Aggro(Unit *pWho)
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KELTHUZAD, IN_PROGRESS);
+        /*if (m_pInstance)
+            m_pInstance->SetData(TYPE_KELTHUZAD, IN_PROGRESS);*/
+
         DoCastSpellIfCan(m_creature, SPELL_CHANNEL_VISUAL); 
     }
 
@@ -467,27 +469,24 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                     m_uiFrostBoltNovaTimer = 15000;
             }else m_uiFrostBoltNovaTimer -= uiDiff;
 
-                        //Check for Mana Detonation
+            //Check for Mana Detonation
             if (m_uiManaDetonationTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,1))
                     if (pTarget->getPowerType() == POWER_MANA)
                     {
                         int32 curPower = pTarget->GetPower(POWER_MANA);
-                        if (curPower < (m_bIsRegularMode ? 4000 : 5500))
+                        if (curPower < (m_bIsRegularMode ? 2000 : 3000))
                             return;
 
                         m_creature->CastSpell(pTarget,SPELL_DETONATE_MANA, true);
-                        m_uiManaReductionValue = m_bIsRegularMode ? urand(2500,4000) : urand(3500,5500);
-                        int32 mana = curPower - m_uiManaReductionValue;
-                        pTarget->SetPower(POWER_MANA, mana);
-                        m_uiManaDetonationDmgTimer = 4900;
                         m_uiManaDetonationTargetGUID = pTarget->GetGUID();
-                    }
-                if (rand()%2)
-                    DoScriptText(SAY_SPECIAL1_MANA_DET, m_creature);
+                        m_uiManaDetonationDmgTimer = 4900;
+                        m_uiManaDetonationTimer = 20000;
 
-                m_uiManaDetonationTimer = 15000;
+                        if (urand(0, 1))
+                            DoScriptText(SAY_SPECIAL1_MANA_DET, m_creature);
+                    }
             }else m_uiManaDetonationTimer -= uiDiff;
 
             if (m_uiManaDetonationDmgTimer)
@@ -496,9 +495,13 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                 {
                     if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_uiManaDetonationTargetGUID))
                     {
-                        m_uiManaReductionValue *= 2;
-                        pTarget->CastCustomSpell(pTarget, SPELL_MANA_DETONATION, &m_uiManaReductionValue, 0 ,0 , true);
-                        m_uiManaReductionValue = 0;
+                        //hack mana drain & dmg
+                        int32 ManaReductionValue = m_bIsRegularMode ? 2000 : 3000;
+                        pTarget->CastCustomSpell(pTarget, 27526, &ManaReductionValue, &ManaReductionValue ,0 , true);
+
+                        int32 DetonateDmg = pTarget->GetMaxPower(POWER_MANA) / 2;
+                        pTarget->CastCustomSpell(pTarget, SPELL_MANA_DETONATION, &DetonateDmg, &DetonateDmg ,0 , true);
+
                         m_uiManaDetonationDmgTimer = 0;
                     }
                 }else m_uiManaDetonationDmgTimer -= uiDiff;
@@ -509,33 +512,15 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (pTarget->GetTypeId() == TYPEID_PLAYER)
-                    {   
+				    {   
                         m_creature->CastSpell(pTarget,SPELL_SHADOW_FISSURE,true);
-                        m_uiShadowFissureActiveTimer = 3000;
+
                         if (urand(0, 1))
                             DoScriptText(SAY_SPECIAL3_MANA_DET, m_creature);
                     }
                 }
                 m_uiShadowFissureTimer = m_bIsRegularMode ? 25000: 10000;
             }else m_uiShadowFissureTimer -= uiDiff;
-
-            if(m_uiShadowFissureActiveTimer)
-                if(m_uiShadowFissureActiveTimer < uiDiff)
-                {
-                    // hack for shadow fissure
-                    // TODO: find energy beam visual spell
-                    m_uiShadowFissureActiveTimer = 0;
-
-                    Creature* pFissure = GetClosestCreatureWithEntry(m_creature, NPC_SHADOW_FISSURE, 100.0f);
-
-                    if(!pFissure)
-                        return;
-
-                    Map::PlayerList const& pPlayers = m_creature->GetMap()->GetPlayers();
-                    for (Map::PlayerList::const_iterator itr = pPlayers.begin(); itr != pPlayers.end(); ++itr)
-                        if(itr->getSource()->GetDistance2d(pFissure) < 2.0f)
-                            pFissure->DealDamage(itr->getSource(),itr->getSource()->GetHealth(),NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                }else m_uiShadowFissureActiveTimer -= uiDiff;
 
             if (m_uiFrostBlastTimer < uiDiff)
             {
