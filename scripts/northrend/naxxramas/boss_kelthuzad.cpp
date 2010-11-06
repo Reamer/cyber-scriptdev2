@@ -165,7 +165,7 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
 
         m_uiManaDetonationTargetGUID = 0;
 
-        if (m_pInstance)
+        if (m_pInstance->GetData(TYPE_KELTHUZAD) == IN_PROGRESS)
             m_pInstance->SetData(TYPE_KELTHUZAD, NOT_STARTED);
 
         // it may be some spell should be used instead, to control the intro phase
