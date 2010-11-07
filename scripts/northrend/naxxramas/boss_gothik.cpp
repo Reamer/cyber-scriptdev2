@@ -348,7 +348,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                 if (m_uiHarvestSoulTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
-                        m_uiHarvestSoulTimer = 30000;
+                        m_uiHarvestSoulTimer = 20000;
                 }else m_uiHarvestSoulTimer -= uiDiff;
 
                 

@@ -187,7 +187,7 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
                 SummonGuard();
 
             //DoCastSpellIfCan(m_creature, SPELL_SUMMONGUARD);
-            m_uiCryptGuardTimer = 30000;
+            m_uiCryptGuardTimer =  m_bIsRegularMode ? 30000 : 45000;
         }else m_uiCryptGuardTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
