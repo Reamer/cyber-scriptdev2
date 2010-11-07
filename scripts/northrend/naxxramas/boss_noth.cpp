@@ -107,12 +107,14 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
     {
         m_uiPhase = PHASE_GROUND;
         m_uiPhaseSub = PHASE_GROUND;
-        m_uiPhaseTimer = 90000;
+        m_uiPhaseTimer = 90000; // first balcony teleport
 
         m_uiBlinkTimer = 25000;
         m_uiCurseTimer = 4000;
         m_uiSummonTimer = 30000;
         m_uiCrippleTimer = 24500; // just before blink
+
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     }
 
     void Aggro(Unit* pWho)
@@ -176,9 +178,9 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
                     DoScriptText(EMOTE_TELEPORT, m_creature);
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-                    if (m_uiPhaseSub == 0)
-                        m_uiPhaseTimer = 70000;
+                    // timer taken from DBM addon
+                    if (m_uiPhaseSub == 0) 
+                        m_uiPhaseTimer = 70000; //first ground teleport
                     else if (m_uiPhaseSub == 1)
                         m_uiPhaseTimer = 97000;
                     else m_uiPhaseTimer = 120000;
