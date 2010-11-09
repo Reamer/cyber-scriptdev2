@@ -24,6 +24,7 @@ EndScriptData */
 #include "precompiled.h"
 #include "ahnkahet.h"
 
+
 enum 
 { 
     SAY_AGGRO                       = -1619033, 
@@ -65,55 +66,29 @@ enum
  
 enum clonehealth
 { 
-    CLONE_HEALTH_DRUID      = 16101, 
+    CLONE_HEALTH_DRUID      = 6101, 
     CLONE_HEALTH_DRUID_H    = CLONE_HEALTH_DRUID * 3, 
-    CLONE_HEALTH_PRIEST     = 16404, 
+    CLONE_HEALTH_PRIEST     = 5204, 
     CLONE_HEALTH_PRIEST_H   = CLONE_HEALTH_PRIEST * 3, 
-    CLONE_HEALTH_PALA       = 17334, 
+    CLONE_HEALTH_PALA       = 7934, 
     CLONE_HEALTH_PALA_H     = CLONE_HEALTH_PALA * 3, 
-    CLONE_HEALTH_HUNT       = 15899, 
+    CLONE_HEALTH_HUNT       = 7399, 
     CLONE_HEALTH_HUNT_H     = CLONE_HEALTH_HUNT * 3, 
-    CLONE_HEALTH_SHAMAN     = 17655, 
+    CLONE_HEALTH_SHAMAN     = 7655, 
     CLONE_HEALTH_SHAMAN_H   = CLONE_HEALTH_SHAMAN * 3, 
-    CLONE_HEALTH_ROGUE      = 14530, 
+    CLONE_HEALTH_ROGUE      = 6530, 
     CLONE_HEALTH_ROGUE_H    = CLONE_HEALTH_ROGUE * 3, 
-    CLONE_HEALTH_MAGE       = 12444, 
+    CLONE_HEALTH_MAGE       = 5129, 
     CLONE_HEALTH_MAGE_H     = CLONE_HEALTH_MAGE * 3, 
-    CLONE_HEALTH_WARRIOR    = 19883, 
+    CLONE_HEALTH_WARRIOR    = 10012, 
     CLONE_HEALTH_WARRIOR_H  = CLONE_HEALTH_WARRIOR * 3, 
-    CLONE_HEALTH_WARLOCK    = 16877, 
+    CLONE_HEALTH_WARLOCK    = 5477, 
     CLONE_HEALTH_WARLOCK_H  = CLONE_HEALTH_WARLOCK * 3, 
-    CLONE_HEALTH_DK         = 20012, 
+    CLONE_HEALTH_DK         = 9883, 
     CLONE_HEALTH_DK_H       = CLONE_HEALTH_DK * 3, 
 }; 
  
-enum 
-{ 
-    SPELL_DRUID_1           = 69882, 
-    SPELL_DRUID_1_H         = 71141, 
-    SPELL_DRUID_2           = 69898, 
-    SPELL_DRUID_2_H         = 71142, 
-    SPELL_DRUID_3           = 38658, 
-    SPELL_HUNT              = 59604, 
-    SPELL_DK                = 55978, 
-    SPELL_MAGE              = 69869, 
-    SPELL_MAGE_H            = 71130, 
-    SPELL_ROGUE_1           = 37331, 
-    SPELL_ROGUE_2           = 1330, 
-    SPELL_SHAMAN            = 68113, 
-    SPELL_SHAMAN_H          = 64213, 
-    SPELL_PRIEST_1          = 71932, 
-    SPELL_PRIEST_2          = 30854, 
-    SPELL_PRIEST_1_H        = 43575, 
-    SPELL_PRIEST_2_H        = 68089, 
-    SPELL_WARRIOR           = 46271, 
-    SPELL_WARRIOR_H         = 41399, 
-    SPELL_WARLOCK           = 37668, 
-    SPELL_WARLOCK_H         = 75383, 
-    SPELL_PALA              = 46029, 
-    SPELL_PALA_H            = 41541 
-}; 
- 
+
 /*###### 
 ## boss_volazj 
 ######*/ 
@@ -279,67 +254,140 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
     void createClassMirrors() 
     {
         Map* pMap = m_creature->GetMap();
-        Map::PlayerList const &players = pMap->GetPlayers();
-        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-        { 
-            if(Unit* pPlayer = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
-            { 
-                Unit* pClone = m_creature->SummonCreature(m_bIsRegularMode ? CLONE : CLONE_H, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), pPlayer->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
-                if (pClone) 
+        Map::PlayerList const &group1 = pMap->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = group1.begin(); itr != group1.end(); ++itr) 
+        {
+            Map::PlayerList const &group2 = group1;
+            for (Map::PlayerList::const_iterator ittr = group2.begin(); ittr != group2.end(); ++ittr)
+            {
+                if (Player* pPlayer1 = m_creature->GetMap()->GetPlayer(itr->getSource()->GetGUID()))
                 {
-                    pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_PASSIVE);
-                    pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
-                    pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_OOC_NOT_ATTACKABLE);
-                    pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_UNK_6);
-                    pClone->SetDisplayId(pPlayer->GetNativeDisplayId());
-                    pClone->SetName(pPlayer->GetName());
-                    pClone->setFaction(FAC_HOSTILE);
+                    if (Player* pPlayer2 = m_creature->GetMap()->GetPlayer(ittr->getSource()->GetGUID()))
+                    {
+                        if (pPlayer1->isAlive() && pPlayer2->isAlive() && (pPlayer1->GetGUID() != pPlayer2->GetGUID()) && !pPlayer1->isGameMaster() && !pPlayer2->isGameMaster())
+                        {
+                            Creature* pClone = m_creature->SummonCreature(m_bIsRegularMode ? CLONE : CLONE_H, pPlayer2->GetPositionX(), pPlayer2->GetPositionY(), pPlayer2->GetPositionZ(), pPlayer2->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+                            if (pClone) 
+                            {
+                                pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_PASSIVE);
+                                pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
+                                pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                                pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_UNK_6);
 
-                    switch (pPlayer->getClass()) 
-                    { 
-                        case CLASS_PRIEST: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PRIEST : CLONE_HEALTH_PRIEST_H); break;
-                        case CLASS_PALADIN: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PALA : CLONE_HEALTH_PALA_H); break;
-                        case CLASS_WARLOCK: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARLOCK : CLONE_HEALTH_WARLOCK_H); break;
-                        case CLASS_MAGE: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_MAGE : CLONE_HEALTH_MAGE_H); break;
-                        case CLASS_ROGUE: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_ROGUE : CLONE_HEALTH_ROGUE_H); break;
-                        case CLASS_WARRIOR: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARRIOR : CLONE_HEALTH_WARRIOR_H); break;
-                        case CLASS_DRUID: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DRUID : CLONE_HEALTH_DRUID_H); break;
-                        case CLASS_SHAMAN: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_SHAMAN : CLONE_HEALTH_SHAMAN_H); break;
-                        case CLASS_HUNTER: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_HUNT : CLONE_HEALTH_HUNT_H); break;
-                        case CLASS_DEATH_KNIGHT: pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DK : CLONE_HEALTH_DK_H); break;
-                        default: break;
+                                pClone->SetName(pPlayer2->GetName());
+                                pClone->SetDisplayId(pPlayer2->GetDisplayId());
+                                pClone->setFaction(FAC_HOSTILE);
+
+                                switch (pPlayer2->getClass()) 
+                                { 
+                                    case CLASS_PRIEST:
+                                        pClone->setPowerType(POWER_MANA);
+                                        pClone->SetMaxPower(POWER_MANA,45000);
+                                        pClone->SetPower(POWER_MANA,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PRIEST : CLONE_HEALTH_PRIEST_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
+                                        break;
+                                    case CLASS_PALADIN: 
+                                        pClone->setPowerType(POWER_MANA);
+                                        pClone->SetMaxPower(POWER_MANA,45000);
+                                        pClone->SetPower(POWER_MANA,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PALA : CLONE_HEALTH_PALA_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1);
+                                        break;
+                                    case CLASS_WARLOCK: 
+                                        pClone->setPowerType(POWER_MANA);
+                                        pClone->SetMaxPower(POWER_MANA,45000);
+                                        pClone->SetPower(POWER_MANA,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARLOCK : CLONE_HEALTH_WARLOCK_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
+                                        break;
+                                    case CLASS_MAGE:
+                                        pClone->setPowerType(POWER_MANA);
+                                        pClone->SetMaxPower(POWER_MANA,45000);
+                                        pClone->SetPower(POWER_MANA,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_MAGE : CLONE_HEALTH_MAGE_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
+                                        break;
+                                    case CLASS_ROGUE: 
+                                        pClone->setPowerType(POWER_ENERGY);
+                                        pClone->SetMaxPower(POWER_ENERGY,45000);
+                                        pClone->SetPower(POWER_ENERGY,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_ROGUE : CLONE_HEALTH_ROGUE_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1);
+                                        break;
+                                    case CLASS_WARRIOR:
+                                        pClone->setPowerType(POWER_RAGE);
+                                        pClone->SetMaxPower(POWER_RAGE,45000);
+                                        pClone->SetPower(POWER_RAGE,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARRIOR : CLONE_HEALTH_WARRIOR_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1);
+                                        break;
+                                    case CLASS_DRUID:
+                                        pClone->setPowerType(POWER_MANA);
+                                        pClone->SetMaxPower(POWER_MANA,45000);
+                                        pClone->SetPower(POWER_MANA,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DRUID : CLONE_HEALTH_DRUID_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
+                                        break;
+                                    case CLASS_SHAMAN:
+                                        pClone->setPowerType(POWER_MANA);
+                                        pClone->SetMaxPower(POWER_MANA,45000);
+                                        pClone->SetPower(POWER_MANA,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_SHAMAN : CLONE_HEALTH_SHAMAN_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
+                                        break;
+                                    case CLASS_HUNTER:
+                                        pClone->setPowerType(POWER_MANA);
+                                        pClone->SetMaxPower(POWER_MANA,45000);
+                                        pClone->SetPower(POWER_MANA,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_HUNT : CLONE_HEALTH_HUNT_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
+                                        break;
+                                    case CLASS_DEATH_KNIGHT:
+                                        pClone->setPowerType(POWER_RUNIC_POWER);
+                                        pClone->SetMaxPower(POWER_RUNIC_POWER,45000);
+                                        pClone->SetPower(POWER_RUNIC_POWER,45000);
+                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DK : CLONE_HEALTH_DK_H);
+                                        pClone->GetMotionMaster()->MoveChase(pPlayer1);
+                                        break;
+                                    default: break;
+                                }
+
+                                pClone->SetHealth(pClone->GetMaxHealth()); 
+                                pClone->Attack(pPlayer1, true);
+                                pClone->AddThreat(pPlayer1, 10000.0f);
+                                pClone->SetInCombatWith(pPlayer1);
+                                cloneGUIDList.push_back(pClone->GetGUID()); 
+                     
+                    
+                                if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_16)) //Phase 16
+                                {
+                                    pClone->SetPhaseMask(16, true);
+                                    clone16GUIDList.push_back(pClone->GetGUID());
+                                }
+                                else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_32))//Phase 32
+                                {
+                                    pClone->SetPhaseMask(32, true);
+                                    clone32GUIDList.push_back(pClone->GetGUID());                            
+                                }
+                                else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_64))//Phase 64
+                                {
+                                    pClone->SetPhaseMask(64, true);
+                                    clone64GUIDList.push_back(pClone->GetGUID());
+                                }
+                                else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_128))//Phase 128
+                                {
+                                    pClone->SetPhaseMask(128, true);
+                                    clone128GUIDList.push_back(pClone->GetGUID());
+                                }
+                                else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_256))//Phase 256
+                                {
+                                    pClone->SetPhaseMask(256, true);
+                                    clone256GUIDList.push_back(pClone->GetGUID());
+                                }
+                            }
+                        }
                     }
-
-                    pClone->SetHealth(pClone->GetMaxHealth()); 
-                    pClone->Attack(pPlayer, true); 
-                    pClone->AddThreat(pPlayer, 10000.0f);
-                    cloneGUIDList.push_back(pClone->GetGUID()); 
-                } 
-                
-                if (pPlayer->HasAura(SPELL_INSANITY_PHASE_16)) //Phase 16
-                {
-                    pClone->SetPhaseMask(16, true);
-                    clone16GUIDList.push_back(pClone->GetGUID());
-                }
-                else if (pPlayer->HasAura(SPELL_INSANITY_PHASE_32))//Phase 32
-                {
-                    pClone->SetPhaseMask(32, true);
-                    clone32GUIDList.push_back(pClone->GetGUID());                            
-                }
-                else if (pPlayer->HasAura(SPELL_INSANITY_PHASE_64))//Phase 64
-                {
-                    pClone->SetPhaseMask(64, true);
-                    clone64GUIDList.push_back(pClone->GetGUID());
-                }
-                else if (pPlayer->HasAura(SPELL_INSANITY_PHASE_128))//Phase 128
-                {
-                    pClone->SetPhaseMask(128, true);
-                    clone128GUIDList.push_back(pClone->GetGUID());
-                }
-                else if (pPlayer->HasAura(SPELL_INSANITY_PHASE_256))//Phase 256
-                {
-                    pClone->SetPhaseMask(256, true);
-                    clone256GUIDList.push_back(pClone->GetGUID());
                 }
             } 
         } 
@@ -686,6 +734,61 @@ CreatureAI* GetAI_boss_volazj(Creature* pCreature)
     return new boss_volazjAI(pCreature); 
 } 
  
+enum 
+{ 
+    SPELL_DK_1              = 55978, //Heart Strike
+    SPELL_DK_2              = 50688, //Plague Strike
+    SPELL_DK_2_H            = 60186, //Plague Strike
+    SPELL_DK_3_H            = 50349, //Icy Touch
+
+    SPELL_DRUID_1           = 27737, //Moon Fire
+    SPELL_DRUID_1_H         = 47072, //Moon Fire
+    SPELL_DRUID_2           = 9857,  //Regrowth
+    SPELL_DRUID_2_H         = 48442, //Regrowth
+    SPELL_DRUID_3           = 26982, //Rejuvenation
+    SPELL_DRUID_3_H         = 48441, //Rejuvenation
+
+    SPELL_HUNTER_1          = 22907, //Shoot
+    SPELL_HUNTER_1_H        = 20463, //Shoot
+    SPELL_HUNTER_2          = 44286, //Wing Clip
+
+    SPELL_MAGE_1            = 71500, //Fireball
+    SPELL_MAGE_1_H          = 24374, //Fireball
+    SPELL_MAGE_2            = 31622, //Frostbolt
+    SPELL_MAGE_2_H          = 21369, //Frostbolt
+
+    SPELL_ROGUE_1           = 45897, //Hemorrhage
+    SPELL_ROGUE_1_H         = 30478, //Hemorrhage
+    SPELL_ROGUE_2           = 57640, //Sinister Strike
+
+    SPELL_SHAMAN_1          = 15208, //Lightnig Bolt
+    SPELL_SHAMAN_1_H        = 48895, //Lightnig Bolt
+    SPELL_SHAMAN_2          = 10605, //Chain Lightning
+    SPELL_SHAMAN_2_H        = 24680, //Chain Lightning
+
+    SPELL_PRIEST_1          = 57777, //Renew
+    SPELL_PRIEST_1_H        = 46192, //Renew
+    SPELL_PRIEST_2          = 23952, //Shadow Word: Pain
+    SPELL_PRIEST_2_H        = 41355, //Shadow Word: Pain
+ 
+    SPELL_WARRIOR_1         = 31910, //Whirlwind
+    SPELL_WARRIOR_1_H       = 29852, //Whirlwind
+    SPELL_WARRIOR_2         = 60019, //Thunderclap
+    SPELL_WARRIOR_2_H       = 36214, //Thunderclap
+
+    SPELL_WARLOCK_1         = 24668, //Shadow Bolt
+    SPELL_WARLOCK_1_H       = 31618, //Shadow Bolt
+    SPELL_WARLOCK_2         = 30938, //Corruption
+    SPELL_WARLOCK_2_H       = 60016, //Corruption
+    SPELL_WARLOCK_3         = 44267, //Immolate
+    SPELL_WARLOCK_3_H       = 20294, //Immolate
+   
+    SPELL_PALA_1            = 32773, //Consecration
+    SPELL_PALA_1_H          = 59998, //Consecration
+    SPELL_PALA_2            = 32769, //Holy Light
+    SPELL_PALA_2_H          = 29562, //Holy Light
+    SPELL_PALA_3            = 58127  //Divine Storm
+}; 
 struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI 
 { 
     mob_volazj_cloneAI(Creature* pCreature) : ScriptedAI(pCreature) 
@@ -697,7 +800,8 @@ struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI
  
     instance_ahnkahet* m_pInstance; 
  
-    bool m_bIsRegularMode; 
+    bool m_bIsRegularMode;
+
  
     uint32 spellPriestTimer; 
     uint32 spellRogueTimer; 
@@ -723,154 +827,225 @@ struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI
         spellPaladinTimer      = 5000;
         spellHunterTimer       = 5000;
     } 
- 
+
     void UpdateAI(const uint32 uiDiff) 
     { 
         if (m_creature->GetMaxHealth() == CLONE_HEALTH_DRUID || m_creature->GetMaxHealth() == CLONE_HEALTH_DRUID_H) 
-        { 
+        {
             if (spellDruidTimer < uiDiff) 
-            { 
+            {
                 int randomSpell = urand(0, 2); 
                 switch (randomSpell) 
                 { 
                     case 0: 
-                        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DRUID_1 : SPELL_DRUID_1_H); 
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DRUID_1 : SPELL_DRUID_1_H) == CAST_OK) //Moon Fire
+                            spellDruidTimer = 5000;
                         break; 
-                    case 1: 
-                        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DRUID_2 : SPELL_DRUID_2_H); 
+                    case 1:
+                        if (!m_creature->HasAura(m_bIsRegularMode ? SPELL_DRUID_2 : SPELL_DRUID_2_H))
+                            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DRUID_2 : SPELL_DRUID_2_H) == CAST_OK) //Regrowth
+                                spellDruidTimer = 5000;
                         break; 
-                    case 2: 
-                        DoCastSpellIfCan(m_creature, SPELL_DRUID_3); 
+                    case 2:
+                        if (!m_creature->HasAura(m_bIsRegularMode ? SPELL_DRUID_3 : SPELL_DRUID_3_H))
+                            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DRUID_3 : SPELL_DRUID_3_H) == CAST_OK) //Rejuvenation
+                                spellDruidTimer = 5000;
                         break; 
-                } 
-                spellDruidTimer = 5000; 
-            }else spellDruidTimer -= uiDiff; 
- 
+                    default:
+                        break;
+                }
+            } else
+                spellDruidTimer -= uiDiff;
         } 
         else if (m_creature->GetMaxHealth() == CLONE_HEALTH_MAGE || m_creature->GetMaxHealth() == CLONE_HEALTH_MAGE_H) 
-        { 
+        {
             if (spellMageTimer < uiDiff) 
-            { 
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MAGE : SPELL_MAGE_H); 
- 
-                spellMageTimer = urand(4000, 6000); 
-            }else spellMageTimer -= uiDiff; 
+            {
+                int randomSpell = urand(0,1);
+                switch (randomSpell)
+                {
+                    case 0:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MAGE_1 : SPELL_MAGE_1_H) == CAST_OK) //Fireball
+                            spellMageTimer = urand(4000, 6000);
+                        break;
+                    case 1:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MAGE_2 : SPELL_MAGE_2_H) == CAST_OK) //Frostbolt
+                            spellMageTimer = urand(4000, 6000);
+                        break;
+                    default:
+                        break;
+                }
+            }else spellMageTimer -= uiDiff;
         } 
         else if (m_creature->GetMaxHealth() == CLONE_HEALTH_PALA || m_creature->GetMaxHealth() == CLONE_HEALTH_PALA_H) 
         { 
             if (spellPaladinTimer < uiDiff) 
-            { 
-                if (!m_bIsRegularMode) 
-                { 
-                    if (!urand(0, 2)) 
-                        DoCastSpellIfCan(m_creature, SPELL_PALA_H); 
-                    else 
-                        DoCastSpellIfCan(m_creature, SPELL_PALA);  
+            {
+                int randomSpell = urand(0,2);
+                switch (randomSpell)
+                {
+                    case 0:
+                        if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PALA_1 : SPELL_PALA_1_H) == CAST_OK) // Consecration
+                            spellPaladinTimer = urand(4000, 5000);
+                        break;
+                    case 1:
+                        if (m_creature->GetHealth() < (m_creature->GetMaxHealth() - 2000))
+                            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PALA_2 : SPELL_PALA_2_H) == CAST_OK) // Holy Light
+                                spellPaladinTimer = urand(4000, 5000);
+                        break;
+                    case 2:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PALA_3) == CAST_OK) // Divine Storm
+                            spellPaladinTimer = urand(4000, 5000);
+                        break;
+                    default:
+                        break;
                 } 
-                else 
-                    DoCastSpellIfCan(m_creature, SPELL_PALA);    
- 
-                spellPaladinTimer = urand(4000, 5000); 
             }else spellPaladinTimer -= uiDiff; 
         } 
         else if (m_creature->GetMaxHealth() == CLONE_HEALTH_HUNT || m_creature->GetMaxHealth() == CLONE_HEALTH_HUNT_H) 
-        { 
+        {
             if (spellHunterTimer < uiDiff) 
-            { 
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_HUNT); 
- 
-                spellHunterTimer = m_bIsRegularMode ? urand(8000, 9000) : urand(4000, 5000); 
-            }else spellHunterTimer -= uiDiff;  
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ?  SPELL_HUNTER_1 :  SPELL_HUNTER_1_H) == CAST_OK) //Shoot
+                    spellHunterTimer = urand(3000, 5000);
+                if (m_creature->IsWithinDistInMap(m_creature->getVictim(), 3.0f))
+                {
+                    DoCast(m_creature->getVictim(), SPELL_HUNTER_2, true); //Wing Clip
+                    spellHunterTimer = urand(5000, 7000);
+                }
+            }else spellHunterTimer -= uiDiff;
         } 
         else if (m_creature->GetMaxHealth() == CLONE_HEALTH_WARLOCK || m_creature->GetMaxHealth() == CLONE_HEALTH_WARLOCK_H) 
-        { 
+        {
             if (spellWarlockTimer < uiDiff) 
-            { 
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK : SPELL_WARLOCK_H); 
- 
-                spellWarlockTimer = urand(6000, 10000); 
-            }else spellWarlockTimer -= uiDiff; 
+            {
+                int randomSpell = urand(0,2);
+                switch (randomSpell)
+                {
+                    case 0:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK_1 : SPELL_WARLOCK_1_H) == CAST_OK) //Shadow Bolt
+                            spellWarlockTimer = urand(4000, 6000);
+                        break;
+                    case 1:
+                        if (!m_creature->getVictim()->HasAura(m_bIsRegularMode ? SPELL_WARLOCK_2 : SPELL_WARLOCK_2_H))
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK_2 : SPELL_WARLOCK_2_H) == CAST_OK) //Corruption
+                                spellWarlockTimer = urand(4000, 6000);
+                        break;
+                    case 2:
+                        if (!m_creature->getVictim()->HasAura(m_bIsRegularMode ? SPELL_WARLOCK_3 : SPELL_WARLOCK_3_H))
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK_3 : SPELL_WARLOCK_3_H) == CAST_OK) //Immolate
+                                spellWarlockTimer = urand(4000, 6000);
+                        break;
+                    default:
+                        break;
+                }
+            }else spellWarlockTimer -= uiDiff;
         } 
         else if (m_creature->GetMaxHealth() == CLONE_HEALTH_DK || m_creature->GetMaxHealth() == CLONE_HEALTH_DK_H) 
         { 
             if (spellDeathKnightTimer < uiDiff) 
             { 
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DK); 
- 
-                spellDeathKnightTimer = m_bIsRegularMode ? urand(9000, 12000) : urand(4000, 5000); 
+                int randomSpell = urand(0,2);
+                switch (randomSpell)
+                {
+                    case 0:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DK_1) == CAST_OK) //Heart Strike
+                            spellDeathKnightTimer = urand(4000, 6000);
+                        break;
+                    case 1:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DK_2 : SPELL_DK_2_H) == CAST_OK) //Plague Strike
+                            spellDeathKnightTimer = urand(4000, 6000);
+                        break;
+                    case 2:
+                        if (!m_bIsRegularMode)
+                            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DK_3_H) == CAST_OK) //Icy Touch
+                                spellDeathKnightTimer = urand(4000, 6000);
+                        break;                               
+                    default:
+                        break;
+                }
             }else spellDeathKnightTimer -= uiDiff;  
         } 
         else if (m_creature->GetMaxHealth() == CLONE_HEALTH_WARRIOR || m_creature->GetMaxHealth() == CLONE_HEALTH_WARRIOR_H) 
         { 
             if (spellWarriorTimer < uiDiff) 
             { 
-                if (m_bIsRegularMode) 
-                { 
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_WARRIOR); 
-                    spellWarriorTimer = urand(4000, 6000); 
-                } 
-                else 
-                { 
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_WARRIOR_H); 
-                    spellWarriorTimer = urand(20000, 25000); 
-                } 
+                int randomSpell = urand(0,1);
+                switch (randomSpell)
+                {
+                    case 0:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARRIOR_1 : SPELL_WARRIOR_1_H) == CAST_OK) //Whirlwind
+                            spellWarriorTimer = urand(4000, 6000);
+                        break;
+                    case 1:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARRIOR_2 : SPELL_WARRIOR_2_H) == CAST_OK) //Thunderclap
+                            spellWarriorTimer = urand(4000, 6000);
+                        break;
+                    default:
+                        break;
+                }
             }else spellWarriorTimer -= uiDiff; 
         } 
         else if (m_creature->GetMaxHealth() == CLONE_HEALTH_PRIEST || m_creature->GetMaxHealth() == CLONE_HEALTH_PRIEST_H) 
-        { 
+        {
             if (spellPriestTimer < uiDiff) 
-            { 
-                if (m_bIsRegularMode)
+            {
+                int randomSpell = urand(0,1);
+                switch (randomSpell)
                 {
-                    if (urand(0, 1))
-                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_PRIEST_2);
-                    else
-                        DoCastSpellIfCan(m_creature, SPELL_PRIEST_1);
+                    case 0:
+                        if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PRIEST_1 : SPELL_PRIEST_1_H) == CAST_OK) //Renew
+                            spellPriestTimer = urand(4000, 6000);
+                        break;
+                    case 1:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PRIEST_2 : SPELL_PRIEST_2_H) == CAST_OK) //Shadow Word: Pain
+                            spellPriestTimer = urand(4000, 6000);
+                        break;
+                    default:
+                        break;
                 }
-                else 
-                {
-                    if (!urand(0, 3))
-                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_PRIEST_2_H);
-                    else
-                        DoCastSpellIfCan(m_creature, SPELL_PRIEST_1_H);
-                }
-                  
-                spellPriestTimer = urand (5000, 7000);  
-            }else spellPriestTimer -= uiDiff; 
+            }else spellPriestTimer -= uiDiff;
         } 
         else if (m_creature->GetMaxHealth() == CLONE_HEALTH_SHAMAN || m_creature->GetMaxHealth() == CLONE_HEALTH_SHAMAN_H) 
-        { 
+        {
             if (spellShamanTimer < uiDiff) 
-            { 
-                if (m_bIsRegularMode) 
-                { 
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHAMAN); 
-                    spellShamanTimer = urand(4000, 6000); 
-                } 
-                else 
-                { 
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHAMAN_H); 
-                    spellShamanTimer = urand(10000, 11000); 
-                } 
-            }else spellShamanTimer -= uiDiff;  
+            {
+                int randomSpell = urand(0,1);
+                switch (randomSpell)
+                {
+                    case 0:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHAMAN_1 : SPELL_SHAMAN_1_H) == CAST_OK) //Lightnig Bolt
+                            spellShamanTimer = urand(4000, 6000);
+                        break;
+                    case 1:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHAMAN_2 : SPELL_SHAMAN_2_H) == CAST_OK) //Chain Lightning
+                            spellShamanTimer = urand(4000, 6000);
+                        break;
+                    default:
+                        break;
+                }
+            }else spellShamanTimer -= uiDiff;
         } 
         else if (m_creature->GetMaxHealth() == CLONE_HEALTH_ROGUE || m_creature->GetMaxHealth() == CLONE_HEALTH_ROGUE_H) 
         { 
             if (spellRogueTimer < uiDiff) 
-            { 
-                if (m_bIsRegularMode) 
-                { 
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_ROGUE_2); 
-                    spellRogueTimer = urand(4000, 6000); 
-                } 
-                else 
-                { 
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_ROGUE_1); 
-                    spellRogueTimer = urand(10000, 14000); 
-                } 
-            }else spellRogueTimer -= uiDiff; 
-        } 
- 
+            {
+                int randomSpell = urand(0,1);
+                switch (randomSpell)
+                {
+                    case 0:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ROGUE_1 : SPELL_ROGUE_1_H) == CAST_OK) //Hemorrhage
+                            spellRogueTimer = urand(4000, 6000);
+                        break;
+                    case 1:
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ROGUE_2) == CAST_OK) //Sinister Strike
+                            spellRogueTimer = urand(4000, 6000);
+                        break;
+                    default:
+                        break;
+                }
+            }else spellRogueTimer -= uiDiff;
+        }
         DoMeleeAttackIfReady(); 
     } 
 }; 
