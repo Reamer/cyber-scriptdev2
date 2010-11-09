@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Krikthir
 SD%Complete: 90%
-SDComment: Implement Achievement
+SDComment:
 SDCategory: Azjol'Nerub
 EndScriptData */
 
@@ -26,29 +26,26 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                 = -1601000,
-    SAY_KILL_1                = -1601001,
-    SAY_KILL_2                = -1601002,
-    SAY_KILL_3                = -1601003,
-    SAY_PREFIGHT_1            = -1601007,
-    SAY_PREFIGHT_2            = -1601008,
-    SAY_PREFIGHT_3            = -1601009,
-    SAY_SWARM_1               = -1601010,
-    SAY_SWARM_2               = -1601011,
-    SAY_DEATH                 = -1601012,
-    EMOTE_BOSS_GENERIC_FRENZY = -1000005,
+    SAY_AGGRO                       = -1601000,
+    SAY_KILL_1                      = -1601001,
+    SAY_KILL_2                      = -1601002,
+    SAY_KILL_3                      = -1601003,
+    SAY_PREFIGHT_1                  = -1601007,
+    SAY_PREFIGHT_2                  = -1601008,
+    SAY_PREFIGHT_3                  = -1601009,
+    SAY_SWARM_1                     = -1601010,
+    SAY_SWARM_2                     = -1601011,
+    SAY_DEATH                       = -1601012,
+    EMOTE_BOSS_GENERIC_FRENZY       = -1000005,
 
-    SPELL_SWARM               = 52440,
-    SPELL_CURSE_OF_FATIGUE    = 52592,
-    SPELL_CURSE_OF_FATIGUE_H  = 59368,
-    SPELL_MINDFLAY            = 52586,
-    SPELL_MINDFLAY_H          = 59367,
-    SPELL_FRENZY              = 28747,
+    SPELL_CURSE_OF_FATIGUE          = 52592,
+    SPELL_CURSE_OF_FATIGUE_H        = 59368,
+    SPELL_MIND_FLAY                 = 52586,
+    SPELL_MIND_FLAY_H               = 59367,
+    SPELL_ENRAGE                    = 28747,
 
-    NPC_SKITTERING_SWARMER    = 28735,
-    NPC_SKITTERING_INFECTOR   = 28736
+    NPC_SWARM                       = 28735
 };
-
 /*######
 ## boss_krikthir
 ######*/
@@ -57,34 +54,35 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
 {
     boss_krikthirAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_azjol_nerub*)pCreature->GetInstanceData();
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    instance_azjol_nerub* m_pInstance;
+    ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
 
-    bool m_bFrenzy;
-    bool m_bIntroSpeech;
+    uint32 CurseTimer;
+    uint32 MindFlayTimer;
+    uint32 SwarmTimer;
+    uint32 EnrageRefreshTimer;
 
-    uint32 m_uiSwarmTimer;
-    uint32 m_uiCurseTimer;
-    uint32 m_uiMindFlayTimer;
+    bool Enrage;
 
     void Reset()
     {
-        m_uiSwarmTimer    = 15000;
-        m_uiCurseTimer    = 20000;
-        m_uiMindFlayTimer = 8000;
+        CurseTimer = 20000;
+        MindFlayTimer = 10000;
+        SwarmTimer = urand(6000, 10000);
+        Enrage = false;
 
-        m_bIntroSpeech    = false;
-        m_bFrenzy         = false;
+        m_pInstance->SetData(TYPE_KRIKTHIR, NOT_STARTED);
     }
 
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
+        m_pInstance->SetData(TYPE_KRIKTHIR, IN_PROGRESS);
     }
 
     void KilledUnit(Unit* pVictim)
@@ -97,20 +95,6 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
         }
     }
 
-    void MoveInLineOfSight (Unit* pWho)
-    {
-        if (!m_bIntroSpeech && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
-        {
-            switch(urand(0, 2))
-            {
-                case 0: DoScriptText(SAY_PREFIGHT_1, m_creature); break;
-                case 1: DoScriptText(SAY_PREFIGHT_2, m_creature); break;
-                case 2: DoScriptText(SAY_PREFIGHT_3, m_creature); break;
-            }
-            m_bIntroSpeech = true;
-        }
-    }
-
     void JustDied(Unit* pKiller)
     {
         DoScriptText(SAY_DEATH, m_creature);
@@ -119,51 +103,77 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
             m_pInstance->SetData(TYPE_KRIKTHIR, DONE);
     }
 
-    void JustSummoned(Creature* pSummoned)
-    {
-        uint32 uiEntry = pSummoned->GetEntry();
-        if (uiEntry == NPC_SKITTERING_SWARMER || uiEntry == NPC_SKITTERING_INFECTOR)
-            pSummoned->AI()->AttackStart(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0));
-    }
-
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-
-        if (!m_bFrenzy && m_creature->GetHealthPercent() <= 10.0f)
+        
+        if ((m_creature->GetHealth() < m_creature->GetMaxHealth() / 5) && !Enrage)
         {
-            DoCastSpellIfCan(m_creature, SPELL_FRENZY);
-            DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
-            m_bFrenzy = true;
+            Enrage = true;
+            DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
+            EnrageRefreshTimer = 600000;
         }
 
-        if (m_uiCurseTimer < uiDiff)
+        if (EnrageRefreshTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_CURSE_OF_FATIGUE : SPELL_CURSE_OF_FATIGUE_H);
-            m_uiCurseTimer = 20000;
+            DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
+            EnrageRefreshTimer = 600000;
+        }else EnrageRefreshTimer -= uiDiff;
 
-        }
-        else
-            m_uiCurseTimer -= uiDiff;
-
-        if (m_uiMindFlayTimer < uiDiff)
+        if (CurseTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MINDFLAY : SPELL_MINDFLAY_H);
-            m_uiMindFlayTimer = 8000;
-        }
-        else
-            m_uiMindFlayTimer -= uiDiff;
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+            
+            if (!pTarget)
+                return;
+            
+            m_bIsRegularMode ? DoCastSpellIfCan(pTarget, SPELL_CURSE_OF_FATIGUE): DoCastSpellIfCan(pTarget, SPELL_CURSE_OF_FATIGUE_H);
 
-        if (m_uiSwarmTimer < uiDiff)
+            CurseTimer = urand(11000, 13000);
+        }else CurseTimer -= uiDiff;
+
+        if (MindFlayTimer < uiDiff)
         {
-            DoScriptText(urand(0, 1) ? SAY_SWARM_1 : SAY_SWARM_2, m_creature);
-            DoCastSpellIfCan(m_creature, SPELL_SWARM);
-            m_uiSwarmTimer = 15000;
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+            
+            if (!pTarget)
+                return;
+            
+            m_bIsRegularMode ? DoCastSpellIfCan(pTarget, SPELL_MIND_FLAY): DoCastSpellIfCan(pTarget, SPELL_MIND_FLAY_H);
 
-        }
-        else
-            m_uiSwarmTimer -= uiDiff;
+            MindFlayTimer = urand(14000, 18000);  
+        }else MindFlayTimer -= uiDiff;
+
+        if (SwarmTimer < uiDiff)
+        {
+            if (!urand(0, 1))
+            {
+                switch(urand(0, 1))
+                {
+                    case 0: DoScriptText(SAY_SWARM_1, m_creature); break;
+                    case 1: DoScriptText(SAY_SWARM_2, m_creature); break;
+                }
+            }
+
+            int i;
+            i = 0;
+            do 
+            {
+                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+
+                if (!pTarget)
+                    return;
+
+                float x = pTarget->GetPositionX() + urand(3.0f, 15.0f);
+                float y = pTarget->GetPositionY() + urand(3.0f, 15.0f);
+
+                Creature* pSwarm = m_creature->SummonCreature(NPC_SWARM, x, y, pTarget->GetPositionZ(), pTarget->GetOrientation(), TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
+                pSwarm->SetInCombatWith(pTarget);
+                i++;
+            }while (m_bIsRegularMode ? i <= 5 : i <= 12);
+            SwarmTimer = urand(3000, 5000);
+        }else SwarmTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -176,10 +186,10 @@ CreatureAI* GetAI_boss_krikthir(Creature* pCreature)
 
 void AddSC_boss_krikthir()
 {
-    Script* pNewScript;
+    Script *newscript;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_krikthir";
-    pNewScript->GetAI = &GetAI_boss_krikthir;
-    pNewScript->RegisterSelf();
+    newscript = new Script;
+    newscript->Name = "boss_krikthir";
+    newscript->GetAI = &GetAI_boss_krikthir;
+    newscript->RegisterSelf();
 }

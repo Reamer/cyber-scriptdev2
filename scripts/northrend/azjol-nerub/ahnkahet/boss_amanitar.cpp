@@ -202,6 +202,14 @@ struct MANGOS_DLL_DECL npc_amanitar_healthy_mushroomAI : public ScriptedAI
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
+    
+    void SpellHit(Unit* pTarget, const SpellEntry* pSpell) 
+    {
+        if (pSpell->Id == SPELL_POTENT_FUNGUS)
+        {
+            pTarget->RemoveAurasDueToSpell(SPELL_MINI);            
+        }
+    }
 
     instance_ahnkahet* m_pInstance;
     bool m_bIsRegularMode;
@@ -217,7 +225,7 @@ struct MANGOS_DLL_DECL npc_amanitar_healthy_mushroomAI : public ScriptedAI
         if (pWho->HasAura(SPELL_MINI, EFFECT_INDEX_0) || pWho->HasAura(SPELL_MINI, EFFECT_INDEX_1) || pWho->HasAura(SPELL_MINI, EFFECT_INDEX_2))
         {   
             pWho->RemoveAurasDueToSpell(SPELL_MINI);
-            pWho->CastSpell(pWho, SPELL_POTENT_FUNGUS, true);
+            m_creature->CastSpell(m_creature, SPELL_POTENT_FUNGUS, true);
         }
     }
 };
