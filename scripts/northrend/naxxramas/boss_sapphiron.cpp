@@ -81,6 +81,7 @@ struct MANGOS_DLL_DECL boss_sapphironAI : public ScriptedAI
     uint32 m_uiCleaveTimer;
     uint32 m_uiFlyTimer;
     uint32 m_uiBeserkTimer;
+    uint32 m_uiAchievCheck;
     uint32 m_uiPhase;
     uint32 m_uiLandTimer;
     uint64 m_uiFrostBreathTargetGUID;
@@ -103,17 +104,23 @@ struct MANGOS_DLL_DECL boss_sapphironAI : public ScriptedAI
         m_uiIceboltTimer     = 4000;
         m_uiLandTimer        = 2000;
         m_uiBeserkTimer      = 15*MINUTE*IN_MILLISECONDS;
+        m_uiAchievCheck     = 1000;
         m_uiPhase            = 1;
         m_uiIceboltCount     = 0;
         m_bLandoff           = false;
         m_bReachedMiddle     = false;
         targets.clear();
+        if (m_pInstance)
+            m_pInstance->SetAchiev(TYPE_SAPPHIRON, false);
     }
 
     void Aggro(Unit* pWho)
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_SAPPHIRON, IN_PROGRESS);
+            m_pInstance->SetAchiev(TYPE_SAPPHIRON, true);
+        }
 
         m_creature->SetInCombatWithZone();
         DoCast(m_creature, m_bIsRegularMode ? SPELL_FROST_AURA : H_SPELL_FROST_AURA);
@@ -205,6 +212,32 @@ struct MANGOS_DLL_DECL boss_sapphironAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
+
+        if (m_uiAchievCheck)
+        {
+            if (m_uiAchievCheck < uiDiff)
+            {
+                Map *map = m_creature->GetMap();
+                if (map->IsDungeon())
+                {
+                    Map::PlayerList const &PlayerList = map->GetPlayers();
+                    for(Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
+                        if (i->getSource()->GetTotalAuraModValue(UNIT_MOD_RESISTANCE_FROST) > 100.0f)
+                        {
+                            if (m_pInstance)
+                            {
+                                m_pInstance->SetAchiev(TYPE_SAPPHIRON, false);
+                                m_uiAchievCheck = 0;
+                            }
+                        }
+                    }
+                    m_uiAchievCheck = 1000;
+                }
+            } else
+                m_uiAchievCheck -= uiDiff;
+        }
+
 
         if (m_uiBeserkTimer)
         {

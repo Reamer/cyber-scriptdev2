@@ -139,7 +139,21 @@ enum
 
     AREATRIGGER_FROSTWYRM       = 4120,                    //not needed here, but AT to be scripted
     AREATRIGGER_KELTHUZAD       = 4112,
-    AREATRIGGER_GOTHIK          = 4116
+    AREATRIGGER_GOTHIK          = 4116,
+
+    //Achievements
+    ACHIEV_CRITERIA_THE_SAFETY_DANCE            = 7264,
+    ACHIEV_CRITERIA_THE_SAFETY_DANCE_H          = 7548,
+    ACHIEV_CRITERIA_MOMMA_SAID_KNOCK_YOU_OUT    = 7265,
+    ACHIEV_CRITERIA_MOMMA_SAID_KNOCK_YOU_OUT_H  = 7549,
+    ACHIEV_CRITERIA_SPORE_LOSER                 = 7612,
+    ACHIEV_CRITERIA_SPORE_LOSER_H               = 7613,
+    ACHIEV_CRITERIA_SHOCKING                    = 7604,
+    ACHIEV_CRITERIA_SHOCKING_H                  = 7605,
+    ACHIEV_CRITERIA_THE_HUNDRED_CLUB            = 7567,
+    ACHIEV_CRITERIA_THE_HUNDRED_CLUB_H          = 7568,
+    ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH        = 7614,
+    ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH_H      = 7615
 };
 
 struct GothTrigger
@@ -162,11 +176,14 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         void OnObjectCreate(GameObject* pGo);
 
         void SetData(uint32 uiType, uint32 uiData);
+        void SetAchiev(uint32 uiType, bool get);
         uint32 GetData(uint32 uiType);
         uint64 GetData64(uint32 uiData);
 
         const char* Save() { return strInstData.c_str(); }
         void Load(const char* chrIn);
+
+        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/);
 
         // goth
         void SetGothTriggers();
@@ -256,6 +273,14 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         float m_fChamberCenterX;
         float m_fChamberCenterY;
         float m_fChamberCenterZ;
+
+        //Achievements
+        bool m_bTheSafetyDance;
+        bool m_bMommaSaidKnockYouOut;
+        bool m_bSporeLoser;
+        bool m_bShocking;
+        bool m_bTheHundredClub;
+        bool m_bJustCantGetEnough;
 };
 
 #endif

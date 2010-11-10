@@ -72,12 +72,12 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
 {
     boss_heiganAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_naxxramas* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 Disruption_Timer;
@@ -98,7 +98,10 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
         phase = 0;
 
         if(m_pInstance)
+        {
             m_pInstance->SetData(TYPE_HEIGAN, NOT_STARTED);
+            m_pInstance->SetAchiev(TYPE_HEIGAN, false);
+        }
     }
 
     void AttackStart(Unit* pWho)
@@ -153,11 +156,16 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
         }
 
         if(m_pInstance)
+        {
             m_pInstance->SetData(TYPE_HEIGAN, IN_PROGRESS);
+            m_pInstance->SetAchiev(TYPE_HEIGAN, true);
+        }
     }
 
     void KilledUnit(Unit* victim)
     {
+        if(m_pInstance)
+            m_pInstance->SetAchiev(TYPE_HEIGAN, false);
         DoScriptText(SAY_SLAY, m_creature);
     }
 
@@ -210,10 +218,10 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
 {
     npc_heigan_eruptionAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
+        m_pInstance = ((instance_naxxramas*)pCreature->GetInstanceData());
         Reset();
     }
-    ScriptedInstance* pInstance;
+    instance_naxxramas* m_pInstance;
  
     uint32 phase;
     uint32 safeSpot;
@@ -241,8 +249,8 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
     //Let's Dance!
     void DoErupt(uint32 safePlace)
     {
-        uint64 heiganGUID = pInstance->GetData64(NPC_HEIGAN);
-        Map::PlayerList const &PlList = pInstance->instance->GetPlayers();
+        uint64 heiganGUID = m_pInstance->GetData64(NPC_HEIGAN);
+        Map::PlayerList const &PlList = m_pInstance->instance->GetPlayers();
         if (PlList.isEmpty())
             return;
  
@@ -409,6 +417,12 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
         //Let's dance back!
         }else forward=false;
     }
+    void KilledUnit(Unit* victim)
+    {
+        if(m_pInstance)
+            m_pInstance->SetAchiev(TYPE_HEIGAN, false);
+    }
+
  
     void Reset()
     {
@@ -430,7 +444,7 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
         if(m_creature->GetMapId() != 533)
             return;
 
-        if(pInstance->GetData(TYPE_HEIGAN) != IN_PROGRESS)
+        if(m_pInstance->GetData(TYPE_HEIGAN) != IN_PROGRESS)
         {
             m_creature->ForcedDespawn();
         }

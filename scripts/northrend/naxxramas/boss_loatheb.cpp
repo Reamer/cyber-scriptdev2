@@ -70,12 +70,17 @@ struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
         m_uiSummonTimer = urand(10000, 15000);              // first seen in vid after approx 12s
         m_uiBerserkTimer = MINUTE*12*IN_MILLISECONDS;       // only in heroic, after 12min
         m_uiNecroticAuraCount = 0;
+        if (m_pInstance)
+            m_pInstance->SetAchiev(TYPE_LOATHEB, false);
     }
 
     void Aggro(Unit* pWho)
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_LOATHEB, IN_PROGRESS);
+            m_pInstance->SetAchiev(TYPE_LOATHEB, true);
+        }
     }
 
     void JustDied(Unit* pKiller)
@@ -185,6 +190,8 @@ struct MANGOS_DLL_DECL mob_sporeAI : public ScriptedAI
     
     void JustDied(Unit* pKiller)
     {
+        if (m_pInstance)
+            m_pInstance->SetAchiev(TYPE_LOATHEB, false);
         m_creature->CastSpell(m_creature, SPELL_FUNGAL_CREEP, true);
     }
 

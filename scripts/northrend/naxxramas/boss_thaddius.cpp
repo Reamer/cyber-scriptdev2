@@ -128,6 +128,8 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
 
         PlusList.clear();
         MinusList.clear();
+        if (m_pInstance)
+            m_pInstance->SetAchiev(TYPE_THADDIUS, false);
     }
 
     void PreBossDeath()
@@ -198,6 +200,8 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
         case 2:  DoScriptText(SAY_AGGRO2, m_creature); break;
         default: DoScriptText(SAY_AGGRO3, m_creature); break;
         }
+        if (m_pInstance)
+            m_pInstance->SetAchiev(TYPE_THADDIUS, true);
     }
 
     void JustDied(Unit* pKiller)
@@ -296,7 +300,11 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
                     for(Map::PlayerList::const_iterator ittr = plList.begin(); ittr != plList.end(); ++ittr)
                     {
                         if(ittr->getSource() && ittr->getSource()->isAlive() && !ittr->getSource()->HasAura(SPELL_CHARGE_POSITIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
+                        {
                             (*itr)->CastSpell((*itr),SPELL_CHARGE_POSITIVE_NEARDMG,true);
+                            if (m_pInstance)
+                                m_pInstance->SetAchiev(TYPE_THADDIUS, false);
+                        }
                         if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_POSITIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
                             ++charge;
                     }
@@ -318,7 +326,11 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
                     for(Map::PlayerList::const_iterator ittr = plList.begin(); ittr != plList.end(); ++ittr)
                     {
                         if(ittr->getSource() && ittr->getSource()->isAlive() && !ittr->getSource()->HasAura(SPELL_CHARGE_NEGATIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
+                        {
                             (*itr)->CastSpell((*itr),SPELL_CHARGE_NEGATIVE_NEARDMG,true);
+                            if (m_pInstance)
+                                m_pInstance->SetAchiev(TYPE_THADDIUS, false);
+                        }
                         if(ittr->getSource() && ittr->getSource()->isAlive() && ittr->getSource()->HasAura(SPELL_CHARGE_NEGATIVE_DMGBUFF,EFFECT_INDEX_0) && ittr->getSource()->IsWithinDistInMap((*itr), 10.0f))
                             ++charge;
                     }
