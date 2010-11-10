@@ -85,6 +85,8 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
         m_uiRainOfFireTimer = 16000;
         m_uiEnrageTimer = 60000;
         m_uiDeadWorshippers = 0;
+        if (m_pInstance)
+            m_pInstance->SetAchiev(TYPE_FAERLINA, false);
     }
 
     void Aggro(Unit* pWho)
@@ -100,7 +102,10 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
         m_creature->CallForHelp(15.0f);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_FAERLINA, IN_PROGRESS);
+            m_pInstance->SetAchiev(TYPE_FAERLINA, true);
+        }
     }
 
     void MoveInLineOfSight(Unit* pWho)
@@ -125,6 +130,8 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
         {
             if (m_creature->HasAura(SPELL_ENRAGE,EFFECT_INDEX_2))
             {
+                if (m_pInstance)
+                    m_pInstance->SetAchiev(TYPE_FAERLINA, false);
                 m_creature->RemoveAurasDueToSpell(SPELL_ENRAGE);
                 m_uiEnrageTimer = 60000;
 

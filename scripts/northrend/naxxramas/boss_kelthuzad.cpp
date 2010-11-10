@@ -135,6 +135,8 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
     uint32 m_uiSummonIntroTimer;
     uint32 m_uiIntroPackCount;
 
+    uint32 m_uiAchievCounter;
+
     std::set<uint64> m_lIntroMobsSet;
     std::set<uint64> m_lAddsSet;
 
@@ -153,6 +155,7 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
         m_uiGuardiansCount      = 0;
         m_uiSummonIntroTimer    = 0;
         m_uiIntroPackCount      = 0;
+        m_uiAchievCounter       = 0;
 
         m_uiPhase1Timer         = 228000;                   //Phase 1 lasts "3 minutes and 48 seconds"
         m_uiSoldierTimer        = 5000;
@@ -166,7 +169,10 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
         m_uiManaDetonationTargetGUID = 0;
 
         if (m_pInstance->GetData(TYPE_KELTHUZAD) == IN_PROGRESS)
+        {
             m_pInstance->SetData(TYPE_KELTHUZAD, NOT_STARTED);
+            m_pInstance->SetAchiev(TYPE_KELTHUZAD, false);
+        }
 
         // it may be some spell should be used instead, to control the intro phase
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -366,9 +372,13 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
     {
         switch(pSummoned->GetEntry())
         {
+            case NPC_UNSTOPPABLE_ABOM:
+                ++m_uiAchievCounter;
+                if (m_uiAchievCounter >= 18)
+                    if (m_pInstance)
+                        m_pInstance->SetAchiev(TYPE_KELTHUZAD, true);
             case NPC_GUARDIAN:
             case NPC_SOLDIER_FROZEN:
-            case NPC_UNSTOPPABLE_ABOM:
             case NPC_SOUL_WEAVER:
                 m_lAddsSet.erase(pSummoned->GetGUID());
                 break;

@@ -90,7 +90,14 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
 
     m_fChamberCenterX(0.0f),
     m_fChamberCenterY(0.0f),
-    m_fChamberCenterZ(0.0f)
+    m_fChamberCenterZ(0.0f),
+
+    m_bTheSafetyDance(false),
+    m_bMommaSaidKnockYouOut(false),
+    m_bSporeLoser(false),
+    m_bShocking(false),
+    m_bTheHundredClub(false),
+    m_bJustCantGetEnough(false)
 {
     Initialize();
 }
@@ -269,7 +276,59 @@ bool instance_naxxramas::IsEncounterInProgress() const
 
     return false;
 }
+bool instance_naxxramas::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/)
+{
+    switch (uiCriteriaId)
+    {
+        case ACHIEV_CRITERIA_THE_SAFETY_DANCE:
+        case ACHIEV_CRITERIA_THE_SAFETY_DANCE_H:
+            return m_bTheSafetyDance;
+        case ACHIEV_CRITERIA_MOMMA_SAID_KNOCK_YOU_OUT:
+        case ACHIEV_CRITERIA_MOMMA_SAID_KNOCK_YOU_OUT_H:
+            return m_bMommaSaidKnockYouOut;
+        case ACHIEV_CRITERIA_SPORE_LOSER:
+        case ACHIEV_CRITERIA_SPORE_LOSER_H:
+            return m_bSporeLoser;
+        case ACHIEV_CRITERIA_SHOCKING:
+        case ACHIEV_CRITERIA_SHOCKING_H:
+            return m_bShocking;
+        case ACHIEV_CRITERIA_THE_HUNDRED_CLUB:
+        case ACHIEV_CRITERIA_THE_HUNDRED_CLUB_H:
+            return m_bTheHundredClub;
+        case ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH:
+        case ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH_H:
+            return m_bJustCantGetEnough;
+        default:
+            return 0;
+    }
+}
 
+void instance_naxxramas::SetAchiev(uint32 uiType, bool get)
+{
+    switch(uiType)
+    {
+        case TYPE_HEIGAN:
+            m_bTheSafetyDance = get;
+            break;
+        case TYPE_FAERLINA:
+            m_bMommaSaidKnockYouOut = get;
+            break;
+        case TYPE_LOATHEB:
+            m_bSporeLoser = get;
+            break;
+        case TYPE_THADDIUS:
+            m_bShocking = get;
+            break;
+        case TYPE_SAPPHIRON:
+            m_bTheHundredClub = get;
+            break;
+        case TYPE_KELTHUZAD:
+            m_bJustCantGetEnough = get;
+            break;
+        default:
+            break;
+    }
+}
 void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
 {
     switch(uiType)
