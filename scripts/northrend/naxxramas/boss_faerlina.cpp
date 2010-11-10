@@ -130,8 +130,7 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
         {
             if (m_creature->HasAura(SPELL_ENRAGE,EFFECT_INDEX_2))
             {
-                if (m_pInstance)
-                    m_pInstance->SetAchiev(TYPE_FAERLINA, false);
+
                 m_creature->RemoveAurasDueToSpell(SPELL_ENRAGE);
                 m_uiEnrageTimer = 60000;
 
@@ -139,7 +138,9 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
                 //    pCaster->DealDamage(pCaster, pCaster->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
             }else m_uiEnrageTimer += 30000;
-        }
+            if (m_pInstance)
+                m_pInstance->SetAchiev(TYPE_FAERLINA, false);
+        }       
     }
 
     void JustDied(Unit* pKiller)
