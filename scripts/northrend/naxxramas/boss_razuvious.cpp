@@ -128,7 +128,7 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
         if (m_uiUnbalancingStrikeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
-                m_uiUnbalancingStrikeTimer = 10000;
+                m_uiUnbalancingStrikeTimer = 20000;
         }else m_uiUnbalancingStrikeTimer -= uiDiff;
 
         // Disrupting Shout
@@ -174,7 +174,7 @@ bool GossipHello_obedience_crystal(Player* pPlayer, Creature* pCreature)
     {
         if(Creature* Understudy = (Creature*) pCreature->GetMap()->GetUnit(((instance_naxxramas*)pCreature->GetInstanceData())->GetData64(m_uiDeathKnightUnderstudy[i])))
         {
-            if(!Understudy->HasAuraType(SPELL_AURA_MOD_POSSESS))
+            if(!Understudy->HasAuraType(SPELL_AURA_MOD_POSSESS) && Understudy->isAlive())
             {
                 pPlayer->CastSpell(Understudy,SPELL_FORCE_OBEDIENCE,true);
                 return true;
