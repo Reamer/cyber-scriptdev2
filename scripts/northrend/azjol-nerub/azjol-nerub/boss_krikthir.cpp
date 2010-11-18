@@ -186,10 +186,10 @@ CreatureAI* GetAI_boss_krikthir(Creature* pCreature)
 
 void AddSC_boss_krikthir()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_krikthir";
-    newscript->GetAI = &GetAI_boss_krikthir;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_krikthir";
+    pNewScript->GetAI = &GetAI_boss_krikthir;
+    pNewScript->RegisterSelf();
 }

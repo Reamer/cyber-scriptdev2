@@ -260,10 +260,10 @@ CreatureAI* GetAI_boss_galdarah(Creature* pCreature)
 
 void AddSC_boss_galdarah()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_galdarah";
-    newscript->GetAI = &GetAI_boss_galdarah;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_galdarah";
+    pNewScript->GetAI = &GetAI_boss_galdarah;
+    pNewScript->RegisterSelf();
 }
