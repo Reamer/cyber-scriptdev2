@@ -1313,7 +1313,7 @@ struct MANGOS_DLL_DECL npc_eye_of_acherusAI : public ScriptedAI
         if(!target || target->GetTypeId() != TYPEID_PLAYER)
             return;
 
-        m_creature->SetCharmerGUID(0);
+        m_creature->SetCharmerGuid(ObjectGuid());
         target->RemoveAurasDueToSpell(51852);
         target->SetCharm(NULL);
 

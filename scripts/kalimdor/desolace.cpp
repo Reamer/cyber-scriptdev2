@@ -161,39 +161,6 @@ bool GossipHello_npc_aged_dying_ancient_kodo(Player* pPlayer, Creature* pCreatur
     return true;
 }
 
-enum
-{
-	QUEST_GHOST_O_PLASM_ROUND_UP	=	6134,
-	GAMEOBJECT_GHOST_MAGNET			=	177746,
-	MOB_MAGRAMI_SPECTRE				=	11560
-};
-struct Locations
-{
-    float x, y, z;
-};
-static Locations SpawnP[]=
-{
-	{-3009.97f, 2560.86f, 39.05f},                            // Start
-	{-3009.17f, 2684.55f, 42.42f},
-	{-3159.04f, 2485.20f, 95.52f},
-	{-2864.91f, 2699.52f, 74.07f}
-};
-
-bool GOHello_go_ghost_magnet (Player* pPlayer, GameObject* pGo)
-{
-	if ( pPlayer->GetQuestStatus(QUEST_GHOST_O_PLASM_ROUND_UP) == QUEST_STATUS_INCOMPLETE)
-		if (pGo->GetEntry()== GAMEOBJECT_GHOST_MAGNET)
-		{
-			for (int i = 0; i < 3; ++i)
-			{
-				pGo->SummonCreature(MOB_MAGRAMI_SPECTRE, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(),0,TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 300000);
-			}
-			return true;
-		}
-	return false;
-
-
-}
 void AddSC_desolace()
 {
     Script *newscript;
@@ -204,9 +171,4 @@ void AddSC_desolace()
     newscript->pEffectDummyCreature = &EffectDummyCreature_npc_aged_dying_ancient_kodo;
     newscript->pGossipHello = &GossipHello_npc_aged_dying_ancient_kodo;
     newscript->RegisterSelf();
-
-	newscript = new Script;
-	newscript->Name = "go_ghost_magnet";
-	newscript->pGOHello = &GOHello_go_ghost_magnet;
-	newscript->RegisterSelf();
 }

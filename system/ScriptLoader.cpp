@@ -10,6 +10,7 @@ extern void AddSC_battleground();
 //custom
 extern void AddSC_boss_pusillin();
 extern void AddSC_instance_dire_maul(); 
+extern void AddSC_custom_cybernetic();
 
 //examples
 extern void AddSC_example_creature();
@@ -145,7 +146,6 @@ extern void AddSC_boss_brutallus();                         //sunwell_plateau
 extern void AddSC_boss_kalecgos();
 extern void AddSC_instance_sunwell_plateau();
 extern void AddSC_boss_archaedas();                         //uldaman
-extern void AddSC_boss_ironaya();
 extern void AddSC_instance_uldaman();
 extern void AddSC_uldaman();
 extern void AddSC_boss_akilzon();                           //zulaman
@@ -240,6 +240,7 @@ extern void AddSC_mob_anubisath_sentinel();
 extern void AddSC_instance_temple_of_ahnqiraj();
 extern void AddSC_instance_wailing_caverns();               // Wailing Caverns
 extern void AddSC_zulfarrak();                              //zulfarrak
+extern void AddSC_instance_zulfarrak();
 
 extern void AddSC_ashenvale();
 extern void AddSC_azshara();
@@ -284,15 +285,21 @@ extern void AddSC_twin_valkyr();
 extern void AddSC_boss_novos();                             //draktharon_keep
 extern void AddSC_boss_tharonja();
 extern void AddSC_boss_trollgore();
+extern void AddSC_instance_draktharon_keep();
 extern void AddSC_boss_colossus();                          //gundrak
+extern void AddSC_boss_eck();
 extern void AddSC_boss_galdarah();
 extern void AddSC_boss_moorabi();
 extern void AddSC_boss_sladran();
-extern void AddSC_boss_eck_the_ferocious();
 extern void AddSC_instance_gundrak();
 extern void AddSC_boss_bronjahm();                          // ICC, forge_of_souls
 extern void AddSC_boss_devourer_of_souls();
 extern void AddSC_instance_forge_of_souls();
+extern void AddSC_boss_gafrost();                           // ICC, pit_of_saron
+extern void AddSC_boss_krick_and_ick();
+extern void AddSC_boss_tyrannus();
+extern void AddSC_instance_pit_of_saron();
+extern void AddSC_pit_of_saron();
 extern void AddSC_boss_anubrekhan();                        //naxxramas
 extern void AddSC_boss_four_horsemen();
 extern void AddSC_boss_faerlina();
@@ -325,7 +332,21 @@ extern void AddSC_boss_maiden_of_grief();                   //Ulduar, halls_of_s
 extern void AddSC_boss_sjonnir();
 extern void AddSC_halls_of_stone();
 extern void AddSC_instance_halls_of_stone();
-extern void AddSC_instance_ulduar();                        //ulduar
+extern void AddSC_boss_assembly_of_iron();                  //ulduar
+extern void AddSC_boss_algalon();
+extern void AddSC_boss_auriaya();
+extern void AddSC_boss_flame_leviathan();
+extern void AddSC_boss_freya();
+extern void AddSC_boss_general_vezax();
+extern void AddSC_boss_hodir();
+extern void AddSC_boss_ignis();
+extern void AddSC_boss_kologarn();
+extern void AddSC_boss_mimiron();
+extern void AddSC_boss_razorscale();
+extern void AddSC_boss_thorim();
+extern void AddSC_boss_xt_002();
+extern void AddSC_boss_yogg_saron();
+extern void AddSC_instance_ulduar();
 extern void AddSC_boss_ingvar();                            //utgarde_keep
 extern void AddSC_boss_keleseth();
 extern void AddSC_boss_skarvald_and_dalronn();
@@ -383,6 +404,7 @@ extern void AddSC_boss_hydross_the_unstable();
 extern void AddSC_boss_lady_vashj();
 extern void AddSC_boss_leotheras_the_blind();
 extern void AddSC_boss_morogrim_tidewalker();
+extern void AddSC_boss_the_lurker_below();
 extern void AddSC_instance_serpentshrine_cavern();
 extern void AddSC_boss_hydromancer_thespia();               //CR, steam_vault
 extern void AddSC_boss_mekgineer_steamrigger();
@@ -440,7 +462,8 @@ void AddScripts()
 
     //custom
 	AddSC_boss_pusillin();
-	AddSC_instance_dire_maul(); 
+	AddSC_instance_dire_maul();
+    AddSC_custom_cybernetic();
     //examples
     AddSC_example_creature();
     AddSC_example_escort();
@@ -575,7 +598,6 @@ void AddScripts()
     AddSC_boss_kalecgos();
     AddSC_instance_sunwell_plateau();
     AddSC_boss_archaedas();                                 //uldaman
-    AddSC_boss_ironaya();
     AddSC_instance_uldaman();
     AddSC_uldaman();
     AddSC_boss_akilzon();                                   //zulaman
@@ -670,6 +692,7 @@ void AddScripts()
     AddSC_instance_temple_of_ahnqiraj();
     AddSC_instance_wailing_caverns();                       // Wailing Caverns
     AddSC_zulfarrak();                                      //zulfarrak
+    AddSC_instance_zulfarrak();
 
     AddSC_ashenvale();
     AddSC_azshara();
@@ -714,15 +737,21 @@ void AddScripts()
     AddSC_boss_novos();                                     //draktharon_keep
     AddSC_boss_tharonja();
     AddSC_boss_trollgore();
+    AddSC_instance_draktharon_keep();
     AddSC_boss_colossus();                                  //gundrak
+    AddSC_boss_eck();
     AddSC_boss_galdarah();
     AddSC_boss_moorabi();
     AddSC_boss_sladran();
-	AddSC_boss_eck_the_ferocious();
     AddSC_instance_gundrak();
     AddSC_boss_bronjahm();                                  // ICC, forge_of_souls
     AddSC_boss_devourer_of_souls();
     AddSC_instance_forge_of_souls();
+    AddSC_boss_gafrost();                                   // ICC, pit_of_saron
+    AddSC_boss_krick_and_ick();
+    AddSC_boss_tyrannus();
+    AddSC_instance_pit_of_saron();
+    AddSC_pit_of_saron();
     AddSC_boss_anubrekhan();                                //naxxramas
     AddSC_boss_four_horsemen();
     AddSC_boss_faerlina();
@@ -755,7 +784,21 @@ void AddScripts()
     AddSC_boss_sjonnir();
     AddSC_halls_of_stone();
     AddSC_instance_halls_of_stone();
-    AddSC_instance_ulduar();                                //ulduar
+    AddSC_boss_assembly_of_iron();                          //ulduar
+    AddSC_boss_algalon();
+    AddSC_boss_auriaya();
+    AddSC_boss_flame_leviathan();
+    AddSC_boss_freya();
+    AddSC_boss_general_vezax();
+    AddSC_boss_hodir();
+    AddSC_boss_ignis();
+    AddSC_boss_kologarn();
+    AddSC_boss_mimiron();
+    AddSC_boss_razorscale();
+    AddSC_boss_thorim();
+    AddSC_boss_xt_002();
+    AddSC_boss_yogg_saron();
+    AddSC_instance_ulduar();
     AddSC_boss_ingvar();                                    //utgarde_keep
     AddSC_boss_keleseth();
     AddSC_boss_skarvald_and_dalronn();
@@ -813,6 +856,7 @@ void AddScripts()
     AddSC_boss_lady_vashj();
     AddSC_boss_leotheras_the_blind();
     AddSC_boss_morogrim_tidewalker();
+    AddSC_boss_the_lurker_below();
     AddSC_instance_serpentshrine_cavern();
     AddSC_boss_hydromancer_thespia();                       //CR, steam_vault
     AddSC_boss_mekgineer_steamrigger();
