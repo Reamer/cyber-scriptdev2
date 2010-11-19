@@ -46,6 +46,7 @@ include/sc_grid_searchers.h \
 include/sc_instance.cpp \
 include/sc_instance.h \
 scripts/battlegrounds/battleground.cpp \
+scripts/custom/custom_cybernetic.cpp \
 scripts/eastern_kingdoms/alterac_mountains.cpp \
 scripts/eastern_kingdoms/arathi_highlands.cpp \
 scripts/eastern_kingdoms/blasted_lands.cpp \
@@ -276,6 +277,9 @@ scripts/kalimdor/caverns_of_time/old_hillsbrad/boss_leutenant_drake.cpp \
 scripts/kalimdor/caverns_of_time/old_hillsbrad/instance_old_hillsbrad.cpp \
 scripts/kalimdor/caverns_of_time/old_hillsbrad/old_hillsbrad.cpp \
 scripts/kalimdor/caverns_of_time/old_hillsbrad/old_hillsbrad.h \
+scripts/kalimdor/dire_maul/boss_pusillin.cpp \
+scripts/kalimdor/dire_maul/dire_maul.h \
+scripts/kalimdor/dire_maul/instance_dire_maul.cpp \
 scripts/kalimdor/maraudon/boss_celebras_the_cursed.cpp \
 scripts/kalimdor/maraudon/boss_landslide.cpp \
 scripts/kalimdor/maraudon/boss_noxxion.cpp \
@@ -323,6 +327,7 @@ scripts/northrend/sholazar_basin.cpp \
 scripts/northrend/storm_peaks.cpp \
 scripts/northrend/howling_fjord.cpp \
 scripts/northrend/zuldrak.cpp \
+scripts/northrend/azjol-nerub/ahnkahet/boss_amanitar.cpp \
 scripts/northrend/azjol-nerub/ahnkahet/boss_jedoga.cpp \
 scripts/northrend/azjol-nerub/ahnkahet/boss_nadox.cpp \
 scripts/northrend/azjol-nerub/ahnkahet/boss_taldaram.cpp \
@@ -453,6 +458,13 @@ scripts/northrend/utgarde_keep/utgarde_pinnacle/boss_svala.cpp \
 scripts/northrend/utgarde_keep/utgarde_pinnacle/boss_ymiron.cpp \
 scripts/northrend/utgarde_keep/utgarde_pinnacle/instance_utgarde_pinnacle.cpp \
 scripts/northrend/utgarde_keep/utgarde_pinnacle/utgarde_pinnacle.h \
+scripts/northrend/violet_hold/boss_cyanigosa.cpp \
+scripts/northrend/violet_hold/boss_erekem.cpp \
+scripts/northrend/violet_hold/boss_ichoron.cpp \
+scripts/northrend/violet_hold/boss_lavanthor.cpp \
+scripts/northrend/violet_hold/boss_moragg.cpp \
+scripts/northrend/violet_hold/boss_xevozz.cpp \
+scripts/northrend/violet_hold/boss_zuramat.cpp \
 scripts/northrend/violet_hold/instance_violet_hold.cpp \
 scripts/northrend/violet_hold/violet_hold.cpp \
 scripts/northrend/violet_hold/violet_hold.h \
