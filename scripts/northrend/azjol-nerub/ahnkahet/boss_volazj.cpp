@@ -266,7 +266,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     {
                         if (pPlayer1->isAlive() && pPlayer2->isAlive() && (pPlayer1->GetGUID() != pPlayer2->GetGUID()) && !pPlayer1->isGameMaster() && !pPlayer2->isGameMaster())
                         {
-                            Creature* pClone = m_creature->SummonCreature(m_bIsRegularMode ? CLONE : CLONE_H, pPlayer2->GetPositionX(), pPlayer2->GetPositionY(), pPlayer2->GetPositionZ(), pPlayer2->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
+                            Creature* pClone = m_creature->SummonCreature(m_bIsRegularMode ? CLONE : CLONE_H, pPlayer2->GetPositionX(), pPlayer2->GetPositionY(), pPlayer2->GetPositionZ(), pPlayer2->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                             if (pClone) 
                             {
                                 pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_PASSIVE);
@@ -351,6 +351,14 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                                         pClone->GetMotionMaster()->MoveChase(pPlayer1);
                                         break;
                                     default: break;
+                                }
+                                if (m_bIsRegularMode)
+                                {
+                                    pClone->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 400.0f );
+                                    pClone->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 600.0f );
+                                } else {
+                                    pClone->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 800.0f );
+                                    pClone->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1100.0f );
                                 }
 
                                 pClone->SetHealth(pClone->GetMaxHealth()); 
@@ -829,7 +837,10 @@ struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI
     } 
 
     void UpdateAI(const uint32 uiDiff) 
-    { 
+    {
+        if(!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
         if (m_creature->GetMaxHealth() == CLONE_HEALTH_DRUID || m_creature->GetMaxHealth() == CLONE_HEALTH_DRUID_H) 
         {
             if (spellDruidTimer < uiDiff) 
