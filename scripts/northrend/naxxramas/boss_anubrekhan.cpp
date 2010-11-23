@@ -149,7 +149,7 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
         m_creature->SummonCreature(NPC_CRYPT_GUARD,m_creature->GetPositionX()+rand()%5,
                                                    m_creature->GetPositionY()+rand()%5,
                                                    m_creature->GetPositionZ(),0,
-                                                   TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,60000);
+                                                   TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
     }
 
     void UpdateAI(const uint32 uiDiff)
