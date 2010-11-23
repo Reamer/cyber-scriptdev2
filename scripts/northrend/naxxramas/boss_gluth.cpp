@@ -213,7 +213,7 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
     void SummonZombie()
     {
         uint32 ran = rand()%5;
-        if (Creature* pZombie = m_creature->SummonCreature(NPC_ZOMBIE_CHOW, ADD_SPAWN[ran][0], ADD_SPAWN[ran][1], ADD_SPAWN[ran][2], 0.0f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 80000))
+        if (Creature* pZombie = m_creature->SummonCreature(NPC_ZOMBIE_CHOW, ADD_SPAWN[ran][0], ADD_SPAWN[ran][1], ADD_SPAWN[ran][2], 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000))
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {

@@ -184,6 +184,11 @@ struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
                     else if (m_uiPhaseSub == 1)
                         m_uiPhaseTimer = 97000;
                     else m_uiPhaseTimer = 120000;
+                    
+                    // reset timers
+                    m_uiCrippleTimer = 24500;
+                    m_uiBlinkTimer = 25000;
+                    m_uiCurseTimer = 28000;
 
                     m_uiPhase = PHASE_BALCONY;
                     ++m_uiPhaseSub;
