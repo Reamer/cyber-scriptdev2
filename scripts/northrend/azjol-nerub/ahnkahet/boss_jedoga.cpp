@@ -369,6 +369,8 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
         }
         else
         {
+            if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             if (volunteerPhaseTimer    < uiDiff)
             {
                 MoveVolunteer();
