@@ -61,7 +61,13 @@ instance_gundrak::instance_gundrak(Map* pMap) : ScriptedInstance(pMap),
 
     m_uiSladranGUID(0),
     m_uiElementalGUID(0),
-    m_uiColossusGUID(0)
+    m_uiColossusGUID(0),
+    
+    //Achievements
+    m_bCriteriaSnake(false),
+    m_bLessRabi(false),
+    m_bWhatTheEck(false),
+    m_bShareTheLove(false)
 {
     Initialize();
 }
@@ -136,7 +142,7 @@ void instance_gundrak::OnObjectCreate(GameObject* pGo)
             m_uiAltarOfColossusGUID = pGo->GetGUID();
             if (m_auiEncounter[TYPE_COLOSSUS] == DONE)
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
-                break;
+            break;
         case GO_SNAKE_KEY:
             m_uiSnakeKeyGUID = pGo->GetGUID();
             break;
@@ -182,6 +188,27 @@ void instance_gundrak::Load(const char* chrIn)
 
 
     OUT_LOAD_INST_DATA_COMPLETE;
+}
+
+void instance_gundrak::SetAchiev(uint32 uiType, bool get)
+{
+    switch(uiType)
+    {
+        case TYPE_SLADRAN:
+            m_bCriteriaSnake = get;
+            break;
+        case TYPE_MOORABI:
+            m_bLessRabi = get;
+            break;
+        case TYPE_ECK:
+            m_bWhatTheEck = get;
+            break;
+        case TYPE_GALDARAH:
+            m_bShareTheLove = get;
+            break;
+        default:
+            break;
+    }
 }
 
 void instance_gundrak::SetData(uint32 uiType, uint32 uiData)
@@ -282,6 +309,23 @@ uint64 instance_gundrak::GetData64(uint32 uiType)
             return m_uiColossusGUID;
     }
     return 0;
+}
+
+bool instance_gundrak::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/)
+{
+    switch (uiCriteriaId)
+    {
+        case ACHIEV_CRITERIA_SNAKES:
+            return m_bCriteriaSnake;
+        case ACHIEV_CRITERIA_LESS_RABI:
+            return m_bLessRabi;
+        case ACHIEV_CRITERIA_WHAT_THE_ECK:
+            return m_bWhatTheEck;
+        case ACHIEV_CRITERIA_SHARE_THE_LOVE:
+            return m_bShareTheLove;
+        default:
+            return 0;
+    }
 }
 
 static bool sortFromEastToWest(Creature* pFirst, Creature* pSecond)

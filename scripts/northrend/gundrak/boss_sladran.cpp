@@ -46,9 +46,15 @@ enum
     // Summon spells
     SPELL_SUMMON_VIPER        = 55060,
     SPELL_SUMMON_CONSTRICTOR  = 54969,
-
+    // Mob spells
     SPELL_GRIP_OF_SLADRAN     = 55093,
     SPELL_GRIP_OF_SLADRAN_H   = 61474,
+
+    SPELL_SNAKE_WRAP          = 55126,
+    SPELL_SNAKE_WRAP_H        = 61476,
+    SPELL_SNAKE_WRAP_STUN     = 55099,
+    SPELL_SNAKE_WRAP_STUN_H   = 61475,
+
 
     NPC_SLADRAN_CONSTRICTOR   = 29713,
     NPC_SLADRAN_VIPER         = 29680,
@@ -101,12 +107,12 @@ struct MANGOS_DLL_DECL boss_sladranAI : public ScriptedAI
 {
     boss_sladranAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_gundrak*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_gundrak* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiSummonTimer;
@@ -127,7 +133,10 @@ struct MANGOS_DLL_DECL boss_sladranAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_SLADRAN, IN_PROGRESS);
+            m_pInstance->SetAchiev(TYPE_SLADRAN, true);
+        }
     }
 
     void KilledUnit(Unit* pVictim)
@@ -230,6 +239,144 @@ CreatureAI* GetAI_boss_sladran(Creature* pCreature)
     return new boss_sladranAI(pCreature);
 }
 
+/*######
+## npc_snake_wrap
+######*/
+struct MANGOS_DLL_DECL npc_snake_wrapAI : public ScriptedAI
+{
+    npc_snake_wrapAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_gundrak*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+    
+    instance_gundrak* m_pInstance;
+    bool m_bIsRegularMode;
+    uint64 m_uiVictimGUID;
+
+    void Reset()
+    {
+        if (m_pInstance)
+            m_pInstance->SetAchiev(TYPE_SLADRAN, false);
+        
+        SetCombatMovement(false);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE); 
+    }
+    
+    Player *GetNearestPlayer()
+    {
+        Player *nearp = NULL;
+        float neardist = 0.0f;
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &lPlayers = pMap->GetPlayers();
+        for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+        {
+            Player* pPlayer = itr->getSource();
+            if (!pPlayer || !pPlayer->isAlive())
+                continue;
+            float pudist = pPlayer->GetDistance((const Creature *)m_creature);
+            if (!nearp || (neardist > pudist))
+            {
+                nearp = pPlayer;
+                neardist = pudist;
+            }
+        }
+        return nearp;
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        if (Player* pVictim = GetNearestPlayer())
+        {
+            pVictim->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_SNAKE_WRAP : SPELL_SNAKE_WRAP_H);
+        }
+    }
+
+
+     void UpdateAI(const uint32 uiDiff)
+    {
+    }
+};
+
+CreatureAI* GetAI_npc_snake_wrap(Creature* pCreature)
+{
+    return new npc_snake_wrapAI(pCreature);
+}
+/*######
+## mob_sladran_constrictor
+######*/
+struct MANGOS_DLL_DECL mob_sladran_constrictorAI : public ScriptedAI
+{
+    mob_sladran_constrictorAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_gundrak*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+    
+    instance_gundrak* m_pInstance;
+    bool m_bIsRegularMode;
+
+    uint32 m_uiGripOfSladranTimer;
+
+    void Reset()
+    {
+        if (m_bIsRegularMode)
+            m_uiGripOfSladranTimer = urand(4000,8000);
+        else
+            m_uiGripOfSladranTimer = urand(3000,6000);
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiGripOfSladranTimer < uiDiff)
+        {
+            if (Unit* pVictim = m_creature->getVictim())
+            {
+                if (pVictim->HasAura(m_bIsRegularMode ? SPELL_GRIP_OF_SLADRAN : SPELL_GRIP_OF_SLADRAN_H) || pVictim->HasAura(m_bIsRegularMode ? SPELL_SNAKE_WRAP : SPELL_SNAKE_WRAP_H))
+                {
+                    if (Aura* aura = pVictim->GetAura(m_bIsRegularMode ? SPELL_GRIP_OF_SLADRAN : SPELL_GRIP_OF_SLADRAN_H, EFFECT_INDEX_0))
+                    {
+                        if (aura->GetCaster()->GetGUID() == m_creature->GetGUID())
+                        {
+                            if (SpellAuraHolder* holder = aura->GetHolder())
+                            {
+                                if (holder->GetStackAmount() >= 4)
+                                {
+                                    pVictim->CastSpell(pVictim, m_bIsRegularMode ? SPELL_SNAKE_WRAP : SPELL_SNAKE_WRAP_H, true);
+                                    m_creature->getThreatManager().modifyThreatPercent(pVictim, -100);
+                                }
+                                else
+                                {
+                                    DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_GRIP_OF_SLADRAN : SPELL_GRIP_OF_SLADRAN_H);
+                                }
+                            }
+                        } else {
+                            m_creature->getThreatManager().modifyThreatPercent(pVictim, -100);
+                        }                                      
+                    }
+                } else {
+                    DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_GRIP_OF_SLADRAN : SPELL_GRIP_OF_SLADRAN_H);
+                }
+                m_uiGripOfSladranTimer = m_bIsRegularMode ? urand(4000,8000) : urand(3000,6000);
+            }
+        } else
+            m_uiGripOfSladranTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+
+};
+
+CreatureAI* GetAI_mob_sladran_constrictor(Creature* pCreature)
+{
+    return new mob_sladran_constrictorAI(pCreature);
+}
+
 void AddSC_boss_sladran()
 {
     Script* newscript;
@@ -242,5 +389,15 @@ void AddSC_boss_sladran()
     newscript = new Script;
     newscript->Name = "mob_sladran_summon_target";
     newscript->GetAI = &GetAI_mob_sladran_summon_target;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "mob_sladran_constrictor";
+    newscript->GetAI = &GetAI_mob_sladran_constrictor;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_snake_wrap";
+    newscript->GetAI = &GetAI_npc_snake_wrap;
     newscript->RegisterSelf();
 }
