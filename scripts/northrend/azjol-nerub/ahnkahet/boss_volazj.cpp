@@ -113,8 +113,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
     bool clone64;
     bool clone128;
     bool clone256;
-    bool startAchievement;
-    bool getsAchievement;
  
     std::list<uint64> cloneGUIDList; 
     std::list<uint64> clone16GUIDList;
@@ -155,8 +153,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         clone64 = false;
         clone128 = false;
         clone256 = false;
-        startAchievement = false;
-        getsAchievement = true;
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, NOT_STARTED);
@@ -169,11 +165,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+            if (Unit *target = pMap->GetUnit(itr->getSource()->GetGUID())) 
                 DoScriptText(WHISPER_AGGRO,m_creature,target);
         
-        startAchievement = true;
-
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, IN_PROGRESS);
     } 
@@ -201,19 +195,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
     void JustDied(Unit* pKiller) 
     { 
         DoScriptText(SAY_DEATH, m_creature); 
-
-        Map* pMap = m_creature->GetMap();
-        /*if (pMap && pMap->IsDungeon())
-        {
-            Map::PlayerList const &players = pMap->GetPlayers();
-            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-            {
-                if(!m_bIsRegularMode && getsAchievement)
-                    itr->getSource() //add Achievement here
-                DoScriptText(WHISPER_DEATH,m_creature,itr->getSource());
-            }
-        }*/ 
-
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, DONE);
     } 
@@ -225,7 +206,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if(Player* target = m_creature->GetMap()->GetPlayer(itr->getSource()->GetGUID())) 
+            if(Player* target = pMap->GetPlayer(itr->getSource()->GetGUID())) 
             {
                 switch(i)
                 {
@@ -260,9 +241,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
             Map::PlayerList const &group2 = group1;
             for (Map::PlayerList::const_iterator ittr = group2.begin(); ittr != group2.end(); ++ittr)
             {
-                if (Player* pPlayer1 = m_creature->GetMap()->GetPlayer(itr->getSource()->GetGUID()))
+                if (Player* pPlayer1 = pMap->GetPlayer(itr->getSource()->GetGUID()))
                 {
-                    if (Player* pPlayer2 = m_creature->GetMap()->GetPlayer(ittr->getSource()->GetGUID()))
+                    if (Player* pPlayer2 = pMap->GetPlayer(ittr->getSource()->GetGUID()))
                     {
                         if (pPlayer1->isAlive() && pPlayer2->isAlive() && (pPlayer1->GetGUID() != pPlayer2->GetGUID()) && !pPlayer1->isGameMaster() && !pPlayer2->isGameMaster())
                         {
@@ -360,7 +341,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                                     pClone->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 800.0f );
                                     pClone->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1100.0f );
                                 }
-
+                                pClone->SetLevel(pPlayer2->getLevel() + 2);
                                 pClone->SetHealth(pClone->GetMaxHealth()); 
                                 pClone->Attack(pPlayer1, true);
                                 pClone->AddThreat(pPlayer1, 10000.0f);
@@ -505,13 +486,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
  
     void UpdateAI(const uint32 uiDiff) 
     {
-        if(startAchievement)
-            if(achievementTimer < uiDiff)
-            {
-                startAchievement = false;
-                getsAchievement = false;
-            } else
-                achievementTimer -= uiDiff;
         if (!isInInsanity)
             if(!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                 return;
