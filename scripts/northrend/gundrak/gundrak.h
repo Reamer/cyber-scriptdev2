@@ -55,6 +55,12 @@ enum
     TIMER_VISUAL_ALTAR     = 3000,
     TIMER_VISUAL_BEAM      = 2500,
     TIMER_VISUAL_KEY       = 2000,
+
+    //Achievements
+    ACHIEV_CRITERIA_SNAKES = 7363,
+    ACHIEV_CRITERIA_LESS_RABI = 7319,
+    ACHIEV_CRITERIA_WHAT_THE_ECK = 7136,
+    ACHIEV_CRITERIA_SHARE_THE_LOVE = 7583
 };
 
 typedef std::map<uint8, uint32>  TypeTimerMap;
@@ -72,8 +78,11 @@ class MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
         void OnObjectCreate(GameObject* pGo);
 
         void SetData(uint32 uiType, uint32 uiData);
+        void SetAchiev(uint32 uiType, bool get);
         uint32 GetData(uint32 uiType);
         uint64 GetData64(uint32 uiData);
+
+        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/);
 
         const char* Save() { return strInstData.c_str(); }
         void Load(const char* chrIn);
@@ -111,6 +120,12 @@ class MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
         std::list<uint64> m_luiStalkerGUIDs;
         std::list<uint64> m_luiStalkerCasterGUIDs;
         std::list<uint64> m_luiStalkerTargetGUIDs;
+
+        //Achievements
+        bool m_bCriteriaSnake;
+        bool m_bLessRabi;
+        bool m_bWhatTheEck;
+        bool m_bShareTheLove;
 };
 
 #endif

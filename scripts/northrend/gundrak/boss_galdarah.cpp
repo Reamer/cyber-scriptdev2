@@ -69,12 +69,12 @@ struct MANGOS_DLL_DECL boss_galdarahAI : public ScriptedAI
 {
     boss_galdarahAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_gundrak*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_gundrak* m_pInstance;
     bool m_bIsRegularMode;
 
     bool m_bRhinoPhase;
@@ -89,6 +89,8 @@ struct MANGOS_DLL_DECL boss_galdarahAI : public ScriptedAI
     uint32 m_uiPunctureTimer;
 
     uint64 m_uiRhinoGUID;
+
+    std::list<uint64> impalePlayerGuidList;
 
     void Reset()
     {
@@ -107,6 +109,8 @@ struct MANGOS_DLL_DECL boss_galdarahAI : public ScriptedAI
 
         m_creature->SetDisplayId(MODELID_HUMAN);
 
+        impalePlayerGuidList.clear();
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GALDARAH, NOT_STARTED);
     }
@@ -114,7 +118,27 @@ struct MANGOS_DLL_DECL boss_galdarahAI : public ScriptedAI
     void Aggro(Unit* pWho)
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_GALDARAH, IN_PROGRESS);
+            m_pInstance->SetAchiev(TYPE_ECK, true);
+            m_pInstance->SetAchiev(TYPE_GALDARAH, false);
+        }
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &players = pMap->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+            impalePlayerGuidList.push_back( itr->getSource()->GetGUID());
+        }
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+            if (!itr->getSource()->HasAura(AURA_ECK_RESIDUE))
+            {
+                if (m_pInstance)
+                    m_pInstance->SetAchiev(TYPE_ECK, false);
+                break;
+            }
+        }
+
 
         DoScriptText(SAY_AGGRO, m_creature);
     }
@@ -135,19 +159,6 @@ struct MANGOS_DLL_DECL boss_galdarahAI : public ScriptedAI
             m_pInstance->SetData(TYPE_GALDARAH, DONE);
 
         DoScriptText(SAY_DEATH, m_creature);
-        /*
-        Map::PlayerList const& plList = m_pInstance->instance->GetPlayers();
-
-        if(plList.isEmpty())
-            return;
-
-        for(Map::PlayerList::const_iterator ittr = plList.begin(); ittr != plList.end(); ++ittr)
-        {
-            if(ittr->getSource() && ittr->getSource()->HasAura(AURA_ECK_RESIDUE))
-            {
-                ittr->getSource() // add Archivment here
-            }
-        }*/ 
     }
 
     void ChangePhase()
@@ -238,6 +249,10 @@ struct MANGOS_DLL_DECL boss_galdarahAI : public ScriptedAI
                 {
                     DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_IMPALING_CHARGE : SPELL_IMPALING_CHARGE_H);
                     DoCastSpellIfCan(pVictim, SPELL_KNOCK_BACK);
+                    impalePlayerGuidList.remove(pVictim->GetGUID());
+                    if (impalePlayerGuidList.empty())
+                        if (m_pInstance)
+                            m_pInstance->SetAchiev(TYPE_GALDARAH, true);
                 }
                 m_uiImpalingChargeTimer = urand(7000, 9000);
             }else m_uiImpalingChargeTimer -= uiDiff;
