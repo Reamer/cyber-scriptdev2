@@ -1332,8 +1332,8 @@ struct MANGOS_DLL_DECL npc_eye_of_acherusAI : public ScriptedAI
         if (uiType != POINT_MOTION_TYPE && uiPointId == 0)
             return;
 
-            char * text = "The Eye of Acherus is in your control";
-            m_creature->MonsterTextEmote(text, m_creature->GetGUID(), true);
+            //char * text = "The Eye of Acherus is in your control";
+            //m_creature->MonsterTextEmote(text, m_creature->GetGUID(), true);
             m_creature->CastSpell(m_creature, 51890, true);
     }
 
@@ -1345,8 +1345,8 @@ struct MANGOS_DLL_DECL npc_eye_of_acherusAI : public ScriptedAI
             {
                 m_creature->CastSpell(m_creature, 70889, true);
                 m_creature->CastSpell(m_creature, 51892, true);
-                char * text = "The Eye of Acherus launches towards its destination";
-                m_creature->MonsterTextEmote(text, m_creature->GetGUID(), true);
+                //char * text = "The Eye of Acherus launches towards its destination";
+                //m_creature->MonsterTextEmote(text, m_creature->GetGUID(), true);
                 m_creature->SetSpeedRate(MOVE_FLIGHT, 6.4f,true);
                 m_creature->GetMotionMaster()->MovePoint(0, 1750.8276f, -5873.788f, 147.2266f);
                 Active = true;
@@ -1701,7 +1701,7 @@ struct MANGOS_DLL_DECL mob_scarlet_courierAI : public ScriptedAI
     }
 
     uint32 uiWait_timer;
-    uint64 m_uiPlayer;
+    ObjectGuid m_uiPlayer;
     bool found;
 
     void StartRunning()
@@ -1710,7 +1710,7 @@ struct MANGOS_DLL_DECL mob_scarlet_courierAI : public ScriptedAI
 
         if (GameObject* treeGO = GetClosestGameObjectWithEntry(m_creature, GO_INCONSPICUOUS_TREE, 20.0f))
         {
-            m_uiPlayer = treeGO->GetOwnerGUID();
+            m_uiPlayer = treeGO->GetOwnerGuid();
             m_creature->Mount(14338);
             m_creature->GetMotionMaster()->MovePoint(1, treeGO->GetPositionX()+3, treeGO->GetPositionY(), treeGO->GetPositionZ());
             DoScriptText(SAY_TREE1, m_creature);
