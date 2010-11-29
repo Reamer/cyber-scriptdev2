@@ -98,7 +98,7 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
                 randY = rand()%30;
                 posX = pTarget->GetPositionX() + (urand(0,1)? (randX) : (-randX));
                 posY = pTarget->GetPositionY() + (urand(0,1)? (randY) : (-randY));
-                posZ = pTarget->GetMap()->GetWaterOrGroundLevel(posX,posY,pTarget->GetPositionZ()+3);
+                posZ = pTarget->GetMap()->GetTerrain()->GetWaterLevel(posX,posY,pTarget->GetPositionZ()+3);
 
                 Creature* pMushroom = m_creature->SummonCreature(!urand(0, 4) ? NPC_HEALTHY_MUSHROOM : NPC_POISONOUS_MUSHROOM, posX, posY, posZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000);
                 m_lMushroomGUIDList.push_back(pMushroom->GetGUID());

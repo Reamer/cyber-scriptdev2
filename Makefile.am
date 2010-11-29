@@ -36,6 +36,8 @@ base/follower_ai.cpp \
 base/follower_ai.h \
 base/guard_ai.cpp \
 base/guard_ai.h \
+base/pet_ai.cpp \
+base/pet_ai.h \
 include/precompiled.cpp \
 include/precompiled.h \
 include/sc_creature.cpp \
@@ -356,8 +358,8 @@ scripts/northrend/draktharon_keep/boss_tharonja.cpp \
 scripts/northrend/draktharon_keep/boss_trollgore.cpp \
 scripts/northrend/draktharon_keep/draktharon_keep.h \
 scripts/northrend/draktharon_keep/instance_draktharon_keep.cpp \
-scripts/northrend/gundrak/boss_colossus.cpp \
 scripts/northrend/gundrak/boss_eck.cpp \
+scripts/northrend/gundrak/boss_colossus.cpp \
 scripts/northrend/gundrak/boss_galdarah.cpp \
 scripts/northrend/gundrak/boss_moorabi.cpp \
 scripts/northrend/gundrak/boss_sladran.cpp \
