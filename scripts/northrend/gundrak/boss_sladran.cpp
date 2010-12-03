@@ -179,7 +179,7 @@ struct MANGOS_DLL_DECL boss_sladranAI : public ScriptedAI
         if (m_uiPoisonNovaTimer < uiDiff)
         {
             DoScriptText(EMOTE_NOVA, m_creature);
-            DoCastSpellIfCan(m_creature->getVictim(),m_bIsRegularMode ? SPELL_POISON_NOVA : SPELL_POISON_NOVA_H);
+            DoCastSpellIfCan(m_creature,m_bIsRegularMode ? SPELL_POISON_NOVA : SPELL_POISON_NOVA_H);
             m_uiPoisonNovaTimer = 22000;
         }
         else
