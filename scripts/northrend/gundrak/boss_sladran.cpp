@@ -341,28 +341,30 @@ struct MANGOS_DLL_DECL mob_sladran_constrictorAI : public ScriptedAI
                 {
                     if (Aura* aura = pVictim->GetAura(m_bIsRegularMode ? SPELL_GRIP_OF_SLADRAN : SPELL_GRIP_OF_SLADRAN_H, EFFECT_INDEX_0))
                     {
-                        if (aura->GetCaster()->GetGUID() == m_creature->GetGUID())
+                        if (Unit* auracaster = aura->GetCaster())
                         {
-                            if (SpellAuraHolder* holder = aura->GetHolder())
+                            if (auracaster->GetGUID() == m_creature->GetGUID())
                             {
-                                if (holder->GetStackAmount() >= 4)
+                                if (SpellAuraHolder* holder = aura->GetHolder())
                                 {
-                                    pVictim->CastSpell(pVictim, m_bIsRegularMode ? SPELL_SNAKE_WRAP : SPELL_SNAKE_WRAP_H, true);
-                                    m_creature->getThreatManager().modifyThreatPercent(pVictim, -100);
-                                }
-                                else
-                                {
-                                    DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_GRIP_OF_SLADRAN : SPELL_GRIP_OF_SLADRAN_H);
+                                    if (holder->GetStackAmount() >= 4)
+                                    {
+                                        pVictim->CastSpell(pVictim, m_bIsRegularMode ? SPELL_SNAKE_WRAP : SPELL_SNAKE_WRAP_H, true);
+                                    }
+                                    else
+                                    {
+                                        DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_GRIP_OF_SLADRAN : SPELL_GRIP_OF_SLADRAN_H);
+                                    }
                                 }
                             }
                         } else {
-                            m_creature->getThreatManager().modifyThreatPercent(pVictim, -100);
-                        }                                      
+                            DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_GRIP_OF_SLADRAN : SPELL_GRIP_OF_SLADRAN_H);
+                        }
                     }
                 } else {
                     DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_GRIP_OF_SLADRAN : SPELL_GRIP_OF_SLADRAN_H);
                 }
-                m_uiGripOfSladranTimer = m_bIsRegularMode ? urand(4000,8000) : urand(3000,6000);
+                m_uiGripOfSladranTimer = m_bIsRegularMode ? urand(3000,6000) : urand(1500,3000);
             }
         } else
             m_uiGripOfSladranTimer -= uiDiff;
