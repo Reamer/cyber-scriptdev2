@@ -1800,6 +1800,13 @@ CreatureAI* GetAI_npc_training_dummy(Creature* pCreature)
 return new npc_training_dummyAI(pCreature);
 }
 
+bool GossipHello_npc_lightwell(Player* pPlayer, Creature* pCreature)
+{
+    pPlayer->CLOSE_GOSSIP_MENU();
+    pCreature->CastSpell(pPlayer, 60123, true);
+    return true;
+}
+
 void AddSC_npcs_special()
 {
     Script* newscript;
@@ -1893,5 +1900,10 @@ void AddSC_npcs_special()
     newscript = new Script;
     newscript->Name = "npc_training_dummy";
     newscript->GetAI = &GetAI_npc_training_dummy;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_lightwell";
+    newscript->pGossipHello =  &GossipHello_npc_lightwell;
     newscript->RegisterSelf();
 }
