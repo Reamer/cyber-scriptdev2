@@ -21,9 +21,6 @@ SDComment:
 SDCategory: Pit of Saron
 EndScriptData */
 
-/* ContentData
-EndContentData */
-
 #include "precompiled.h"
 #include "pit_of_saron.h"
 
@@ -59,7 +56,57 @@ enum
     SAY_SYLVANAS_OUTRO_2                = -1658067,
 };
 
+struct MANGOS_DLL_DECL npc_jaina_or_sylvanas_POSintroAI : public ScriptedAI
+{
+   npc_jaina_or_sylvanas_POSintroAI(Creature *pCreature) : ScriptedAI(pCreature)
+   {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        Reset();
+   }
+
+   ScriptedInstance* m_pInstance;
+
+   void Reset()
+   {
+   }
+};
+
+struct MANGOS_DLL_DECL npc_jaina_or_sylvanas_POSoutroAI : public ScriptedAI
+{
+   npc_jaina_or_sylvanas_POSoutroAI(Creature *pCreature) : ScriptedAI(pCreature)
+   {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        Reset();
+   }
+
+   ScriptedInstance* m_pInstance;
+
+   void Reset()
+   {
+   }
+};
+
+CreatureAI* GetAI_npc_jaina_or_sylvanas_POSintro(Creature* pCreature)
+{
+    return new npc_jaina_or_sylvanas_POSintroAI(pCreature);
+}
+
+CreatureAI* GetAI_npc_jaina_or_sylvanas_POSoutro(Creature* pCreature)
+{
+    return new npc_jaina_or_sylvanas_POSoutroAI(pCreature);
+}
+
 void AddSC_pit_of_saron()
 {
+    Script *newscript;
 
+    newscript = new Script;
+    newscript->Name="npc_jaina_or_sylvanas_POSintro";
+    newscript->GetAI = &GetAI_npc_jaina_or_sylvanas_POSintro;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name="npc_jaina_or_sylvana_POSoutro";
+    newscript->GetAI = &GetAI_npc_jaina_or_sylvanas_POSoutro;
+    newscript->RegisterSelf();
 }

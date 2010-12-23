@@ -78,7 +78,6 @@ struct MANGOS_DLL_DECL boss_keristraszaAI : public ScriptedAI
 
         m_bIsEnraged = false;
 
-
         if (!m_pInstance)
             return;
 

@@ -120,7 +120,7 @@ struct MANGOS_DLL_DECL npc_volcanoAI : public ScriptedAI
         CheckTimer = 1000;
         SupremusGUID = 0;
         FireballTimer = 500;
-        GeyserTimer = 0;
+        GeyserTimer = 2000;
     }
 
     void AttackStart(Unit* who) {}

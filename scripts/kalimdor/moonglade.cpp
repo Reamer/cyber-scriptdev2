@@ -72,6 +72,7 @@ bool GossipHello_npc_bunthen_plainswind(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_npc_bunthen_plainswind(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
+    pPlayer->PlayerTalkClass->ClearMenus();
     switch(uiAction)
     {
         case GOSSIP_ACTION_INFO_DEF + 1:
@@ -253,6 +254,7 @@ bool GossipHello_npc_great_bear_spirit(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_npc_great_bear_spirit(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
+    pPlayer->PlayerTalkClass->ClearMenus();
     switch(uiAction)
     {
         case GOSSIP_ACTION_INFO_DEF:
@@ -310,6 +312,7 @@ bool GossipHello_npc_silva_filnaveth(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_npc_silva_filnaveth(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
+    pPlayer->PlayerTalkClass->ClearMenus();
     switch(uiAction)
     {
         case GOSSIP_ACTION_INFO_DEF + 1:

@@ -110,6 +110,9 @@ struct MANGOS_DLL_DECL boss_talon_king_ikissAI : public ScriptedAI
             case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
         }
+
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_IKISS, IN_PROGRESS);
     }
 
     void JustDied(Unit* Killer)
@@ -117,7 +120,13 @@ struct MANGOS_DLL_DECL boss_talon_king_ikissAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(DATA_IKISSDOOREVENT, DONE);
+            m_pInstance->SetData(TYPE_IKISS, DONE);
+    }
+
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_IKISS, FAIL);
     }
 
     void KilledUnit(Unit* victim)
@@ -184,8 +193,7 @@ struct MANGOS_DLL_DECL boss_talon_king_ikissAI : public ScriptedAI
                 float Y = target->GetPositionY();
                 float Z = target->GetPositionZ();
 
-                m_creature->GetMap()->CreatureRelocation(m_creature,X,Y,Z,0.0f);
-                m_creature->SendMonsterMove(X, Y, Z, SPLINETYPE_NORMAL, SPLINEFLAG_WALKMODE, 1);
+                m_creature->MonsterMove(X, Y, Z, 1);
 
                 DoCastSpellIfCan(target,SPELL_BLINK_TELEPORT);
                 Blink = true;
