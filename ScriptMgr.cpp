@@ -17,10 +17,16 @@ Script *m_scripts[MAX_SCRIPTS];
 
 Config SD2Config;
 
+QueryResult* strSD2Pquery(char* str)
+{
+return SD2Database.Query(str);
+}
+
 void FillSpellSummary();
 
 void LoadDatabase()
 {
+
     std::string strSD2DBinfo = SD2Config.GetStringDefault("ScriptDev2DatabaseInfo", "");
 
     if (strSD2DBinfo.empty())
@@ -47,8 +53,6 @@ void LoadDatabase()
         return;
     }
 
-    SD2Database.HaltDelayThread();
-
 }
 
 struct TSpellSummary {
@@ -67,6 +71,7 @@ void ScriptsFree()
         delete m_scripts[i];
 
     num_sc_scripts = 0;
+    SD2Database.HaltDelayThread();
 }
 
 MANGOS_DLL_EXPORT
@@ -270,7 +275,9 @@ bool GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 
     if (!tmpscript || !tmpscript->pGossipSelect)
         return false;
 
-    pPlayer->PlayerTalkClass->ClearMenus();
+//    pPlayer->PlayerTalkClass->ClearMenus();
+//    this expression is wrong, where 'return false' from script's GossipSelect
+//    not return menu ID (cleared in this string) and not allow to work with database-based menus
 
     return tmpscript->pGossipSelect(pPlayer, pCreature, uiSender, uiAction);
 }
