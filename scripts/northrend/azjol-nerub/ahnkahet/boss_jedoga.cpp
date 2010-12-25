@@ -341,29 +341,29 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
                     {
                         if (pChosenVolunteer->isAlive())
                             pChosenVolunteer->DealDamage(pChosenVolunteer, pChosenVolunteer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-
-                        if (volunteerGUIDList.empty() || victimCounter >= 6)
-                        {
-                            DepawnVolunteers();
-                            SpawnVolunteers();
-                            victimCounter = 0;
-                        }
-
-                        m_creature->NearTeleportTo(CORD_CENTER_X, CORD_CENTER_Y, CORD_CENTER_Z, START_O);
-                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        {
-                            m_creature->GetMotionMaster()->MoveChase(pTarget);
-                            m_creature->Attack(pTarget, true);
-                        }
-
-                        if (Creature* pVisualTrigger = m_creature->GetMap()->GetCreature(pVisualTriggerGUID))
-                            pVisualTrigger->ForcedDespawn();
-                        
-                        victimCounter++;
-                        volunteerPhase = false;
-                        volunteerDeathTimer = 0;
                     }
+                    if (volunteerGUIDList.empty() || victimCounter >= 6)
+                    {
+                        DepawnVolunteers();
+                        SpawnVolunteers();
+                        victimCounter = 0;
+                    }
+
+                    m_creature->NearTeleportTo(CORD_CENTER_X, CORD_CENTER_Y, CORD_CENTER_Z, START_O);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        m_creature->GetMotionMaster()->MoveChase(pTarget);
+                        m_creature->Attack(pTarget, true);
+                    }
+
+                    if (Creature* pVisualTrigger = m_creature->GetMap()->GetCreature(pVisualTriggerGUID))
+                        pVisualTrigger->ForcedDespawn();
+                    
+                    victimCounter++;
+                    volunteerPhase = false;
+                    volunteerDeathTimer = 0;
+                    
                 }else volunteerDeathTimer -= uiDiff;
             }
         }
