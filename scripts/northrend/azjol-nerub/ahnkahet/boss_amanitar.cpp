@@ -222,11 +222,7 @@ struct MANGOS_DLL_DECL npc_amanitar_healthy_mushroomAI : public ScriptedAI
 
     void JustDied(Unit* pWho)
     {
-        if (pWho->HasAura(SPELL_MINI, EFFECT_INDEX_0) || pWho->HasAura(SPELL_MINI, EFFECT_INDEX_1) || pWho->HasAura(SPELL_MINI, EFFECT_INDEX_2))
-        {   
-            pWho->RemoveAurasDueToSpell(SPELL_MINI);
-            m_creature->CastSpell(m_creature, SPELL_POTENT_FUNGUS, true);
-        }
+        m_creature->CastSpell(m_creature, SPELL_POTENT_FUNGUS, true);
     }
 };
 
