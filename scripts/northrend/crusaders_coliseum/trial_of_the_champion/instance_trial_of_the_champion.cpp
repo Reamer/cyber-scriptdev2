@@ -111,6 +111,8 @@ struct MANGOS_DLL_DECL instance_trial_of_the_champion : public ScriptedInstance
 
     void OnPlayerEnter(Player *pPlayer)
     {
+
+
         //if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP)) return;
 
         switch (pPlayer->GetTeam())

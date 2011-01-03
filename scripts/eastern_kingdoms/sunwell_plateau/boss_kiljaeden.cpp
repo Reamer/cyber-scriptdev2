@@ -1431,7 +1431,7 @@ struct MANGOS_DLL_DECL mob_kiljaeden_controllerAI : public Scripted_NoMovementAI
 /*######
 ## go_orb_of_the_blue_fight
 ######*/
-bool GOHello_go_orb_of_the_blue_flight(Player* pPlayer, GameObject* pGo)
+bool GOUse_go_orb_of_the_blue_flight(Player* pPlayer, GameObject* pGo)
 {
     if (ScriptedInstance* pInstance = (ScriptedInstance*)pPlayer->GetInstanceData())
     {
@@ -1522,6 +1522,6 @@ void AddSC_boss_kiljaden()
 
 	newscript = new Script;
     newscript->Name = "go_orb_of_the_blue_flight";
-	newscript->pGOHello = &GOHello_go_orb_of_the_blue_flight;
+	newscript->pGOUse = &GOUse_go_orb_of_the_blue_flight;
     newscript->RegisterSelf();
 }

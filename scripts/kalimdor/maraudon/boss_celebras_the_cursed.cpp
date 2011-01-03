@@ -140,7 +140,7 @@ CreatureAI* GetAI_npc_celebras(Creature* pCreature)
     return new npc_celebrasAI(pCreature);
 }
 
-bool QuestAccept_npc_celebras(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAcceptNPC_npc_celebras(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_THE_SCEPTER_OF_CELEBRAS)
     {
@@ -162,6 +162,6 @@ void AddSC_boss_celebras_the_cursed()
 	newscript = new Script;
 	newscript->Name = "npc_celebras_the_redeemed";
 	newscript->GetAI = &GetAI_npc_celebras;
-    newscript->pQuestAccept = &QuestAccept_npc_celebras;
+    newscript->pQuestAcceptNPC = &QuestAcceptNPC_npc_celebras;
     newscript->RegisterSelf();
 }

@@ -30,7 +30,7 @@ EndScriptData */
 #define BRIDGE_GUARD_Z              118.949997f
 #define BRIDGE_GUARD_O              2.434944f
 
-bool GOHello_go_gundrak_altar(Player* pPlayer, GameObject* pGo)
+bool GOUse_go_gundrak_altar(Player* pPlayer, GameObject* pGo)
 {
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
@@ -344,7 +344,7 @@ void AddSC_instance_gundrak()
 
     pNewScript = new Script;
     pNewScript->Name = "go_gundrak_altar";
-    pNewScript->pGOHello = &GOHello_go_gundrak_altar;
+    pNewScript->pGOUse = &GOUse_go_gundrak_altar;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
