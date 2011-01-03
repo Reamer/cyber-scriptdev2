@@ -543,7 +543,7 @@ struct MANGOS_DLL_DECL boss_kalecgos_humanoidAI : public ScriptedAI
     }
 };
 
-bool GOHello_go_spectral_rift(Player* pPlayer, GameObject* pGo)
+bool GOUse_go_spectral_rift(Player* pPlayer, GameObject* pGo)
 {
     if (pGo->GetGoType() != GAMEOBJECT_TYPE_GOOBER)
         return true;
@@ -601,7 +601,7 @@ void AddSC_boss_kalecgos()
     newscript->RegisterSelf();
 
     newscript = new Script;
-    newscript->pGOHello = &GOHello_go_spectral_rift;
+    newscript->pGOUse = &GOUse_go_spectral_rift;
     newscript->Name = "go_spectral_rift";
     newscript->RegisterSelf();
 }

@@ -347,7 +347,7 @@ bool QuestAccept_npc_chicken_cluck(Player* pPlayer, Creature* pCreature, const Q
     return true;
 }
 
-bool QuestComplete_npc_chicken_cluck(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestRewarded_npc_chicken_cluck(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_CLUCK)
     {
@@ -1267,7 +1267,7 @@ bool GossipHello_npc_mount_vendor(Player* pPlayer, Creature* pCreature)
             else canBuy = true;
             break;
         case 4731:                                          //Zachariah Post
-            if (pPlayer->GetReputationRank(68) != REP_EXALTED && race != RACE_UNDEAD_PLAYER)
+            if (pPlayer->GetReputationRank(68) != REP_EXALTED && race != RACE_UNDEAD)
                 pPlayer->SEND_GOSSIP_MENU(5840, pCreature->GetGUID());
             else canBuy = true;
             break;
@@ -1316,42 +1316,27 @@ bool GossipSelect_npc_mount_vendor(Player* pPlayer, Creature* pCreature, uint32 
 
 bool GossipHello_npc_rogue_trainer(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+   if (pPlayer->getClass() != CLASS_ROGUE) return false;
 
-    if (pCreature->isTrainer())
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
-
-    if (pCreature->CanTrainAndResetTalentsOf(pPlayer))
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "I wish to unlearn my talents", GOSSIP_SENDER_MAIN, GOSSIP_OPTION_UNLEARNTALENTS);
-
-    if (pPlayer->getClass() == CLASS_ROGUE && pPlayer->getLevel() >= 24 && !pPlayer->HasItemCount(17126,1) && !pPlayer->GetQuestRewardStatus(6681))
-    {
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<Take the letter>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-        pPlayer->SEND_GOSSIP_MENU(5996, pCreature->GetGUID());
-    } else
-        pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
-
-    return true;
+   if (pPlayer->getLevel() >= 24 && !pPlayer->HasItemCount(17126,1) && !pPlayer->GetQuestRewardStatus(6681))
+        if (pCreature->isQuestGiver())
+           {
+            pPlayer->PrepareGossipMenu(pCreature,50195);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<Take the letter>", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            pPlayer->SEND_GOSSIP_MENU(5996, pCreature->GetGUID());
+            return true;
+           }
+    return false;
 }
 
 bool GossipSelect_npc_rogue_trainer(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    switch(uiAction)
-    {
-        case GOSSIP_ACTION_INFO_DEF+1:
-            pPlayer->CLOSE_GOSSIP_MENU();
+      if (uiAction == GOSSIP_ACTION_INFO_DEF)
+      {
             pPlayer->CastSpell(pPlayer,21100,false);
-            break;
-        case GOSSIP_ACTION_TRAIN:
-            pPlayer->SEND_TRAINERLIST(pCreature->GetGUID());
-            break;
-        case GOSSIP_OPTION_UNLEARNTALENTS:
             pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->SendTalentWipeConfirm(pCreature->GetGUID());
-            break;
-    }
-    return true;
+            return true;
+      } else return false;
 }
 
 /*######
@@ -2319,6 +2304,96 @@ CreatureAI* GetAI_npc_risen_ally(Creature* pCreature)
     return new npc_risen_allyAI(pCreature);
 }
 
+struct MANGOS_DLL_DECL npc_explosive_decoyAI : public ScriptedAI
+{
+    npc_explosive_decoyAI(Creature *pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    Player* p_owner;
+
+    void Reset()
+    {
+        p_owner = NULL;
+        SetCombatMovement(false);
+    }
+
+    void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
+    {
+        if (!m_creature || !m_creature->isAlive())
+            return;
+
+        if (uiDamage > 0)
+            m_creature->CastSpell(m_creature, 53273, true);
+    }
+
+    void JustDied(Unit* killer)
+    {
+        if (!m_creature || !p_owner)
+            return;
+
+        SpellEntry const* createSpell = GetSpellStore()->LookupEntry(m_creature->GetUInt32Value(UNIT_CREATED_BY_SPELL));
+
+        if (createSpell)
+            p_owner->SendCooldownEvent(createSpell);
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (p_owner)
+            return;
+
+        p_owner = m_creature->GetMap()->GetPlayer(m_creature->GetCreatorGuid());
+
+        if (!p_owner) 
+            return;
+
+        m_creature->setFaction(p_owner->getFaction());
+        m_creature->SetCreatorGuid(ObjectGuid());
+    }
+};
+
+CreatureAI* GetAI_npc_explosive_decoy(Creature* pCreature)
+{
+    return new npc_explosive_decoyAI(pCreature);
+}
+
+struct MANGOS_DLL_DECL npc_eye_of_kilrogg : public ScriptedAI
+{
+    npc_eye_of_kilrogg(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+
+    Player* p_owner;
+
+    void Reset()
+    {
+        p_owner = NULL;
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (p_owner)
+            return;
+
+        p_owner = (Player*)m_creature->GetCharmerOrOwner();
+
+        if (!p_owner)
+            return;
+
+        if (!m_creature->HasAura(2585))
+            m_creature->CastSpell(m_creature, 2585, true);
+
+        if (p_owner->HasAura(58081))
+            m_creature->CastSpell(m_creature, 58083, true);
+
+    }
+};
+
+CreatureAI* GetAI_npc_eye_of_kilrogg(Creature* pCreature)
+{
+    return new npc_eye_of_kilrogg(pCreature);
+}
+
 void AddSC_npcs_special()
 {
     Script* newscript;
@@ -2331,8 +2406,8 @@ void AddSC_npcs_special()
     newscript = new Script;
     newscript->Name = "npc_chicken_cluck";
     newscript->GetAI = &GetAI_npc_chicken_cluck;
-    newscript->pQuestAccept =   &QuestAccept_npc_chicken_cluck;
-    newscript->pQuestComplete = &QuestComplete_npc_chicken_cluck;
+    newscript->pQuestAcceptNPC =   &QuestAccept_npc_chicken_cluck;
+    newscript->pQuestRewardedNPC = &QuestRewarded_npc_chicken_cluck;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -2348,7 +2423,7 @@ void AddSC_npcs_special()
     newscript = new Script;
     newscript->Name = "npc_doctor";
     newscript->GetAI = &GetAI_npc_doctor;
-    newscript->pQuestAccept = &QuestAccept_npc_doctor;
+    newscript->pQuestAcceptNPC = &QuestAccept_npc_doctor;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -2442,5 +2517,15 @@ void AddSC_npcs_special()
     newscript = new Script;
     newscript->Name = "npc_risen_ally";
     newscript->GetAI = &GetAI_npc_risen_ally;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_explosive_decoy";
+    newscript->GetAI = &GetAI_npc_explosive_decoy;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_eye_of_kilrogg";
+    newscript->GetAI = &GetAI_npc_eye_of_kilrogg;
     newscript->RegisterSelf();
 }

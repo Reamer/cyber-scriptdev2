@@ -17,134 +17,13 @@
 /* ScriptData
 SDName: Feralas
 SD%Complete: 100
-SDComment: Quest support: 3520, 2767,2845 Special vendor Gregan Brewspewer
+SDComment: Quest support: 3520, 2767. Special vendor Gregan Brewspewer
 SDCategory: Feralas
 EndScriptData */
 
 #include "precompiled.h"
 #include "escort_ai.h"
-#include "follower_ai.h"
 
-/*######
-## npc_shay_leafrunner
-######*/
-enum
-{
-	SPELL_STANDUP			 = 11402,
-	QUEST_WANDERING_SHAY     = 2845,
-	NPC_ROCKBITER			 = 7765
-};
-struct Locations
-{
-    float x, y, z;
-};
-static Locations ShayWP[]=
-{
-	{-3009.97f, 2560.86f, 39.05f},                            // Start
-	{-3009.17f, 2684.55f, 42.42f},
-	{-3159.04f, 2485.20f, 95.52f},
-	{-2864.91f, 2699.52f, 74.07f},
-};
-struct MANGOS_DLL_DECL npc_shayAI : public FollowerAI
-{
-    npc_shayAI(Creature* pCreature) : FollowerAI(pCreature) { Reset();}
-
-	uint32 m_uiSitdownTimer;
-
-    void Reset()
-	{
-		m_uiSitdownTimer = urand(45000, 75000);
-	}
-
-    void MoveInLineOfSight(Unit *pWho)
-    {
-        FollowerAI::MoveInLineOfSight(pWho);
-
-        if (!m_creature->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && pWho->GetEntry() == NPC_ROCKBITER)
-        {
-            if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE*2))
-            {
-                if (Player* pPlayer = GetLeaderForFollower())
-                {
-                    if (pPlayer->GetQuestStatus(QUEST_WANDERING_SHAY) == QUEST_STATUS_INCOMPLETE)
-                        pPlayer->GroupEventHappens(QUEST_WANDERING_SHAY, m_creature);
-                }
-
-                SetFollowComplete();
-            }
-        }
-    }
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
-    {
-        if (HasFollowState(STATE_FOLLOW_INPROGRESS | STATE_FOLLOW_PAUSED) && pSpell->Id == SPELL_STANDUP)
-            StandUp();
-    }
-
-    void SetSiting()
-    {
-		m_creature->SetStandState(UNIT_STAND_STATE_SIT);
-    }
-
-    void StandUp()
-    {
-        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        SetFollowPaused(false);
-    }
-
-	void GoAway()
-	{
-		SetFollowPaused(true);
-		uint32 id = urand(0,3);
-		m_creature->GetMotionMaster()->MovePoint(id, ShayWP[id].x, ShayWP[id].y, ShayWP[id].z);
-	}
-	void MovementInform(uint32 type, uint32 id)
-	{
-		if ( id == 0 || id == 1 || id == 2 || id == 3 )
-			SetSiting();
-	}
-    void UpdateFollowerAI(const uint32 uiDiff)
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        {
-            if (!HasFollowState(STATE_FOLLOW_INPROGRESS))
-                return;
-
-            if (!HasFollowState(STATE_FOLLOW_PAUSED))
-            {
-                if (m_uiSitdownTimer < uiDiff)
-                {
-					GoAway();
-                    m_uiSitdownTimer = urand(45000, 75000);
-                }
-                else
-                    m_uiSitdownTimer -= uiDiff;
-            }
-
-            return;
-        }
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-CreatureAI* GetAI_npc_shay(Creature* pCreature)
-{
-    return new npc_shayAI(pCreature);
-}
-
-bool QuestAccept_npc_shay(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_WANDERING_SHAY)
-    {
-        if (npc_shayAI* pshayAI = dynamic_cast<npc_shayAI*>(pCreature->AI()))
-        {
-            pCreature->SetStandState(UNIT_STAND_STATE_STAND);
-            pshayAI->StartFollow(pPlayer, FACTION_ESCORT_N_FRIEND_PASSIVE, pQuest);
-        }
-    }
-
-    return true;
-}
 /*######
 ## npc_gregan_brewspewer
 ######*/
@@ -303,12 +182,6 @@ void AddSC_feralas()
     Script *newscript;
 
     newscript = new Script;
-    newscript->Name = "npc_shay";
-    newscript->GetAI = &GetAI_npc_shay;
-    newscript->pQuestAccept = &QuestAccept_npc_shay;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
     newscript->Name = "npc_gregan_brewspewer";
     newscript->pGossipHello = &GossipHello_npc_gregan_brewspewer;
     newscript->pGossipSelect = &GossipSelect_npc_gregan_brewspewer;
@@ -317,7 +190,7 @@ void AddSC_feralas()
     newscript = new Script;
     newscript->Name = "npc_oox22fe";
     newscript->GetAI = &GetAI_npc_oox22fe;
-    newscript->pQuestAccept = &QuestAccept_npc_oox22fe;
+    newscript->pQuestAcceptNPC = &QuestAccept_npc_oox22fe;
     newscript->RegisterSelf();
 
     newscript = new Script;

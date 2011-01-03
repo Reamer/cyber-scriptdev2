@@ -347,7 +347,7 @@ CreatureAI* GetAI_mob_taldaram_flame_orb(Creature* pCreature)
 ## go_nerubian_device
 ######*/
 
-bool GOHello_go_nerubian_device(Player* pPlayer, GameObject* pGo)
+bool GOUse_go_nerubian_device(Player* pPlayer, GameObject* pGo)
 {
     ScriptedInstance* pInstance = (instance_ahnkahet*)pGo->GetInstanceData();
 
@@ -375,6 +375,6 @@ void AddSC_boss_taldaram()
 
     newscript = new Script;
     newscript->Name = "go_nerubian_device";
-    newscript->pGOHello = &GOHello_go_nerubian_device;
+    newscript->pGOUse = &GOUse_go_nerubian_device;
     newscript->RegisterSelf();
 }

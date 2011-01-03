@@ -183,7 +183,7 @@ InstanceData* GetInstanceData_instance_dire_maul(Map* pMap)
     return new instance_dire_maul(pMap);
 }
 
-bool GOHello_go_dire_maul_generator(Player* pPlayer, GameObject* pGo)
+bool GOUse_go_dire_maul_generator(Player* pPlayer, GameObject* pGo)
 {
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
@@ -211,6 +211,6 @@ void AddSC_instance_dire_maul()
 
 	newscript = new Script;
     newscript->Name = "go_dire_maul_generator";
-    newscript->pGOHello = &GOHello_go_dire_maul_generator;
+    newscript->pGOUse = &GOUse_go_dire_maul_generator;
     newscript->RegisterSelf();
 }
