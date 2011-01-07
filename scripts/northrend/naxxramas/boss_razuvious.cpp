@@ -180,7 +180,8 @@ bool GossipHello_obedience_crystal(Player* pPlayer, Creature* pCreature)
                 return true;
             }
         }
-    } 
+    }
+    return false;
 }
 
 void AddSC_boss_razuvious()
