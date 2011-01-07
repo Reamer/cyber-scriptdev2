@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -89,16 +89,14 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
 
     void spawnMushroom()
     {
-        float posX, posY, posZ;
-        int32 randX,randY;
-        for(int i = 0; i < 8;i++)
+        for (int i = 0; i < 8;i++)
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
-                randX = rand()%30;
-                randY = rand()%30;
-                posX = pTarget->GetPositionX() + (urand(0,1)? (randX) : (-randX));
-                posY = pTarget->GetPositionY() + (urand(0,1)? (randY) : (-randY));
-                posZ = pTarget->GetMap()->GetTerrain()->GetWaterLevel(posX,posY,pTarget->GetPositionZ()+3);
+                float posX = urand(1,100)%30;
+                float posY = urand(1,100)%30;
+                posX = pTarget->GetPositionX() + (urand(0,1)? (posX) : (-posX));
+                posY = pTarget->GetPositionY() + (urand(0,1)? (posY) : (-posY));
+                float posZ = pTarget->GetTerrain()->GetWaterOrGroundLevel(posX,posY,pTarget->GetPositionZ()+3);
 
                 Creature* pMushroom = m_creature->SummonCreature(!urand(0, 4) ? NPC_HEALTHY_MUSHROOM : NPC_POISONOUS_MUSHROOM, posX, posY, posZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000);
                 m_lMushroomGUIDList.push_back(pMushroom->GetGUID());

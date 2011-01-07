@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+# Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -632,6 +632,7 @@ scripts/world/mob_generic_creature.cpp \
 scripts/world/npc_professions.cpp \
 scripts/world/npcs_special.cpp \
 scripts/world/spell_scripts.cpp \
+system/MangosdRev.cpp \
 system/ScriptLoader.cpp \
 system/ScriptLoader.h \
 system/system.cpp \

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/> 
+/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/> 
 * This program is free software; you can redistribute it and/or modify 
 * it under the terms of the GNU General Public License as published by 
 * the Free Software Foundation; either version 2 of the License, or 
@@ -156,6 +156,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, NOT_STARTED);
+        RemoveInsanity();
     } 
  
     void Aggro(Unit* pWho) 
@@ -197,39 +198,67 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature); 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, DONE);
-    } 
-
-    void setPlayersPhase()
-    {
-        int i = 1;
-
+        RemoveInsanity();
+    }
+    void RemoveInsanity(){
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
+        { 
+            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+            { 
+                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
+                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
+                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_64);
+                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_128);
+                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_256);
+            } 
+        }
+    }
+
+    void setPlayersPhase()
+    {
+        uint8 i = 1;
+
+        Map* pMap = m_creature->GetMap();
+        Map::PlayerList const &players = pMap->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
             if(Player* target = pMap->GetPlayer(itr->getSource()->GetGUID())) 
             {
                 switch(i)
                 {
                     case 1:
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
+                    {
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_16, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
                         break;
+                    }
                     case 2:
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
+                    {
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_32, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
                         break;
+                    }
                     case 3:
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
+                    {
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_64, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
                         break;
+                    }
                     case 4:
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
+                    {
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_128, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
                         break;
+                    }
                     case 5:
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                    {
+                        target->CastSpell(target, SPELL_INSANITY_PHASE_256, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
                         break;
+                    }
                     default:
                         break;
                 }
                 i++;
             }
+        }
     }
  
     void createClassMirrors() 
@@ -517,7 +546,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     { 
                         if (target->HasAura(SPELL_INSANITY_PHASE_16))
                         {
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
                             if (!clone32)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
                             else if (!clone64)
@@ -526,6 +554,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
                             else if (!clone256)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
                         }
                     } 
                 }
@@ -543,7 +572,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     { 
                         if (target->HasAura(SPELL_INSANITY_PHASE_32))
                         {
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
                             if (!clone16)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
                             else if (!clone64)
@@ -552,6 +580,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
                             else if (!clone256)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
                         }
                     } 
                 }
@@ -569,7 +598,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     { 
                         if (target->HasAura(SPELL_INSANITY_PHASE_64))
                         {
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_64);
                             if (!clone16)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
                             else if (!clone32)
@@ -578,6 +606,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
                             else if (!clone256)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_64);
                         }
                     } 
                 }
@@ -595,7 +624,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     { 
                         if (target->HasAura(SPELL_INSANITY_PHASE_128))
                         {
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_128);
                             if (!clone16)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
                             else if (!clone32)
@@ -604,6 +632,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
                             else if (!clone256)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_128);
                         }
                     } 
                 }
@@ -621,7 +650,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     { 
                         if (target->HasAura(SPELL_INSANITY_PHASE_256))
                         {
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_256);
                             if (!clone16)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
                             else if (!clone32)
@@ -629,7 +657,8 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                             else if (!clone64)
                                 target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
                             else if (!clone128)
-                            target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
+                                target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
+                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_256);
                         }
                     } 
                 }

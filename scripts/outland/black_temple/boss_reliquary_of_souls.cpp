@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -33,7 +33,7 @@ EndScriptData */
 #define SUFF_SAY_SLAY3              -1564051
 #define SUFF_SAY_RECAP              -1564052
 #define SUFF_SAY_AFTER              -1564053
-#define SUFF_EMOTE_ENRAGE           -1564054
+#define EMOTE_BOSS_GENERIC_ENRAGED  -1000006
 
 //Desire
 #define DESI_SAY_FREED              -1564055
@@ -679,7 +679,6 @@ struct MANGOS_DLL_DECL boss_essence_of_sufferingAI : public ScriptedAI
         if (EnrageTimer < diff)
         {
             DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
-            DoScriptText(SUFF_EMOTE_ENRAGE, m_creature);
             EnrageTimer = 60000;
         }else EnrageTimer -= diff;
 
