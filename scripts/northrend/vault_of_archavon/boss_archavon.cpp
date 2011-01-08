@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Archavon_The_Stone_Watcher
-SD%Complete: 0%
+SD%Complete: 90%
 SDComment:
 SDCategory: Vault of Archavon
 EndScriptData */
@@ -26,12 +26,9 @@ EndScriptData */
 
 enum
 {
-    SPELL_ROCK_SHARDS_LEFT_N                = 58695,
-    SPELL_ROCK_SHARDS_LEFT_H                = 60883,
-    SPELL_ROCK_SHARDS_RIGHT_N               = 58696,
-    SPELL_ROCK_SHARDS_RIGHT_H               = 60884,
-    SPELL_CRUSHING_LEAP_N                   = 58963,
-    SPELL_CRUSHING_LEAP_H                   = 60895,
+    SPELL_ROCK_SHARDS                       = 58678,
+    SPELL_CRUSHING_LEAP_N                   = 58960,
+    SPELL_CRUSHING_LEAP_H                   = 60894,
     SPELL_STOMP_N                           = 58663,
     SPELL_STOMP_H                           = 60880,
     SPELL_IMPALE_DMG_N                      = 58666,
@@ -46,7 +43,6 @@ struct MANGOS_DLL_DECL boss_archavonAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_fDefaultMoveSpeed = pCreature->GetSpeedRate(MOVE_RUN);
         Reset();
     }
 
@@ -57,15 +53,7 @@ struct MANGOS_DLL_DECL boss_archavonAI : public ScriptedAI
 
     uint32 m_uiBerserkTimer;
     uint32 m_uiRockShardsTimer;
-    bool m_bRockShardsInProgress;
-    uint32 m_uiRockShardsProgressTimer;
-    uint32 m_uiRockShardTimer;
-    bool m_bRLRockShard;
-    Unit* m_pRockShardsTarget;
     uint32 m_uiCrushingLeapTimer;
-    Unit* m_pCrushingLeapTarget;
-    bool m_bCrushingLeapInProgress;
-    uint32 m_uiCrushingLeapSecureTimer;
     uint32 m_uiStompTimer;
     uint32 m_uiImpaleAfterStompTimer;
     bool m_bImpaleInProgress;
@@ -73,18 +61,9 @@ struct MANGOS_DLL_DECL boss_archavonAI : public ScriptedAI
     void Reset()
     {
         m_uiEvadeCheckCooldown = 2000;
-        m_creature->SetSpeedRate(MOVE_RUN, m_fDefaultMoveSpeed);
         m_uiBerserkTimer = 300000;
         m_uiRockShardsTimer = 15000;
-        m_bRockShardsInProgress = false;
-        m_uiRockShardsProgressTimer = 3000;
-        m_uiRockShardTimer = 0;
-        m_bRLRockShard = true;
-        m_pRockShardsTarget = NULL;
         m_uiCrushingLeapTimer = 30000;
-        m_pCrushingLeapTarget = NULL;
-        m_bCrushingLeapInProgress = false;
-        m_uiCrushingLeapSecureTimer = 2000;
         m_uiStompTimer = 45000;
         m_uiImpaleAfterStompTimer = 1000;
         m_bImpaleInProgress = false;
@@ -137,69 +116,10 @@ struct MANGOS_DLL_DECL boss_archavonAI : public ScriptedAI
             }
         }
 
-        if (m_bCrushingLeapInProgress)
-        {
-            if (m_pCrushingLeapTarget)
-            {
-                if (m_pCrushingLeapTarget->isDead() || !m_pCrushingLeapTarget->IsInWorld() && !m_pCrushingLeapTarget->IsInMap(m_creature))
-                {
-                    m_bCrushingLeapInProgress = false;
-                    return;
-                }
-            }
-            else
-            {
-                m_bCrushingLeapInProgress = false;
-                return;
-            }
-            if ((m_uiCrushingLeapSecureTimer < uiDiff) || (m_pCrushingLeapTarget && m_creature->IsWithinDist(m_pCrushingLeapTarget, 5.0f)))
-            {
-                m_creature->getThreatManager().addThreat(m_pCrushingLeapTarget, -100000000.0f);
-                m_creature->SetSpeedRate(MOVE_RUN, m_fDefaultMoveSpeed);
-                DoCastSpellIfCan(m_pCrushingLeapTarget, m_bIsRegularMode ? SPELL_CRUSHING_LEAP_N : SPELL_CRUSHING_LEAP_H, true);
-                m_bCrushingLeapInProgress = false;
-            }
-            else
-                m_uiCrushingLeapSecureTimer -= uiDiff;
-
-            return;
-        }
-
-        if (m_bRockShardsInProgress)
-        {
-            if (m_uiRockShardsProgressTimer < uiDiff)
-            {
-                m_bRockShardsInProgress = false;
-                if (m_pRockShardsTarget)
-                    m_creature->getThreatManager().addThreat(m_pRockShardsTarget, -100000000.0f);
-                return;
-            }
-            else
-                m_uiRockShardsProgressTimer -= uiDiff;
-
-            if (m_uiRockShardTimer < uiDiff)
-            {
-                if (m_pRockShardsTarget && m_pRockShardsTarget->isAlive())
-                {
-                    DoCast(m_pRockShardsTarget, m_bIsRegularMode ? (m_bRLRockShard ? SPELL_ROCK_SHARDS_LEFT_N : SPELL_ROCK_SHARDS_RIGHT_N) : (m_bRLRockShard ? SPELL_ROCK_SHARDS_LEFT_H : SPELL_ROCK_SHARDS_RIGHT_H));
-                    m_bRLRockShard = !m_bRLRockShard;
-                }
-                m_uiRockShardTimer = 100;
-            }
-            else
-                m_uiRockShardsTimer -= uiDiff;
-
-            return;
-        }
-
         if (m_uiRockShardsTimer < uiDiff)
         {
-            m_bRockShardsInProgress = true;
-            m_uiRockShardsProgressTimer = 3000;
-            m_bRLRockShard = true;
-            m_pRockShardsTarget = NULL;
-            if (m_pRockShardsTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                m_creature->getThreatManager().addThreat(m_pRockShardsTarget, 100000000.0f);
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                DoCast(pTarget, SPELL_ROCK_SHARDS);
             m_uiRockShardsTimer = 15000+rand()%15000;
             return;
         }
@@ -216,19 +136,14 @@ struct MANGOS_DLL_DECL boss_archavonAI : public ScriptedAI
                 if (pTemp && pTemp->GetTypeId() == TYPEID_PLAYER && !m_creature->IsWithinDist(pTemp, 10.0f) && m_creature->IsWithinDist(pTemp, 80.0f))
                     lTargets.push_back(pTemp);
             }
-            m_pCrushingLeapTarget = NULL;
             if (!lTargets.empty())
             {
                 std::list<Unit*>::iterator pTarget = lTargets.begin();
                 advance(pTarget, (rand() % lTargets.size()));
-                m_pCrushingLeapTarget = *pTarget;
+                Unit* m_pCrushingLeapTarget = *pTarget;
                 if (m_pCrushingLeapTarget)
                 {
-                    m_creature->MonsterSay(m_pCrushingLeapTarget->GetName(), LANG_UNIVERSAL);
-                    m_creature->getThreatManager().addThreat(m_pCrushingLeapTarget, 100000000.0f);
-                    m_creature->SetSpeedRate(MOVE_RUN, m_fDefaultMoveSpeed*10.0f);
-                    m_bCrushingLeapInProgress = true;
-                    m_uiCrushingLeapSecureTimer = 2000;
+                    DoCast(m_pCrushingLeapTarget, m_bIsRegularMode ? SPELL_CRUSHING_LEAP_N : SPELL_CRUSHING_LEAP_H, true);
                 }
             }
             m_uiCrushingLeapTimer = 30000+rand()%15000;
