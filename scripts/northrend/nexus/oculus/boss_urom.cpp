@@ -130,12 +130,12 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
 
     void DoSummon(uint32 Entry01, uint32 Entry02, uint32 Entry03, uint32 Entry04, uint32 Entry05 = 0)
     {
-       m_creature->SummonCreature(Entry01, m_creature->GetPositionX() - (10.0f) * cos(M_PI / 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI / 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
-       m_creature->SummonCreature(Entry02, m_creature->GetPositionX() - (10.0f) * cos(M_PI * 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI * 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
-       m_creature->SummonCreature(Entry03, m_creature->GetPositionX() - (10.0f) * cos(M_PI + M_PI / 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI + M_PI / 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
-       m_creature->SummonCreature(Entry04, m_creature->GetPositionX() - (10.0f) * cos(M_PI), m_creature->GetPositionY() - (10.0f) * sin(M_PI), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
+       m_creature->SummonCreature(Entry01, m_creature->GetPositionX() - (10.0f) * cos(M_PI / 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI / 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000);
+       m_creature->SummonCreature(Entry02, m_creature->GetPositionX() - (10.0f) * cos(M_PI * 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI * 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000);
+       m_creature->SummonCreature(Entry03, m_creature->GetPositionX() - (10.0f) * cos(M_PI + M_PI / 2), m_creature->GetPositionY() - (10.0f) * sin(M_PI + M_PI / 2), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000);
+       m_creature->SummonCreature(Entry04, m_creature->GetPositionX() - (10.0f) * cos(M_PI), m_creature->GetPositionY() - (10.0f) * sin(M_PI), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000);
        if(Entry05 != 0)
-          m_creature->SummonCreature(Entry05, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
+          m_creature->SummonCreature(Entry05, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 15000);
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
@@ -192,6 +192,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
                 DoScriptText(SAY_SUMMON_1, m_creature);
                 DoSummon(NPC_PHANTASMAL_FIRE, NPC_PHANTASMAL_FIRE, NPC_PHANTASMAL_AIR, NPC_PHANTASMAL_WATER);
                 DoCast(m_creature, SPELL_SUMMON_MENAGERIE);
+                TeleportBoss(Teleport[1].x, Teleport[1].y, Teleport[1].z, Teleport[1].o);
                 m_pInstance->SetData(TYPE_UROM_PHASE, 1);
                 break;
             case 1:
@@ -199,6 +200,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
                 DoScriptText(SAY_SUMMON_2, m_creature);
                 DoSummon(NPC_PHANTASMAL_OGRE, NPC_PHANTASMAL_OGRE, NPC_PHANTASMAL_NAGA, NPC_PHANTASMAL_MURLOC);
                 DoCast(m_creature, SPELL_SUMMON_MENAGERIE_2);
+                TeleportBoss(Teleport[2].x, Teleport[2].y, Teleport[2].z, Teleport[2].o);
                 m_pInstance->SetData(TYPE_UROM_PHASE, 2);
                 break;
             case 2:
@@ -206,6 +208,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
                 DoScriptText(SAY_SUMMON_3, m_creature);
                 DoSummon(NPC_PHANTASMAL_MAMMOTH, NPC_PHANTASMAL_WOLF, NPC_PHANTASMAL_WOLF, NPC_PHANTASMAL_CLOUDSCRAPER, NPC_PHANTASMAL_CLOUDSCRAPER);
                 DoCast(m_creature, SPELL_SUMMON_MENAGERIE_3);
+                TeleportBoss(Teleport[3].x, Teleport[3].y, Teleport[3].z, Teleport[3].o);
                 m_pInstance->SetData(TYPE_UROM_PHASE, 3);
                 break;
             case 3:
@@ -253,7 +256,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
                return;
        }
        m_pInstance->SetData(TYPE_UROM, FAIL);
-       m_pInstance->SetData(TYPE_UROM_PHASE, 1);
+       m_pInstance->SetData(TYPE_UROM_PHASE, 0);
        ScriptedAI::EnterEvadeMode();
     }
 
@@ -344,7 +347,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
            if(m_uiArcaneExplodeTimer < uiDiff)
            {
                DoScriptText(urand(0,1) ? SAY_EXPLOSION_1 : SAY_EXPLOSION_2, m_creature);
-               DoCast(m_creature, SPELL_EMPOWERED_ARCANE_EXPLOSION);
+               DoCast(m_creature, m_bIsRegularMode ? SPELL_EMPOWERED_ARCANE_EXPLOSION : SPELL_EMPOWERED_ARCANE_EXPLOSION_2);
                m_uiArcaneExplodeTimer = 32000;
            } else m_uiArcaneExplodeTimer -= uiDiff;
 
@@ -354,7 +357,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
                m_creature->RemoveSplineFlag(SPLINEFLAG_FLYING);
                if(m_creature->getVictim())
                   m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-               m_uiBackTimer = 9000;
+               m_uiBackTimer = m_bIsRegularMode ? 9500 : 7500;
                m_bIsTeleported = false;
                m_uiArcaneExplodeTimer = 1000;
            } else m_uiBackTimer -= uiDiff;
