@@ -28,7 +28,7 @@ enum
     NPC_VAROS              = 27447,
     NPC_UROM               = 27655,
     NPC_EREGOS             = 27656,
-//
+
     GO_DRAGON_CAGE_DOOR    = 193995,
     GO_EREGOS_CACHE        = 191349,
     GO_EREGOS_CACHE_H      = 193603,

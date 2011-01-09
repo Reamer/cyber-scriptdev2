@@ -138,7 +138,7 @@ struct MANGOS_DLL_DECL boss_eregosAI : public ScriptedAI
     {
         m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ()-100.0f, 0);
         m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ()-100.0f, SPLINETYPE_NORMAL , m_creature->GetSplineFlags(), 6000);
-            DoScriptText(SAY_DEATH, m_creature);
+        DoScriptText(SAY_DEATH, m_creature);
         if (m_pInstance)
             m_pInstance->SetData(TYPE_EREGOS, DONE);
     }
