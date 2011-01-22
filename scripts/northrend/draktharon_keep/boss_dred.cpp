@@ -26,16 +26,16 @@ EndScriptData */
 
 enum
 {
-    SAY_KING_DRED_TALON                = -1600020,
-    SAY_CALL_FOR_RAPTOR                = -1600021,
+    SAY_KING_DRED_TALON                 = -1600020,
+    SAY_CALL_FOR_RAPTOR                 = -1600021,
     
-    SPELL_BELLOWING_ROAR            = 22686,
-    SPELL_FEARSOME_ROAR                = 48849,
-    H_SPELL_FEARSOME_ROAR            = 59422,
-    SPELL_GRIEVOUS_BITE                = 48920,
-    SPELL_MANGLING_SLASH            = 48873,
-    SPELL_PIERCING_SLASH            = 48878,
-    SPELL_RAPTOR_CALL                = 59416,            //not yet implemented
+    SPELL_BELLOWING_ROAR                = 22686,
+    SPELL_FEARSOME_ROAR                 = 48849,
+    H_SPELL_FEARSOME_ROAR               = 59422,
+    SPELL_GRIEVOUS_BITE                 = 48920,
+    SPELL_MANGLING_SLASH                = 48873,
+    SPELL_PIERCING_SLASH                = 48878,
+    SPELL_RAPTOR_CALL                   = 59416,            //not yet implemented
 
 };
 
@@ -78,26 +78,12 @@ struct MANGOS_DLL_DECL boss_dredAI : public ScriptedAI
         CallForRaptorSpawn_Check = 0;
     }
 
-    void Aggro(Unit* pWho)
-    {
-       
-    }
-
-    void KilledUnit(Unit* pVictim)
-    {
-        
-    }
-
-    void JustDied(Unit* pKiller)
-    {
-        
-    }
-    
     void CallForRaptorSpawnCheck()
     {
         CallForRaptorSpawn_Timer = 1000;
         CallForRaptorSpawn_Check = 1;
     }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -106,7 +92,7 @@ struct MANGOS_DLL_DECL boss_dredAI : public ScriptedAI
         //Fearsome Roar
         if (FearsomeRoar_Timer < uiDiff)
         {
-            DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FEARSOME_ROAR : H_SPELL_FEARSOME_ROAR, true);
+            DoCast(m_creature, m_bIsRegularMode ? SPELL_FEARSOME_ROAR : H_SPELL_FEARSOME_ROAR, true);
             FearsomeRoar_Timer = 15000;
         }else FearsomeRoar_Timer -= uiDiff;
 
@@ -124,23 +110,13 @@ struct MANGOS_DLL_DECL boss_dredAI : public ScriptedAI
             ManglingSlash_Timer = urand(20000, 25000);
         }else ManglingSlash_Timer -= uiDiff;
 
-        //Mangling Slash
+        //Grievous Bite
         if (GrievousBite_Timer < uiDiff)
         {    
             DoCast(m_creature->getVictim(), SPELL_GRIEVOUS_BITE, true);
             GrievousBite_Timer = urand(20000, 25000);
         }else GrievousBite_Timer -= uiDiff;
 
-        //Grievous Bite remove
-        if (Check_Timer < uiDiff)
-        {
-            Unit* pPlayer = m_creature->getVictim();
-            if (pPlayer->GetHealth() == pPlayer->GetMaxHealth())
-                if (pPlayer->HasAura(SPELL_GRIEVOUS_BITE))
-                        pPlayer->RemoveAura(SPELL_GRIEVOUS_BITE, EFFECT_INDEX_0);
-            Check_Timer = 1000;
-        }else Check_Timer -= uiDiff;
-        
         //Bellowing Roar
         if (BellowingRoar_Timer < uiDiff)
         {    
@@ -165,12 +141,12 @@ struct MANGOS_DLL_DECL boss_dredAI : public ScriptedAI
                 case 0:
                 {
                     if (Creature* pRaptor1 = m_creature->SummonCreature(NPC_DRAKKARI_GUTRIPPER, PosSummon1[0], PosSummon1[1], PosSummon1[2], 0 , TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 240000))
-                        pRaptor1->AI()->AttackStart(m_creature->getVictim());
+                        pRaptor1->AI()->AttackStart(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0));
                 }
                 case 1:
                 {
                     if (Creature* pRaptor2 = m_creature->SummonCreature(NPC_DRAKKARI_SCYTHECLAW, PosSummon1[0], PosSummon1[1], PosSummon1[2], 0 , TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 240000))
-                        pRaptor2->AI()->AttackStart(m_creature->getVictim());
+                        pRaptor2->AI()->AttackStart(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0));
                 }
             }
             CallForRaptorSpawn_Check = 0;
