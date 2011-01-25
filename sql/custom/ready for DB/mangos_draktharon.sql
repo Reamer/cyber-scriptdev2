@@ -1,6 +1,6 @@
 -- general
-UPDATE `creature_template` SET `unit_flags`='0' WHERE (`entry`='26620');
-UPDATE `creature_template` SET `unit_flags`='0' WHERE (`entry`='31339');
+UPDATE `creature_template` SET `unit_flags`='33554498' WHERE (`entry`='26620');
+UPDATE `creature_template` SET `unit_flags`='33554498' WHERE (`entry`='31339');
 
 
 --  trollgore
