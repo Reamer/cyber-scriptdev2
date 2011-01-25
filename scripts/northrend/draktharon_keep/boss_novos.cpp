@@ -271,8 +271,11 @@ struct MANGOS_DLL_DECL boss_novosAI : public ScriptedAI
             if(Handler_Count < 5)
             {
                 uint8 SummonLoc = rand()%2;
-                m_creature->SummonCreature(NPC_CRYSTAL_HANDLER, PosSummonHandler[SummonLoc][0],PosSummonHandler[SummonLoc][1],PosSummonHandler[SummonLoc][2],0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120000);
-                Handler_Spawn = 17500;
+                if (Creature* handler = m_creature->SummonCreature(NPC_CRYSTAL_HANDLER, PosSummonHandler[SummonLoc][0],PosSummonHandler[SummonLoc][1],PosSummonHandler[SummonLoc][2],0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120000))
+                {
+                    handler->AI()->AttackStart(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0));
+                    Handler_Spawn = 17500;
+                }
             }
             if(Handler_Count == 5)
             {            
@@ -296,13 +299,6 @@ struct MANGOS_DLL_DECL crystal_handlerAI : public ScriptedAI
     crystal_handlerAI(Creature* pCreature) : ScriptedAI(pCreature){Reset();}
 
     void Reset(){}
-    void MoveInLineOfSight(Unit* who)
-    {
-        if (Creature* pNovos = GetClosestCreatureWithEntry(m_creature, NPC_NOVOS, 85.0f))
-        {
-            m_creature->AI()->AttackStart(pNovos->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0));
-        }
-    }
 
     void JustDied(Unit* killer)
     {

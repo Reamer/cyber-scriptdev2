@@ -91,10 +91,14 @@ enum
     SPELL_CONDEMNATION      = 57377,
 
     // horseman spirits
-    NPC_SPIRIT_OF_BLAUMEUX    = 16776,
-    NPC_SPIRIT_OF_RIVENDARE   = 0,                          //creature entry not known yet
-    NPC_SPIRIT_OF_KORTHAZZ    = 16778,
-    NPC_SPIRIT_OF_ZELIREK     = 16777
+    NPC_SPIRIT_OF_BLAUMEUX  = 16776,
+    NPC_SPIRIT_OF_RIVENDARE = 0,                          //creature entry not known yet
+    NPC_SPIRIT_OF_KORTHAZZ  = 16778,
+    NPC_SPIRIT_OF_ZELIREK   = 16777,
+
+    // Achievements Hacks
+    THE_MILITARY_QUARTER    = 568,
+    H_THE_MILITARY_QUARTER  = 569
 };
 
 /*walk coords*/
@@ -241,7 +245,17 @@ struct MANGOS_DLL_DECL boss_lady_blaumeuxAI : public ScriptedAI
         DoScriptText(SAY_BLAU_DEATH, m_creature);
         
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_BLAUMEUX, DONE);
+            if (m_pInstance->GetData(TYPE_ZELIEK) == DONE &&
+                m_pInstance->GetData(TYPE_KORTHAZZ) == DONE &&
+                m_pInstance->GetData(TYPE_RIVENDARE) == DONE &&
+                m_pInstance->GetData(TYPE_GOTHIK) == DONE &&
+                m_pInstance->GetData(TYPE_RAZUVIOUS) == DONE)
+            {
+                m_bIsRegularMode ? m_pInstance->DoCompleteAchievement(THE_MILITARY_QUARTER) : m_pInstance->DoCompleteAchievement(H_THE_MILITARY_QUARTER);
+            }
+        }
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -378,7 +392,17 @@ struct MANGOS_DLL_DECL boss_rivendare_naxxAI : public ScriptedAI
         DoScriptText(SAY_RIVE_DEATH, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_RIVENDARE, DONE);
+            if (m_pInstance->GetData(TYPE_ZELIEK) == DONE &&
+                m_pInstance->GetData(TYPE_KORTHAZZ) == DONE &&
+                m_pInstance->GetData(TYPE_BLAUMEUX) == DONE &&
+                m_pInstance->GetData(TYPE_GOTHIK) == DONE &&
+                m_pInstance->GetData(TYPE_RAZUVIOUS) == DONE)
+            {
+                m_bIsRegularMode ? m_pInstance->DoCompleteAchievement(THE_MILITARY_QUARTER) : m_pInstance->DoCompleteAchievement(H_THE_MILITARY_QUARTER);
+            }
+        }
     }
 
     void UpdateAI(const uint32 diff)
@@ -509,7 +533,17 @@ struct MANGOS_DLL_DECL boss_thane_korthazzAI : public ScriptedAI
         DoScriptText(SAY_KORT_DEATH, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_KORTHAZZ, DONE);
+            if (m_pInstance->GetData(TYPE_ZELIEK) == DONE &&
+                m_pInstance->GetData(TYPE_RIVENDARE) == DONE &&
+                m_pInstance->GetData(TYPE_BLAUMEUX) == DONE &&
+                m_pInstance->GetData(TYPE_GOTHIK) == DONE &&
+                m_pInstance->GetData(TYPE_RAZUVIOUS) == DONE)
+            {
+                m_bIsRegularMode ? m_pInstance->DoCompleteAchievement(THE_MILITARY_QUARTER) : m_pInstance->DoCompleteAchievement(H_THE_MILITARY_QUARTER);
+            }
+        }
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -695,7 +729,17 @@ struct MANGOS_DLL_DECL boss_sir_zeliekAI : public ScriptedAI
         DoScriptText(SAY_ZELI_DEATH, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_ZELIEK, DONE);
+            if (m_pInstance->GetData(TYPE_KORTHAZZ) == DONE &&
+                m_pInstance->GetData(TYPE_RIVENDARE) == DONE &&
+                m_pInstance->GetData(TYPE_BLAUMEUX) == DONE &&
+                m_pInstance->GetData(TYPE_GOTHIK) == DONE &&
+                m_pInstance->GetData(TYPE_RAZUVIOUS) == DONE)
+            {
+                m_bIsRegularMode ? m_pInstance->DoCompleteAchievement(THE_MILITARY_QUARTER) : m_pInstance->DoCompleteAchievement(H_THE_MILITARY_QUARTER);
+            }
+        }
     }
 
     void UpdateAI(const uint32 uiDiff)
