@@ -31,6 +31,7 @@ enum
     SPELL_GEYSER                    = 37478,
     SPELL_SPOUT                     = 37433,                // TODO should sweep the room 360degrees, related spells 37429 37430 37431
     SPELL_WATERBOLT                 = 37138,                // TODO is used when no enemy in melee range (unknown if on random or top-most aggro holder in this case
+    ACHIEVEMENT_LURKER          = 144,
 };
 
 enum Phases
@@ -42,6 +43,7 @@ enum Phases
 };
 
 // TODO This boss should infact be a Scripted_NoMovementAI, but selecting only melee targets is not supported yet, change when implemented
+
 struct MANGOS_DLL_DECL boss_the_lurker_belowAI : public ScriptedAI
 {
     boss_the_lurker_belowAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -128,6 +130,7 @@ bool GOUse_go_strange_pool(Player* pPlayer, GameObject* pGo)
             if (pInstance->GetData(TYPE_THELURKER_EVENT) == NOT_STARTED)
             {
                 pPlayer->CastSpell(pPlayer, SPELL_LURKER_SPAWN_TRIGGER, true);
+                pPlayer->CompletedAchievement(ACHIEVEMENT_LURKER);
                 pInstance->SetData(TYPE_THELURKER_EVENT, IN_PROGRESS);
                 return true;
             }

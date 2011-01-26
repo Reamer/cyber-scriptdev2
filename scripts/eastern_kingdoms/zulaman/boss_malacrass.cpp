@@ -671,10 +671,6 @@ struct MANGOS_DLL_DECL boss_malacrassAI : public ScriptedAI
 
         DoMeleeAttackIfReady();
     }
-
-
-
-
 };
 
 CreatureAI* GetAI_boss_malacrass(Creature* pCreature)

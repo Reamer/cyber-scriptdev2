@@ -238,8 +238,6 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
         m_creature->InterruptSpell(CURRENT_CHANNELED_SPELL);
         DoScriptText(SAY_AGGRO, m_creature);
 
-        m_creature->SetInCombatWithZone();
-
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ARCHIMONDE, IN_PROGRESS);
     }
@@ -261,17 +259,17 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
             case CLASS_PRIEST:
             case CLASS_PALADIN:
             case CLASS_WARLOCK:
-                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_RED, true, 0, 0, m_creature->GetGUID());
+                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_RED, true);
                 break;
             case CLASS_MAGE:
             case CLASS_ROGUE:
             case CLASS_WARRIOR:
-                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_YELLOW, true, 0, 0, m_creature->GetGUID());
+                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_YELLOW, true);
                 break;
             case CLASS_DRUID:
             case CLASS_SHAMAN:
             case CLASS_HUNTER:
-                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_GREEN, true, 0, 0, m_creature->GetGUID());
+                pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_GREEN, true);
                 break;
         }
     }

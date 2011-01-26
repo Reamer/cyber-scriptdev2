@@ -175,15 +175,8 @@ scripts/eastern_kingdoms/scarlet_monastery/instance_scarlet_monastery.cpp \
 scripts/eastern_kingdoms/scarlet_monastery/scarlet_monastery.h \
 scripts/eastern_kingdoms/scholomance/boss_darkmaster_gandling.cpp \
 scripts/eastern_kingdoms/scholomance/boss_death_knight_darkreaver.cpp \
-scripts/eastern_kingdoms/scholomance/boss_doctor_theolen_krastinov.cpp \
-scripts/eastern_kingdoms/scholomance/boss_illucia_barov.cpp \
-scripts/eastern_kingdoms/scholomance/boss_instructor_malicia.cpp \
 scripts/eastern_kingdoms/scholomance/boss_jandice_barov.cpp \
 scripts/eastern_kingdoms/scholomance/boss_kormok.cpp \
-scripts/eastern_kingdoms/scholomance/boss_lord_alexei_barov.cpp \
-scripts/eastern_kingdoms/scholomance/boss_lorekeeper_polkelt.cpp \
-scripts/eastern_kingdoms/scholomance/boss_ras_frostwhisper.cpp \
-scripts/eastern_kingdoms/scholomance/boss_the_ravenian.cpp \
 scripts/eastern_kingdoms/scholomance/boss_vectus.cpp \
 scripts/eastern_kingdoms/scholomance/instance_scholomance.cpp \
 scripts/eastern_kingdoms/scholomance/scholomance.h \
@@ -327,6 +320,7 @@ scripts/kalimdor/temple_of_ahnqiraj/instance_temple_of_ahnqiraj.cpp \
 scripts/kalimdor/temple_of_ahnqiraj/mob_anubisath_sentinel.cpp \
 scripts/kalimdor/temple_of_ahnqiraj/temple_of_ahnqiraj.h \
 scripts/kalimdor/wailing_caverns/instance_wailing_caverns.cpp \
+scripts/kalimdor/wailing_caverns/wailing_caverns.cpp \
 scripts/kalimdor/wailing_caverns/wailing_caverns.h \
 scripts/kalimdor/zulfarrak/boss_zumrah.cpp \
 scripts/kalimdor/zulfarrak/instance_zulfarrak.cpp \
@@ -510,7 +504,7 @@ scripts/outland/auchindoun/mana_tombs/boss_nexusprince_shaffar.cpp \
 scripts/outland/auchindoun/mana_tombs/boss_pandemonius.cpp \
 scripts/outland/auchindoun/sethekk_halls/boss_anzu.cpp \
 scripts/outland/auchindoun/sethekk_halls/boss_darkweaver_syth.cpp \
-scripts/outland/auchindoun/sethekk_halls/boss_tailonking_ikiss.cpp \
+scripts/outland/auchindoun/sethekk_halls/boss_talon_king_ikiss.cpp \
 scripts/outland/auchindoun/sethekk_halls/instance_sethekk_halls.cpp \
 scripts/outland/auchindoun/sethekk_halls/sethekk_halls.h \
 scripts/outland/auchindoun/shadow_labyrinth/boss_ambassador_hellmaw.cpp \
