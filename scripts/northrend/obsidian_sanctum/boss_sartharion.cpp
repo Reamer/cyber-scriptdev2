@@ -1098,6 +1098,7 @@ struct MANGOS_DLL_DECL mob_tenebronAI : public dummy_dragonAI
 
     void Reset()
     {
+        dummy_dragonAI::Reset();
         m_uiShadowBreathTimer = 10000;
         m_uiShadowFissureTimer = 8000;
         m_uiHatchEggTimer = 15000;
@@ -1198,6 +1199,7 @@ struct MANGOS_DLL_DECL mob_shadronAI : public dummy_dragonAI
 
     void Reset()
     {
+        dummy_dragonAI::Reset();
         m_uiShadowBreathTimer = 10000;
         m_uiShadowFissureTimer = 8000;
         m_uiAcolyteShadronTimer = 15000;
@@ -1298,6 +1300,7 @@ struct MANGOS_DLL_DECL mob_vesperonAI : public dummy_dragonAI
 
     void Reset()
     {
+        dummy_dragonAI::Reset();
         m_uiShadowBreathTimer = 10000;
         m_uiShadowFissureTimer = 8000;
         m_uiAcolyteVesperonTimer = 15000;
@@ -1515,7 +1518,7 @@ struct MANGOS_DLL_DECL mob_twilight_eggsAI : public ScriptedAI
     {
         if (m_uiSummonWhelpTimer < uiDiff)
         {
-            if (Creature* pWhelp = DoSpawnCreature(NPC_TWILIGHT_WHELP, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+            if (Creature* pWhelp = DoSpawnCreature(NPC_TWILIGHT_WHELP, 0, 0, 0, 0, TEMPSUMMON_DEAD_DESPAWN, 30000))
             {
                 pWhelp->SetPhaseMask(1, true);
                 pWhelp->SetInCombatWithZone();
