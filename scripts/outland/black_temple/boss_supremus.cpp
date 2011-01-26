@@ -120,7 +120,7 @@ struct MANGOS_DLL_DECL npc_volcanoAI : public ScriptedAI
         CheckTimer = 1000;
         SupremusGUID = 0;
         FireballTimer = 500;
-        GeyserTimer = 0;
+        GeyserTimer = 2000;
     }
 
     void AttackStart(Unit* who) {}
@@ -187,8 +187,6 @@ struct MANGOS_DLL_DECL boss_supremusAI : public ScriptedAI
 
     void Aggro(Unit* pWho)
     {
-        m_creature->SetInCombatWithZone();
-
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SUPREMUS, IN_PROGRESS);
     }
