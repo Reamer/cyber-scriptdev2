@@ -247,14 +247,6 @@ struct MANGOS_DLL_DECL boss_lady_blaumeuxAI : public ScriptedAI
         if (m_pInstance)
         {
             m_pInstance->SetData(TYPE_BLAUMEUX, DONE);
-            if (m_pInstance->GetData(TYPE_ZELIEK) == DONE &&
-                m_pInstance->GetData(TYPE_KORTHAZZ) == DONE &&
-                m_pInstance->GetData(TYPE_RIVENDARE) == DONE &&
-                m_pInstance->GetData(TYPE_GOTHIK) == DONE &&
-                m_pInstance->GetData(TYPE_RAZUVIOUS) == DONE)
-            {
-                m_bIsRegularMode ? m_pInstance->DoCompleteAchievement(THE_MILITARY_QUARTER) : m_pInstance->DoCompleteAchievement(H_THE_MILITARY_QUARTER);
-            }
         }
     }
 
@@ -394,14 +386,6 @@ struct MANGOS_DLL_DECL boss_rivendare_naxxAI : public ScriptedAI
         if (m_pInstance)
         {
             m_pInstance->SetData(TYPE_RIVENDARE, DONE);
-            if (m_pInstance->GetData(TYPE_ZELIEK) == DONE &&
-                m_pInstance->GetData(TYPE_KORTHAZZ) == DONE &&
-                m_pInstance->GetData(TYPE_BLAUMEUX) == DONE &&
-                m_pInstance->GetData(TYPE_GOTHIK) == DONE &&
-                m_pInstance->GetData(TYPE_RAZUVIOUS) == DONE)
-            {
-                m_bIsRegularMode ? m_pInstance->DoCompleteAchievement(THE_MILITARY_QUARTER) : m_pInstance->DoCompleteAchievement(H_THE_MILITARY_QUARTER);
-            }
         }
     }
 
@@ -535,14 +519,6 @@ struct MANGOS_DLL_DECL boss_thane_korthazzAI : public ScriptedAI
         if (m_pInstance)
         {
             m_pInstance->SetData(TYPE_KORTHAZZ, DONE);
-            if (m_pInstance->GetData(TYPE_ZELIEK) == DONE &&
-                m_pInstance->GetData(TYPE_RIVENDARE) == DONE &&
-                m_pInstance->GetData(TYPE_BLAUMEUX) == DONE &&
-                m_pInstance->GetData(TYPE_GOTHIK) == DONE &&
-                m_pInstance->GetData(TYPE_RAZUVIOUS) == DONE)
-            {
-                m_bIsRegularMode ? m_pInstance->DoCompleteAchievement(THE_MILITARY_QUARTER) : m_pInstance->DoCompleteAchievement(H_THE_MILITARY_QUARTER);
-            }
         }
     }
 
@@ -731,14 +707,6 @@ struct MANGOS_DLL_DECL boss_sir_zeliekAI : public ScriptedAI
         if (m_pInstance)
         {
             m_pInstance->SetData(TYPE_ZELIEK, DONE);
-            if (m_pInstance->GetData(TYPE_KORTHAZZ) == DONE &&
-                m_pInstance->GetData(TYPE_RIVENDARE) == DONE &&
-                m_pInstance->GetData(TYPE_BLAUMEUX) == DONE &&
-                m_pInstance->GetData(TYPE_GOTHIK) == DONE &&
-                m_pInstance->GetData(TYPE_RAZUVIOUS) == DONE)
-            {
-                m_bIsRegularMode ? m_pInstance->DoCompleteAchievement(THE_MILITARY_QUARTER) : m_pInstance->DoCompleteAchievement(H_THE_MILITARY_QUARTER);
-            }
         }
     }
 
