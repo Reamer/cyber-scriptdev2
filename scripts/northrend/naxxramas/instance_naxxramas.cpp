@@ -447,6 +447,11 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(m_uiHorsemenDoorGUID);
             if (uiData == DONE)
             {
+                if (instance)
+                {
+                    bool m_bIsRegularMode = instance->IsRegularDifficulty();
+                    DoCompleteAchievement(m_bIsRegularMode ? 568 : 569);
+                }                
                 DoUseDoorOrButton(m_uiMiliEyeRampGUID);
                 DoRespawnGameObject(m_uiMiliPortalGUID, 30*MINUTE);
                 DoRespawnGameObject(m_uiHorsemenChestGUID, 30*MINUTE);
