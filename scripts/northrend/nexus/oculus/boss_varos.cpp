@@ -27,13 +27,14 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                                     = -1578022,
-    SAY_KILL_1                                    = -1578023,
-    SAY_KILL_2                                    = -1578024,
-    SAY_DEATH                                     = -1578025,
-    SAY_STRIKE_1                                  = -1578026,
-    SAY_STRIKE_2                                  = -1578027,
-    SAY_STRIKE_3                                  = -1578028,
+    SAY_AGGRO                                     = -1578020,
+    SAY_KILL_1                                    = -1578021,
+    SAY_KILL_2                                    = -1578022,
+    SAY_DEATH                                     = -1578023,
+    SAY_AIRSTRIKE_1                               = -1578024,
+    SAY_AIRSTRIKE_2                               = -1578025,
+    SAY_AIRSTRIKE_3                               = -1578026,
+    SAY_SHIELD_DOWN                               = -1578027,
 
     SPELL_ARCANE_SHIELD                           = 50053,
     SPELL_ENERGIZE_CORES                          = 50785, //Damage 5938 to 6562, effec2 Triggers 54069, effect3 Triggers 56251
@@ -126,6 +127,7 @@ struct MANGOS_DLL_DECL boss_varosAI : public ScriptedAI
               m_creature->RemoveAurasDueToSpell(SPELL_ARCANE_SHIELD);
               m_creature->InterruptNonMeleeSpells(false);
               m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+              DoScriptText(SAY_SHIELD_DOWN, m_creature);
            }
            else 
            {
@@ -343,9 +345,9 @@ struct MANGOS_DLL_DECL boss_varosAI : public ScriptedAI
            uint8 uiText = urand(0, 2);
            switch (uiText)
            {
-              case 0: DoScriptText(SAY_STRIKE_1, m_creature); break;
-              case 1: DoScriptText(SAY_STRIKE_2, m_creature); break;
-              case 2: DoScriptText(SAY_STRIKE_3, m_creature); break;
+              case 0: DoScriptText(SAY_AIRSTRIKE_1, m_creature); break;
+              case 1: DoScriptText(SAY_AIRSTRIKE_2, m_creature); break;
+              case 2: DoScriptText(SAY_AIRSTRIKE_3, m_creature); break;
            }
         } else m_uiDragonAttackTimer -= uiDiff;
 

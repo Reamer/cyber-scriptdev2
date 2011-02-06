@@ -26,16 +26,16 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                                     = -1578012,
-    SAY_KILL_1                                    = -1578013,
-    SAY_KILL_2                                    = -1578014,
-    SAY_KILL_3                                    = -1578015,
-    SAY_DEATH                                     = -1578016,
-    SAY_EXPLOSION_1                               = -1578017,
-    SAY_EXPLOSION_2                               = -1578018,
-    SAY_SUMMON_1                                  = -1578019,
-    SAY_SUMMON_2                                  = -1578020,
-    SAY_SUMMON_3                                  = -1578021,
+    SAY_AGGRO                                     = -1578030,
+    SAY_KILL_1                                    = -1578031,
+    SAY_KILL_2                                    = -1578032,
+    SAY_KILL_3                                    = -1578033,
+    SAY_DEATH                                     = -1578034,
+    SAY_EXPLOSION_1                               = -1578035,
+    SAY_EXPLOSION_2                               = -1578036,
+    SAY_SUMMON_1                                  = -1578037,
+    SAY_SUMMON_2                                  = -1578038,
+    SAY_SUMMON_3                                  = -1578039,
 
     SPELL_ARCANE_BARRIER                          = 53813, //Dummy --> Channeled, shields the caster from damage.
     SPELL_EMPOWERED_ARCANE_EXPLOSION              = 51110,
