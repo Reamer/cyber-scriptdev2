@@ -1,3 +1,21 @@
+-- portale obsidiansanktum
+DELETE FROM gameobject_template WHERE gameobject_template.entry = 193988;
+INSERT INTO gameobject_template (entry, type, displayId,name,faction, flags, size,data0)
+VALUES
+(193988,22,1327,'Twilight Portal',35,0,2,57620);
+
+DELETE  FROM gameobject WHERE gameobject.id = 193988;
+
+
+-- Fly-Modus for Subboss
+UPDATE `creature_template` SET `InhabitType`='3' WHERE (`entry`='30449');
+UPDATE `creature_template` SET `InhabitType`='3' WHERE (`entry`='30451');
+UPDATE `creature_template` SET `InhabitType`='3' WHERE (`entry`='30452');
+
+UPDATE `creature_template` SET `InhabitType`='3' WHERE (`entry`='31535');
+UPDATE `creature_template` SET `InhabitType`='3' WHERE (`entry`='31520');
+UPDATE `creature_template` SET `InhabitType`='3' WHERE (`entry`='31534');
+
 -- Obsidian sanctum (from PSZ and MaxXx2021)
 UPDATE creature_template SET ScriptName='mob_fire_cyclone' WHERE entry = 30648;
 UPDATE creature_template SET ScriptName='mob_flame_tsunami' WHERE entry = 30616;

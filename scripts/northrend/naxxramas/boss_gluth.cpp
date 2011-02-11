@@ -77,12 +77,15 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         m_uiBerserkTimer     = 7*MINUTE*IN_MILLISECONDS;
 
         m_uiRangeCheck_Timer = 1000;
-        m_lZombieGUIDList.clear();
+        RemoveAllZombies();
+    }
+
+    void RemoveAllZombies()
+    {
         if (!m_lZombieGUIDList.empty())
         {
             for(std::list<uint64>::iterator itr = m_lZombieGUIDList.begin(); itr != m_lZombieGUIDList.end(); ++itr)
-                if (Creature* pTemp = (Creature*)m_creature->GetMap()->GetUnit( *itr))
-                    if (pTemp->isAlive() && m_creature->IsWithinDistInMap(pTemp, ATTACK_DISTANCE))
+                if (Creature* pTemp = (Creature*)m_creature->GetMap()->GetUnit(*itr))
                         pTemp->ForcedDespawn();
         }
         m_lZombieGUIDList.clear();
@@ -93,12 +96,7 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GLUTH, DONE);
 
-        std::list<Creature*> pZombies;
-        GetCreatureListWithEntryInGrid(pZombies, m_creature, NPC_ZOMBIE_CHOW, DEFAULT_VISIBILITY_INSTANCE);
-
-        if (!pZombies.empty())
-            for(std::list<Creature*>::iterator itr = pZombies.begin(); itr != pZombies.end(); ++itr)
-                (*itr)->ForcedDespawn();
+        RemoveAllZombies();
     }
 
     void Aggro(Unit* pWho)
@@ -111,12 +109,6 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GLUTH, FAIL);
-    }
-
-    void JustSummoned(Creature* summoned)
-    {
-        //summoned->SetSpeedRate(MOVE_RUN, 0.5f);
-        //summoned->SetSpeedRate(MOVE_WALK, 0.5f);
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -210,6 +202,7 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
 
         DoMeleeAttackIfReady();
     }
+
     void SummonZombie()
     {
         uint32 ran = rand()%5;
