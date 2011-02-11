@@ -751,6 +751,14 @@ enum VespText
     SAY_VESPERON_SPECIAL_2                  = -1615040
 };
 
+
+float m_aPortalLoc[4][4] =
+{
+    {3238.37f, 518.595f, 58.9057f, 0.739184f}, //Sartharion
+    {3239.05f, 677.645f, 89.5893f, 4.72206f }, //Tenebron
+    {3354.34f, 516.81f , 99.0972f, 2.64546f }, //Shadron
+    {3136.69f, 510.132f, 89.1018f, 1.42888f }, //Vesperon
+};
 //to control each dragons common abilities
 struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
 {
@@ -766,15 +774,20 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
 
     uint32 m_uiWaypointId;
     uint32 m_uiMoveNextTimer;
+    uint32 m_uiPortalTimer;
     bool m_bCanMoveFree;
+
+    std::list<uint64> m_lPortalGUIDList;
 
     void Reset()
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
+        
         m_uiWaypointId = 0;
         m_uiMoveNextTimer = 500;
+        m_uiPortalTimer = 0;
         m_bCanMoveFree = false;
+        ClosePortal();
     }
 
     void AttackStart(Unit* pWho)
@@ -795,7 +808,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
 
     void JustReachedHome()
     {
-        m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+        m_creature->RemoveSplineFlag(SPLINEFLAG_FLYING);
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId)
@@ -817,7 +830,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
         {
             m_creature->GetMotionMaster()->Clear();
             m_bCanMoveFree = false;
-            m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+            m_creature->RemoveSplineFlag(SPLINEFLAG_FLYING);
             m_creature->SetInCombatWithZone();
             return;
         }
@@ -857,128 +870,172 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
         }
     }
 
-    //Removes debuff from players
-    void RemoveDebuff(uint32 uiSpellId)
+    void ExitTwilightRealm()
     {
         Map* pMap = m_creature->GetMap();
-
         if (pMap && pMap->IsDungeon())
         {
             Map::PlayerList const &PlayerList = pMap->GetPlayers();
 
-            if (PlayerList.isEmpty())
-                return;
-
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            {
-                i->getSource()->RemoveAurasDueToSpell(uiSpellId);
-                if (uiSpellId == SPELL_TWILIGHT_SHIFT_ENTER)
-                    i->getSource()->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIFT_DMG);
-            }
+            if (!PlayerList.isEmpty())
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                {
+                    if (i->getSource()->isAlive())
+                        i->getSource()->CastSpell(i->getSource(), SPELL_TWILIGHT_SHIFT_REMOVAL, true);
+                }
         }
     }
+
+    void ClosePortal()
+    {
+        if (Map* pMap = m_creature->GetMap())
+        {
+            if (!m_lPortalGUIDList.empty())
+            {
+                for(std::list<uint64>::iterator itr = m_lPortalGUIDList.begin(); itr != m_lPortalGUIDList.end(); ++itr)
+                    if (GameObject* pTemp = pMap->GetGameObject(*itr))
+                        pTemp->Delete();
+            }
+            m_lPortalGUIDList.clear();
+        }
+    }
+
+    GameObject* SummonPortal(uint32 uiData)
+    {
+        GameObject* pPortal = NULL;
+
+        switch(uiData)
+        {
+            case DATA_SARTHARION:
+                if (!m_lPortalGUIDList.empty())
+                {
+                    if (Map* pMap = m_creature->GetMap())
+                    {
+                        std::list<uint64>::iterator itr = m_lPortalGUIDList.begin();
+                        pPortal = pMap->GetGameObject(*itr);
+                    }
+                }
+                else
+                {
+                    pPortal = m_creature->SummonGameobject(193988,m_aPortalLoc[0][0],m_aPortalLoc[0][1],m_aPortalLoc[0][2],m_aPortalLoc[0][3], 100);
+                    m_lPortalGUIDList.push_back(pPortal->GetGUID());
+                }
+                break;
+            case DATA_TENEBRON:
+                pPortal = m_creature->SummonGameobject(193988,m_aPortalLoc[1][0],m_aPortalLoc[1][1],m_aPortalLoc[1][2],m_aPortalLoc[1][3], 100);
+                m_lPortalGUIDList.push_back(pPortal->GetGUID());
+                break;
+            case DATA_SHADRON:
+                pPortal = m_creature->SummonGameobject(193988,m_aPortalLoc[2][0],m_aPortalLoc[2][1],m_aPortalLoc[2][2],m_aPortalLoc[2][3], 100);
+                m_lPortalGUIDList.push_back(pPortal->GetGUID());
+                break;
+            case DATA_VESPERON:
+                pPortal = m_creature->SummonGameobject(193988,m_aPortalLoc[3][0],m_aPortalLoc[3][1],m_aPortalLoc[3][2],m_aPortalLoc[3][3], 100);
+                m_lPortalGUIDList.push_back(pPortal->GetGUID());
+                break;
+        }
+        return pPortal;
+    }
+
 
     //"opens" the portal and does the "opening" whisper
     void OpenPortal()
     {
         int32 iTextId = 0;
-        int32 iPortalRespawnTime = 0;
-
-        //there are 4 portal spawn locations, each are expected to be spawned with negative spawntimesecs in database
-
-        //using a grid search here seem to be more efficient than caching all four guids
-        //in instance script and calculate range to each.
-        if (GameObject* pPortal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 100.0f))
+        Creature* pAcolyte = NULL;
+        GameObject* pPortal = NULL;
+        m_uiPortalTimer = 30000;
+        switch(m_creature->GetEntry())
         {
-            Creature* pAcolyte = NULL;
-            switch(m_creature->GetEntry())
-            {
-                case NPC_TENEBRON:
-                    iTextId = WHISPER_HATCH_EGGS;
-                    m_lEggsGUIDList.clear();
-                    for (uint8 i=0; i<6; ++i)
+            case NPC_TENEBRON:
+                if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS ? pPortal = SummonPortal(DATA_SARTHARION) : pPortal = SummonPortal(DATA_TENEBRON))
+                {
+                    if (pPortal)
                     {
-                        if (Creature* pEgg = m_creature->SummonCreature(NPC_TWILIGHT_EGG, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000))
+                        iTextId = WHISPER_HATCH_EGGS;
+                        m_lEggsGUIDList.clear();
+                        for (uint8 i=0; i<6; ++i)
                         {
-                            pEgg->SetPhaseMask(16, true);
-                            m_lEggsGUIDList.push_back(pEgg->GetGUID());
-                        }
-                    }
-                    iPortalRespawnTime = 20;
-                    break;
-                case NPC_SHADRON:
-                    iTextId = WHISPER_OPEN_PORTAL;
-                    if (m_pInstance)
-                    {
-                        pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteShadronGUID);
-                        if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
-                        {
-                            pAcolyte = NULL;
-                            if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_SHADRON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
+                            if (Creature* pEgg = m_creature->SummonCreature(NPC_TWILIGHT_EGG, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 30000))
                             {
-                                m_uiAcolyteShadronGUID = pAcolyte->GetGUID();
-                                pAcolyte->SetPhaseMask(16, true);
-                            }
-                        }
-                        if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-                        {
-                            if (Creature* pSarth = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_SARTHARION)))
-                                pSarth->CastSpell(pSarth, SPELL_GIFT_OF_TWILIGTH_SAR, true);
-                        }
-                        else
-                        {
-                            if (Creature* pShad = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_SHADRON)))
-                                pShad->CastSpell(pShad, SPELL_GIFT_OF_TWILIGTH_SHA, true);
-                        }
-                    }
-                    iPortalRespawnTime = 60;
-                    break;
-                case NPC_VESPERON:
-                    iTextId = WHISPER_OPEN_PORTAL;
-                    if (m_pInstance)
-                    {
-                        uint32 uiTempSpell;
-                        if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-                            uiTempSpell = 58835;
-                        else
-                            uiTempSpell = 57935;
-
-                        SpellEntry* pTempSpell = (SpellEntry*)GetSpellStore()->LookupEntry(uiTempSpell);
-                        if (pTempSpell)
-                        {
-                            pTempSpell->StackAmount = 1;
-                            pTempSpell->procCharges = 0;
-                            m_creature->CastSpell(m_creature, pTempSpell, true);
-                        }
-
-                        pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteVesperonGUID);
-                        if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
-                        {
-                            pAcolyte = NULL;
-                            if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_VESPERON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
-                            {
-                                m_uiAcolyteVesperonGUID = pAcolyte->GetGUID();
-                                pAcolyte->SetPhaseMask(16, true);
+                                pEgg->SetPhaseMask(16, true);
+                                m_lEggsGUIDList.push_back(pEgg->GetGUID());
                             }
                         }
                     }
-                    iPortalRespawnTime = 60;
-                    break;
-            }
+                }
+                break;
+            case NPC_SHADRON:
+                if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS ? pPortal = SummonPortal(DATA_SARTHARION) : pPortal = SummonPortal(DATA_SHADRON))
+                {
+                    if (pPortal)
+                    {
+                        iTextId = WHISPER_OPEN_PORTAL;
+                        if (m_pInstance)
+                        {
+                            pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteShadronGUID);
+                            if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
+                            {
+                                pAcolyte = NULL;
+                                if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_SHADRON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                                {
+                                    m_uiAcolyteShadronGUID = pAcolyte->GetGUID();
+                                    pAcolyte->SetPhaseMask(16, true);
+                                }
+                            }
+                            if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                            {
+                                if (Creature* pSarth = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_SARTHARION)))
+                                    pSarth->CastSpell(pSarth, SPELL_GIFT_OF_TWILIGTH_SAR, true);
+                            }
+                            else
+                            {
+                                if (Creature* pShad = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_SHADRON)))
+                                    pShad->CastSpell(pShad, SPELL_GIFT_OF_TWILIGTH_SHA, true);
+                            }
+                        }
+                    }
+                }
+                break;
+            case NPC_VESPERON:
+                if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS ? pPortal = SummonPortal(DATA_SARTHARION) : pPortal = SummonPortal(DATA_VESPERON))
+                {
+                    if (pPortal)
+                    {
+                        iTextId = WHISPER_OPEN_PORTAL;
+                        if (m_pInstance)
+                        {
+                            uint32 uiTempSpell;
+                            if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                                uiTempSpell = 58835;
+                            else
+                                uiTempSpell = 57935;
 
-            DoRaidWhisper(iTextId);
+                            SpellEntry* pTempSpell = (SpellEntry*)GetSpellStore()->LookupEntry(uiTempSpell);
+                            if (pTempSpell)
+                            {
+                                pTempSpell->StackAmount = 1;
+                                pTempSpell->procCharges = 0;
+                                m_creature->CastSpell(m_creature, pTempSpell, true);
+                            }
 
-            //By using SetRespawnTime() we will actually "spawn" the object with our defined time.
-            //Once time is up, portal will disappear again.
-
-            pPortal->SetRespawnTime(iPortalRespawnTime);
-            pPortal->UpdateObjectVisibility();
-
-            //Unclear what are expected to happen if one drake has a portal open already
-            //Refresh respawnTime so time again are set to 30secs?
+                            pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteVesperonGUID);
+                            if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
+                            {
+                                pAcolyte = NULL;
+                                if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_VESPERON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                                {
+                                    m_uiAcolyteVesperonGUID = pAcolyte->GetGUID();
+                                    pAcolyte->SetPhaseMask(16, true);
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
         }
+        DoRaidWhisper(iTextId);
     }
-
 
     void CheckTwilightRealm()
     {
@@ -1000,12 +1057,13 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                             break;
                         }
             if (bNoAliveTwilightRealm)
-                RemoveDebuff(SPELL_TWILIGHT_SHIFT_ENTER);
+                ExitTwilightRealm();
         }
     }
 
     void JustDied(Unit* pKiller)
     {
+        ClosePortal();
         int32 iTextId = 0;
 
         switch(m_creature->GetEntry())
@@ -1047,7 +1105,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
             // not if solo mini-boss fight
             if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
             {
-                RemoveDebuff(SPELL_TWILIGHT_SHIFT_ENTER);
+                ExitTwilightRealm();
                 return;
             }
 
@@ -1055,7 +1113,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
             if (Creature* pSartharion = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_SARTHARION)))
             {
                 if (pSartharion->isAlive())
-                    m_creature->CastSpell(pSartharion, SPELL_TWILIGHT_REVENGE, true);
+                    pSartharion->CastSpell(pSartharion, SPELL_TWILIGHT_REVENGE, true);
                 m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
         }
@@ -1163,6 +1221,14 @@ struct MANGOS_DLL_DECL mob_tenebronAI : public dummy_dragonAI
         else
             m_uiHatchEggTimer -= uiDiff;
 
+        if (m_uiPortalTimer && m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
+        {
+            if (m_uiPortalTimer < uiDiff)
+                ClosePortal();
+            else
+                m_uiPortalTimer -= uiDiff;
+        }
+
         if (m_uiCheckTimer < uiDiff && m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
         {
             CheckTwilightRealm();
@@ -1263,6 +1329,14 @@ struct MANGOS_DLL_DECL mob_shadronAI : public dummy_dragonAI
         }
         else
             m_uiAcolyteShadronTimer -= uiDiff;
+        
+        if (m_uiPortalTimer && m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
+        {
+            if (m_uiPortalTimer < uiDiff)
+                ClosePortal();
+            else
+                m_uiPortalTimer -= uiDiff;
+        }
 
         if (m_uiCheckTimer < uiDiff && m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
         {
@@ -1364,6 +1438,14 @@ struct MANGOS_DLL_DECL mob_vesperonAI : public dummy_dragonAI
         }
         else
             m_uiAcolyteVesperonTimer -= uiDiff;
+
+        if (m_uiPortalTimer && m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
+        {
+            if (m_uiPortalTimer < uiDiff)
+                ClosePortal();
+            else
+                m_uiPortalTimer -= uiDiff;
+        }
 
         if (m_uiCheckTimer < uiDiff && m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS)
         {
@@ -1518,7 +1600,7 @@ struct MANGOS_DLL_DECL mob_twilight_eggsAI : public ScriptedAI
     {
         if (m_uiSummonWhelpTimer < uiDiff)
         {
-            if (Creature* pWhelp = DoSpawnCreature(NPC_TWILIGHT_WHELP, 0, 0, 0, 0, TEMPSUMMON_DEAD_DESPAWN, 30000))
+            if (Creature* pWhelp = DoSpawnCreature(NPC_TWILIGHT_WHELP, 0, 0, 0, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
             {
                 pWhelp->SetPhaseMask(1, true);
                 pWhelp->SetInCombatWithZone();
@@ -1662,35 +1744,18 @@ struct MANGOS_DLL_DECL mob_flame_tsunamiAI : public ScriptedAI
 
     ScriptedInstance* m_pInstance;
 
-    uint32 m_uiTickTimer;
     uint32 m_uiMovementStartTimer;
-    uint64 m_uiDummyDamagerGUID;
 
     void Reset()
     {
-        m_creature->SetDisplayId(11686);
         DoCast(m_creature, SPELL_FLAME_TSUNAMI, true);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetDisplayId(11686);
+        DoCast(m_creature, SPELL_FLAME_TSUNAMI_DMG_AURA,true);
+        m_creature->setFaction(19);
         m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
-        m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
         m_uiMovementStartTimer = 4000;
-        m_uiTickTimer = 1000;
-        m_uiDummyDamagerGUID = 0;
-        if (Creature* pDummyDamager = DoSpawnCreature(31103, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 18000))
-        {
-            pDummyDamager->SetDisplayId(11686);
-            pDummyDamager->setFaction(14);
-            pDummyDamager->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
-            pDummyDamager->SetSpeedRate(MOVE_RUN, m_creature->GetSpeedRate(MOVE_RUN));
-            m_uiDummyDamagerGUID = pDummyDamager->GetGUID();
-        }
-    }
-
-    void AttackStart(Unit* pWho)
-    {
-    }
-
-    void MoveInLineOfSight(Unit* pWho)
-    {
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -1701,59 +1766,10 @@ struct MANGOS_DLL_DECL mob_flame_tsunamiAI : public ScriptedAI
             if (m_creature->GetPositionX() > 3240.0f)
                 uiDirection = -1;
             m_creature->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX()+uiDirection*86.5f, m_creature->GetPositionY(), m_creature->GetPositionZ());
-            if (m_pInstance)
-                if (Creature* pDummyDamager = m_pInstance->instance->GetCreature(m_uiDummyDamagerGUID))
-                    pDummyDamager->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX()+uiDirection*86.5f, m_creature->GetPositionY(), m_creature->GetPositionZ());
             m_uiMovementStartTimer = 30000;
         }
         else
             m_uiMovementStartTimer -= uiDiff;
-
-        if (m_uiTickTimer < uiDiff)
-        {
-            if (m_pInstance)
-                if (Creature* pDummyDamager = m_pInstance->instance->GetCreature(m_uiDummyDamagerGUID))
-                    pDummyDamager->CastSpell(pDummyDamager, SPELL_FLAME_TSUNAMI_DMG, false);
-
-            std::list<Creature*> lLavaBlazes;
-            GetCreatureListWithEntryInGrid(lLavaBlazes, m_creature, NPC_LAVA_BLAZE, 6.0f);
-            if (!lLavaBlazes.empty())
-            {
-                SpellEntry* pTempSpell = (SpellEntry*)GetSpellStore()->LookupEntry(SPELL_FLAME_TSUNAMI_BUFF);
-                if (pTempSpell)
-                {
-                    pTempSpell->EffectImplicitTargetA[0] = TARGET_SELF;
-                    pTempSpell->EffectImplicitTargetB[0] = 0;
-                    pTempSpell->EffectImplicitTargetA[1] = TARGET_SELF;
-                    pTempSpell->EffectImplicitTargetB[1] = 0;
-                    pTempSpell->EffectImplicitTargetA[2] = TARGET_SELF;
-                    pTempSpell->EffectImplicitTargetB[2] = 0;
-                    for (std::list<Creature*>::iterator iter = lLavaBlazes.begin(); iter != lLavaBlazes.end(); ++iter)
-                    {
-                        (*iter)->CastSpell(*iter, pTempSpell, false);
-                        (*iter)->SetHealth((*iter)->GetHealth()*4);
-                    }
-                }
-            }
-
-            Map* pMap = m_creature->GetMap();
-            if (pMap && pMap->IsDungeon())
-            {
-                Map::PlayerList const &PlayerList = pMap->GetPlayers();
-
-                if (!PlayerList.isEmpty())
-                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                        if (i->getSource()->isAlive() && m_creature->GetDistance2d(i->getSource()) <= 5.0f)
-                        {
-                            i->getSource()->SetOrientation(m_creature->GetOrientation());
-                            i->getSource()->CastSpell(i->getSource(), SPELL_FLAME_TSUNAMI_LEAP, true);
-                        }
-            }
-
-            m_uiTickTimer = 1000;
-        }
-        else
-            m_uiTickTimer -= uiDiff;
     }
 };
 
@@ -1771,9 +1787,19 @@ struct MANGOS_DLL_DECL  mob_lava_blazeAI : public ScriptedAI
     }
 
     ScriptedInstance *pInstance;
+    uint32 m_uiStartHealth;
+
+    void SpellHit(Unit* caster, const SpellEntry* spell)
+    {
+        if (spell->Id == SPELL_FLAME_TSUNAMI_BUFF)
+            m_creature->SetHealth(m_creature->GetMaxHealth());;
+    }
+ 
 
     void Reset()
     {
+        m_uiStartHealth = m_creature->GetHealth();
+        m_creature->setFaction(19);
         m_creature->SetRespawnDelay(DAY);
     }
 

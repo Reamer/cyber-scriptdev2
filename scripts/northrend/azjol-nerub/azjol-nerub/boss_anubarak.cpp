@@ -74,8 +74,6 @@ enum
 #define ELITE_SPAWN_2_Y                 319.792603f
 #define ELITE_SPAWN_2_Z                 235.927032f
 
-#define ACHIEV_SPEEDKILL_H              1860
-
 /*######
 ## boss_anubarak
 ######*/
@@ -115,10 +113,9 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
     uint32 ImpaleTriggerTimer;
 
     Unit* pTriggerTarget;
+    std::list<uint64> m_lBettleGUIDList;
 
     int i;
-
-    Creature* Elite[5];
 
     void Reset()
     {
@@ -152,11 +149,24 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
         i = 0;
 
         m_pInstance->SetData(TYPE_ANUBARAK, NOT_STARTED);
+        RemoveAllBettles();
+
     }
 
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
+    }
+
+    void RemoveAllBettles()
+    {
+        if (!m_lBettleGUIDList.empty())
+        {
+            for(std::list<uint64>::iterator itr = m_lBettleGUIDList.begin(); itr != m_lBettleGUIDList.end(); ++itr)
+                if (Creature* pTemp = (Creature*)m_creature->GetMap()->GetUnit( *itr))
+                        pTemp->ForcedDespawn();
+        }
+        m_lBettleGUIDList.clear();
     }
 
     void KilledUnit(Unit* pVictim)
@@ -174,21 +184,15 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetVisibility(VISIBILITY_ON);
         DoScriptText(SAY_DEATH, m_creature);
-        m_pInstance->SetData(TYPE_ANUBARAK, DONE);
-
+        RemoveAllBettles();
+        if (m_pInstance)
+        {
+            m_pInstance->SetData(TYPE_ANUBARAK, DONE);
             if (m_bIsInTimeForAchiev && !m_bIsRegularMode)
             {
-                if (ACHIEV_SPEEDKILL_H)
-                {
-                    Map* pMap = m_creature->GetMap();
-                    if (pMap && pMap->IsDungeon())
-                    {
-                        Map::PlayerList const &players = pMap->GetPlayers();
-                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            itr->getSource()->RewardPlayerAndGroupAtEvent(ACHIEV_SPEEDKILL_H, m_creature);
-                    }
-                }
+                m_pInstance->DoCompleteAchievement(ACHIEV_SPEEDKILL_H);
             }
+        }
     }
 
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
@@ -335,16 +339,21 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
                 switch(i)
                 {
                     case 0:
-                        m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                        m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                        m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
                         if (phase15)
-                            m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetGUID());
 
                         SummonCreatureTimer = 2000;
                         break;
                     case 1:
-                        m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
                         SummonCreatureTimer = phase33 ? 10000 : 6000;
                         if (phase15)
                         {
@@ -353,52 +362,63 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
                         }
                         break;
                     case 2:
-                        m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                        m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
                         if (phase66)
                         {
                             SummonCreatureTimer = 9999999;
                             break;
                         }
-                        m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
 
                         SummonCreatureTimer = 1000;
                         break;
                     case 3:
-                        m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
                         SummonCreatureTimer = 7000;
                         break;
                     case 4:
-                        m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                        m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
                         
                         SummonCreatureTimer = 9999999;
                         break;
                     case 5:
-                        m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
                         
                         SummonCreatureTimer = 2500;
                         break;
                     case 6:
-                        m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                        m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                        m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 120000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
                         
                         SummonCreatureTimer = 2000;
                         break;
                     case 7:
-                        m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
                         SummonCreatureTimer = 3000;
                         break;
                     case 8:
-                        m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
 
                         SummonCreatureTimer = 8000;
                         break;
                     case 9:
-                        m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
                         
                         SummonCreatureTimer = 9999999;
                         break;
