@@ -1083,7 +1083,28 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                 iTextId = SAY_SHADRON_DEATH;
 
                 if (Creature* pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteShadronGUID))
+                {
                     pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    Creature* pDebuffTarget = NULL;
+                    if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                    {
+                        //not solo fight, so main boss has deduff
+                        pDebuffTarget = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_SARTHARION));
+
+                        if (pDebuffTarget && pDebuffTarget->isAlive() && pDebuffTarget->HasAura(SPELL_GIFT_OF_TWILIGTH_SAR))
+                            pDebuffTarget->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SAR);
+                    }
+                    else
+                    {
+                        //event not in progress, then solo fight and must remove debuff mini-boss
+                        pDebuffTarget = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_SHADRON));
+
+                        if (pDebuffTarget && pDebuffTarget->isAlive() && pDebuffTarget->HasAura(SPELL_GIFT_OF_TWILIGTH_SHA))
+                            pDebuffTarget->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SHA);
+                    }
+
+                }
+
 
                 break;
             }
@@ -1092,7 +1113,25 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                 iTextId = SAY_VESPERON_DEATH;
 
                 if (Creature* pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteVesperonGUID))
+                {
                     pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    // remove twilight torment
+                    Map* pMap = m_creature->GetMap();
+
+                    if (pMap && pMap->IsDungeon())
+                    {
+                        Map::PlayerList const &PlayerList = pMap->GetPlayers();
+
+                        if (PlayerList.isEmpty())
+                            return;
+
+                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        {
+                            i->getSource()->RemoveAurasDueToSpell(57935);
+                            i->getSource()->RemoveAurasDueToSpell(58835);
+                        }
+                    }
+                }
 
                 break;
             }
