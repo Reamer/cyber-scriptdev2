@@ -27,27 +27,27 @@ EndScriptData */
 enum
 {
     //Sartharion Yell
-    SAY_SARTHARION_AGGRO                        = -1615018,
-    SAY_SARTHARION_BERSERK                      = -1615019,
-    SAY_SARTHARION_BREATH                       = -1615020,
-    SAY_SARTHARION_CALL_SHADRON                 = -1615021,
-    SAY_SARTHARION_CALL_TENEBRON                = -1615022,
-    SAY_SARTHARION_CALL_VESPERON                = -1615023,
-    SAY_SARTHARION_DEATH                        = -1615024,
-    SAY_SARTHARION_SPECIAL_1                    = -1615025,
-    SAY_SARTHARION_SPECIAL_2                    = -1615026,
-    SAY_SARTHARION_SPECIAL_3                    = -1615027,
-    SAY_SARTHARION_SPECIAL_4                    = -1615028,
-    SAY_SARTHARION_SLAY_1                       = -1615029,
-    SAY_SARTHARION_SLAY_2                       = -1615030,
-    SAY_SARTHARION_SLAY_3                       = -1615031,
+    SAY_SARTHARION_AGGRO                        = -1615020,
+    SAY_SARTHARION_BERSERK                      = -1615021,
+    SAY_SARTHARION_BREATH                       = -1615022,
+    SAY_SARTHARION_CALL_SHADRON                 = -1615023,
+    SAY_SARTHARION_CALL_TENEBRON                = -1615024,
+    SAY_SARTHARION_CALL_VESPERON                = -1615025,
+    SAY_SARTHARION_DEATH                        = -1615026,
+    SAY_SARTHARION_SPECIAL_1                    = -1615027,
+    SAY_SARTHARION_SPECIAL_2                    = -1615028,
+    SAY_SARTHARION_SPECIAL_3                    = -1615029,
+    SAY_SARTHARION_SPECIAL_4                    = -1615030,
+    SAY_SARTHARION_SLAY_1                       = -1615031,
+    SAY_SARTHARION_SLAY_2                       = -1615032,
+    SAY_SARTHARION_SLAY_3                       = -1615033,
 
-    WHISPER_LAVA_CHURN                          = -1615032,
+    WHISPER_LAVA_CHURN                          = -1615034,
 
     WHISPER_SHADRON_DICIPLE                     = -1615008,
-    WHISPER_VESPERON_DICIPLE                    = -1615041,
-    WHISPER_HATCH_EGGS                          = -1615017,
-    WHISPER_OPEN_PORTAL                         = -1615042, // whisper, shared by two dragons
+    WHISPER_VESPERON_DICIPLE                    = -1615048,
+    WHISPER_HATCH_EGGS                          = -1615018,
+    WHISPER_OPEN_PORTAL                         = -1615035, // whisper, shared by two dragons
 
     //Sartharion Spells
     SPELL_BERSERK                               = 61632,    // Increases the caster's attack speed by 150% and all damage it deals by 500% for 5 min.
@@ -717,14 +717,14 @@ CreatureAI* GetAI_boss_sartharion(Creature* pCreature)
 
 enum TeneText
 {
-    SAY_TENEBRON_AGGRO                      = -1615009,
-    SAY_TENEBRON_SLAY_1                     = -1615010,
-    SAY_TENEBRON_SLAY_2                     = -1615011,
-    SAY_TENEBRON_DEATH                      = -1615012,
-    SAY_TENEBRON_BREATH                     = -1615013,
-    SAY_TENEBRON_RESPOND                    = -1615014,
-    SAY_TENEBRON_SPECIAL_1                  = -1615015,
-    SAY_TENEBRON_SPECIAL_2                  = -1615016
+    SAY_TENEBRON_AGGRO                      = -1615010,
+    SAY_TENEBRON_SLAY_1                     = -1615011,
+    SAY_TENEBRON_SLAY_2                     = -1615012,
+    SAY_TENEBRON_DEATH                      = -1615013,
+    SAY_TENEBRON_BREATH                     = -1615014,
+    SAY_TENEBRON_RESPOND                    = -1615015,
+    SAY_TENEBRON_SPECIAL_1                  = -1615016,
+    SAY_TENEBRON_SPECIAL_2                  = -1615017
 };
 
 enum ShadText
@@ -741,14 +741,14 @@ enum ShadText
 
 enum VespText
 {
-    SAY_VESPERON_AGGRO                      = -1615033,
-    SAY_VESPERON_SLAY_1                     = -1615034,
-    SAY_VESPERON_SLAY_2                     = -1615035,
-    SAY_VESPERON_DEATH                      = -1615036,
-    SAY_VESPERON_BREATH                     = -1615037,
-    SAY_VESPERON_RESPOND                    = -1615038,
-    SAY_VESPERON_SPECIAL_1                  = -1615039,
-    SAY_VESPERON_SPECIAL_2                  = -1615040
+    SAY_VESPERON_AGGRO                      = -1615040,
+    SAY_VESPERON_SLAY_1                     = -1615041,
+    SAY_VESPERON_SLAY_2                     = -1615042,
+    SAY_VESPERON_DEATH                      = -1615043,
+    SAY_VESPERON_BREATH                     = -1615044,
+    SAY_VESPERON_RESPOND                    = -1615045,
+    SAY_VESPERON_SPECIAL_1                  = -1615046,
+    SAY_VESPERON_SPECIAL_2                  = -1615047
 };
 
 
