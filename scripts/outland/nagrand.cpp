@@ -113,6 +113,7 @@ struct MANGOS_DLL_DECL mob_lumpAI : public ScriptedAI
     {
         m_uiResetTimer = MINUTE*IN_MILLISECONDS;
         m_uiSpearThrowTimer = 2000;
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
 
         if (m_creature->getFaction() != m_creature->GetCreatureInfo()->faction_A)
             m_creature->setFaction(m_creature->GetCreatureInfo()->faction_A);
@@ -137,13 +138,14 @@ struct MANGOS_DLL_DECL mob_lumpAI : public ScriptedAI
             if (!m_bReset && pPlayer && pPlayer->GetQuestStatus(QUEST_NOT_ON_MY_WATCH) == QUEST_STATUS_INCOMPLETE)
             {
                 uiDamage = 0;                               //Take 0 damage
-
+                m_creature->setFaction(FACTION_FRIENDLY);
+                pPlayer->AttackStop();
                 m_creature->RemoveAllAuras();
                 m_creature->DeleteThreatList();
                 m_creature->CombatStop(true);
 
                 // should get unit_flags UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE at faction change, but unclear why/for what reason, skipped (no flags expected as default)
-                m_creature->setFaction(FACTION_FRIENDLY);
+
 
                 m_creature->SetStandState(UNIT_STAND_STATE_SIT);
                 DoScriptText(SAY_LUMP_DEFEAT, m_creature, pPlayer);
