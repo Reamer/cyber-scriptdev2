@@ -140,13 +140,13 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         //Decimate_Timer
         if (m_uiDecimateTimer < uiDiff)
         {
-            DoCast(m_creature->getVictim(),SPELL_DECIMATE); // need core support
+            DoCast(m_creature, 28375 , true); // only for DBM, this is the script effect spell for Decimate
+            DoCast(m_creature,SPELL_DECIMATE); // need core support
 
             // workaround below
             std::list<HostileReference*> t_list = m_creature->getThreatManager().getThreatList();
             if (t_list.size())
             {
-                //begin + 1 , so we don't target the one with the highest threat
                 std::list<HostileReference*>::iterator itr = t_list.begin();
                 for(; itr!= t_list.end(); ++itr)
                 {
