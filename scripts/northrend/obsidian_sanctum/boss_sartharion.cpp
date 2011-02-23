@@ -125,7 +125,15 @@ enum
 
     //using these custom points for dragons start and end
     POINT_ID_INIT                               = 100,
-    POINT_ID_LAND                               = 200
+    POINT_ID_LAND                               = 200,
+
+    // achievements
+    THE_TWILIGHT_ZONE_25                        = 2054,
+    THE_TWILIGHT_ZONE_10                        = 2051,
+    TWILIGHT_DUO_25                             = 2053,
+    TWILIGHT_DUO_10                             = 2050,
+    TWILIGHT_ASSIST_25                          = 2052,
+    TWILIGHT_ASSIST_10                          = 2049
 };
 
 struct Waypoint
@@ -339,7 +347,27 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
         DoScriptText(SAY_SARTHARION_DEATH, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_SARTHARION_EVENT, DONE);
+
+            uint8 uiHardMode = 0;
+            if (m_bTenebronHelpedInFight)
+                ++uiHardMode;
+            if (m_bShadronHelpedInFight)
+                ++uiHardMode;
+            if (m_bVesperonHelpedInFight)
+                ++uiHardMode;
+
+            switch (uiHardMode)
+            {
+                case 3:
+                    m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? THE_TWILIGHT_ZONE_10 : THE_TWILIGHT_ZONE_25);
+                case 2:
+                    m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? TWILIGHT_DUO_10 : TWILIGHT_DUO_25);
+                case 1:
+                    m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? TWILIGHT_ASSIST_10 : TWILIGHT_ASSIST_25);
+            }
+        }
     }
 
     void KilledUnit(Unit* pVictim)
@@ -1244,13 +1272,13 @@ struct MANGOS_DLL_DECL mob_tenebronAI : public dummy_dragonAI
         else
             m_uiShadowBreathTimer -= uiDiff;
 
-        if (m_uiTailSweepTimer < uiDiff)
+        /*if (m_uiTailSweepTimer < uiDiff)
         {
             DoCast(m_creature, m_bIsRegularMode ? SPELL_TAIL_LASH : SPELL_TAIL_LASH_H);
             m_uiTailSweepTimer = urand(5000, 7000);
         }
         else
-            m_uiTailSweepTimer -= uiDiff;
+            m_uiTailSweepTimer -= uiDiff;*/ 
 
         if (m_uiHatchEggTimer < uiDiff)
         {
@@ -1353,13 +1381,13 @@ struct MANGOS_DLL_DECL mob_shadronAI : public dummy_dragonAI
         else
             m_uiShadowBreathTimer -= uiDiff;
 
-        if (m_uiTailSweepTimer < uiDiff)
+        /*if (m_uiTailSweepTimer < uiDiff)
         {
             DoCast(m_creature, m_bIsRegularMode ? SPELL_TAIL_LASH : SPELL_TAIL_LASH_H);
             m_uiTailSweepTimer = urand(5000, 7000);
         }
         else
-            m_uiTailSweepTimer -= uiDiff;
+            m_uiTailSweepTimer -= uiDiff;*/ 
 
         if (m_uiAcolyteShadronTimer < uiDiff)
         {
@@ -1462,13 +1490,13 @@ struct MANGOS_DLL_DECL mob_vesperonAI : public dummy_dragonAI
         else
             m_uiShadowBreathTimer -= uiDiff;
 
-        if (m_uiTailSweepTimer < uiDiff)
+        /*if (m_uiTailSweepTimer < uiDiff)
         {
             DoCast(m_creature, m_bIsRegularMode ? SPELL_TAIL_LASH : SPELL_TAIL_LASH_H);
             m_uiTailSweepTimer = urand(5000, 7000);
         }
         else
-            m_uiTailSweepTimer -= uiDiff;
+            m_uiTailSweepTimer -= uiDiff;*/ 
 
         if (m_uiAcolyteVesperonTimer < uiDiff)
         {
