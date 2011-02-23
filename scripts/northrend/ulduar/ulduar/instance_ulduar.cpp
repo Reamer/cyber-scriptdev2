@@ -84,9 +84,23 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
     //doors & objects
     // The siege
     uint64 m_uiShieldWallGUID;
+    uint64 m_uiShieldDoorGUID;
     uint64 m_uiLeviathanGateGUID;
     uint64 m_uiXT002GateGUID;
     uint64 m_uiBrokenHarpoonGUID;
+    // hardmode for Leviathan
+    uint64 m_uiTowerOfFrostGUID;
+    uint64 m_uiTowerOfFlameGUID;
+    uint64 m_uiTowerOfLifeGUID;
+    uint64 m_uiTowerOfStormsGUID;
+    uint64 m_uiFreyaStormGeneratorGUID;
+    uint64 m_uiMimironStormGeneratorGUID;
+    uint64 m_uiHodirStormGeneratorGUID;
+    uint64 m_uiTorimWeatherGeneratorGUID;
+    uint64 m_uiFreyaTargettingCrystalGUID;
+    uint64 m_uiMimironTargettingCrystalGUID;
+    uint64 m_uiThorimTargettingCrystalGUID;
+    uint64 m_uiHodirTargettingCrystalGUID;
     // Archivum
     uint64 m_uiIronCouncilDoorGUID;
     uint64 m_uiArchivumDoorGUID;
@@ -206,9 +220,24 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         // doors
         // The siege
         m_uiShieldWallGUID      = 0;
+        m_uiShieldDoorGUID      = 0;
         m_uiLeviathanGateGUID   = 0;
         m_uiXT002GateGUID       = 0;
         m_uiBrokenHarpoonGUID   = 0;
+        // hardmode for Leviathan
+        m_uiTowerOfFrostGUID            = 0;
+        m_uiTowerOfFlameGUID            = 0;
+        m_uiTowerOfLifeGUID             = 0;
+        m_uiTowerOfStormsGUID           = 0;
+        m_uiFreyaStormGeneratorGUID     = 0;
+        m_uiMimironStormGeneratorGUID   = 0;
+        m_uiHodirStormGeneratorGUID     = 0;
+        m_uiTorimWeatherGeneratorGUID   = 0;
+        m_uiFreyaTargettingCrystalGUID  = 0;
+        m_uiMimironTargettingCrystalGUID= 0;
+        m_uiThorimTargettingCrystalGUID = 0;
+        m_uiHodirTargettingCrystalGUID  = 0;
+        
         // Archivum
         m_uiIronCouncilDoorGUID = 0;
         m_uiArchivumDoorGUID    = 0;
@@ -394,6 +423,9 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         case GO_SHIELD_WALL:
             m_uiShieldWallGUID = pGo->GetGUID();
             break;
+        case GO_SHIELD_DOOR:
+            m_uiShieldDoorGUID = pGo->GetGUID();
+            break;
         case GO_LEVIATHAN_GATE:
             m_uiLeviathanGateGUID = pGo->GetGUID();
             if(m_auiEncounter[0] == DONE)
@@ -410,6 +442,44 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         case GO_BROKEN_HARPOON:
             m_uiBrokenHarpoonGUID = pGo->GetGUID();
             pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+            break;
+
+            // Leviathan hard mode
+        case GO_TOWER_OF_FROST:
+            m_uiTowerOfFrostGUID = pGo->GetGUID();
+            break;
+        case GO_TOWER_OF_FLAME:
+            m_uiTowerOfFlameGUID = pGo->GetGUID();
+            break;
+        case GO_TOWER_OF_LIFE:
+            m_uiTowerOfLifeGUID = pGo->GetGUID();
+            break;
+        case GO_TOWER_OF_STORMS:
+            m_uiTowerOfStormsGUID = pGo->GetGUID();
+            break;
+        case GO_FREYA_STORM_GENERATOR:
+            m_uiFreyaStormGeneratorGUID = pGo->GetGUID();
+            break;
+        case GO_MIMIRON_STORM_GENERATOR:
+            m_uiMimironStormGeneratorGUID = pGo->GetGUID();
+            break;
+        case GO_HODIR_STORM_GENERATOR:
+            m_uiHodirStormGeneratorGUID = pGo->GetGUID();
+            break;
+        case GO_THORIM_WEATHER_GENERATOR:
+            m_uiTorimWeatherGeneratorGUID = pGo->GetGUID();
+            break;
+        case GO_FREYA_TARGETTING_CRYSTAL:
+            m_uiFreyaTargettingCrystalGUID = pGo->GetGUID();
+            break;
+        case GO_MIMIRON_TARGETTING_CRYSTAL:
+            m_uiMimironTargettingCrystalGUID = pGo->GetGUID();
+            break;
+        case GO_THORIM_TARGETTING_CRYSTAL:
+            m_uiThorimTargettingCrystalGUID = pGo->GetGUID();
+            break;
+        case GO_HODIR_TARGETTING_CRYSTAL:
+            m_uiHodirTargettingCrystalGUID = pGo->GetGUID();
             break;
 
             // Archivum
@@ -715,11 +785,17 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         {
         case TYPE_LEVIATHAN:
             m_auiEncounter[0] = uiData;
+            if (uiData == SPECIAL)
+            {
+                OpenDoor(m_uiLeviathanGateGUID);
+                CloseDoor(m_uiShieldDoorGUID);
+                return;
+            }
             DoUseDoorOrButton(m_uiShieldWallGUID);
             if (uiData == DONE)
             {
                 OpenDoor(m_uiXT002GateGUID);
-                OpenDoor(m_uiLeviathanGateGUID);
+                OpenDoor(m_uiShieldDoorGUID);
             }
             break;
         case TYPE_IGNIS:
@@ -995,76 +1071,102 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
     {
         switch(uiData)
         {
-            // Siege
-        case NPC_LEVIATHAN:
-            return m_uiLeviathanGUID;
-        case NPC_IGNIS:
-            return m_uiIgnisGUID;
-        case NPC_RAZORSCALE:
-            return m_uiRazorscaleGUID;
-        case NPC_COMMANDER:
-            return m_uiCommanderGUID;
-        case NPC_XT002:
-            return m_uiXT002GUID;
-            // Antechamber
-        case NPC_STEELBREAKER:
-            return m_auiAssemblyGUIDs[0];
-        case NPC_MOLGEIM:
-            return m_auiAssemblyGUIDs[1];
-        case NPC_BRUNDIR:
-            return m_auiAssemblyGUIDs[2];
-        case NPC_KOLOGARN:
-            return m_uiKologarnGUID;
-        case NPC_LEFT_ARM:
-            return m_uiLeftArmGUID;
-        case NPC_RIGHT_ARM:
-            return m_uiRightArmGUID;
-        case NPC_AURIAYA:
-            return m_uiAuriayaGUID;
-            // Keepers
-        case NPC_MIMIRON:
-            return m_uiMimironGUID;
-        case NPC_LEVIATHAN_MK:
-            return m_uiLeviathanMkGUID;
-        case NPC_HODIR:
-            return m_uiMimironGUID;
-        case NPC_THORIM:
-            return m_uiThorimGUID;
-        case NPC_RUNE_GIANT:
-            return m_uiRuneGiantGUID;
-        case NPC_RUNIC_COLOSSUS:
-            return m_uiRunicColossusGUID;
-        case NPC_JORMUNGAR_BEHEMOTH:
-            return m_uiJormungarGUID;
-        case NPC_FREYA:
-            return m_uiFreyaGUID;
-        case NPC_BRIGHTLEAF:
-            return m_uiElderBrightleafGUID;
-        case NPC_IRONBRACH:
-            return m_uiElderIronbrachGUID;
-        case NPC_STONEBARK:
-            return m_uiElderStonebarkGUID;
-        case NPC_VEZAX:
-            return m_uiVezaxGUID;
-        case NPC_YOGGSARON:
-            return m_uiYoggSaronGUID;
-        case NPC_SARA:
-            return m_uiSaraGUID;
-        case NPC_YOGG_BRAIN:
-            return m_uiYoggBrainGUID;
-        case NPC_ALGALON:
-            return m_uiAlgalonGUID;
+                // Siege
+            case NPC_LEVIATHAN:
+                return m_uiLeviathanGUID;
+            case NPC_IGNIS:
+                return m_uiIgnisGUID;
+            case NPC_RAZORSCALE:
+                return m_uiRazorscaleGUID;
+            case NPC_COMMANDER:
+                return m_uiCommanderGUID;
+            case NPC_XT002:
+                return m_uiXT002GUID;
+                // Antechamber
+            case NPC_STEELBREAKER:
+                return m_auiAssemblyGUIDs[0];
+            case NPC_MOLGEIM:
+                return m_auiAssemblyGUIDs[1];
+            case NPC_BRUNDIR:
+                return m_auiAssemblyGUIDs[2];
+            case NPC_KOLOGARN:
+                return m_uiKologarnGUID;
+            case NPC_LEFT_ARM:
+                return m_uiLeftArmGUID;
+            case NPC_RIGHT_ARM:
+                return m_uiRightArmGUID;
+            case NPC_AURIAYA:
+                return m_uiAuriayaGUID;
+                // Keepers
+            case NPC_MIMIRON:
+                return m_uiMimironGUID;
+            case NPC_LEVIATHAN_MK:
+                return m_uiLeviathanMkGUID;
+            case NPC_HODIR:
+                return m_uiMimironGUID;
+            case NPC_THORIM:
+                return m_uiThorimGUID;
+            case NPC_RUNE_GIANT:
+                return m_uiRuneGiantGUID;
+            case NPC_RUNIC_COLOSSUS:
+                return m_uiRunicColossusGUID;
+            case NPC_JORMUNGAR_BEHEMOTH:
+                return m_uiJormungarGUID;
+            case NPC_FREYA:
+                return m_uiFreyaGUID;
+            case NPC_BRIGHTLEAF:
+                return m_uiElderBrightleafGUID;
+            case NPC_IRONBRACH:
+                return m_uiElderIronbrachGUID;
+            case NPC_STONEBARK:
+                return m_uiElderStonebarkGUID;
+            case NPC_VEZAX:
+                return m_uiVezaxGUID;
+            case NPC_YOGGSARON:
+                return m_uiYoggSaronGUID;
+            case NPC_SARA:
+                return m_uiSaraGUID;
+            case NPC_YOGG_BRAIN:
+                return m_uiYoggBrainGUID;
+            case NPC_ALGALON:
+                return m_uiAlgalonGUID;
 
-            // mimiron hard  mode button
-        case GO_MIMIRON_BUTTON:
-            return m_uiMimironButtonGUID;
-            // thorim encounter starter lever
-        case GO_DOOR_LEVER:
-            return m_uiThorimLeverGUID;
-            // celestial door
-        case GO_CELESTIAL_DOOR:
-            return m_uiCelestialDoorGUID;
-        }
+                // mimiron hard  mode button
+            case GO_MIMIRON_BUTTON:
+                return m_uiMimironButtonGUID;
+                // thorim encounter starter lever
+            case GO_DOOR_LEVER:
+                return m_uiThorimLeverGUID;
+                // celestial door
+            case GO_CELESTIAL_DOOR:
+                return m_uiCelestialDoorGUID;
+
+                // Leviathan hard mode
+            case GO_TOWER_OF_FROST:
+                return m_uiTowerOfFrostGUID;
+            case GO_TOWER_OF_FLAME:
+                return m_uiTowerOfFlameGUID;
+            case GO_TOWER_OF_LIFE:
+                return m_uiTowerOfLifeGUID;
+            case GO_TOWER_OF_STORMS:
+                return m_uiTowerOfStormsGUID;
+            case GO_FREYA_STORM_GENERATOR:
+                return m_uiFreyaStormGeneratorGUID;
+            case GO_MIMIRON_STORM_GENERATOR:
+                return m_uiMimironStormGeneratorGUID;
+            case GO_HODIR_STORM_GENERATOR:
+                return m_uiHodirStormGeneratorGUID;
+            case GO_THORIM_WEATHER_GENERATOR:
+                return m_uiTorimWeatherGeneratorGUID;
+            case GO_FREYA_TARGETTING_CRYSTAL:
+                return m_uiFreyaTargettingCrystalGUID;
+            case GO_MIMIRON_TARGETTING_CRYSTAL:
+                return m_uiMimironTargettingCrystalGUID;
+            case GO_THORIM_TARGETTING_CRYSTAL:
+                return m_uiThorimTargettingCrystalGUID;
+            case GO_HODIR_TARGETTING_CRYSTAL:
+                return m_uiHodirTargettingCrystalGUID;
+            }
 
         return 0;
     }
@@ -1238,6 +1340,51 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         // hacky way to complete achievements; use only if you have this function
         if(m_auiEncounter[7] == DONE && m_auiEncounter[8] == DONE && m_auiEncounter[9] == DONE && m_auiEncounter[10] == DONE)
             DoCompleteAchievement(instance->IsRegularDifficulty() ? ACHIEV_KEEPERS : ACHIEV_KEEPERS_H);
+    }
+    
+    void Update(uint32 uiDiff)
+    {
+        if (GameObject* pTowerFrost = instance->GetGameObject(m_uiTowerOfFrostGUID))
+        {
+            if (!pTowerFrost->GetHealth())
+            {
+                if (GameObject* pHodirGenerator = instance->GetGameObject(m_uiHodirStormGeneratorGUID))
+                    pHodirGenerator->UseDoorOrButton();
+                if (GameObject* pHodirCrystal = instance->GetGameObject(m_uiHodirTargettingCrystalGUID))
+                    pHodirCrystal->UseDoorOrButton();
+            }
+        }
+        if (GameObject* pTowerFlame = instance->GetGameObject(m_uiTowerOfFlameGUID))
+        {
+            if (!pTowerFlame->GetHealth())
+            {
+                if (GameObject* pMimironGenerator = instance->GetGameObject(m_uiMimironStormGeneratorGUID))
+                    pMimironGenerator->UseDoorOrButton();
+                if (GameObject* pMimironCrystal = instance->GetGameObject(m_uiMimironTargettingCrystalGUID))
+                    pMimironCrystal->UseDoorOrButton();
+            }
+        }
+        if (GameObject* pTowerLife = instance->GetGameObject(m_uiTowerOfLifeGUID))
+        {
+            if (!pTowerLife->GetHealth())
+            {
+                if (GameObject* pFreyaGenerator = instance->GetGameObject(m_uiFreyaStormGeneratorGUID))
+                    pFreyaGenerator->UseDoorOrButton();
+                if (GameObject* pFreyaCrystal = instance->GetGameObject(m_uiFreyaTargettingCrystalGUID))
+                    pFreyaCrystal->UseDoorOrButton();
+            }
+        }
+        
+        if (GameObject* pTowerStorm = instance->GetGameObject(m_uiTowerOfStormsGUID))
+        {
+            if (!pTowerStorm->GetHealth())
+            {
+                if (GameObject* pTorimGenerator = instance->GetGameObject(m_uiTorimWeatherGeneratorGUID))
+                    pTorimGenerator->UseDoorOrButton();
+                if (GameObject* pTorimCrystal = instance->GetGameObject(m_uiThorimTargettingCrystalGUID))
+                    pTorimCrystal->UseDoorOrButton();
+            }
+        }
     }
 };
 

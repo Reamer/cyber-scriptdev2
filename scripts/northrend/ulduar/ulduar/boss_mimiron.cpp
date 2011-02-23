@@ -2249,7 +2249,7 @@ void AddSC_boss_mimiron()
     newscript->RegisterSelf();
 
     newscript = new Script;
-    newscript->Name = "mob_mimiron_inferno";
+    newscript->Name = "mob_mimirons_inferno";
     newscript->GetAI = &GetAI_mob_mimiron_inferno;
     newscript->RegisterSelf();
 

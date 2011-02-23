@@ -1,31 +1,79 @@
 /* ULDUAR from Xfurry*/
 
 -- Flame Leviathan
-UPDATE creature_template SET ScriptName = 'boss_flame_leviathan' WHERE entry = 33113;
-UPDATE creature_template SET ScriptName = 'mob_defense_turret' WHERE entry = 33142;
+    UPDATE creature_template SET ScriptName = 'boss_flame_leviathan' WHERE entry = 33113;
+    UPDATE creature_template SET ScriptName = 'mob_defense_turret' WHERE entry = 33142;
+    UPDATE creature_template SET ScriptName = 'mob_pool_of_tar' WHERE entry = 33090;
+    UPDATE creature_template SET ScriptName = 'mob_mechanolift' WHERE entry = 33214;
+    UPDATE creature_template SET ScriptName = 'mob_freyas_ward' WHERE entry = 33367;
+    UPDATE creature_template SET ScriptName = 'mob_hodirs_fury' WHERE entry = 33212;  
+    UPDATE creature_template SET ScriptName = 'mob_mimiron_inferno' WHERE entry = 33370;
+    UPDATE creature_template SET ScriptName = 'mob_thorims_hammer' WHERE entry = 33365;
+    UPDATE creature_template SET ScriptName = 'mob_lorekeeper' WHERE entry=33686;
+
+    -- grünes leuchten
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 63295;
+    INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (63295,1,33367);
+    -- blaues  leuchten
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 63294;
+    INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (63294,1,33212),(63294,1,33365);
+    -- gelbes(rotes) leuchten
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 63292;
+    INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (63292,1,33370);
+
+
+    -- Freya Wall (Pflanzen)
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 62906;
+    INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (62906,1,33060),(62906,1,33109) ;
+
+    -- Hodir Fury (Eis)
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 62533;
+    INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (62533,1,33060),(62533,1,33109);
+
+    -- mimiron inferno (Feuer)
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 62909;
+    INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (62909,1,33369);
+
+    -- Thorim Hammer
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 62911 ;
+    INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (62911 ,1,33060),(62911 ,1,33109);
 
 -- Ignis
-UPDATE creature_template SET mechanic_immune_mask=617299803, scriptname='boss_ignis' WHERE entry=33118;
-UPDATE creature_template SET ScriptName = 'mob_iron_construct' WHERE entry = 33121;
-REPLACE INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES ('64474', '1', '33118');
-REPLACE INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES ('64475', '1', '33118');
--- this may not be correct
-UPDATE creature_template SET minlevel=80, maxlevel=80, faction_h=1925, faction_a=1925, scale=0.5, scriptname='mob_scorch_target' WHERE entry=33221;
+    UPDATE creature_template SET mechanic_immune_mask=617299803, scriptname='boss_ignis' WHERE entry=33118;
+    UPDATE creature_template SET ScriptName = 'mob_iron_construct' WHERE entry = 33121;
+    REPLACE INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES ('64474', '1', '33118');
+    REPLACE INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES ('64475', '1', '33118');
+    -- this may not be correct
+    UPDATE creature_template SET minlevel=80, maxlevel=80, faction_h=1925, faction_a=1925, scale=0.5, scriptname='mob_scorch_target' WHERE entry=33221;
 
 -- Razorscale
-UPDATE creature_template SET mechanic_immune_mask=617299803, scriptname='boss_razorscale' WHERE entry=33186;
+    UPDATE creature_template SET mechanic_immune_mask=617299803, scriptname='boss_razorscale' WHERE entry=33186;
 -- original x=587.547, y= -174.927, z = 391.517; make the boss fly before encounter starts
-UPDATE creature SET position_x = 590.346741, position_y = -226.947647, position_z = 442.897583 WHERE id = 33186;
-UPDATE gameobject_template SET flags= 6553648, ScriptName='go_broken_harpoon' WHERE entry = 194565;
--- only 2 harpoons for 10 man
-UPDATE gameobject SET spawnMask = 2 WHERE guid IN (73595, 73592);
--- mole machines & adds
-UPDATE creature_template SET ScriptName = 'mob_mole_machine' WHERE entry = 33245;
-UPDATE creature_template SET ScriptName = 'mob_dark_rune_watcher' WHERE entry = 33453;
-UPDATE creature_template SET ScriptName = 'mob_dark_rune_sentinel' WHERE entry = 33846;
-UPDATE creature_template SET ScriptName = 'mob_dark_rune_guardian' WHERE entry = 33388;
-UPDATE creature_template SET ScriptName = 'npc_expedition_commander' WHERE entry = 33210;
-UPDATE creature_template SET ScriptName = 'mob_devouring_flame_target' WHERE entry IN (34189, 34188);
+    UPDATE creature SET position_x = 590.346741, position_y = -226.947647, position_z = 442.897583 WHERE id = 33186;
+
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 63524;
+    INSERT INTO spell_script_target VALUES (63524 ,1,33282);
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 63657;
+    INSERT INTO spell_script_target VALUES (63657 ,1,33282);
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 63658;
+    INSERT INTO spell_script_target VALUES (63658 ,1,33282);
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 63659;
+    INSERT INTO spell_script_target VALUES (63659 ,1,33282);
+
+    DELETE FROM spell_script_target WHERE spell_script_target.entry = 62505;
+    INSERT INTO spell_script_target VALUES (62505 ,1,33186);
+
+
+    UPDATE gameobject_template SET data3 = 180000, ScriptName='go_repair_harpoon' WHERE entry IN (194543,194542,194541,194519);
+    -- only 2 harpoons for 10 man
+    UPDATE gameobject SET spawnMask = 2 WHERE guid IN (73595, 73592);
+    -- mole machines & adds
+    UPDATE creature_template SET ScriptName = 'mob_mole_machine' WHERE entry = 33245;
+    UPDATE creature_template SET ScriptName = 'mob_dark_rune_watcher' WHERE entry = 33453;
+    UPDATE creature_template SET ScriptName = 'mob_dark_rune_sentinel' WHERE entry = 33846;
+    UPDATE creature_template SET ScriptName = 'mob_dark_rune_guardian' WHERE entry = 33388;
+    UPDATE creature_template SET ScriptName = 'npc_expedition_commander' WHERE entry = 33210;
+    UPDATE creature_template SET ScriptName = 'mob_devouring_flame_target' WHERE entry IN (34189, 34188);
 
 -- XT002
 UPDATE creature_template SET mechanic_immune_mask=617299803, scriptname='boss_xt002' WHERE entry=33293;
