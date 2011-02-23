@@ -50,8 +50,10 @@ enum
     BUFF_STRENGHT_OF_CREATOR	= 64473,
     SPELL_STRENGHT_OF_CREATOR2	= 64474,
     SPELL_STRENGHT_OF_CREATOR3	= 64475,
-    SPELL_HASTE					= 66045,
+    SPELL_HASTE					= 62836,
     SPELL_ENRAGE                = 26662,
+
+
     //iron construct
     SPELL_HEAT					= 65667,
     SPELL_MOLTEN				= 62373,
@@ -267,15 +269,6 @@ struct MANGOS_DLL_DECL mob_iron_constructAI : public ScriptedAI
                     m_bIsBrittle = true;
                     m_bIsMolten = false;
                 }
-                // workaround
-                /* else use workaround
-                if( m_creature->GetDistance2d(524.15f, 277.0f) < 18 || m_creature->GetDistance2d(648.5f, 277.0f) < 18)
-                {
-                    DoCast(m_creature, SPELL_BRITTLE);
-                    m_creature->RemoveAurasDueToSpell(SPELL_MOLTEN);
-                    m_bIsBrittle = true;
-                    m_bIsMolten = false;
-                }*/
                 m_uiWaterCheckTimer = 500;
             }else m_uiWaterCheckTimer -= uiDiff;
         }

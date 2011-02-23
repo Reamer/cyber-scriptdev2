@@ -146,6 +146,7 @@ enum
 
     // doors
     // the siege
+    GO_SHIELD_DOOR              = 194905,
     GO_SHIELD_WALL              = 194416,
     GO_LEVIATHAN_GATE           = 194630,
     GO_XT002_GATE               = 194631,
@@ -188,7 +189,6 @@ enum
     GO_DARK_IRON_PORTCULIS      = 194560,
     GO_RUNED_STONE_DOOR         = 194557,
     GO_THORIM_STONE_DOOR        = 194558,
-    GO_LIGHTNING_DOOR           = 194905,
     GO_LIGHTNING_FIELD          = 194559,
     GO_DOOR_LEVER               = 194264,
     //Yogg
@@ -208,6 +208,23 @@ enum
     ACHIEV_CELESTIAL_DEFENDER   = 3259,     // realm first algalon
     SPELL_ALGALON_ACHIEV_TRIGG  = 65184,
     ACHIEV_DEATHS_DEMISE        = 3117,     // realm first yogg
+
+    // hard mode Flame Leviathan
+    GO_TOWER_OF_FROST           = 194370,
+    GO_TOWER_OF_FLAME           = 194371,
+    GO_TOWER_OF_LIFE            = 194375,
+    GO_TOWER_OF_STORMS          = 194377,
+    GO_FREYA_STORM_GENERATOR    = 194663,
+    GO_MIMIRON_STORM_GENERATOR  = 194664,
+    GO_HODIR_STORM_GENERATOR    = 194665,
+    GO_THORIM_WEATHER_GENERATOR = 194666,
+    GO_FREYA_TARGETTING_CRYSTAL = 194704,
+    GO_MIMIRON_TARGETTING_CRYSTAL=194705,    
+    GO_THORIM_TARGETTING_CRYSTAL= 194706,
+    GO_HODIR_TARGETTING_CRYSTAL = 194707,
+
+
+
 };
 
 #endif

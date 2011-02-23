@@ -60,6 +60,10 @@ enum
     NPC_VOIDZONE            = 34001,
     NPC_LIFESPARK           = 34004,
 
+    // Void Zone
+    SPELL_VOID_ZONE_10      = 64203,
+    SPELL_VOID_ZONE_25      = 64235,
+
     //heart of the deconstructor
     SPELL_EXPOSED_HEART		= 63849,
 
@@ -282,15 +286,14 @@ struct MANGOS_DLL_DECL mob_xtheartAI : public ScriptedAI
     {
         DoCast(m_creature, SPELL_EXPOSED_HEART);
         m_creature->SetRespawnDelay(DAY);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_uiTotalDamage = 0;
         m_uiDeathTimer = 30000;
     }
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
     {
-        m_uiTotalDamage += uiDamage;
-        // double damage
-        uiDamage += uiDamage;
+        m_uiTotalDamage += (uiDamage *2);
     }
 
     void JustDied(Unit* pKiller)
@@ -529,7 +532,7 @@ struct MANGOS_DLL_DECL boss_xt002AI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 // fix spell range
-                DoCast(pTarget, m_bIsRegularMode ? SPELL_LIGHT_BOMB : SPELL_LIGHT_BOMB_H);
+                pTarget->CastSpell(pTarget, m_bIsRegularMode ? SPELL_LIGHT_BOMB : SPELL_LIGHT_BOMB_H, true);
                 pLightBombTarGUID = pTarget->GetGUID();
             }
 
@@ -546,7 +549,7 @@ struct MANGOS_DLL_DECL boss_xt002AI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 // fix spell range
-                DoCast(pTarget, m_bIsRegularMode ? SPELL_GRAVITY_BOMB : SPELL_GRAVITY_BOMB_H);
+                pTarget->CastSpell(pTarget, m_bIsRegularMode ? SPELL_GRAVITY_BOMB : SPELL_GRAVITY_BOMB_H, true);
                 pGravityBombTarGUID = pTarget->GetGUID();
             }
 
@@ -680,12 +683,7 @@ struct MANGOS_DLL_DECL boss_xt002AI : public ScriptedAI
             m_uiPummellerCount      = 0;
 
             if(Creature *Heart = m_creature->SummonCreature(NPC_HEART, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 900000))
-            {
                 m_uiXtHeartGUID = Heart->GetGUID();
-				// this needs fixing in DB
-                if(!m_bIsRegularMode)
-                    Heart->SetMaxHealth(7199999);
-            }
         }
 
         if (m_bPhase2 && m_uiHeart_Timer < uiDiff)

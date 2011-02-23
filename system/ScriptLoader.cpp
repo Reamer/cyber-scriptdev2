@@ -309,7 +309,8 @@ extern void AddSC_boss_moorabi();
 extern void AddSC_boss_sladran();
 extern void AddSC_instance_gundrak();
 
-extern void AddSC_boss_gafrost();                           // ICC, pit_of_saron
+extern void AddSC_boss_garfrost();                          // ICC, pit_of_saron
+
 extern void AddSC_boss_krick_and_ick();
 extern void AddSC_boss_tyrannus();
 extern void AddSC_instance_pit_of_saron();
@@ -346,6 +347,7 @@ extern void AddSC_boss_urom();
 extern void AddSC_boss_eregos();
 
 extern void AddSC_boss_malygos();                           //eye of eternity
+extern void AddSC_instance_eye_of_eternity();
 
 extern void AddSC_boss_sartharion();                        //obsidian_sanctum
 extern void AddSC_instance_obsidian_sanctum();
@@ -820,7 +822,8 @@ void AddScripts()
     AddSC_boss_sladran();
     AddSC_instance_gundrak();
 
-    AddSC_boss_gafrost();                                   // ICC, pit_of_saron
+    AddSC_boss_garfrost();                                  // ICC, FH, pit_of_saron
+
     AddSC_boss_krick_and_ick();
     AddSC_boss_tyrannus();
     AddSC_instance_pit_of_saron();
@@ -857,6 +860,7 @@ void AddScripts()
     AddSC_boss_eregos();
 
     AddSC_boss_malygos();                                   //eye of eternity
+    AddSC_instance_eye_of_eternity();
 
     AddSC_boss_sartharion();                                //obsidian_sanctum
     AddSC_instance_obsidian_sanctum();
