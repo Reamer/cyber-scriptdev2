@@ -1,6 +1,6 @@
 #summary One-sentence summary of this page.
 
-= ScriptDev2 Projekt von Cyberneticworld =
+= ScriptDev2-Projekt von Cyberneticworld =
 
 www.cyberneticworld.de
 
