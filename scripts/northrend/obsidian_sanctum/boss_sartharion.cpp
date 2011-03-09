@@ -980,7 +980,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                             if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
                             {
                                 pAcolyte = NULL;
-                                if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_SHADRON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                                if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_SHADRON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 90000))
                                 {
                                     m_uiAcolyteShadronGUID = pAcolyte->GetGUID();
                                     pAcolyte->SetPhaseMask(16, true);
@@ -1026,7 +1026,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                             if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
                             {
                                 pAcolyte = NULL;
-                                if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_VESPERON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                                if (pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_VESPERON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 90000))
                                 {
                                     m_uiAcolyteVesperonGUID = pAcolyte->GetGUID();
                                     pAcolyte->SetPhaseMask(16, true);
@@ -1111,23 +1111,22 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                 iTextId = SAY_VESPERON_DEATH;
 
                 if (Creature* pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteVesperonGUID))
-                {
                     pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    // remove twilight torment
-                    Map* pMap = m_creature->GetMap();
 
-                    if (pMap && pMap->IsDungeon())
+                // remove twilight torment
+                Map* pMap = m_creature->GetMap();
+
+                if (pMap && pMap->IsDungeon())
+                {
+                    Map::PlayerList const &PlayerList = pMap->GetPlayers();
+
+                    if (PlayerList.isEmpty())
+                        return;
+
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
-                        Map::PlayerList const &PlayerList = pMap->GetPlayers();
-
-                        if (PlayerList.isEmpty())
-                            return;
-
-                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                        {
-                            i->getSource()->RemoveAurasDueToSpell(57935);
-                            i->getSource()->RemoveAurasDueToSpell(58835);
-                        }
+                        i->getSource()->RemoveAurasDueToSpell(57935);
+                        i->getSource()->RemoveAurasDueToSpell(58835);
                     }
                 }
 
