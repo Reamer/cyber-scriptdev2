@@ -1084,31 +1084,26 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
             case NPC_SHADRON:
             {
                 iTextId = SAY_SHADRON_DEATH;
-
-                if (Creature* pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteShadronGUID))
+                
+                Creature* pDebuffTarget = NULL;
+                if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
                 {
-                    pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    Creature* pDebuffTarget = NULL;
-                    if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-                    {
-                        //not solo fight, so main boss has deduff
-                        pDebuffTarget = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_SARTHARION));
+                    //not solo fight, so main boss has deduff
+                    pDebuffTarget = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_SARTHARION));
 
-                        if (pDebuffTarget && pDebuffTarget->isAlive() && pDebuffTarget->HasAura(SPELL_GIFT_OF_TWILIGTH_SAR))
-                            pDebuffTarget->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SAR);
-                    }
-                    else
-                    {
-                        //event not in progress, then solo fight and must remove debuff mini-boss
-                        pDebuffTarget = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_SHADRON));
-
-                        if (pDebuffTarget && pDebuffTarget->isAlive() && pDebuffTarget->HasAura(SPELL_GIFT_OF_TWILIGTH_SHA))
-                            pDebuffTarget->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SHA);
-                    }
-
+                    if (pDebuffTarget && pDebuffTarget->isAlive() && pDebuffTarget->HasAura(SPELL_GIFT_OF_TWILIGTH_SAR))
+                        pDebuffTarget->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SAR);
                 }
+                else
+                {
+                    //event not in progress, then solo fight and must remove debuff mini-boss
+                    pDebuffTarget = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_SHADRON));
 
-
+                    if (pDebuffTarget && pDebuffTarget->isAlive() && pDebuffTarget->HasAura(SPELL_GIFT_OF_TWILIGTH_SHA))
+                        pDebuffTarget->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SHA);
+                }
+                if (Creature* pAcolyte = m_pInstance->instance->GetCreature(m_uiAcolyteShadronGUID))
+                    pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                 break;
             }
             case NPC_VESPERON:
