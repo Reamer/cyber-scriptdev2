@@ -44,6 +44,11 @@ enum
     SPELL_SONIC_SCREECH_H		= 64688,
     SPELL_FEAR					= 64386,
 
+    // summon Feral Defender
+    SPELL_SUMMON_DEFENDER       = 64448,
+    SPELL_SUMMON_DEFENDER_AURA  = 64449,
+    NPC_FERAL_DEFENDER_STALKER  = 34096,
+
     //feral defender
     SPELL_FEIGN_DEATH			= 57685,
     SPELL_FERAL_ESSENCE			= 64455,
@@ -57,8 +62,10 @@ enum
     SPELL_RIP_FLESH_H			= 64667,
     SPELL_SAVAGE_POUNCE			= 64666,
     SPELL_SAVAGE_POUNCE_H		= 64374,
-    SPELL_STRENGHT_OF_PACK		= 64369,
+    SPELL_STRENGHT_OF_PACK      = 64369,
+    SPELL_STRENGHT_OF_PACK_BUFF = 64381,
     //seeping feral essence
+    SPELL_SUMMON_SEEPING_ESSENCE= 64457,
     AURA_VOID_ZONE				= 64458,
     AURA_VOID_ZONE_H			= 64676,
     //NPC ids
@@ -97,7 +104,7 @@ struct MANGOS_DLL_DECL mob_seeping_feral_essenceAI : public ScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         DoCast(m_creature, m_bIsRegularMode ? AURA_VOID_ZONE : AURA_VOID_ZONE_H);
-        m_creature->SetRespawnDelay(DAY);
+        m_creature->SetRespawnDelay(7*DAY);
     }
 
     void UpdateAI(const uint32 diff)
@@ -123,6 +130,8 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
 
+    bool m_bIsFollowing;
+
     uint32 m_uiRip_Flesh_Timer;
     uint32 m_uiJump_Timer;
 
@@ -132,8 +141,22 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
     {
         m_uiRip_Flesh_Timer = 13000;
         m_uiJump_Timer = 0;
+        m_bIsFollowing = false;
 
         lSentrys.clear();
+    }
+
+    void SpellHit(Unit *pCaster, const SpellEntry *spellInfo)
+    {
+        if (spellInfo->Id == SPELL_STRENGHT_OF_PACK_BUFF)
+        {
+            std::list<Creature*> lPack;
+
+            GetCreatureListWithEntryInGrid(lPack, m_creature, NPC_SANCTUM_SENTRY, 10.0f);
+
+            if (SpellAuraHolder *holder = m_creature->GetSpellAuraHolder(SPELL_STRENGHT_OF_PACK_BUFF))
+                holder->SetStackAmount(lPack.size());
+        }
     }
 
     void Aggro(Unit* pWho)
@@ -169,15 +192,11 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
         {
-			// they should follow Auriaya, but this looks ugly!
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_AURIAYA)))
-            {
-                if (pTemp->isAlive())
-                {
-                    m_creature->GetMotionMaster()->MoveFollow(pTemp,0.0f,0.0f);
-                    m_creature->GetMap()->CreatureRelocation(m_creature, pTemp->GetPositionX(), pTemp->GetPositionY(), pTemp->GetPositionZ(), 0.0f);
-                }
-            }
+            if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
+                if (m_pInstance)
+                    if (Creature *pAuriaya = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_AURIAYA)))
+                        m_creature->GetMotionMaster()->MoveFollow(pAuriaya, 5.0f, urand(60, 250)/100.0f);
+            return;
         }
 
         if (m_uiRip_Flesh_Timer < diff)
@@ -226,6 +245,8 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
 
 	bool m_bHasAura;
 
+    std::list<uint64> m_lVoidZones;
+
     void Reset()
     {
         m_uiPounce_Timer        = 5000;
@@ -234,6 +255,19 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
         m_bIsDead               = false;
 		m_bHasAura				= false;
         m_creature->SetRespawnDelay(DAY);
+
+        if (!m_lVoidZones.empty())
+        {
+            if (m_pInstance)
+            {
+                for(std::list<uint64>::iterator itr = m_lVoidZones.begin(); itr != m_lVoidZones.end(); itr++)
+                {
+                    if (Creature *pTmp = m_pInstance->instance->GetCreature(*itr))
+                        pTmp->ForcedDespawn();
+                }
+            }
+        }
+        m_lVoidZones.clear();
     }
 
 	void Aggro(Unit* pWho)
@@ -249,13 +283,23 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
 	// feign death
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
     {
+        if (m_pInstance)
+        {
+            if (m_pInstance->GetData(TYPE_AURIAYA) == DONE)
+            {
+                Reset();
+                m_creature->ForcedDespawn(1000);
+                return;
+            }
+        }
         if (uiDamage > m_creature->GetHealth())
         {
             uiDamage = 0;
             m_creature->CastStop();
             m_creature->RemoveArenaAuras(true);
-            m_creature->SummonCreature(MOB_VOID_ZONE, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            DoCast(m_creature, SPELL_FEIGN_DEATH);
+            //DoSpawnCreature(MOB_VOID_ZONE, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+            DoCast(m_creature, SPELL_SUMMON_SEEPING_ESSENCE, true);
+            DoCast(m_creature, SPELL_FEIGN_DEATH ,true);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             if (m_creature->HasAura(SPELL_FERAL_ESSENCE))
@@ -273,30 +317,55 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
         }
     }
 
+    void JustReachedHome()
+    {
+        m_creature->ForcedDespawn();
+    }
+    
+    void JustSummoned(Creature *pCreature)
+    {
+        m_lVoidZones.push_back(pCreature->GetGUID());
+    }
+
     void UpdateAI(const uint32 diff)
     {
-        if (m_pInstance && m_pInstance->GetData(TYPE_AURIAYA) != IN_PROGRESS) 
-            m_creature->ForcedDespawn();
+        if (m_bIsDead)
+        {
+            if (m_uiRevive_Delay < diff)
+            {
+                m_creature->SetHealth(m_creature->GetMaxHealth());
+                m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                m_bIsDead = false;
+                m_uiPounce_Timer = 0;
+                m_uiRush_Start_Timer = 9000;
+            }else m_uiRevive_Delay -= diff;
+
+            return;
+        }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
 		// hacky way of stacking aura, needs fixing
-		if(SpellAuraHolder* essence = m_creature->GetSpellAuraHolder(SPELL_FERAL_ESSENCE))
-		{
-			if(essence->GetStackAmount() < 9 && !m_bHasAura)
-			{
-				m_bHasAura = true;
-				essence->SetStackAmount(9);
-			}
-		}
+        if (!m_bHasAura)
+        {
+            if(SpellAuraHolder* essence = m_creature->GetSpellAuraHolder(SPELL_FERAL_ESSENCE))
+            {
+                if(essence->GetStackAmount() < 9)
+                {
+                    m_bHasAura = true;
+                    essence->SetStackAmount(9);
+                }
+            }
+        }
 
 		if (m_uiPounce_Timer < diff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 DoCast(target, m_bIsRegularMode ? SPELL_FERAL_POUNCE : SPELL_FERAL_POUNCE_H);
-                m_creature->AddThreat(target,0.0f);
                 m_creature->AI()->AttackStart(target);
             }
             m_uiPounce_Timer = 5000;
@@ -307,38 +376,30 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 DoCast(target, m_bIsRegularMode ? SPELL_FERAL_RUSH : SPELL_FERAL_RUSH_H);
-                m_creature->AddThreat(target,0.0f);
                 m_creature->AI()->AttackStart(target);
             }
-            m_uiRush_Start_Timer    = 35000;
-            m_uiRush_Finish_Timer   = m_bIsRegularMode ? 2500 : 5000;
-            m_uiRush_Delay          = 500;
-            m_bIsRush               = true;
+            m_uiRush_Start_Timer = 35000;
+            m_uiRush_Finish_Timer = m_bIsRegularMode ? 2500 : 5000;
+            m_uiRush_Delay = 500;
+            m_bIsRush = true;
         }else m_uiRush_Start_Timer -= diff;
 
-        if (m_uiRush_Delay < diff && m_bIsRush)
+        if (m_bIsRush)
         {
-            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_uiRush_Delay <= diff)
             {
-                DoCast(target, m_bIsRegularMode ? SPELL_FERAL_RUSH : SPELL_FERAL_RUSH_H);
-                m_creature->AddThreat(target,0.0f);
-                m_creature->AI()->AttackStart(target);
-            }
-            m_uiRush_Delay = 500;
-        }else m_uiRush_Delay -= diff;
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    DoCast(target, m_bIsRegularMode ? SPELL_FERAL_RUSH : SPELL_FERAL_RUSH_H);
+                    m_creature->AI()->AttackStart(target);
+                }
+                m_uiRush_Delay = 500;
+            }else m_uiRush_Delay -= diff;
+        }
 
         if (m_uiRush_Finish_Timer < diff)
             m_bIsRush = false;
         else m_uiRush_Finish_Timer -= diff;
-
-        if (m_uiRevive_Delay < diff && m_bIsDead)
-        {
-            m_creature->SetHealth(m_creature->GetMaxHealth());
-            m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            m_bIsDead = false;
-        }else m_uiRevive_Delay -= diff;
 
         DoMeleeAttackIfReady();
     }
@@ -380,10 +441,10 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
         m_uiEnrage_Timer        = 600000;
         m_uiSwarm_Timer         = urand(50000, 60000);
-        m_uiSonic_Screech_Timer = urand(90000, 100000);
-        m_uiSentinel_Blast_Timer = 62000;
-        m_uiFear_Timer          = 60000;
-        m_uiSummon_Timer        = urand(60000, 70000);
+        m_uiSonic_Screech_Timer = 65000;
+        m_uiSentinel_Blast_Timer= 42000;
+        m_uiFear_Timer          = 40000;
+        m_uiSummon_Timer        = 60000;
         m_uiSwarmcount          = 10;
         m_bHasBerserk           = false;
         m_bIsDefender           = false;
@@ -437,7 +498,7 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if(irand(0,1))
+        if(urand(0,1))
             DoScriptText(SAY_SLAY1, m_creature);
         else
             DoScriptText(SAY_SLAY2, m_creature);
@@ -454,8 +515,25 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
             for(std::list<Creature*>::iterator iter = lSentrys.begin(); iter != lSentrys.end(); ++iter)
             {
                 if ((*iter) && !(*iter)->isAlive())
+                {
                     (*iter)->Respawn();
+                    (*iter)->NearTeleportTo(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f);
+                }
             }
+        }
+    }
+
+    void JustSummoned(Creature *pCreature)
+    {
+        if (pCreature->GetEntry() == NPC_FERAL_DEFENDER_STALKER)
+        {
+            DoCast(pCreature, SPELL_SUMMON_DEFENDER_AURA);
+            pCreature->ForcedDespawn(4000);
+        }
+        else if (pCreature->GetEntry() == MOB_FERAL_DEFENDER)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                pCreature->AI()->AttackStart(pTarget);
         }
     }
 
@@ -471,6 +549,8 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
             DoCast(m_creature, SPELL_FEAR);
             m_uiFear_Timer = 35000;
             m_uiSentinel_Blast_Timer = 2500;
+            if (m_uiSonic_Screech_Timer < 4000)
+                m_uiSonic_Screech_Timer = 4000;
         }else m_uiFear_Timer -= uiDiff;
 
         if (m_uiSentinel_Blast_Timer < uiDiff)
@@ -479,19 +559,21 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
             m_uiSentinel_Blast_Timer = urand(30000, 40000);
         }else m_uiSentinel_Blast_Timer -= uiDiff;
 
-        if (m_uiSummon_Timer < uiDiff && !m_bIsDefender)
+        if (!m_bIsDefender)
         {
-            if (Creature* pTemp = m_creature->SummonCreature(MOB_FERAL_DEFENDER, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+            if (m_uiSummon_Timer < uiDiff)
             {
+                m_creature->CastStop();
+                //DoCast(m_creature, SPELL_SUMMON_DEFENDER, true);
+                // should be summoned by spell, but creature can be summoned in not wanted position
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    pTemp->AddThreat(pTarget,0.0f);
-                    pTemp->AI()->AttackStart(pTarget);
+                    m_creature->SummonCreature(NPC_FERAL_DEFENDER_STALKER, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 7*DAY*IN_MILLISECONDS);
+                    DoScriptText(EMOTE_DEFENDER, m_creature);
+                    m_bIsDefender = true;
                 }
-                DoScriptText(EMOTE_DEFENDER, m_creature);
-                m_bIsDefender = true;
-            }
-        }else m_uiSummon_Timer -= uiDiff;
+            }else m_uiSummon_Timer -= uiDiff;
+        }
 
         if (m_uiSonic_Screech_Timer < uiDiff)
         {

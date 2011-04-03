@@ -63,8 +63,6 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
     uint64 m_uiVezaxGUID;
     uint64 m_uiYoggSaronGUID;
     uint64 m_uiAlgalonGUID;
-    uint64 m_uiRightArmGUID;
-    uint64 m_uiLeftArmGUID;
     uint64 m_uiFeralDefenderGUID;
     uint64 m_uiElderBrightleafGUID;
     uint64 m_uiElderStonebarkGUID;
@@ -185,8 +183,6 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         m_uiVezaxGUID           = 0;
         m_uiYoggSaronGUID       = 0;
         m_uiAlgalonGUID         = 0;
-        m_uiRightArmGUID		= 0;
-        m_uiLeftArmGUID			= 0;
         m_uiFeralDefenderGUID	= 0;
         m_uiElderBrightleafGUID = 0;
         m_uiElderStonebarkGUID  = 0;
@@ -321,12 +317,6 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
 
         case NPC_KOLOGARN:
             m_uiKologarnGUID = pCreature->GetGUID();
-            break;
-        case NPC_RIGHT_ARM:
-            m_uiRightArmGUID = pCreature->GetGUID();
-            break;
-        case NPC_LEFT_ARM:
-            m_uiLeftArmGUID = pCreature->GetGUID();
             break;
         case NPC_AURIAYA:
             m_uiAuriayaGUID = pCreature->GetGUID();
@@ -1091,10 +1081,6 @@ struct MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
                 return m_auiAssemblyGUIDs[2];
             case NPC_KOLOGARN:
                 return m_uiKologarnGUID;
-            case NPC_LEFT_ARM:
-                return m_uiLeftArmGUID;
-            case NPC_RIGHT_ARM:
-                return m_uiRightArmGUID;
             case NPC_AURIAYA:
                 return m_uiAuriayaGUID;
                 // Keepers
