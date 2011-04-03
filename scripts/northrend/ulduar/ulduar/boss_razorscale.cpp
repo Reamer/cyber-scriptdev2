@@ -115,7 +115,7 @@ static LocationsXY PositionLoc[]=
 #define HOME_X                      587.546997f
 #define HOME_Y                      -174.927002f
  
-#define GOSSIP_START     "Bring Razorscale down!"
+#define GOSSIP_START     "Holt Klingenschuppe auf den Boden!"
 
 //expedition commander
 // start the event
