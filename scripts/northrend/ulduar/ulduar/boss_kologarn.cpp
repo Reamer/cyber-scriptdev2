@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "def_ulduar.h"
-#include "vehicle.h"
+#include "Vehicle.h"
 
 enum
 {
@@ -51,7 +51,7 @@ enum
     SPELL_PETRIFYING_BREATH		= 62030,
     SPELL_PETRIFYING_BREATH_H	= 63980,
     // Focused Eyebeam
-    SPELL_FOCUSED_EYEBEAM = 63342,
+    SPELL_FOCUSED_EYEBEAM       = 63342,
     NPC_FOCUSED_EYEBEAM_RIGHT   = 33802,
     NPC_FOCUSED_EYEBEAM_LEFT    = 33632,
     SPELL_EYEBEAM_PERIODIC      = 63347,
