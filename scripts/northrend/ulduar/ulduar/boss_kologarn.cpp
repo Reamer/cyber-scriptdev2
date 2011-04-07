@@ -22,7 +22,7 @@ SDCategory: Ulduar
 EndScriptData */
 
 #include "precompiled.h"
-#include "def_ulduar.h"
+#include "ulduar.h"
 #include "Vehicle.h"
 
 enum
@@ -83,9 +83,6 @@ enum
     SPELL_STONE_NOVA			= 63978,    // on 25 man
     //NPC ids
     MOB_RUBBLE					= 33768,
-
-    NPC_RIGHT_ARM               = 32934,
-    NPC_LEFT_ARM                = 32933,
 
     RIGHT_ARM_SLOT              = 1,
     LEFT_ARM_SLOT               = 0,
@@ -577,18 +574,14 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
     uint32 m_uiStone_Grip_Timer;
     uint32 m_uiFreeDamage;
     uint32 m_uiMaxDamage;
-    uint64 m_uiGripTargetGUID[3];
-    uint8 m_uiMaxTargets;
+    std::list<uint64> m_lGripTargetGUIDList;
 
     void Reset()
     {
         m_uiStone_Grip_Timer    = 20000;
         m_uiFreeDamage          = 0;
         m_uiMaxDamage           = m_bIsRegularMode ? 80000 : 380000;
-        m_uiMaxTargets          = m_bIsRegularMode ? 1 : 3;
-        for(int i = 0; i < m_uiMaxTargets; i++)
-            m_uiGripTargetGUID[i] = 0;
-
+        m_lGripTargetGUIDList.clear();
         DoCast(m_creature, SPELL_ARM_VISUAL);
     }
 
@@ -597,18 +590,19 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
         m_uiFreeDamage += uiDamage;
         if (m_uiFreeDamage > m_uiMaxDamage)
         {
-            for(int i = 0; i < m_uiMaxTargets; i++)
+            if (!m_lGripTargetGUIDList.empty())
             {
-                if (Unit* pVictim = m_creature->GetMap()->GetUnit( m_uiGripTargetGUID[i]))
-                {
-                    pVictim->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H);
-                    pVictim->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP_VEH : SPELL_STONE_GRIP_VEH_H);
-                    pVictim->RemoveAurasDueToSpell(54661); //HACK
-                    pVictim->ExitVehicle();
-                    DoTeleportPlayer(pVictim,KoloFront[0],KoloFront[1],KoloFront[2],0.0f);
-                    m_uiGripTargetGUID[i] = 0;
-                }
+                for(std::list<uint64>::iterator itr = m_lGripTargetGUIDList.begin(); itr != m_lGripTargetGUIDList.end(); ++itr)
+                    if (Unit* pTemp = m_creature->GetMap()->GetUnit(*itr))
+                    {
+                        pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H);
+                        pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP_VEH : SPELL_STONE_GRIP_VEH_H);
+                        pTemp->RemoveAurasDueToSpell(54661); //HACK
+                        pTemp->ExitVehicle();
+                        DoTeleportPlayer(pTemp,KoloFront[0],KoloFront[1],KoloFront[2],0.0f);
+                    }
             }
+            m_lGripTargetGUIDList.clear();
         }
     }
 
@@ -629,16 +623,28 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
             }
         }
 
-        for(int i = 0; i < m_uiMaxTargets; i++)
+        if (!m_lGripTargetGUIDList.empty())
         {
-            if (Unit* pVictim = m_creature->GetMap()->GetUnit( m_uiGripTargetGUID[i]))
-            {
-                pVictim->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H);
-                pVictim->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP_VEH : SPELL_STONE_GRIP_VEH_H);
-                pVictim->RemoveAurasDueToSpell(54661); //HACK
-                pVictim->ExitVehicle();
-                DoTeleportPlayer(pVictim,KoloFront[0],KoloFront[1],KoloFront[2],0.0f);
-            }
+            for(std::list<uint64>::iterator itr = m_lGripTargetGUIDList.begin(); itr != m_lGripTargetGUIDList.end(); ++itr)
+                if (Unit* pTemp = m_creature->GetMap()->GetUnit(*itr))
+                {
+                    pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H);
+                    pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP_VEH : SPELL_STONE_GRIP_VEH_H);
+                    pTemp->RemoveAurasDueToSpell(54661); //HACK
+                    pTemp->ExitVehicle();
+                    DoTeleportPlayer(pTemp,KoloFront[0],KoloFront[1],KoloFront[2],0.0f);
+                }
+        }
+        m_lGripTargetGUIDList.clear();
+    }
+
+    void SpellHitTarget(Unit* victim, const SpellEntry* spell)
+    {
+        if (spell->Id == SPELL_STONE_GRIP_GRAB || spell->Id == SPELL_STONE_GRIP_GRAB_H)
+        {
+            victim->CastSpell(victim, 54661 , true); //HACK
+            m_lGripTargetGUIDList.push_back(victim->GetGUID());
+            victim->EnterVehicle(vehicle);
         }
     }
 
@@ -653,18 +659,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
                 DoScriptText(SAY_GRAB, pTemp);
 
             DoScriptText(EMOTE_STONE_GRIP, m_creature);
-            
-            for(int i = 0; i < m_uiMaxTargets; i++)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-                {
-                    pTarget->CastSpell(pTarget, 54661 , true); //HACK
-                    DoCast(pTarget, m_bIsRegularMode ? SPELL_STONE_GRIP_GRAB : SPELL_STONE_GRIP_GRAB_H, true);
-                    m_uiGripTargetGUID[i] = pTarget->GetGUID();
-                    pTarget->EnterVehicle(vehicle);
-                   
-                }
-            }            
+            DoCast(m_creature, m_bIsRegularMode ? SPELL_STONE_GRIP_GRAB : SPELL_STONE_GRIP_GRAB_H, true);       
             m_uiFreeDamage = 0;
             m_uiStone_Grip_Timer = 30000;
         }else m_uiStone_Grip_Timer -= uiDiff;
@@ -688,6 +683,53 @@ CreatureAI* GetAI_mob_eyebeam_trigger(Creature* pCreature)
     return new mob_eyebeam_triggerAI(pCreature);
 }
 
+// kologarn kill pit bunny - kills players that fall down into the pit. also handling bridge respawn after server restarts
+struct MANGOS_DLL_DECL mob_kologarn_pit_kill_bunnyAI : public ScriptedAI
+{
+    mob_kologarn_pit_kill_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = pCreature->GetInstanceData();
+        m_fPositionZ = m_creature->GetPositionZ();
+        m_bBridgeLocked = false;
+    }
+    InstanceData *m_pInstance;
+    float m_fPositionZ;
+    bool m_bBridgeLocked;
+    void Reset(){}
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_bBridgeLocked)
+        {
+            if (m_pInstance)
+            {
+                Creature *pKolo = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_KOLOGARN));
+                if (!pKolo || pKolo && !pKolo->isAlive())
+                {
+                    if (GameObject *pGo = m_pInstance->instance->GetGameObject(m_pInstance->GetData64(GO_KOLOGARN_BRIDGE)))
+                    {
+                        pGo->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
+                        pGo->SetGoState(GO_STATE_READY);
+                    }
+                    if (Creature *pBridge = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_KOLOGARN_BRIDGE_DUMMY)))
+                        pBridge->SetVisibility(VISIBILITY_ON);
+                    m_bBridgeLocked = true;
+                }
+            }
+        }
+    }
+
+    void MoveInLineOfSight(Unit *pWho)
+    {
+        if (pWho->GetTypeId() == TYPEID_PLAYER && !pWho->GetVehicle())
+            if (m_creature->IsWithinLOSInMap(pWho) && pWho->GetPositionZ() - m_fPositionZ <= 15.0f)
+                pWho->DealDamage(pWho, pWho->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+    }
+};
+CreatureAI* GetAI_mob_kologarn_pit_kill_bunny(Creature* pCreature)
+{
+    return new mob_kologarn_pit_kill_bunnyAI(pCreature);
+}
+
 void AddSC_boss_kologarn()
 {
     Script* NewScript;
@@ -706,7 +748,7 @@ void AddSC_boss_kologarn()
     NewScript->Name = "boss_left_arm";
     NewScript->GetAI = &GetAI_boss_left_arm;
     NewScript->RegisterSelf();
-
+ 
     NewScript = new Script;
     NewScript->Name = "boss_right_arm";
     NewScript->GetAI = &GetAI_boss_right_arm;
@@ -715,5 +757,10 @@ void AddSC_boss_kologarn()
     NewScript = new Script;
     NewScript->Name = "mob_eyebeam_trigger";
     NewScript->GetAI = &GetAI_mob_eyebeam_trigger;
+    NewScript->RegisterSelf();
+
+    NewScript = new Script;
+    NewScript->Name = "mob_kologarn_pit_kill_bunny";
+    NewScript->GetAI = &GetAI_mob_kologarn_pit_kill_bunny;
     NewScript->RegisterSelf();
 }

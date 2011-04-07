@@ -22,7 +22,7 @@ SDCategory: Ulduar
 EndScriptData */
 
 #include "precompiled.h"
-#include "def_ulduar.h"
+#include "ulduar.h"
 
 enum
 {
@@ -48,12 +48,14 @@ enum
     SPELL_GRAVITY_BOMB_H	= 64234,
     SPELL_ENRAGE			= 47008,
     SPELL_STUN				= 3618,
+    SPELL_ENERGY_ORB        = 62790,
 
     // hard mode
     SPELL_HEARTBREAK        = 65737,
     SPELL_HEARTBREAK_H      = 64193,
     SPELL_VOIDZONE          = 64203,
     SPELL_VOIDZONE_H        = 64235,
+    SPELL_VOIDZONE_EFFECT   = 46264,
     SPELL_LIFE_SPARK        = 64210,
         
     // Life Spark
@@ -128,36 +130,26 @@ struct MANGOS_DLL_DECL mob_voidzoneAI : public ScriptedAI
 
     uint32 Spell_Timer;
     bool m_bIsRegularMode;
+    SpellEntry const *spellInfo;
 
     void Reset()
     {
-        Spell_Timer = 4000;
+        spellInfo = (SpellEntry*)GetSpellStore()->LookupEntry(m_bIsRegularMode ? SPELL_VOIDZONE : SPELL_VOIDZONE_H);
+        Spell_Timer = 1000;
     }
 
     void UpdateAI(const uint32 diff)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
 		// should be an aura here. Couldn't find it
 		// hacky way, needs fixing!
         if (Spell_Timer < diff)
         {
-            Map *map = m_creature->GetMap();
-            if (map->IsDungeon())
+            if (spellInfo)
             {
-                Map::PlayerList const &PlayerList = map->GetPlayers();
-
-                if (PlayerList.isEmpty())
-                    return;
-
-                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                {
-                    if (i->getSource()->isAlive() && m_creature->IsWithinDistInMap(i->getSource(),5.0f))
-                        i->getSource()->DealDamage(i->getSource(), m_bIsRegularMode ? 5000 : 7500, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW, NULL, false);
-                }
-            } 
-            Spell_Timer = 4000;
+                int32 damage = spellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
+                m_creature->CastCustomSpell(m_creature, SPELL_VOIDZONE_EFFECT, &damage, 0, 0, true);
+            }
+            Spell_Timer = 1000;
         }else Spell_Timer -= diff;  
     }
 };
@@ -231,15 +223,15 @@ struct MANGOS_DLL_DECL mob_pummelerAI : public ScriptedAI
         {
             switch(urand(0, 2))
             {
-            case 0:
-                DoCast(m_creature->getVictim(), SPELL_CLEAVE);
-                break;
-            case 1:
-                DoCast(m_creature->getVictim(), SPELL_TRAMPLE);
-                break;
-            case 2:
-                DoCast(m_creature->getVictim(), SPELL_UPPERCUT);
-                break;
+                case 0:
+                    DoCast(m_creature->getVictim(), SPELL_CLEAVE);
+                    break;
+                case 1:
+                    DoCast(m_creature->getVictim(), SPELL_TRAMPLE);
+                    break;
+                case 2:
+                    DoCast(m_creature->getVictim(), SPELL_UPPERCUT);
+                    break;
             }
             Spell_Timer = urand(5000, 10000);
         }else Spell_Timer -= diff;        
@@ -361,9 +353,9 @@ CreatureAI* GetAI_mob_xtheart(Creature* pCreature)
 }
 
 //XT-002 Deconstructor
-struct MANGOS_DLL_DECL boss_xt002AI : public ScriptedAI
+struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
 {
-    boss_xt002AI(Creature* pCreature) : ScriptedAI(pCreature) 
+    boss_xt_002AI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
@@ -563,6 +555,7 @@ struct MANGOS_DLL_DECL boss_xt002AI : public ScriptedAI
             uint8 i = urand(0, 4);
             if (Creature* pTemp = m_creature->SummonCreature(addentry, SummonLoc[i].x + urand(0, 10), SummonLoc[i].y + urand(0, 10), SummonLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
             {
+                DoCast(pTemp, SPELL_ENERGY_ORB, true);
                 switch (addentry)
                 {
                     case NPC_SCRAPBOT:
@@ -598,8 +591,22 @@ struct MANGOS_DLL_DECL boss_xt002AI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
+        // both phases
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
+
+        // enrage timer
+        if (m_uiEnrage_Timer < uiDiff && !m_bIsEnrage)
+        {
+            DoCast(m_creature, SPELL_ENRAGE, true);
+            if (m_creature->HasAura(SPELL_ENRAGE))
+            {
+                m_bIsEnrage = true;
+                DoScriptText(SAY_BERSERK, m_creature);
+            }
+            else
+                m_uiEnrage_Timer = 5000;
+        }else m_uiEnrage_Timer -= uiDiff;
 
         // Achiev timer
         uiEncounterTimer += uiDiff;
@@ -718,20 +725,7 @@ struct MANGOS_DLL_DECL boss_xt002AI : public ScriptedAI
             }
         }
 
-		// enrage timer
-        if (m_uiEnrage_Timer < uiDiff && !m_bIsEnrage)
-        {
-            DoCast(m_creature, SPELL_ENRAGE);
-            if (m_creature->HasAura(SPELL_ENRAGE))
-            {
-                m_bIsEnrage = true;
-                DoScriptText(SAY_BERSERK, m_creature);
-            }
-            else
-                m_uiEnrage_Timer = 5000;
-        }else m_uiEnrage_Timer -= uiDiff;
-
-		// adds range check
+        // adds range check
         if (m_uiRange_Check_Timer < uiDiff)
         {
             if (!m_lScrapbotsGUIDList.empty())
@@ -756,18 +750,18 @@ struct MANGOS_DLL_DECL boss_xt002AI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_xt002(Creature* pCreature)
+CreatureAI* GetAI_boss_xt_002(Creature* pCreature)
 {
-    return new boss_xt002AI(pCreature);
+    return new boss_xt_002AI(pCreature);
 }
 
-void AddSC_boss_xt002()
+void AddSC_boss_xt_002()
 {
     Script* NewScript;
 
     NewScript = new Script;
-    NewScript->Name = "boss_xt002";
-    NewScript->GetAI = GetAI_boss_xt002;
+    NewScript->Name = "boss_xt_002";
+    NewScript->GetAI = GetAI_boss_xt_002;
     NewScript->RegisterSelf();
 
     NewScript = new Script;
