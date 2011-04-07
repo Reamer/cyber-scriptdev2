@@ -22,7 +22,7 @@ SDCategory: Ulduar
 EndScriptData */
 
 #include "precompiled.h"
-#include "def_ulduar.h"
+#include "ulduar.h"
 
 enum
 {
@@ -43,18 +43,22 @@ enum
 	SPELL_WING_BUFFET			= 62666,
 	SPELL_STUN					= 62794,
     SPELL_SUMMON_DWARF          = 62916,
+    SPELL_HOVER                 = 57764,
 	//both
 	SPELL_BERSERK				= 47008,
 	DEVOURING_FLAME_VISUAL		= 63236,
 	SPELL_FLAME_BREATH			= 63317,
 	SPELL_FLAME_BREATH_H		= 64021,
+    NPC_CONTROLLER              = 33233,  // used for casting deep breath on turrets
 	//ground
 	SPELL_FLAME_BUFFET			= 64016,
 	SPELL_FLAME_BUFFET_H		= 64023,
 	SPELL_FUSE_ARMOR			= 64771,
 
 	//devouring flame target
-	AURA_DEVOURING_FLAME		= 64709,
+	NPC_DEVOURING_TARGET        = 34188,
+    NPC_DEVOURING_TARGET_H      = 34189,
+    AURA_DEVOURING_FLAME		= 64709,
 	AURA_DEVOURING_FLAME_H		= 64734,
 
     // mole machine

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -7,10 +7,11 @@
 
 enum
 {
-    // encounters
     MAX_ENCOUNTER               = 14,
-    HARD_ENCOUNTER              = 9,
+    HARD_MODE_ENCOUNTER         = 9,
     KEEPER_ENCOUNTER            = 4,
+    FREYA_ELDERS_ENCOUNTER      = 3,
+    TELEPORTER_ENCOUNTER        = 3,
 
     // boss types
     TYPE_LEVIATHAN              = 0,
@@ -28,6 +29,10 @@ enum
     TYPE_YOGGSARON              = 12,
     TYPE_ALGALON                = 13,
 
+    // Freya 1, 2 elders
+    TYPE_FREYA_1                = 35,
+    TYPE_FREYA_2                = 36,
+
     // hard mode bosses
     TYPE_LEVIATHAN_HARD         = 37,
     TYPE_XT002_HARD             = 38,
@@ -35,7 +40,7 @@ enum
     TYPE_MIMIRON_HARD           = 40,
     TYPE_HODIR_HARD             = 41,
     TYPE_THORIM_HARD            = 42,
-    TYPE_FREYA_HARD             = 43,
+    TYPE_FREYA_HARD             = 43, // this means 3 elders up
     TYPE_VEZAX_HARD             = 44,
     TYPE_YOGGSARON_HARD         = 45,
 
@@ -64,6 +69,7 @@ enum
     // siege
     NPC_LEVIATHAN               = 33113,
     NPC_IGNIS                   = 33118,
+    NPC_IRON_CONSTRUCT          = 33121,
     NPC_RAZORSCALE              = 33186,
     NPC_COMMANDER               = 33210,
     NPC_XT002                   = 33293,
@@ -72,6 +78,9 @@ enum
     NPC_MOLGEIM                 = 32927,
     NPC_BRUNDIR                 = 32857,
     NPC_KOLOGARN                = 32930,
+    NPC_RIGHT_ARM               = 32934,
+    NPC_LEFT_ARM                = 32933,
+    NPC_KOLOGARN_BRIDGE_DUMMY   = 34297,
     NPC_AURIAYA                 = 33515,
     NPC_SANCTUM_SENTRY          = 34014,
     NPC_FERAL_DEFENDER          = 34035,
@@ -125,17 +134,13 @@ enum
     GO_GIFT_OF_OBSERVER_H       = 194821,
     GO_GIFT_OF_OBSERVER         = 194822,
     GO_GIFT_OF_OBSERVER_HH      = 194823,   // unk
-    // Freya -> each chest is for a mode = more elders alive = more items in chest
+    // Freya -> each chest is for a mode
     // 10 man
     GO_FREYA_GIFT               = 194324,//10 normal
-    GO_FREYA_GIFT_1             = 194325,//10 1 elder
-    GO_FREYA_GIFT_2             = 194326,//10 2 elders
-    GO_FREYA_GIFT_3             = 194327,//10 3 elders
+    GO_FREYA_GIFT_HARD          = 194327,//10 3 elders
     // 25 man
     GO_FREYA_GIFT_H             = 194328,//25 normal
-    GO_FREYA_GIFT_H_1           = 194329,//25 1 elder
-    GO_FREYA_GIFT_H_2           = 194330,//25 2 elder
-    GO_FREYA_GIFT_H_3           = 194331,//25 3 elders
+    GO_FREYA_GIFT_H_HARD        = 194331,//25 3 elders
     // Mimiron
     GO_CACHE_OF_INOV            = 194789,
     GO_CACHE_OF_INOV_H          = 194956,
@@ -144,7 +149,6 @@ enum
 
     // doors
     // the siege
-    GO_SHIELD_DOOR              = 194905,
     GO_SHIELD_WALL              = 194416,
     GO_LEVIATHAN_GATE           = 194630,
     GO_XT002_GATE               = 194631,
@@ -187,6 +191,7 @@ enum
     GO_DARK_IRON_PORTCULIS      = 194560,
     GO_RUNED_STONE_DOOR         = 194557,
     GO_THORIM_STONE_DOOR        = 194558,
+    GO_LIGHTNING_DOOR           = 194905,
     GO_LIGHTNING_FIELD          = 194559,
     GO_DOOR_LEVER               = 194264,
     //Yogg
@@ -196,6 +201,12 @@ enum
     GO_BRAIN_DOOR1              = 194635,
     GO_BRAIN_DOOR2              = 194636,
     GO_BRAIN_DOOR3              = 194637,
+
+    //Tower
+    GO_TOWER_OF_FROST           = 194370,
+    GO_TOWER_OF_FLAME           = 194371,
+    GO_TOWER_OF_LIFE            = 194375,
+    GO_TOWER_OF_STORMS          = 194377,
 
     ACHIEV_IRON_COUNCIL         = 2888,
     ACHIEV_IRON_COUNCIL_H       = 2889,
@@ -207,21 +218,152 @@ enum
     SPELL_ALGALON_ACHIEV_TRIGG  = 65184,
     ACHIEV_DEATHS_DEMISE        = 3117,     // realm first yogg
 
-    // hard mode Flame Leviathan
-    GO_TOWER_OF_FROST           = 194370,
-    GO_TOWER_OF_FLAME           = 194371,
-    GO_TOWER_OF_LIFE            = 194375,
-    GO_TOWER_OF_STORMS          = 194377,
-    GO_FREYA_STORM_GENERATOR    = 194663,
-    GO_MIMIRON_STORM_GENERATOR  = 194664,
-    GO_HODIR_STORM_GENERATOR    = 194665,
-    GO_THORIM_WEATHER_GENERATOR = 194666,
-    GO_FREYA_TARGETTING_CRYSTAL = 194704,
-    GO_MIMIRON_TARGETTING_CRYSTAL=194705,    
-    GO_THORIM_TARGETTING_CRYSTAL= 194706,
-    GO_HODIR_TARGETTING_CRYSTAL = 194707,
+    // World state used for algalon timer
+    WORLD_STATE_TIMER           = 4132,
+    WORLD_STATE_TIMER_COUNT     = 4131,
+};
 
+class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
+{
+    public:
+        instance_ulduar(Map* pMap);
+        ~instance_ulduar() {}
 
+        void Initialize();
+        bool IsEncounterInProgress() const;
+
+        void OnCreatureCreate(Creature* pCreature);
+        void OnObjectCreate(GameObject* pGo);
+
+        void SetData(uint32 uiType, uint32 uiData);
+        uint32 GetData(uint32 uiType);
+        uint64 GetData64(uint32 uiData);
+
+        const char* Save();
+        void Load(const char* chrIn);
+
+        // Dummy, leave till correct solution for hardmode found
+        bool CheckConditionCriteriaMeet(Player const* pSource, uint32 uiMapId, uint32 uiInstanceConditionId);
+        bool CheckAchievementCriteriaMeet(uint32 criteria_id, const Player *source);
+
+        void OpenDoor(uint64 guid);
+        void CloseDoor(uint64 guid);
+        void DoOpenMadnessDoorIfCan();
+        void OpenXtDoor();
+        void CheckIronCouncil();
+        void CheckKeepers();
+        Player* GetPlayerInMap();
+        void SpawnFriendlyKeeper(uint32 uiWho);
+
+        std::list<uint64> m_lIronConstructsGUIDs;
+
+    protected:
+        
+	// initialize the encouter variables
+    std::string m_strInstData;
+    uint32 m_auiEncounter[MAX_ENCOUNTER];
+    uint32 m_auiHardBoss[HARD_MODE_ENCOUNTER];
+    uint32 m_auiUlduarKeepers[KEEPER_ENCOUNTER];
+    uint32 m_auiFreyaElders[FREYA_ELDERS_ENCOUNTER];
+    uint32 m_auiUlduarTeleporters[3];
+    uint32 m_auiMiniBoss[6];
+
+	// boss phases which need to be used inside the instance script
+    uint32 m_uiMimironPhase;
+    uint32 m_uiYoggPhase;
+    uint32 m_uiVisionPhase;
+
+	// creature guids
+    uint64 m_uiLeviathanGUID;
+    uint64 m_uiIgnisGUID;
+    uint64 m_uiRazorscaleGUID;
+    uint64 m_uiCommanderGUID;
+    uint64 m_uiXT002GUID;
+    uint64 m_auiAssemblyGUIDs[3];
+    uint64 m_uiKologarnGUID;
+    uint64 m_uiKologarnBridgeDummyGUID;
+    uint64 m_uiAuriayaGUID;
+    uint64 m_uiMimironGUID;
+    uint64 m_uiHodirGUID;
+    uint64 m_uiThorimGUID;
+    uint64 m_uiFreyaGUID;
+    uint64 m_uiVezaxGUID;
+    uint64 m_uiYoggSaronGUID;
+    uint64 m_uiAlgalonGUID;
+    uint64 m_uiRightArmGUID;
+    uint64 m_uiLeftArmGUID;
+    uint64 m_uiFeralDefenderGUID;
+    uint64 m_uiElderBrightleafGUID;
+    uint64 m_uiElderStonebarkGUID;
+    uint64 m_uiElderIronbrachGUID;
+    uint64 m_uiSaroniteAnimusGUID;
+    uint64 m_uiRunicColossusGUID;
+    uint64 m_uiRuneGiantGUID;
+    uint64 m_uiJormungarGUID;
+    uint64 m_uiLeviathanMkGUID;
+    uint64 m_uiHodirImageGUID;
+    uint64 m_uiFreyaImageGUID;
+    uint64 m_uiThorimImageGUID;
+    uint64 m_uiMimironImageGUID;
+    uint64 m_uiSaraGUID;
+    uint64 m_uiYoggBrainGUID;
+
+    //doors & objects
+    // The siege
+    uint64 m_uiShieldWallGUID;
+    uint64 m_uiLeviathanGateGUID;
+    uint64 m_uiXT002GateGUID;
+    uint64 m_uiBrokenHarpoonGUID;
+    // Archivum
+    uint64 m_uiIronCouncilDoorGUID;
+    uint64 m_uiArchivumDoorGUID;
+    uint64 m_uiArchivumConsoleGUID;
+    uint64 m_uiUniverseFloorArchivumGUID;
+    // Celestial planetarium
+    uint64 m_uiCelestialDoorGUID;
+    uint64 m_uiCelestialConsoleGUID;
+    uint64 m_uiUniverseFloorCelestialGUID;
+    uint64 m_uiAzerothGlobeGUID;
+    // Kologarn
+    uint64 m_uiShatteredHallsDoorGUID;
+    uint64 m_uiKologarnBridgeGUID;
+    // Hodir
+    uint64 m_uiHodirEnterDoorGUID;
+    uint64 m_uiHodirWallGUID;
+    uint64 m_uiHodirExitDoorGUID;
+    // Mimiron
+    uint64 m_uiMimironTramGUID;
+    uint64 m_uiMimironButtonGUID;
+    uint64 m_uiMimironDoor1GUID;
+    uint64 m_uiMimironDoor2GUID;
+    uint64 m_uiMimironDoor3GUID;
+    uint64 m_uiMimironElevatorGUID;
+    uint64 m_uiMimironTelGUID[9];
+    // Thorim
+    uint64 m_uiArenaEnterDoorGUID;
+    uint64 m_uiArenaExitDoorGUID;
+    uint64 m_uiHallwayDoorGUID;
+    uint64 m_uiThorimEnterDoorGUID;
+    uint64 m_uiThorimLeverGUID;
+    // Prison
+    uint64 m_uiAncientGateGUID;
+    uint64 m_uiVezaxGateGUID;
+    uint64 m_uiYoggGateGUID;
+    uint64 m_uiBrainDoor1GUID;
+    uint64 m_uiBrainDoor2GUID;
+    uint64 m_uiBrainDoor3GUID;
+
+    // chests
+    uint64 m_uiKologarnLootGUID;
+    uint64 m_uiHodirLootGUID;
+    uint64 m_uiHodirRareLootGUID;
+    uint64 m_uiThorimLootGUID;
+    uint64 m_uiThorimRareLootGUID;
+    uint64 m_uiFreyaLootGUID;
+    uint64 m_uiFreyaLootHardGUID;
+    uint64 m_uiMimironLootGUID;
+    uint64 m_uiMimironHardLootGUID;
+    uint64 m_uiAlagonLootGUID;
 
 };
 
