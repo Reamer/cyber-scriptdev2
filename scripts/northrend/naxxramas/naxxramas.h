@@ -199,6 +199,11 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         void SetChamberCenterCoords(float fX, float fY, float fZ);
         void GetChamberCenterCoords(float &fX, float &fY, float &fZ) { fX = m_fChamberCenterX; fY = m_fChamberCenterY; fZ = m_fChamberCenterZ; }
         void DoTaunt();
+
+        std::list<uint64> m_lEruptionObjectOneGUIDs;
+        std::list<uint64> m_lEruptionObjectTwoGUIDs;
+        std::list<uint64> m_lEruptionObjectThreeGUIDs;
+        std::list<uint64> m_lEruptionObjectFourGUIDs;
         
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
@@ -236,10 +241,6 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         uint64 m_uiLoathebGUID;
 
         uint64 m_uiHeiganGUID;
-        std::list<uint64> m_lEruptionObjectOneGUIDs;
-        std::list<uint64> m_lEruptionObjectTwoGUIDs;
-        std::list<uint64> m_lEruptionObjectThreeGUIDs;
-        std::list<uint64> m_lEruptionObjectFourGUIDs;
 
         uint64 m_uiKelthuzadGUID;
 

@@ -184,16 +184,16 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
             m_uiLoathebDoorGUID = pGo->GetGUID();
             break;
         case GO_ERUPTION_ONE_OBJECT:
-            m_lEruptionObjectOneGUIDs = pGo->GetGUID();
+            m_lEruptionObjectOneGUIDs.push_back(pGo->GetGUID());
             break;
         case GO_ERUPTION_TWO_OBJECT:
-            m_lEruptionObjectTwoGUIDs = pGO->GetGUID();
+            m_lEruptionObjectTwoGUIDs.push_back(pGo->GetGUID());
             break;
         case GO_ERUPTION_THREE_OBJECT:
-            m_lEruptionObjectThreeGUIDs = pGo->GetGUID();
+            m_lEruptionObjectThreeGUIDs.push_back(pGo->GetGUID());
             break;
         case GO_ERUPTION_FOUR_OBJECT:
-            m_lEruptionObjectFourGUIDs = pGo->GetGUID();
+            m_lEruptionObjectFourGUIDs.push_back(pGo->GetGUID());
             break;
 
         case GO_MILI_GOTH_ENTRY_GATE:
