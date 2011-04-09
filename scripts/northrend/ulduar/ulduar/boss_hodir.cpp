@@ -26,6 +26,17 @@ EndScriptData */
 
 enum
 {
+    
+    SAY_AGGRO               = -1603085,
+    SAY_DEATH               = -1603084,
+    SAY_SLAY01              = -1603083,
+    SAY_SLAY02              = -1603082,
+    SAY_FLASH_FREEZE        = -1603081,
+    SAY_FROZEN_BLOWS        = -1603080,
+    SAY_BERSERK             = -1603087,
+    EMOTE_FLASH_FREEZE      = -1603360,
+    EMOTE_FROZEN_BLOWS      = -1603361,
+
     SPELL_ENRAGE                = 26662,
 
     SPELL_FROZEN_BLOWS          = 62478,
@@ -47,16 +58,6 @@ enum
     NPC_SNOW_ICICLE         = 33173,
     NPC_FLASH_FREEZE        = 32926,
     NPC_FLASH_FREEZE_NPC    = 32938, 
-
-    SAY_AGGRO               = -1603085,
-    SAY_DEATH               = -1603084,
-    SAY_SLAY01              = -1603083,
-    SAY_SLAY02              = -1603082,
-    SAY_FLASH_FREEZE        = -1603081,
-    SAY_FROZEN_BLOWS        = -1603080,
-    SAY_BERSERK             = -1603087,
-    EMOTE_FLASH_FREEZE      = -1603360,
-    EMOTE_FROZEN_BLOWS      = -1603361,
 
     ACHIEV_RARE_CACHE       = 3182,
     ACHIEV_RARE_CACHE_H     = 3184,

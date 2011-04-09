@@ -156,7 +156,6 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
     }
     void Aggro(Unit *who)
     {
-        //m_creature->SummonCreature(HEIGAN_TRIGGER, TRIGGER_X, TRIGGER_Y, TRIGGER_Z, TRIGGER_O, TEMPSUMMON_CORPSE_DESPAWN, 0);
         SetPhase(1);
         switch (rand()%3)
         {
@@ -214,7 +213,6 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
  
         if(safePlace != 1)
         {
-            //std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181678);
             //Visual part of eruption
             for (int32 i = 181510; i <= 181526; i++)
             {
@@ -250,7 +248,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
                                 if (pPlayer->isAlive())
                                 {
                                     if(pPlayer->GetDistance(pEruption) <= 4.0f)
-                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, pEruption->GetGUID()); 
                                 }
                             }
                         }
@@ -262,7 +260,6 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
         else m_bforward = true;
         if(safePlace != 2)
         {
-            //std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181676);
             for (int32 i = 181511; i <= 181531; i++)
             {
                 if ((i > 181516 && i < 181525) || (i == 181526))
@@ -295,7 +292,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
                                 if (pPlayer->isAlive())
                                 {
                                     if(pPlayer->GetDistance(pEruption) <= 4.0f)
-                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, pEruption->GetGUID()); 
                                 }
                             }
                         }
@@ -305,7 +302,6 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
         }
         if(safePlace != 3)
         {
-            //std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181677);
             for (int32 i = 181532; i <= 181545; i++)
             {
                 if (i >= 181537 && i <= 181539)
@@ -338,7 +334,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
                                 if (pPlayer->isAlive())
                                 {
                                     if(pPlayer->GetDistance(pEruption) <= 4.0f)
-                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, pEruption->GetGUID()); 
                                 }
                             }
                         }
@@ -348,7 +344,6 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
         }
         if(safePlace != 4)
         {
-            //std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181695);
             for (int32 i = 181537; i <= 181552; i++)
             {
                 if (i > 181539 && i < 181545)
@@ -381,7 +376,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
                                 if (pPlayer->isAlive())
                                 {
                                     if(pPlayer->GetDistance(pEruption) <= 4.0f)
-                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, pEruption->GetGUID()); 
                                 }
                             }
                         }

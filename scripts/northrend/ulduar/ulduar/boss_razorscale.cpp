@@ -127,12 +127,12 @@ struct MANGOS_DLL_DECL npc_expedition_commanderAI : public ScriptedAI
 {
     npc_expedition_commanderAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bHasPlayerNear = false;
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     bool m_bHasPlayerNear;
     bool m_bIsIntro;
@@ -529,7 +529,6 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
 		m_uiBerserk_Timer           = 600000;   // 10 min
         m_uiRepairHarpoonTimer      = 51000;
         m_uiHarpoonsRepaired        = 0;
-        m_uiGrounded_Timer          = 0;
         for(int i = 0; i < 4; i++)
         {
             m_uiHarpoonsGUID[i] = 0;
