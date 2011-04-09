@@ -342,6 +342,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                         pTarget->CastSpell(pTarget, m_bIsRegularMode ? SPELL_SLAG_POT_AURA : SPELL_SLAG_POT_AURA_H, true, 0,0, m_creature->GetObjectGuid()); 
                         m_bIsSlagPot = true;
                         m_uiSlagPotSwitchTimer = 1500;
+                        m_uiSlagPotDmgTimer = 2000;
                         m_uiSlagPotExitTimer = 10000;
                         m_uiSlagPotTimer = urand(15000, 25000);
                     }
@@ -370,7 +371,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                     {
                         pPassenger->CastSpell(pPassenger, m_bIsRegularMode ? SPELL_SLAG_POT_DMG : SPELL_SLAG_POT_DMG_H, true ,0 ,0, m_creature->GetObjectGuid());
                     }
-                m_uiSlagPotDmgTimer = 1000;
+                m_uiSlagPotDmgTimer = 3000;
             }
             else m_uiSlagPotDmgTimer -= uiDiff;
 
