@@ -80,14 +80,16 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
     instance_naxxramas* m_pInstance;
     bool m_bIsRegularMode;
 
-    uint32 Disruption_Timer;
-    uint32 Feaver_Timer;
-    uint32 Erupt_Timer;
-    uint32 Phase_Timer;
-    uint32 PlagueCloudTimer;
+    uint32 m_uiDisruption_Timer;
+    uint32 m_uiFeaver_Timer;
+    uint32 m_uiErupt_Timer;
+    uint32 m_uiPhase_Timer;
+    uint32 m_uiPlagueCloudTimer;
 
-    uint32 eruptSection;
-    bool eruptDirection;
+    uint32 m_uiSafeSpot;
+    uint32 m_uiFastTimer;
+    uint32 m_uiSlowTimer;
+    bool m_bforward;
 
     uint8 phase;
 
@@ -96,6 +98,10 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
         if(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         phase = 0;
+        m_uiSafeSpot = 1;
+        m_uiFastTimer = 3500;
+        m_uiSlowTimer = 10500;
+        m_bforward = true;
 
         if(m_pInstance)
         {
@@ -109,7 +115,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
         if (!pWho)
             return;
 
-        if(phase != 1)
+        if(phase != PHASE_GROUND)
             return;
 
         if (m_creature->Attack(pWho, true))
@@ -122,16 +128,18 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
     void SetPhase(uint8 tPhase)
     {
         phase = tPhase;
-        if(phase == 1)
+        if(phase == PHASE_GROUND)
         {
             m_creature->InterruptNonMeleeSpells(false);
-            Feaver_Timer = 20000;
-            Phase_Timer = 90000;
-            Disruption_Timer = 5000+rand()%10000;
+            m_uiFeaver_Timer = 20000;
+            m_uiPhase_Timer = 90000;
+            m_uiSlowTimer = 10500; 
+            m_uiSafeSpot = 1;
+            m_uiDisruption_Timer = 5000+urand(0,4000);
             if(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             DoStartMovement(m_creature->getVictim());
-        }else if(phase == 2)
+        }else if(phase == PHASE_PLATFORM)
         {
             m_creature->InterruptNonMeleeSpells(true);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -140,13 +148,15 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
             m_creature->GetMotionMaster()->MoveIdle();
             DoCast(m_creature, SPELL_TELEPORT_SELF);
 
-            Phase_Timer = 45000;
-            PlagueCloudTimer = 1000;
+            m_uiPhase_Timer = 45000;
+            m_uiSafeSpot = 1;
+            m_uiFastTimer = 3500;
+            m_uiPlagueCloudTimer = 1000;
         }
     }
     void Aggro(Unit *who)
     {
-        m_creature->SummonCreature(HEIGAN_TRIGGER, TRIGGER_X, TRIGGER_Y, TRIGGER_Z, TRIGGER_O, TEMPSUMMON_CORPSE_DESPAWN, 0);
+        //m_creature->SummonCreature(HEIGAN_TRIGGER, TRIGGER_X, TRIGGER_Y, TRIGGER_Z, TRIGGER_O, TEMPSUMMON_CORPSE_DESPAWN, 0);
         SetPhase(1);
         switch (rand()%3)
         {
@@ -177,58 +187,6 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
             m_pInstance->SetData(TYPE_HEIGAN, DONE);
     }
 
-    void UpdateAI(const uint32 diff)
-    {
-        if(phase == 0)
-            return;
-
-        if (Phase_Timer < diff)
-        {
-            if (phase == 1)
-                SetPhase(2);
-            else SetPhase(1);
-        }else Phase_Timer -= diff;
-
-        if ( phase == 2 && PlagueCloudTimer < diff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_PLAGUE_CLOUD);
-            PlagueCloudTimer  = 999999;
-        }else PlagueCloudTimer -= diff;
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || phase != 1)
-            return; 
-
-        if (Disruption_Timer < diff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISRUPTION);
-            Disruption_Timer = 5000+rand()%10000;
-        }else Disruption_Timer -= diff;
-
-        if (Feaver_Timer < diff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DECREPIT_FEVER_N : SPELL_DECREPIT_FEVER_H);
-            Feaver_Timer = 30000+rand()%10000;
-        }else Feaver_Timer -= diff;
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
-{
-    npc_heigan_eruptionAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = ((instance_naxxramas*)pCreature->GetInstanceData());
-        Reset();
-    }
-    instance_naxxramas* m_pInstance;
- 
-    uint32 phase;
-    uint32 safeSpot;
-    uint32 fastTimer;
-    uint32 phaseTimer;
-    uint32 slowTimer;
-    bool forward;
     std::list<GameObject*> GetGameObjectsByEntry(uint32 entry)
     {
         CellPair pair(MaNGOS::ComputeCellPair(m_creature->GetPositionX(), m_creature->GetPositionY()));
@@ -245,6 +203,7 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
  
         return gameobjectList;
     }
+
     //Let's Dance!
     void DoErupt(uint32 safePlace)
     {
@@ -255,7 +214,7 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
  
         if(safePlace != 1)
         {
-            std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181678);
+            //std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181678);
             //Visual part of eruption
             for (int32 i = 181510; i <= 181526; i++)
             {
@@ -275,31 +234,35 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                 }
             }
             //Damage part of eruption
-            for (std::list<GameObject*>::iterator itr = eruptGOs.begin(); itr != eruptGOs.end(); ++itr)
+            if (m_pInstance)
             {
-                if(!(*itr))
-                    continue;
-                for(Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                for (std::list<uint64>::iterator itr = m_pInstance->m_lEruptionObjectOneGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectOneGUIDs.end(); ++itr)
                 {
-                    if (Player* pPlayer = i->getSource())
+                    if (GameObject* pEruption = m_creature->GetMap()->GetGameObject((*itr)))
                     {
-                        if (pPlayer->isGameMaster())
-                            continue;
- 
-                        if (pPlayer->isAlive())
+                        for(Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                         {
-                            if(pPlayer->GetDistance((*itr)) <= 4.0f)
-                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                            if (Player* pPlayer = i->getSource())
+                            {
+                                if (pPlayer->isGameMaster())
+                                    continue;
+         
+                                if (pPlayer->isAlive())
+                                {
+                                    if(pPlayer->GetDistance(pEruption) <= 4.0f)
+                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                                }
+                            }
                         }
                     }
                 }
             }
         }
         //Change direction of dance
-        else forward = true;
+        else m_bforward = true;
         if(safePlace != 2)
         {
-            std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181676);
+            //std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181676);
             for (int32 i = 181511; i <= 181531; i++)
             {
                 if ((i > 181516 && i < 181525) || (i == 181526))
@@ -316,21 +279,25 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                     }
                 }
             }
-            for (std::list<GameObject*>::iterator itr = eruptGOs.begin(); itr != eruptGOs.end(); ++itr)
+            if (m_pInstance)
             {
-                if(!(*itr))
-                    continue;
-                for(Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                for (std::list<uint64>::iterator itr = m_pInstance->m_lEruptionObjectTwoGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectTwoGUIDs.end(); ++itr)
                 {
-                    if (Player* pPlayer = i->getSource())
+                    if (GameObject* pEruption = m_creature->GetMap()->GetGameObject((*itr)))
                     {
-                        if (pPlayer->isGameMaster())
-                            continue;
- 
-                        if (pPlayer->isAlive())
+                        for(Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                         {
-                            if(pPlayer->GetDistance((*itr)) <= 4.0f)
-                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                            if (Player* pPlayer = i->getSource())
+                            {
+                                if (pPlayer->isGameMaster())
+                                    continue;
+         
+                                if (pPlayer->isAlive())
+                                {
+                                    if(pPlayer->GetDistance(pEruption) <= 4.0f)
+                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                                }
+                            }
                         }
                     }
                 }
@@ -338,7 +305,7 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
         }
         if(safePlace != 3)
         {
-            std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181677);
+            //std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181677);
             for (int32 i = 181532; i <= 181545; i++)
             {
                 if (i >= 181537 && i <= 181539)
@@ -355,21 +322,25 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                     }
                 }
             }
-            for (std::list<GameObject*>::iterator itr = eruptGOs.begin(); itr != eruptGOs.end(); ++itr)
+            if (m_pInstance)
             {
-                if(!(*itr))
-                    continue;
-                for(Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                for (std::list<uint64>::iterator itr = m_pInstance->m_lEruptionObjectThreeGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectThreeGUIDs.end(); ++itr)
                 {
-                    if (Player* pPlayer = i->getSource())
+                    if (GameObject* pEruption = m_creature->GetMap()->GetGameObject((*itr)))
                     {
-                        if (pPlayer->isGameMaster())
-                            continue;
- 
-                        if (pPlayer->isAlive())
+                        for(Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                         {
-                            if(pPlayer->GetDistance((*itr)) <= 4.0f)
-                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                            if (Player* pPlayer = i->getSource())
+                            {
+                                if (pPlayer->isGameMaster())
+                                    continue;
+         
+                                if (pPlayer->isAlive())
+                                {
+                                    if(pPlayer->GetDistance(pEruption) <= 4.0f)
+                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                                }
+                            }
                         }
                     }
                 }
@@ -377,7 +348,7 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
         }
         if(safePlace != 4)
         {
-            std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181695);
+            //std::list<GameObject*> eruptGOs = GetGameObjectsByEntry(181695);
             for (int32 i = 181537; i <= 181552; i++)
             {
                 if (i > 181539 && i < 181545)
@@ -394,119 +365,99 @@ struct MANGOS_DLL_DECL npc_heigan_eruptionAI : public ScriptedAI
                     }
                 }
             }
-            for (std::list<GameObject*>::iterator itr = eruptGOs.begin(); itr != eruptGOs.end(); ++itr)
+            if (m_pInstance)
             {
-                if(!(*itr))
-                    continue;
-                for(Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                for (std::list<uint64>::iterator itr = m_pInstance->m_lEruptionObjectFourGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectFourGUIDs.end(); ++itr)
                 {
-                    if (Player* pPlayer = i->getSource())
+                    if (GameObject* pEruption = m_creature->GetMap()->GetGameObject((*itr)))
                     {
-                        if (pPlayer->isGameMaster())
-                            continue;
- 
-                        if (pPlayer->isAlive())
+                        for(Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
                         {
-                            if(pPlayer->GetDistance((*itr)) <= 4.0f)
-                                pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                            if (Player* pPlayer = i->getSource())
+                            {
+                                if (pPlayer->isGameMaster())
+                                    continue;
+         
+                                if (pPlayer->isAlive())
+                                {
+                                    if(pPlayer->GetDistance(pEruption) <= 4.0f)
+                                        pPlayer->CastSpell(pPlayer, SPELL_ERUPTION, true, 0, 0, m_creature->GetGUID()); 
+                                }
+                            }
                         }
                     }
                 }
             }
         //Let's dance back!
-        }else forward=false;
-    }
-    void KilledUnit(Unit* victim)
-    {
-        if(m_pInstance)
-            m_pInstance->SetAchiev(TYPE_HEIGAN, false);
-    }
-
- 
-    void Reset()
-    {
-        phase = 1;
-        safeSpot = 1;
-        fastTimer = 3500;
-        slowTimer = 10500;
-        phaseTimer = 90000;
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-    }
-    void Aggro(Unit* who)
-    {
-        //This is just for dance. It doesn't attack anybody.
-        DoStopAttack();
-        SetCombatMovement(false);
+        }else m_bforward=false;
     }
     void UpdateAI(const uint32 diff)
     {
-        if(m_creature->GetMapId() != 533)
+        if(phase == 0)
             return;
 
-        if(m_pInstance->GetData(TYPE_HEIGAN) != IN_PROGRESS)
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return; 
+
+        if (m_uiPhase_Timer < diff)
         {
-            m_creature->ForcedDespawn();
-        }
- 
-        if (phase == 1)
+            if (phase == PHASE_GROUND)
+                SetPhase(PHASE_PLATFORM);
+            else SetPhase(PHASE_GROUND);
+        }else m_uiPhase_Timer -= diff;
+
+        if (phase == PHASE_GROUND)
         {
-            if(phaseTimer < diff)
+            if (m_uiDisruption_Timer < diff)
             {
-                // Let's fast dance
-                phase = 2;
-                phaseTimer = 45000;
-                safeSpot = 1;
-                fastTimer = 3500; //reset timer for phase 2
-            }
-            else
+                //DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISRUPTION);
+                m_uiDisruption_Timer = 5000+rand()%10000;
+            }else m_uiDisruption_Timer -= diff;
+
+            if (m_uiFeaver_Timer < diff)
             {
-                phaseTimer-=diff;
-                if(slowTimer < diff)
-                {
-                    DoErupt(safeSpot);
-                    if(forward)
-                        safeSpot++;
-                    else
-                        safeSpot--;
-                    slowTimer = 10500;
-                }else slowTimer-=diff;
-            }
+                //DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DECREPIT_FEVER_N : SPELL_DECREPIT_FEVER_H);
+                m_uiFeaver_Timer = 30000+rand()%10000;
+            }else m_uiFeaver_Timer -= diff;
+
+            if(m_uiSlowTimer < diff)
+            {
+                DoErupt(m_uiSafeSpot);
+                if(m_bforward)
+                    m_uiSafeSpot++;
+                else
+                    m_uiSafeSpot--;
+                m_uiSlowTimer = 10500;
+            }else m_uiSlowTimer-=diff;
         }
-        else if(phase == 2)
+
+        if (phase == PHASE_PLATFORM)
         {
-            if(phaseTimer < diff)
+            if (m_uiPlagueCloudTimer < diff)
             {
-                // Slow dance again
-                phase = 1;
-                phaseTimer = 90000;
-                slowTimer = 10500; //reset timer for phase 1
-                safeSpot = 1;
-            }
-            else 
+                DoCastSpellIfCan(m_creature, SPELL_PLAGUE_CLOUD);
+                m_uiPlagueCloudTimer  = 999999;
+            }else m_uiPlagueCloudTimer -= diff;
+
+            if(m_uiFastTimer < diff)
             {
-                phaseTimer-=diff;
-                if(fastTimer < diff)
-                {
-                    DoErupt(safeSpot);
-                    if(forward)
-                        safeSpot++;
-                    else
-                        safeSpot--;
-                    fastTimer = 3500;
-                }else fastTimer-=diff;
-            }
+                DoErupt(m_uiSafeSpot);
+                if(m_bforward)
+                    m_uiSafeSpot++;
+                else
+                    m_uiSafeSpot--;
+                m_uiFastTimer = 3500;
+            }else m_uiFastTimer-=diff;
         }
+
+        DoMeleeAttackIfReady();
     }
 };
+
 
 CreatureAI* GetAI_boss_heigan(Creature* pCreature)
 {
     return new boss_heiganAI(pCreature);
-}
-
-CreatureAI* GetAI_npc_heigan_eruptionAI(Creature* pCreature)
-{
-    return new npc_heigan_eruptionAI(pCreature);
 }
 
 void AddSC_boss_heigan()
@@ -515,11 +466,6 @@ void AddSC_boss_heigan()
     newscript = new Script;
     newscript->Name = "boss_heigan";
     newscript->GetAI = &GetAI_boss_heigan;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "npc_heigan_eruption";
-    newscript->GetAI = &GetAI_npc_heigan_eruptionAI;
     newscript->RegisterSelf();
 }
 
