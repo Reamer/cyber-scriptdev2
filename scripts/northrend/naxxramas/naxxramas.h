@@ -106,6 +106,10 @@ enum
     GO_PLAG_HEIG_ENTRY_DOOR     = 181202,
     GO_PLAG_HEIG_EXIT_DOOR      = 181203,                   //exit, open when boss dead
     GO_PLAG_LOAT_DOOR           = 181241,                   //encounter door
+    GO_ERUPTION_ONE_OBJECT      = 181678,                   //eruption objects
+    GO_ERUPTION_TWO_OBJECT      = 181676,
+    GO_ERUPTION_THREE_OBJECT    = 181677,
+    GO_ERUPTION_FOUR_OBJECT     = 181695,
 
     // Military Quarter
     GO_MILI_GOTH_ENTRY_GATE     = 181124,                   //used while encounter is in progress
@@ -232,6 +236,10 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         uint64 m_uiLoathebGUID;
 
         uint64 m_uiHeiganGUID;
+        std::list<uint64> m_lEruptionObjectOneGUIDs;
+        std::list<uint64> m_lEruptionObjectTwoGUIDs;
+        std::list<uint64> m_lEruptionObjectThreeGUIDs;
+        std::list<uint64> m_lEruptionObjectFourGUIDs;
 
         uint64 m_uiKelthuzadGUID;
 
