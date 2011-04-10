@@ -117,7 +117,11 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
     void JustDied(Unit* pKiller)
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_ANUB_REKHAN, DONE);
+            m_pInstance->m_uiArachnophobiaTimer = time(0);
+        }
+
     }
 
     void JustReachedHome()

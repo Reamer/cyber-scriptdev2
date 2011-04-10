@@ -39,20 +39,27 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiFaerlinanGUID(0),
     m_uiWorshipperCount(0),
     m_uiFollowerCount(0),
+    m_uiMaexxnaGUID(0),
 
+    m_uiRazuviousGUID(0),
+    m_uiGothikGUID(0),
     m_uiZeliekGUID(0),
     m_uiThaneGUID(0),
     m_uiBlaumeuxGUID(0),
     m_uiRivendareGUID(0),
 
+    m_uiPatchwerkGUID(0),
+    m_uiGrobbulusGUID(0),
+    m_uiGluthGUID(0),
     m_uiThaddiusGUID(0),
     m_uiStalaggGUID(0),
     m_uiFeugenGUID(0),
 
+    m_uiNothGUID(0),
+    m_uiHeiganGUID(0),
     m_uiLoathebGUID(0),
 
-    m_uiHeiganGUID(0),
-
+    m_uiSapphironGUID(0),
     m_uiKelthuzadGUID(0),
 
     m_uiPathExitDoorGUID(0),
@@ -66,7 +73,6 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiMaexOuterGUID(0),
     m_uiMaexInnerGUID(0),
 
-    m_uiGothikGUID(0),
     m_uiGothCombatGateGUID(0),
     m_uiGothikEntryDoorGUID(0),
     m_uiGothikExitDoorGUID(0),
@@ -92,12 +98,15 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_fChamberCenterY(0.0f),
     m_fChamberCenterZ(0.0f),
 
+    m_uiArachnophobiaTimer(0),
+
     m_bTheSafetyDance(false),
     m_bMommaSaidKnockYouOut(false),
     m_bSporeLoser(false),
     m_bShocking(false),
     m_bTheHundredClub(false),
-    m_bJustCantGetEnough(false)
+    m_bJustCantGetEnough(false),
+    m_bMonsterRun(true)
 {
     Initialize();
 }
@@ -113,19 +122,26 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 {
     switch(pCreature->GetEntry())
     {
-        case NPC_ANUB_REKHAN:       m_uiAnubRekhanGUID = pCreature->GetGUID();  break;
-        case NPC_FAERLINA:          m_uiFaerlinanGUID = pCreature->GetGUID();   break;
-        case NPC_THADDIUS:          m_uiThaddiusGUID = pCreature->GetGUID();    break;
-        case NPC_STALAGG:           m_uiStalaggGUID = pCreature->GetGUID();     break;
-        case NPC_FEUGEN:            m_uiFeugenGUID = pCreature->GetGUID();      break;
-        case NPC_LOATHEB:           m_uiLoathebGUID = pCreature->GetGUID();     break;
-        case NPC_HEIGAN:            m_uiHeiganGUID = pCreature->GetGUID();      break;
-        case NPC_ZELIEK:            m_uiZeliekGUID = pCreature->GetGUID();      break;
-        case NPC_THANE:             m_uiThaneGUID = pCreature->GetGUID();       break;
-        case NPC_BLAUMEUX:          m_uiBlaumeuxGUID = pCreature->GetGUID();    break;
-        case NPC_RIVENDARE:         m_uiRivendareGUID = pCreature->GetGUID();   break;
-        case NPC_GOTHIK:            m_uiGothikGUID = pCreature->GetGUID();      break;
-        case NPC_KELTHUZAD:         m_uiKelthuzadGUID = pCreature->GetGUID();   break;
+        case NPC_ANUB_REKHAN:       m_uiAnubRekhanGUID  = pCreature->GetGUID(); break;
+        case NPC_FAERLINA:          m_uiFaerlinanGUID   = pCreature->GetGUID(); break;
+        case NPC_MAEXXNA:           m_uiMaexxnaGUID     = pCreature->GetGUID(); break;
+        case NPC_PATCHWERK:         m_uiPatchwerkGUID   = pCreature->GetGUID(); break;
+        case NPC_GROBBULUS:         m_uiGrobbulusGUID   = pCreature->GetGUID(); break;
+        case NPC_GLUTH:             m_uiGluthGUID       = pCreature->GetGUID(); break;
+        case NPC_THADDIUS:          m_uiThaddiusGUID    = pCreature->GetGUID(); break;
+        case NPC_STALAGG:           m_uiStalaggGUID     = pCreature->GetGUID(); break;
+        case NPC_FEUGEN:            m_uiFeugenGUID      = pCreature->GetGUID(); break;
+        case NPC_NOTH:              m_uiNothGUID        = pCreature->GetGUID(); break;
+        case NPC_HEIGAN:            m_uiHeiganGUID      = pCreature->GetGUID(); break;
+        case NPC_LOATHEB:           m_uiLoathebGUID     = pCreature->GetGUID(); break;
+        case NPC_RAZUVIOUS:         m_uiRazuviousGUID   = pCreature->GetGUID(); break;
+        case NPC_ZELIEK:            m_uiZeliekGUID      = pCreature->GetGUID(); break;
+        case NPC_THANE:             m_uiThaneGUID       = pCreature->GetGUID(); break;
+        case NPC_BLAUMEUX:          m_uiBlaumeuxGUID    = pCreature->GetGUID(); break;
+        case NPC_RIVENDARE:         m_uiRivendareGUID   = pCreature->GetGUID(); break;
+        case NPC_GOTHIK:            m_uiGothikGUID      = pCreature->GetGUID(); break;
+        case NPC_SAPPHIRON:         m_uiSapphironGUID   = pCreature->GetGUID(); break;
+        case NPC_KELTHUZAD:         m_uiKelthuzadGUID   = pCreature->GetGUID(); break;
         case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetGUID()); break;
         case NPC_WORSHIPPER:        if(m_uiWorshipperCount<5) m_uiWorshipperGUID[m_uiWorshipperCount++] = pCreature->GetGUID(); break;
         case NPC_FOLLOWER:          if(m_uiFollowerCount<3) m_uiFollowerGUID[m_uiFollowerCount++] = pCreature->GetGUID(); break;
@@ -288,6 +304,26 @@ bool instance_naxxramas::IsEncounterInProgress() const
 
     return false;
 }
+
+void instance_naxxramas::OnPlayerDeath(Player* pPlayer)
+{
+    if (IsEncounterInProgress())
+    {
+        m_bMonsterRun = false;
+        pPlayer->MonsterSay("MonsterRun-Erfolg gibs nicht mehr.", 0);
+        if (GetData(TYPE_HEIGAN) == IN_PROGRESS)
+        {
+            m_bTheSafetyDance = false;
+        }
+    }
+}
+
+
+void instance_naxxramas::OnPlayerLeave(Player* pPlayer)
+{
+    m_bMonsterRun = false;
+    pPlayer->MonsterSay("MonsterRun-Erfolg gibs nicht mehr.", 0);
+}
 bool instance_naxxramas::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/)
 {
     switch (uiCriteriaId)
@@ -310,9 +346,29 @@ bool instance_naxxramas::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Playe
         case ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH:
         case ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH_H:
             return m_bJustCantGetEnough;
+
+        case ACHIEV_CRITERIA_THE_IMMORTAL_1:
+        case ACHIEV_CRITERIA_THE_IMMORTAL_2:
+        case ACHIEV_CRITERIA_THE_IMMORTAL_3:
+        case ACHIEV_CRITERIA_THE_IMMORTAL_4:
+        case ACHIEV_CRITERIA_THE_IMMORTAL_5:
+        case ACHIEV_CRITERIA_THE_UNDYING_1:
+        case ACHIEV_CRITERIA_THE_UNDYING_2:
+        case ACHIEV_CRITERIA_THE_UNDYING_3:
+        case ACHIEV_CRITERIA_THE_UNDYING_4:
+        case ACHIEV_CRITERIA_THE_UNDYING_5:
+            return IsAllEncounterDone() ? m_bMonsterRun : false;
         default:
             return 0;
     }
+}
+
+bool instance_naxxramas::IsAllEncounterDone()
+{
+    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+        if (m_auiEncounter[i] != DONE)
+            return false; 
+    return true;
 }
 
 void instance_naxxramas::SetAchiev(uint32 uiType, bool get)
@@ -367,6 +423,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             {
                 DoUseDoorOrButton(m_uiAracEyeRampGUID);
                 DoRespawnGameObject(m_uiAracPortalGUID, 30*MINUTE);
+                if (GameObject* pTele = instance->GetGameObject(m_uiAracPortalGUID))
+                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
                 DoTaunt();
             }
             break;
@@ -392,6 +450,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             {
                 DoUseDoorOrButton(m_uiPlagEyeRampGUID);
                 DoRespawnGameObject(m_uiPlagPortalGUID, 30*MINUTE);
+                if (GameObject* pTele = instance->GetGameObject(m_uiPlagPortalGUID))
+                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
                 DoTaunt();
             }
             break;
@@ -399,6 +459,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[6] = uiData;
             break;
         case TYPE_GOTHIK:
+            m_auiEncounter[7] = uiData;
             switch(uiData)
             {
                 case IN_PROGRESS:
@@ -420,7 +481,6 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                     DoUseDoorOrButton(m_uiHorsemenDoorGUID);
                     break;
             }
-            m_auiEncounter[7] = uiData;
             break;
         case TYPE_BLAUMEUX:
             if (uiData == DONE)
@@ -466,6 +526,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 }                
                 DoUseDoorOrButton(m_uiMiliEyeRampGUID);
                 DoRespawnGameObject(m_uiMiliPortalGUID, 30*MINUTE);
+                if (GameObject* pTele = instance->GetGameObject(m_uiMiliPortalGUID))
+                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
                 DoRespawnGameObject(m_uiHorsemenChestGUID, 30*MINUTE);
                 DoTaunt();
             }
@@ -493,6 +555,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             {
                 DoUseDoorOrButton(m_uiConsEyeRampGUID);
                 DoRespawnGameObject(m_uiConsPortalGUID, 30*MINUTE);
+                if (GameObject* pTele = instance->GetGameObject(m_uiConsPortalGUID))
+                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
                 DoTaunt();
             }
             break;

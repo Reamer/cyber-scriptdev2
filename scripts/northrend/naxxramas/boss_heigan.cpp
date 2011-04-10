@@ -50,11 +50,6 @@ enum
     SPELL_DISRUPTION        = 29310,
     SPELL_TELEPORT_SELF     = 30211,
     SPELL_PLAGUE_CLOUD      = 29350,
-
-    //Spell by eye stalks
-    SPELL_MIND_FLAY         = 26143,
-
-    HEIGAN_TRIGGER          = 45101
 };
 
 #define POS_X 2793.86f
@@ -405,13 +400,13 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
         {
             if (m_uiDisruption_Timer < diff)
             {
-                //DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISRUPTION);
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISRUPTION);
                 m_uiDisruption_Timer = 5000+rand()%10000;
             }else m_uiDisruption_Timer -= diff;
 
             if (m_uiFeaver_Timer < diff)
             {
-                //DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DECREPIT_FEVER_N : SPELL_DECREPIT_FEVER_H);
+                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DECREPIT_FEVER_N : SPELL_DECREPIT_FEVER_H);
                 m_uiFeaver_Timer = 30000+rand()%10000;
             }else m_uiFeaver_Timer -= diff;
 

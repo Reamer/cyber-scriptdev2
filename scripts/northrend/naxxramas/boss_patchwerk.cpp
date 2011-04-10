@@ -54,6 +54,7 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
     bool m_bIsRegularMode;
 
     uint32 m_uiHatefulStrikeTimer;
+    uint64 m_uiDeathTimer;
     uint32 m_uiBerserkTimer;
     uint32 m_uiSlimeboltTimer;
     bool   m_bEnraged;
@@ -64,6 +65,7 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
         m_uiHatefulStrikeTimer = 1000;                      //1 second
         m_uiBerserkTimer = MINUTE*6*IN_MILLISECONDS;         //6 minutes
         m_uiSlimeboltTimer = 10000;
+        m_uiDeathTimer = 0;
         m_bEnraged = false;
         m_bBerserk = false;
     }
@@ -81,7 +83,12 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_PATCHWERK, DONE);
+            if (m_uiDeathTimer < 180000)
+                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? 1856 : 1857);
+        }
+
     }
 
     void Aggro(Unit* pWho)
@@ -131,6 +138,8 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
+
+        m_uiDeathTimer += uiDiff;
 
         // Soft Enrage at 5%
         if (!m_bEnraged)

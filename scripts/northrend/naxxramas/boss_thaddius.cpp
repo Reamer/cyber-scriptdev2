@@ -208,6 +208,12 @@ struct MANGOS_DLL_DECL boss_thaddiusAI: public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
         RemoveCharges();
+        if (m_pInstance)
+        {
+            m_pInstance->SetData(TYPE_THADDIUS, DONE);
+            m_pInstance->SetData(TYPE_STALAGG, DONE);
+            m_pInstance->SetData(TYPE_FEUGEN, DONE);
+        }
     }
 
     void KilledUnit(Unit* pVictim)
