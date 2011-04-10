@@ -135,7 +135,11 @@ struct MANGOS_DLL_DECL boss_maexxnaAI : public ScriptedAI
     void JustDied(Unit* pKiller)
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_MAEXXNA, DONE);
+            if (m_pInstance->m_uiArachnophobiaTimer - time(0) < 1200000 && m_pInstance->m_uiArachnophobiaTimer - time(0) > 0)
+                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? 1858 : 1859);
+        }
     }
 
     void JustReachedHome()

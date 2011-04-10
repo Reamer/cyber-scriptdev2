@@ -35,11 +35,11 @@ enum
     TYPE_GROBBULUS              = 11,
     TYPE_GLUTH                  = 12,
     TYPE_THADDIUS               = 13,
-    TYPE_STALAGG                = 14,
-    TYPE_FEUGEN                 = 15,
+    TYPE_STALAGG                = 131,
+    TYPE_FEUGEN                 = 132,
 
-    TYPE_SAPPHIRON              = 16,
-    TYPE_KELTHUZAD              = 17,
+    TYPE_SAPPHIRON              = 14,
+    TYPE_KELTHUZAD              = 15,
 
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
@@ -51,26 +51,32 @@ enum
     NPC_FOLLOWER                = 16505,
     NPC_FOLLOWER_1              = 165051,
     NPC_FOLLOWER_2              = 165052,
+    NPC_MAEXXNA                 = 15952,
 
+    NPC_PATCHWERK               = 16028,
+    NPC_GROBBULUS               = 15931,
+    NPC_GLUTH                   = 15932,
     NPC_THADDIUS                = 15928,
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,
 
+    NPC_NOTH                    = 15954,
+    NPC_HEIGAN                  = 15936,
     NPC_LOATHEB                 = 16011,
 
-    NPC_HEIGAN                  = 15936,
-
+    NPC_RAZUVIOUS               = 16061,
     NPC_DEATH_KNIGHT_UNDERSTUDY  = 16803,
     NPC_DEATH_KNIGHT_UNDERSTUDY_1= 168031,
     NPC_DEATH_KNIGHT_UNDERSTUDY_2= 168032,
     NPC_DEATH_KNIGHT_UNDERSTUDY_3= 168033,
     NPC_DEATH_KNIGHT_UNDERSTUDY_4= 168034,
-
+    
     NPC_ZELIEK                  = 16063,
     NPC_THANE                   = 16064,
     NPC_BLAUMEUX                = 16065,
     NPC_RIVENDARE               = 30549,
 
+    NPC_SAPPHIRON               = 15989,
     NPC_KELTHUZAD               = 15990,
 
     // Gothik
@@ -157,7 +163,22 @@ enum
     ACHIEV_CRITERIA_THE_HUNDRED_CLUB            = 7567,
     ACHIEV_CRITERIA_THE_HUNDRED_CLUB_H          = 7568,
     ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH        = 7614,
-    ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH_H      = 7615
+    ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH_H      = 7615,
+
+    ACHIEV_CRITERIA_THE_IMMORTAL_1              = 13235,
+    ACHIEV_CRITERIA_THE_IMMORTAL_2              = 13234,
+    ACHIEV_CRITERIA_THE_IMMORTAL_3              = 7616,
+    ACHIEV_CRITERIA_THE_IMMORTAL_4              = 13236,
+    ACHIEV_CRITERIA_THE_IMMORTAL_5              = 13233,
+
+    ACHIEV_CRITERIA_THE_UNDYING_1               = 13240,
+    ACHIEV_CRITERIA_THE_UNDYING_2               = 13239,
+    ACHIEV_CRITERIA_THE_UNDYING_3               = 7617,
+    ACHIEV_CRITERIA_THE_UNDYING_4               = 13238,
+    ACHIEV_CRITERIA_THE_UNDYING_5               = 13237,
+
+    ACHIEV_CRITERIA_ARCHNOPHOBIA                = 7128,
+    ACHIEV_CRITERIA_ARCHNOPHOBIA_H              = 7129,
 };
 
 struct GothTrigger
@@ -175,12 +196,16 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         void Initialize();
 
         bool IsEncounterInProgress() const;
+        bool IsAllEncounterDone();
 
         void OnCreatureCreate(Creature* pCreature);
         void OnObjectCreate(GameObject* pGo);
 
         void SetData(uint32 uiType, uint32 uiData);
         void SetAchiev(uint32 uiType, bool get);
+        void OnPlayerDeath(Player* pPlayer);
+        void OnPlayerLeave(Player* pPlayer);
+
         uint32 GetData(uint32 uiType);
         uint64 GetData64(uint32 uiData);
 
@@ -204,6 +229,8 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         std::list<uint64> m_lEruptionObjectTwoGUIDs;
         std::list<uint64> m_lEruptionObjectThreeGUIDs;
         std::list<uint64> m_lEruptionObjectFourGUIDs;
+
+        time_t m_uiArachnophobiaTimer;
         
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
@@ -225,24 +252,31 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         uint8  m_uiWorshipperCount;
         uint64 m_uiFollowerGUID[2];
         uint8  m_uiFollowerCount;
+        uint64 m_uiMaexxnaGUID;
 
+        uint64 m_uiRazuviousGUID;
         uint64 m_uiDeathKnightUnderstudyGUID[4];
         uint8  m_uiDeathKnightUnderstudyCount;
+        uint64 m_uiGothikGUID;
 
         uint64 m_uiZeliekGUID;
         uint64 m_uiThaneGUID;
         uint64 m_uiBlaumeuxGUID;
         uint64 m_uiRivendareGUID;
 
+        uint64 m_uiPatchwerkGUID;
+        uint64 m_uiGrobbulusGUID;
+        uint64 m_uiGluthGUID;
         uint64 m_uiThaddiusGUID;
         uint64 m_uiStalaggGUID;
         uint64 m_uiFeugenGUID;
 
+        uint64 m_uiNothGUID;
+        uint64 m_uiHeiganGUID;
         uint64 m_uiLoathebGUID;
 
-        uint64 m_uiHeiganGUID;
-
         uint64 m_uiKelthuzadGUID;
+        uint64 m_uiSapphironGUID;
 
         uint64 m_uiPathExitDoorGUID;
         uint64 m_uiGlutExitDoorGUID;
@@ -255,7 +289,6 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         uint64 m_uiMaexOuterGUID;
         uint64 m_uiMaexInnerGUID;
 
-        uint64 m_uiGothikGUID;
         uint64 m_uiGothCombatGateGUID;
         uint64 m_uiGothikEntryDoorGUID;
         uint64 m_uiGothikExitDoorGUID;
@@ -290,6 +323,7 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         bool m_bShocking;
         bool m_bTheHundredClub;
         bool m_bJustCantGetEnough;
+        bool m_bMonsterRun;
 };
 
 #endif
