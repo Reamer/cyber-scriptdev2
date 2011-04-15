@@ -107,12 +107,12 @@ struct MANGOS_DLL_DECL mob_ulduar_rubbleAI : public ScriptedAI
 {
     mob_ulduar_rubbleAI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiStone_Nova_Timer;
@@ -151,14 +151,14 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
 {
     boss_kologarnAI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         vehicle = m_creature->GetVehicleKit();
         SetCombatMovement(false);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     VehicleKit* vehicle;
     bool m_bIsRegularMode;
 
@@ -497,14 +497,14 @@ struct MANGOS_DLL_DECL boss_left_armAI : public ScriptedAI
 {
     boss_left_armAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         pCreature->SetRespawnDelay(7*DAY);
         SetCombatMovement(false);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiShockwave_Timer;
@@ -559,7 +559,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
 {
     boss_right_armAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         vehicle = m_creature->GetVehicleKit();
         pCreature->SetRespawnDelay(7*DAY);
@@ -567,7 +567,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     VehicleKit* vehicle;
     bool m_bIsRegularMode;
 
@@ -688,11 +688,11 @@ struct MANGOS_DLL_DECL mob_kologarn_pit_kill_bunnyAI : public ScriptedAI
 {
     mob_kologarn_pit_kill_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_fPositionZ = m_creature->GetPositionZ();
         m_bBridgeLocked = false;
     }
-    InstanceData *m_pInstance;
+    instance_ulduar *m_pInstance;
     float m_fPositionZ;
     bool m_bBridgeLocked;
     void Reset(){}

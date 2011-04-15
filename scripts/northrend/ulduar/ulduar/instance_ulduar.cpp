@@ -874,7 +874,7 @@ uint64 instance_ulduar::GetData64(uint32 uiData)
     case NPC_LEVIATHAN_MK:
         return m_uiLeviathanMkGUID;
     case NPC_HODIR:
-        return m_uiMimironGUID;
+        return m_uiHodirGUID;
     case NPC_THORIM:
         return m_uiThorimGUID;
     case NPC_RUNE_GIANT:
