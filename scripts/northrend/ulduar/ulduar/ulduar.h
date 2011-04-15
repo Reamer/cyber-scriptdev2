@@ -252,7 +252,6 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         void OpenXtDoor();
         void CheckIronCouncil();
         void CheckKeepers();
-        Player* GetPlayerInMap();
         void SpawnFriendlyKeeper(uint32 uiWho);
 
         std::list<uint64> m_lIronConstructsGUIDs;
