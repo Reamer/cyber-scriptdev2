@@ -187,12 +187,15 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
         }
     }
 
+
     void UpdateAI(const uint32 uiDiff)
     {
         //Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        if(m_creature->getVictim()->GetEntry() == NPC_BRITTLE_GOLEM)
+            	DespawnGolem();
 
         if (m_creature->GetHealthPercent() <= (80 - 20 * m_uiShatter_Counter))
         {
@@ -340,8 +343,9 @@ struct MANGOS_DLL_DECL mob_molten_golemAI : public ScriptedAI
             uiDamage = 0;
 
  //           m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-//            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+ //           m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             m_creature->SetHealth(1);
 
             Creature* pCreature = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_VOLKHAN));
@@ -361,7 +365,7 @@ struct MANGOS_DLL_DECL mob_molten_golemAI : public ScriptedAI
         {
             if (m_creature->GetEntry() == NPC_BRITTLE_GOLEM){
             	m_creature->CastSpell(m_creature, m_bIsRegularMode ? SPELL_SHATTER_N : SPELL_SHATTER_H, true, NULL, NULL, pCaster->GetObjectGuid());
-                m_creature->ForcedDespawn();
+                m_creature->ForcedDespawn(500);
             }
         }
     }
