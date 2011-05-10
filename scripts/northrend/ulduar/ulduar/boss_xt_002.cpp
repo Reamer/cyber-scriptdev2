@@ -663,7 +663,7 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
                     m_bHasMoreHealth = false;
                 }else m_uiHpDelayTimer -= uiDiff;
 
-                if (m_uiLifeSparkTimer < uiDiff)
+                /*if (m_uiLifeSparkTimer < uiDiff)              // Nun im Core
                 {
                     if (Unit* pTarget = m_creature->GetMap()->GetUnit( pLightBombTarGUID))
                         DoCast(pTarget, SPELL_LIFE_SPARK, true);
@@ -675,7 +675,7 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
                     if (Unit* pTarget = m_creature->GetMap()->GetUnit( pGravityBombTarGUID))
                         DoCast(pTarget,m_bIsRegularMode ? SPELL_VOIDZONE : SPELL_VOIDZONE_H, true);     
                     m_uiVoidZoneTimer = 60000;
-                }else m_uiVoidZoneTimer -= uiDiff;
+                }else m_uiVoidZoneTimer -= uiDiff;*/ 
             }
             if (m_creature->GetHealthPercent() < m_uiHealthPercent && !m_bIsHardMode)
             {

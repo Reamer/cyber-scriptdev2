@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -28,7 +28,6 @@ instance_molten_core::instance_molten_core(Map* pMap) : ScriptedInstance(pMap),
     m_uiGarrGUID(0),
     m_uiSulfuronGUID(0),
     m_uiMajordomoGUID(0),
-    m_uiRagnarosGUID(0),
     m_uiRuneKoroGUID(0),
     m_uiRuneZethGUID(0),
     m_uiRuneMazjGUID(0),
@@ -36,6 +35,8 @@ instance_molten_core::instance_molten_core(Map* pMap) : ScriptedInstance(pMap),
     m_uiRuneBlazGUID(0),
     m_uiRuneKressGUID(0),
     m_uiRuneMohnGUID(0),
+    m_uiLavaSteamGUID(0),
+    m_uiLavaSplashGUID(0),
     m_uiFirelordCacheGUID(0)
 {
     Initialize();
@@ -71,7 +72,6 @@ void instance_molten_core::OnCreatureCreate(Creature* pCreature)
         case NPC_GARR:      m_uiGarrGUID = pCreature->GetGUID();        break;
         case NPC_SULFURON:  m_uiSulfuronGUID = pCreature->GetGUID();    break;
         case NPC_MAJORDOMO: m_uiMajordomoGUID = pCreature->GetGUID();   break;
-        case NPC_RAGNAROS:  m_uiRagnarosGUID = pCreature->GetGUID();    break;
 
         // Push adds to lists in order to handle respawn
         case NPC_FLAMEWAKER_PROTECTOR:  m_luiProtectorGUIDs.push_back(pCreature->GetGUID());    break;
@@ -97,6 +97,9 @@ void instance_molten_core::OnObjectCreate(GameObject* pGo)
 
         // Majordomo event chest
         case GO_CACHE_OF_THE_FIRE_LORD: m_uiFirelordCacheGUID = pGo->GetGUID(); break;
+        // Ragnaros GOs
+        case GO_LAVA_STEAM:             m_uiLavaSteamGUID = pGo->GetGUID();     break;
+        case GO_LAVA_SPLASH:            m_uiLavaSplashGUID = pGo->GetGUID();    break;
     }
 }
 
@@ -216,7 +219,7 @@ void instance_molten_core::DoSpawnMajordomoIfCan(bool bByPlayerEnter)
         return;
 
     // Check if all rune bosses are done
-    for(uint8 i = TYPE_MAGMADAR; i < TYPE_MAJORDOMO; i++)
+    for(uint8 i = TYPE_MAGMADAR; i < TYPE_MAJORDOMO; ++i)
     {
         if (m_auiEncounter[i] != DONE)
             return;
@@ -274,7 +277,9 @@ uint64 instance_molten_core::GetData64(uint32 uiData)
         case NPC_GARR:      return m_uiGarrGUID;
         case NPC_SULFURON:  return m_uiSulfuronGUID;
         case NPC_MAJORDOMO: return m_uiMajordomoGUID;
-        case NPC_RAGNAROS:  return m_uiRagnarosGUID;
+
+        case GO_LAVA_STEAM:  return m_uiLavaSteamGUID;
+        case GO_LAVA_SPLASH: return m_uiLavaSplashGUID;
 
         default:
             return 0;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -202,7 +202,7 @@ bool GossipSelect_npcs_rutgar_and_frankal(Player* pPlayer, Creature* pCreature, 
         case GOSSIP_ACTION_INFO_DEF + 6:
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_RUTGAR7, pCreature->GetGUID());
             //'kill' our trigger to update quest status
-            pPlayer->KilledMonsterCredit(TRIGGER_RUTGAR, pCreature->GetGUID());
+            pPlayer->KilledMonsterCredit(TRIGGER_RUTGAR, pCreature->GetObjectGuid());
             break;
 
         case GOSSIP_ACTION_INFO_DEF + 9:
@@ -228,7 +228,7 @@ bool GossipSelect_npcs_rutgar_and_frankal(Player* pPlayer, Creature* pCreature, 
         case GOSSIP_ACTION_INFO_DEF + 14:
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FRANKAL6, pCreature->GetGUID());
             //'kill' our trigger to update quest status
-            pPlayer->KilledMonsterCredit(TRIGGER_FRANKAL, pCreature->GetGUID());
+            pPlayer->KilledMonsterCredit(TRIGGER_FRANKAL, pCreature->GetObjectGuid());
             break;
     }
     return true;

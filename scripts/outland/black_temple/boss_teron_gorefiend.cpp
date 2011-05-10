@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -258,7 +258,7 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 
                 DoScriptText(SAY_INTRO, m_creature);
 
-                m_creature->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_TALK);
+                m_creature->HandleEmote(EMOTE_STATE_TALK);
                 m_uiAggroTargetGUID = pWho->GetGUID();
                 m_bIntro = true;
             }
@@ -358,7 +358,7 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 
                 DoScriptText(SAY_AGGRO, m_creature);
 
-                m_creature->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                m_creature->HandleEmote(EMOTE_STATE_NONE);
                 m_bIntro = false;
                 if (m_uiAggroTargetGUID)
                 {

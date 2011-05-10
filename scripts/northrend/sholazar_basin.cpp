@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,11 +17,12 @@
 /* ScriptData
 SDName: Sholazar_Basin
 SD%Complete: 100
-SDComment: Quest support: 12573, 12570, 12580
+SDComment: Quest support: 12573, 12570, 12580, 12688
 SDCategory: Sholazar Basin
 EndScriptData */
 
 /* ContentData
+npc_helice
 npc_injured_rainspeaker
 npc_mosswalker_victim
 npc_vekjik - TODO, can be moved to database (already exist)
@@ -29,6 +30,171 @@ EndContentData */
 
 #include "precompiled.h"
 #include "escort_ai.h"
+
+/*######
+## npc_helice
+######*/
+
+enum
+{
+    QUEST_ENGINEERING_DISASTER          = 12688,
+
+    SAY_HELICE_ACCEPT                   = -1000657,
+    SAY_HELICE_EXPLOSIVES_1             = -1000658,
+    SAY_HELICE_EXPLODE_1                = -1000659,
+    SAY_HELICE_MOVE_ON                  = -1000660,
+    SAY_HELICE_EXPLOSIVES_2             = -1000661,
+    SAY_HELICE_EXPLODE_2                = -1000662,
+    SAY_HELICE_COMPLETE                 = -1000663,
+
+    SPELL_DETONATE_EXPLOSIVES_1         = 52369,            // first "barrel"
+    SPELL_DETONATE_EXPLOSIVES_2         = 52371,            // second "barrel"
+};
+
+struct MANGOS_DLL_DECL npc_heliceAI : public npc_escortAI
+{
+    npc_heliceAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        m_uiExplodeTimer = 5000;
+        m_uiExplodePhase = 0;
+        m_bFirstBarrel = true;
+        Reset();
+    }
+
+    uint32 m_uiExplodeTimer;
+    uint32 m_uiExplodePhase;
+    bool m_bFirstBarrel;
+
+    void Reset()
+    {
+    }
+
+    void WaypointReached(uint32 uiPointId)
+    {
+        switch(uiPointId)
+        {
+            case 2:
+            {
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    DoScriptText(SAY_HELICE_EXPLOSIVES_1, m_creature, pPlayer);
+                    SetEscortPaused(true);
+                }
+                break;
+            }
+            case 13:
+            {
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    DoScriptText(SAY_HELICE_EXPLOSIVES_2, m_creature, pPlayer);
+                    SetEscortPaused(true);
+                }
+                break;
+            }
+            case 22:
+            {
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    DoScriptText(SAY_HELICE_COMPLETE, m_creature, pPlayer);
+                    pPlayer->GroupEventHappens(QUEST_ENGINEERING_DISASTER, m_creature);
+                }
+                break;
+            }
+        }
+    }
+
+    void UpdateEscortAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
+            if (!HasEscortState(STATE_ESCORT_ESCORTING))
+                return;
+
+            if (HasEscortState(STATE_ESCORT_PAUSED))
+            {
+                if (m_uiExplodeTimer < uiDiff)
+                {
+                    if (m_bFirstBarrel)
+                    {
+                        switch(m_uiExplodePhase)
+                        {
+                            case 0:
+                                DoCastSpellIfCan(m_creature, SPELL_DETONATE_EXPLOSIVES_1);
+
+                                if (Player* pPlayer = GetPlayerForEscort())
+                                    DoScriptText(SAY_HELICE_EXPLODE_1, m_creature, pPlayer);
+
+                                m_uiExplodeTimer = 2500;
+                                ++m_uiExplodePhase;
+                                break;
+                            case 1:
+                                if (Player* pPlayer = GetPlayerForEscort())
+                                    DoScriptText(SAY_HELICE_MOVE_ON, m_creature, pPlayer);
+
+                                m_uiExplodeTimer = 2500;
+                                ++m_uiExplodePhase;
+                                break;
+                            case 2:
+                                SetEscortPaused(false);
+                                m_uiExplodePhase = 0;
+                                m_uiExplodeTimer = 5000;
+                                m_bFirstBarrel = false;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch(m_uiExplodePhase)
+                        {
+                            case 0:
+                                DoCastSpellIfCan(m_creature, SPELL_DETONATE_EXPLOSIVES_2);
+
+                                if (Player* pPlayer = GetPlayerForEscort())
+                                    DoScriptText(SAY_HELICE_EXPLODE_2, m_creature, pPlayer);
+
+                                m_uiExplodeTimer = 2500;
+                                ++m_uiExplodePhase;
+                                break;
+                            case 1:
+                                SetEscortPaused(false);
+                                m_uiExplodePhase = 0;
+                                m_uiExplodeTimer = 5000;
+                                m_bFirstBarrel = true;
+                                break;
+                        }
+                    }
+                }
+                else
+                    m_uiExplodeTimer -= uiDiff;
+            }
+
+            return;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_helice(Creature* pCreature)
+{
+    return new npc_heliceAI(pCreature);
+}
+
+bool QuestAccept_npc_helice(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ENGINEERING_DISASTER)
+    {
+        DoScriptText(SAY_HELICE_ACCEPT, pCreature, pPlayer);
+
+        if (npc_heliceAI* pEscortAI = dynamic_cast<npc_heliceAI*>(pCreature->AI()))
+        {
+            pEscortAI->Start(false, pPlayer->GetGUID(), pQuest);
+            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+        }
+    }
+
+    return false;
+}
 
 /*######
 ## npc_injured_rainspeaker
@@ -44,15 +210,15 @@ enum
     SAY_START                           = -1000606,
     SAY_END_1                           = -1000607,
     SAY_END_2                           = -1000608,
-    SAY_TRACKER                         = -1000609,
+    SAY_TRACKER                         = -1000609,         // not used in escort (aggro text for trackers? something for vekjik?)
 
     NPC_FRENZYHEART_TRACKER             = 28077,
 
+    SPELL_ORACLE_ESCORT_START           = 51341,            // unknown purpose
     SPELL_FEIGN_DEATH                   = 51329,
     SPELL_ORACLE_INTRO                  = 51448,
 };
 
-// TODO: add, if faction change is expected.
 struct MANGOS_DLL_DECL npc_injured_rainspeakerAI : public npc_escortAI
 {
     npc_injured_rainspeakerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
@@ -62,7 +228,10 @@ struct MANGOS_DLL_DECL npc_injured_rainspeakerAI : public npc_escortAI
     void JustStartedEscort()
     {
         if (Player* pPlayer = GetPlayerForEscort())
+        {
             DoScriptText(SAY_START, m_creature, pPlayer);
+            DoCastSpellIfCan(m_creature, SPELL_ORACLE_ESCORT_START);
+        }
     }
 
     void WaypointReached(uint32 uiPointId)
@@ -74,8 +243,7 @@ struct MANGOS_DLL_DECL npc_injured_rainspeakerAI : public npc_escortAI
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_END_1, m_creature, pPlayer);
-                    // more likely m_creature->player, doesn't seem to work though.
-                    pPlayer->CastSpell(pPlayer, SPELL_ORACLE_INTRO, true);
+                    DoCastSpellIfCan(m_creature, SPELL_ORACLE_INTRO);
                 }
                 break;
             }
@@ -94,11 +262,6 @@ struct MANGOS_DLL_DECL npc_injured_rainspeakerAI : public npc_escortAI
                 break;
             }
         }
-    }
-
-    void JustSummoned(Creature* pSummoned)
-    {
-        DoScriptText(SAY_TRACKER, pSummoned);
     }
 
     void UpdateEscortAI(const uint32 uiDiff)
@@ -124,7 +287,10 @@ bool QuestAccept_npc_injured_rainspeaker(Player* pPlayer, Creature* pCreature, c
 
         // Workaround, GossipHello/GossipSelect doesn't work well when object already has gossip from database
         if (npc_injured_rainspeakerAI* pEscortAI = dynamic_cast<npc_injured_rainspeakerAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(true, pPlayer->GetGUID(), pQuest);
+            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+        }
     }
 
     return false;
@@ -300,6 +466,12 @@ bool GossipSelect_npc_vekjik(Player* pPlayer, Creature* pCreature, uint32 uiSend
 void AddSC_sholazar_basin()
 {
     Script* pNewScript;
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_helice";
+    pNewScript->GetAI = &GetAI_npc_helice;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_helice;
+    pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_injured_rainspeaker";

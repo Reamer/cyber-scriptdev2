@@ -1,4 +1,4 @@
-/* Copyright (C) 2009 - 2011 by /dev/rsa for ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2009 - 2010 by /dev/rsa for ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -175,14 +175,14 @@ struct MANGOS_DLL_DECL BSWScriptedAI : public ScriptedAI
                  return queryIndex(_findSpellIDX(SpellID)) ? _doSummon(_findSpellIDX(SpellID), type, delay) : NULL;
              };
 
-        Unit* doSelectRandomPlayer(uint32 SpellID = 0, bool spellsearchtype = false, float range = 100.0f)
+        Unit* doSelectRandomPlayer(uint32 SpellID = 0, bool spellsearchtype = false, float range = 100.0f, bool includeVictim = true)
              {
-                 return _doSelect(SpellID, spellsearchtype, range);
+                 return _doSelect(SpellID, spellsearchtype, range, includeVictim);
              };
 
-        Unit* doSelectRandomPlayerAtRange(float range)
+        Unit* doSelectRandomPlayerAtRange(float range, bool includeVictim = true)
              {
-                 return _doSelect(0, false, range);
+                 return _doSelect(0, false, range, includeVictim);
              };
 
         Unit* doSummon(uint32 SpellID, float fPosX, float fPosY, float fPosZ, TempSummonType type = TEMPSUMMON_CORPSE_TIMED_DESPAWN, uint32 delay = 60000)
@@ -241,7 +241,7 @@ struct MANGOS_DLL_DECL BSWScriptedAI : public ScriptedAI
 
         void          _resetTimer(uint8 m_uiSpellIdx);
 
-        Unit*         _doSelect(uint32 SpellID, bool spellsearchtype = false, float range = 100.0f);
+        Unit*         _doSelect(uint32 SpellID, bool spellsearchtype = false, float range = 100.0f, bool includeVictim = true);
 
         Unit*         _doSummon(uint8 m_uiSpellIdx, TempSummonType type = TEMPSUMMON_CORPSE_TIMED_DESPAWN, uint32 delay = 60000);
 

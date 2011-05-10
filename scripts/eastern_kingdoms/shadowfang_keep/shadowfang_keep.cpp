@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -515,7 +515,7 @@ struct MANGOS_DLL_DECL boss_arugalAI : public ScriptedAI
                         Creature *pVoidwalker, *pLeader;
                         pVoidwalker = pLeader = NULL;
 
-                        for(uint8 i = 0; i < 4; i++)
+                        for(uint8 i = 0; i < 4; ++i)
                         {
                             pVoidwalker = m_creature->SummonCreature(NPC_VOIDWALKER,VWSpawns[i].fX,
                                 VWSpawns[i].fY, VWSpawns[i].fZ, VWSpawns[i].fO, TEMPSUMMON_DEAD_DESPAWN, 1);
@@ -527,7 +527,7 @@ struct MANGOS_DLL_DECL boss_arugalAI : public ScriptedAI
                                 pLeader = pVoidwalker;
 
                             if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(pVoidwalker->AI()))
-                                pVoidwalkerAI->SetPosition(i,pLeader);
+                                pVoidwalkerAI->SetPosition(i, pLeader);
 
                             pVoidwalker = NULL;
                         }

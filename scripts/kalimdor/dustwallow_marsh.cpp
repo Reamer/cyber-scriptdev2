@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -71,7 +71,7 @@ struct MANGOS_DLL_DECL mobs_risen_husk_spiritAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned)
     {
         if (m_pCreditPlayer)
-            m_pCreditPlayer->KilledMonsterCredit(pSummoned->GetEntry(), pSummoned->GetGUID());
+            m_pCreditPlayer->KilledMonsterCredit(pSummoned->GetEntry(), pSummoned->GetObjectGuid());
     }
 
     void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)

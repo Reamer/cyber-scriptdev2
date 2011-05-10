@@ -233,6 +233,7 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         bool IsEncounterInProgress() const;
 
         void OnCreatureCreate(Creature* pCreature);
+        void OnCreatureDeath(Creature * pCreature);
         void OnObjectCreate(GameObject* pGo);
 
         void SetData(uint32 uiType, uint32 uiData);
@@ -255,6 +256,8 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         void SpawnFriendlyKeeper(uint32 uiWho);
 
         std::list<uint64> m_lIronConstructsGUIDs;
+        std::list<uint64> m_lHodirMobsGUIDs;
+        std::list<uint64> m_lThorimMobsGUIDs;
 
     protected:
         

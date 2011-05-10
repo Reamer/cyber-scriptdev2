@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -24,6 +24,7 @@ EndScriptData */
 /* ContentData
 mob_mature_netherwing_drake
 mob_enslaved_netherwing_drake
+npc_dragonmaw_peon
 npc_drake_dealer_hurlunk
 npcs_flanis_swiftwing_and_kagrosh
 npc_murkblood_overseer
@@ -117,7 +118,19 @@ struct MANGOS_DLL_DECL mob_mature_netherwing_drakeAI : public ScriptedAI
                 {
                     if (Player* pPlayer = m_creature->GetMap()->GetPlayer(uiPlayerGUID))
                     {
-                        if (GameObject* pGo = pPlayer->GetGameObject(SPELL_PLACE_CARCASS))
+                        GameObject* pGo = pPlayer->GetGameObject(SPELL_PLACE_CARCASS);
+
+                        // Workaround for broken function GetGameObject
+                        if (!pGo)
+                        {
+                            const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_PLACE_CARCASS);
+
+                            uint32 uiGameobjectEntry = pSpell->EffectMiscValue[EFFECT_INDEX_0];
+
+                            pGo = GetClosestGameObjectWithEntry(pPlayer, uiGameobjectEntry, 2*INTERACTION_DISTANCE);
+                        }
+
+                        if (pGo)
                         {
                             if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
                                 m_creature->GetMotionMaster()->MovementExpired();
@@ -125,7 +138,10 @@ struct MANGOS_DLL_DECL mob_mature_netherwing_drakeAI : public ScriptedAI
                             m_creature->GetMotionMaster()->MoveIdle();
                             m_creature->StopMoving();
 
-                            m_creature->GetMotionMaster()->MovePoint(POINT_ID, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
+                            float fX, fY, fZ;
+                            pGo->GetContactPoint(m_creature, fX, fY, fZ, CONTACT_DISTANCE);
+
+                            m_creature->GetMotionMaster()->MovePoint(POINT_ID, fX, fY, fZ);
                         }
                     }
                     bCanEat = false;
@@ -136,7 +152,7 @@ struct MANGOS_DLL_DECL mob_mature_netherwing_drakeAI : public ScriptedAI
                     DoScriptText(SAY_JUST_EATEN, m_creature);
 
                     if (Player* pPlayer = m_creature->GetMap()->GetPlayer(uiPlayerGUID))
-                        pPlayer->KilledMonsterCredit(NPC_EVENT_PINGER, m_creature->GetGUID());
+                        pPlayer->KilledMonsterCredit(NPC_EVENT_PINGER, m_creature->GetObjectGuid());
 
                     Reset();
                     m_creature->GetMotionMaster()->Clear();
@@ -277,49 +293,50 @@ CreatureAI* GetAI_mob_enslaved_netherwing_drake(Creature* pCreature)
 }
 
 /*#####
-# mob_dragonmaw_peon
+# npc_dragonmaw_peon
 #####*/
 
 enum
 {
+    SAY_PEON_1                      = -1000652,
+    SAY_PEON_2                      = -1000653,
+    SAY_PEON_3                      = -1000654,
+    SAY_PEON_4                      = -1000655,
+    SAY_PEON_5                      = -1000656,
+
     SPELL_SERVING_MUTTON            = 40468,
     NPC_DRAGONMAW_KILL_CREDIT       = 23209,
-    QUEST_SLOW_DEATH                = 11020,
+    EQUIP_ID_MUTTON                 = 2202,
     POINT_DEST                      = 1
 };
 
-struct MANGOS_DLL_DECL mob_dragonmaw_peonAI : public ScriptedAI
+struct MANGOS_DLL_DECL npc_dragonmaw_peonAI : public ScriptedAI
 {
-    mob_dragonmaw_peonAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_dragonmaw_peonAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     uint64 m_uiPlayerGUID;
-    bool m_bIsTapped;
     uint32 m_uiPoisonTimer;
+    uint32 m_uiMoveTimer;
+    uint32 m_uiEatTimer;
 
     void Reset()
     {
         m_uiPlayerGUID = 0;
-        m_bIsTapped = false;
         m_uiPoisonTimer = 0;
+        m_uiMoveTimer = 0;
+        m_uiEatTimer = 0;
+
+        SetEquipmentSlots(true);
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
+    bool SetPlayerTarget(uint64 uiPlayerGUID)
     {
-        if (!pCaster)
-            return;
+        if (m_uiPlayerGUID)
+            return false;
 
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_SERVING_MUTTON && !m_bIsTapped)
-        {
-            m_uiPlayerGUID = pCaster->GetGUID();
-
-            m_bIsTapped = true;
-
-            float fX, fY, fZ;
-            pCaster->GetClosePoint(fX, fY, fZ, m_creature->GetObjectBoundingRadius());
-
-            m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
-            m_creature->GetMotionMaster()->MovePoint(POINT_DEST, fX, fY, fZ);
-        }
+        m_uiPlayerGUID = uiPlayerGUID;
+        m_uiMoveTimer = 500;
+        return true;
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId)
@@ -329,31 +346,112 @@ struct MANGOS_DLL_DECL mob_dragonmaw_peonAI : public ScriptedAI
 
         if (uiPointId == POINT_DEST)
         {
-            m_creature->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_EAT);
-            m_uiPoisonTimer = 15000;
+            m_uiEatTimer = 2000;
+            m_uiPoisonTimer = 3000;
+
+            switch(urand(0, 4))
+            {
+                case 0: DoScriptText(SAY_PEON_1, m_creature); break;
+                case 1: DoScriptText(SAY_PEON_2, m_creature); break;
+                case 2: DoScriptText(SAY_PEON_3, m_creature); break;
+                case 3: DoScriptText(SAY_PEON_4, m_creature); break;
+                case 4: DoScriptText(SAY_PEON_5, m_creature); break;
+            }
         }
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (m_uiPoisonTimer)
+        if (!m_creature->isAlive())
+            return;
+
+        if (m_uiMoveTimer)
+        {
+            if (m_uiMoveTimer <= uiDiff)
+            {
+                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiPlayerGUID))
+                {
+                    GameObject* pMutton = pPlayer->GetGameObject(SPELL_SERVING_MUTTON);
+
+                    // Workaround for broken function GetGameObject
+                    if (!pMutton)
+                    {
+                        const SpellEntry* pSpell = GetSpellStore()->LookupEntry(SPELL_SERVING_MUTTON);
+
+                        uint32 uiGameobjectEntry = pSpell->EffectMiscValue[EFFECT_INDEX_0];
+
+                        // this can fail, but very low chance
+                        pMutton = GetClosestGameObjectWithEntry(pPlayer, uiGameobjectEntry, 2*INTERACTION_DISTANCE);
+                    }
+
+                    if (pMutton)
+                    {
+                        float fX, fY, fZ;
+                        pMutton->GetContactPoint(m_creature, fX, fY, fZ, CONTACT_DISTANCE);
+
+                        m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+                        m_creature->GetMotionMaster()->MovePoint(POINT_DEST, fX, fY, fZ);
+                    }
+                }
+
+                m_uiMoveTimer = 0;
+            }
+            else
+                m_uiMoveTimer -= uiDiff;
+        }
+        else if (m_uiEatTimer)
+        {
+            if (m_uiEatTimer <= uiDiff)
+            {
+                SetEquipmentSlots(false, EQUIP_ID_MUTTON, EQUIP_UNEQUIP);
+                m_creature->HandleEmote(EMOTE_ONESHOT_EAT_NOSHEATHE);
+                m_uiEatTimer = 0;
+            }
+            else
+                m_uiEatTimer -= uiDiff;
+        }
+        else if (m_uiPoisonTimer)
         {
             if (m_uiPoisonTimer <= uiDiff)
             {
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiPlayerGUID))
-                {
-                    if (pPlayer->GetQuestStatus(QUEST_SLOW_DEATH) == QUEST_STATUS_INCOMPLETE)
-                        pPlayer->KilledMonsterCredit(NPC_DRAGONMAW_KILL_CREDIT, m_creature->GetGUID());
-                }
+                    pPlayer->KilledMonsterCredit(NPC_DRAGONMAW_KILL_CREDIT, m_creature->GetObjectGuid());
 
                 m_uiPoisonTimer = 0;
-                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+
+                // dies
+                m_creature->SetDeathState(JUST_DIED);
+                m_creature->SetHealth(0);
             }
             else
                 m_uiPoisonTimer -= uiDiff;
         }
     }
 };
+
+CreatureAI* GetAI_npc_dragonmaw_peon(Creature* pCreature)
+{
+    return new npc_dragonmaw_peonAI(pCreature);
+}
+
+bool EffectDummyCreature_npc_dragonmaw_peon(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget)
+{
+    if (uiEffIndex != EFFECT_INDEX_1 || uiSpellId != SPELL_SERVING_MUTTON || pCaster->GetTypeId() != TYPEID_PLAYER)
+        return false;
+
+    npc_dragonmaw_peonAI* pPeonAI = dynamic_cast<npc_dragonmaw_peonAI*>(pCreatureTarget->AI());
+
+    if (!pPeonAI)
+        return false;
+
+    if (pPeonAI->SetPlayerTarget(pCaster->GetGUID()))
+    {
+        pCreatureTarget->HandleEmote(EMOTE_ONESHOT_NONE);
+        return true;
+    }
+
+    return false;
+}
 
 /*######
 ## npc_drake_dealer_hurlunk
@@ -1431,7 +1529,7 @@ CreatureAI* GetAI_npc_lord_illidan_stormrage(Creature* (pCreature))
 ######*/
 bool GOQuestAccept_GO_crystal_prison(Player* pPlayer, GameObject* pGo, Quest const* pQuest)
 {
-    if (pQuest->GetQuestId() == QUEST_BATTLE_OF_THE_CRIMSON_WATCH )
+    if (pQuest->GetQuestId() == QUEST_BATTLE_OF_THE_CRIMSON_WATCH)
         if (Creature* pLordIllidan = GetClosestCreatureWithEntry(pPlayer, NPC_LORD_ILLIDAN, 50.0))
             if (npc_lord_illidan_stormrageAI* pIllidanAI = dynamic_cast<npc_lord_illidan_stormrageAI*>(pLordIllidan->AI()))
                 if (!pIllidanAI->m_bEventStarted)
@@ -1452,6 +1550,12 @@ void AddSC_shadowmoon_valley()
     newscript = new Script;
     newscript->Name = "mob_enslaved_netherwing_drake";
     newscript->GetAI = &GetAI_mob_enslaved_netherwing_drake;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_dragonmaw_peon";
+    newscript->GetAI = &GetAI_npc_dragonmaw_peon;
+    newscript->pEffectDummyNPC = &EffectDummyCreature_npc_dragonmaw_peon;
     newscript->RegisterSelf();
 
     newscript = new Script;

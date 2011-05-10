@@ -1,4 +1,4 @@
-/* Copyright (C) 2009 - 2011 by /dev/rsa for ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2009 - 2010 by /dev/rsa for ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 #include "precompiled.h"
@@ -752,7 +752,7 @@ bool BSWScriptedAI::_doAura(uint32 SpellID, Unit* pTarget, SpellEffectIndex inde
             else 
             {
                 aura = CreateAura(spell, index, &_basepoint, holder, pTarget);
-                aura->SetAuraDuration(aura->GetAuraMaxDuration());
+                holder->SetAuraDuration(aura->GetAuraMaxDuration());
                 holder->AddAura(aura, index);
             }
 
@@ -784,7 +784,7 @@ CanCastResult BSWScriptedAI::_DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, ui
 
 // Not threat-based select random player function
 
-Unit* BSWScriptedAI::_doSelect(uint32 SpellID, bool spellsearchtype, float range)
+Unit* BSWScriptedAI::_doSelect(uint32 SpellID, bool spellsearchtype, float range, bool includeVictim)
 {
     Map* pMap = m_creature->GetMap();
     Map::PlayerList const &pList = pMap->GetPlayers();
@@ -799,6 +799,8 @@ Unit* BSWScriptedAI::_doSelect(uint32 SpellID, bool spellsearchtype, float range
             if (player->isGameMaster()) continue;
 
             if (!player->IsInMap(m_creature)) continue;
+
+            if (player == m_creature->getVictim() && !includeVictim) continue;
 
             if (player->isAlive()
                 && player->IsWithinDistInMap(m_creature, range)

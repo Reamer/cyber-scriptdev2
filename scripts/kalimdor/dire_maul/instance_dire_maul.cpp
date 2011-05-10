@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -15,202 +15,445 @@
  */
 
 /* ScriptData
-SDName: Instance_Dire_Maul
-SD%Complete: 50%
-SDComment: Doorhandling in Dire_Maul
+SDName: instance_dire_maul
+SD%Complete: 30
+SDComment: Basic Support - Most events and quest-related stuff missing
 SDCategory: Dire Maul
 EndScriptData */
 
 #include "precompiled.h"
-struct Encounter
+#include "dire_maul.h"
+
+instance_dire_maul::instance_dire_maul(Map* pMap) : ScriptedInstance(pMap),
+    // East
+    m_bWallDestroyed(false),
+    m_uiCrumbleWallGUID(0),
+    m_uiCorruptVineGUID(0),
+    m_uiConservatoryDoorGUID(0),
+    m_uiOldIronbarkGUID(0),
+
+    // West
+    m_uiPrinceTortheldrinGUID(0),
+    m_uiImmolTharGUID(0),
+    m_uiForcefieldGUID(0),
+    m_uiPrincesChestAuraGUID(0),
+    m_uiTendrisWarpwoodDoorGUID(0),
+
+    // North
+    m_uiGordokGUID(0),
+    m_uiChoRushGUID(0),
+    m_uiMizzleGUID(0)
 {
-    uint64 GUID;
-	bool dead;
-};
-enum
+    Initialize();
+}
+
+void instance_dire_maul::Initialize()
 {
-	TYPE_CRYSTAL_GENERATOR_01		= 1,
-	TYPE_CRYSTAL_GENERATOR_02		= 2,
-	TYPE_CRYSTAL_GENERATOR_03		= 3,
-	TYPE_CRYSTAL_GENERATOR_04		= 4,
-	TYPE_CRYSTAL_GENERATOR_05		= 5,
-	DIRE_MAUL_CRYSTAL_GENERATOR_01	= 177259,
-	DIRE_MAUL_CRYSTAL_GENERATOR_02	= 177257,
-	DIRE_MAUL_CRYSTAL_GENERATOR_03	= 177258,
-	DIRE_MAUL_CRYSTAL_GENERATOR_04	= 179504,
-	DIRE_MAUL_CRYSTAL_GENERATOR_05	= 179505
-};
+    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    memset(&m_auiCrystalGeneratorGUID, 0, sizeof(m_auiCrystalGeneratorGUID));
 
-struct MANGOS_DLL_DECL instance_dire_maul : public ScriptedInstance
+    m_lFelvineShardGUIDs.clear();
+    m_luiHighborneSummonerGUIDs.clear();
+    m_lGeneratorGuardGUIDs.clear();
+}
+
+void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
 {
-    instance_dire_maul(Map *pMap) : ScriptedInstance(pMap) {Initialize();};
-
-	Encounter m_Encounter[6];
-	uint32 m_uiGenerator[5];
-
-	uint32  uiTimer;
-	uint64  m_uiConservatoryDoorGUID;
-	bool	m_bConservatoryDoorOPEN;
-	uint64  m_uiCrumbleWallDoorGUID;
-	bool	m_bCrumbleWallDoorOPEN;
-	uint64	m_uiForceFieldDoorGUID;
-	bool	m_bForceFieldDoorOPEN;
-
-    void Initialize()
+    switch(pCreature->GetEntry())
     {
-		for (int i = 0; i < 6;++i)
-		{
-			m_Encounter[i].GUID 		= 0;
-			m_Encounter[i].dead		= false;
-		}
-        m_uiConservatoryDoorGUID    = 0;
-		m_bConservatoryDoorOPEN	= false;
-		m_uiCrumbleWallDoorGUID		= 0;
-		m_bCrumbleWallDoorOPEN		= false;
-		m_uiForceFieldDoorGUID		= 0;
-		uiTimer = 10000;
+        // East
+        case NPC_OLD_IRONBARK:
+            m_uiOldIronbarkGUID = pCreature->GetGUID();
+            break;
+
+        // West
+        case NPC_PRINCE_TORTHELDRIN:
+            m_uiPrinceTortheldrinGUID = pCreature->GetGUID();
+            if (m_auiEncounter[TYPE_IMMOLTHAR] == DONE)
+                pCreature->setFaction(FACTION_HOSTILE);
+            break;
+        case NPC_ARCANE_ABERRATION:
+        case NPC_MANA_REMNANT:
+            m_lGeneratorGuardGUIDs.push_back(pCreature->GetGUID());
+            break;
+        case NPC_IMMOLTHAR:
+            m_uiImmolTharGUID = pCreature->GetGUID();
+            break;
+        case NPC_HIGHBORNE_SUMMONER:
+            m_luiHighborneSummonerGUIDs.push_back(pCreature->GetGUID());
+            break;
+
+        // North
+        case NPC_CHORUSH:
+            m_uiChoRushGUID = pCreature->GetGUID();
+            break;
+        case NPC_KING_GORDOK:
+            m_uiGordokGUID = pCreature->GetGUID();
+            break;
+        case NPC_MIZZLE_THE_CRAFTY:
+            m_uiMizzleGUID = pCreature->GetGUID();
+            break;
+    }
+}
+
+void instance_dire_maul::OnObjectCreate(GameObject* pGo)
+{
+    switch(pGo->GetEntry())
+    {
+        // East
+        case GO_CONSERVATORY_DOOR:
+            m_uiConservatoryDoorGUID = pGo->GetGUID();
+            if (m_auiEncounter[TYPE_IRONBARK] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_CRUMBLE_WALL:
+            m_uiCrumbleWallGUID = pGo->GetGUID();
+            if (m_bWallDestroyed || m_auiEncounter[TYPE_ALZZIN] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_CORRUPT_VINE:
+            m_uiCorruptVineGUID = pGo->GetGUID();
+            if (m_auiEncounter[TYPE_ALZZIN] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_FELVINE_SHARD:
+            m_lFelvineShardGUIDs.push_back(pGo->GetGUID());
+            break;
+
+        // West
+        case GO_CRYSTAL_GENERATOR_1:
+            m_auiCrystalGeneratorGUID[0] = pGo->GetGUID();
+            if (m_auiEncounter[TYPE_PYLON_1] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_CRYSTAL_GENERATOR_2:
+            m_auiCrystalGeneratorGUID[1] = pGo->GetGUID();
+            if (m_auiEncounter[TYPE_PYLON_2] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_CRYSTAL_GENERATOR_3:
+            m_auiCrystalGeneratorGUID[2] = pGo->GetGUID();
+            if (m_auiEncounter[TYPE_PYLON_3] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_CRYSTAL_GENERATOR_4:
+            m_auiCrystalGeneratorGUID[3] = pGo->GetGUID();
+            if (m_auiEncounter[TYPE_PYLON_4] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_CRYSTAL_GENERATOR_5:
+            m_auiCrystalGeneratorGUID[4] = pGo->GetGUID();
+            if (m_auiEncounter[TYPE_PYLON_5] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_FORCEFIELD:
+            m_uiForcefieldGUID = pGo->GetGUID();
+            if (CheckAllGeneratorsDestroyed())
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_PRINCES_CHEST_AURA:
+            m_uiPrincesChestAuraGUID = pGo->GetGUID();
+            break;
+    }
+}
+
+void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
+{
+    switch(uiType)
+    {
+        // East
+        case TYPE_ZEVRIM:
+            if (uiData == DONE)
+            {
+                // Update Old Ironbark so he can open the conservatory door
+                if (Creature* pIronbark = instance->GetCreature(m_uiOldIronbarkGUID))
+                {
+                    DoScriptText(SAY_IRONBARK_REDEEM, pIronbark);
+                    pIronbark->UpdateEntry(NPC_IRONBARK_REDEEMED);
+                }
+            }
+            m_auiEncounter[uiType] = uiData;
+            break;
+        case TYPE_IRONBARK:
+            m_auiEncounter[uiType] = uiData;
+            break;
+        case TYPE_ALZZIN:                                   // This Encounter is expected to be handled within Acid (reason handling at 50% hp)
+            if (uiData == DONE)
+            {
+                if (!m_bWallDestroyed)
+                {
+                    DoUseDoorOrButton(m_uiCrumbleWallGUID);
+                    m_bWallDestroyed = true;
+                }
+
+                DoUseDoorOrButton(m_uiCorruptVineGUID);
+
+                if (!m_lFelvineShardGUIDs.empty())
+                {
+                    for(std::list<uint64>::iterator i = m_lFelvineShardGUIDs.begin(); i != m_lFelvineShardGUIDs.end(); ++i)
+                        DoRespawnGameObject(*i);
+                }
+            }
+            else if (uiData == SPECIAL && !m_bWallDestroyed)
+            {
+                DoUseDoorOrButton(m_uiCrumbleWallGUID);
+                m_bWallDestroyed = true;
+            }
+            m_auiEncounter[uiType] = uiData;
+            break;
+
+        // West
+        case TYPE_IMMOLTHAR:
+            if (uiData == DONE)
+            {
+                if (Creature* pPrince = instance->GetCreature(m_uiPrinceTortheldrinGUID))
+                {
+                    DoScriptText(SAY_FREE_IMMOLTHAR, pPrince);
+                    pPrince->setFaction(FACTION_HOSTILE);
+                    // Despawn Chest-Aura
+                    if (GameObject* pChestAura = instance->GetGameObject(m_uiPrincesChestAuraGUID))
+                        pChestAura->Use(pPrince);
+                }
+            }
+            m_auiEncounter[uiType] = uiData;
+            break;
+        case TYPE_PRINCE:
+            m_auiEncounter[uiType] = uiData;
+            break;
+        case TYPE_PYLON_1:
+        case TYPE_PYLON_2:
+        case TYPE_PYLON_3:
+        case TYPE_PYLON_4:
+        case TYPE_PYLON_5:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                DoUseDoorOrButton(m_auiCrystalGeneratorGUID[uiType - TYPE_PYLON_1]);
+                if (CheckAllGeneratorsDestroyed())
+                    ProcessForceFieldOpening();
+            }
+            break;
+
+        // North
+        case TYPE_KING_GORDOK:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                // Apply Aura to players in the map
+                Map::PlayerList const& players = instance->GetPlayers();
+                for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                {
+                    if (Player* pPlayer = itr->getSource())
+                        pPlayer->CastSpell(pPlayer, SPELL_KING_OF_GORDOK, true);
+                }
+            }
+            break;
     }
 
-    void OnCreatureCreate(Creature* pCreature)
+    if (uiData == DONE)
     {
-        switch (pCreature->GetEntry())
+        OUT_SAVE_INST_DATA;
+
+        std::ostringstream saveStream;
+        saveStream    << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
+                      << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
+                      << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
+                      << m_auiEncounter[9] << " " << m_auiEncounter[10];
+
+        m_strInstData = saveStream.str();
+
+        SaveToDB();
+        OUT_SAVE_INST_DATA_COMPLETE;
+    }
+}
+
+uint32 instance_dire_maul::GetData(uint32 uiType)
+{
+    if (uiType < MAX_ENCOUNTER)
+        return m_auiEncounter[uiType];
+
+    return 0;
+}
+
+uint64 instance_dire_maul::GetData64(uint32 uiData)
+{
+    switch(uiData)
+    {
+        case NPC_CHORUSH:       return m_uiChoRushGUID;
+        case NPC_KING_GORDOK:   return m_uiGordokGUID;
+        default:
+            return 0;
+    }
+}
+
+void instance_dire_maul::OnCreatureEnterCombat(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // West
+        // - Handling of guards of generators
+        case NPC_ARCANE_ABERRATION:
+        case NPC_MANA_REMNANT:
+            if (!m_lGeneratorGuardGUIDs.empty())
+            {
+                for (uint8 i = 0; i < MAX_GENERATORS; ++i)
+                {
+                    GameObject* pGenerator = instance->GetGameObject(m_auiCrystalGeneratorGUID[i]);
+                    // Skip non-existing or finished generators
+                    if (!pGenerator || GetData(TYPE_PYLON_1 + i) == DONE)
+                        continue;
+
+                    // Sort all remaining (alive) NPCs to unfinished generators
+                    for (std::list<uint64>::iterator itr = m_lGeneratorGuardGUIDs.begin(); itr != m_lGeneratorGuardGUIDs.end();)
+                    {
+                        Creature* pGuard = instance->GetCreature(*itr);
+                        if (!pGuard || pGuard->isDead())    // Remove invalid guids and dead guards
+                        {
+                            m_lGeneratorGuardGUIDs.erase(itr++);
+                            continue;
+                        }
+
+                        if (pGuard->IsWithinDistInMap(pGenerator, 20.0f))
+                        {
+                            m_sSortedGeneratorGuards[i].insert(pGuard->GetGUIDLow());
+                            m_lGeneratorGuardGUIDs.erase(itr++);
+                        }
+                        else
+                            ++itr;
+                    }
+                }
+            }
+            break;
+        // - Set InstData for ImmolThar
+        case NPC_IMMOLTHAR:
+            SetData(TYPE_IMMOLTHAR, IN_PROGRESS);
+            break;
+    }
+}
+
+void instance_dire_maul::OnCreatureDeath(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // East
+        // - Handling Zevrim and Old Ironbark for the door event
+        case NPC_ZEVRIM_THORNHOOF:
+            SetData(TYPE_ZEVRIM, DONE);
+            break;
+        case NPC_IRONBARK_REDEEMED:
+            SetData(TYPE_IRONBARK, DONE);
+            break;
+
+        // West
+        // - Handling of guards of generators
+        case NPC_ARCANE_ABERRATION:
+        case NPC_MANA_REMNANT:
+            for (uint8 i = 0; i < MAX_GENERATORS; ++i)
+            {
+                // Skip already activated generators
+                if (GetData(TYPE_PYLON_1 + i) == DONE)
+                    continue;
+
+                // Only process generator where the npc is sorted in
+                if (m_sSortedGeneratorGuards[i].find(pCreature->GetGUIDLow()) != m_sSortedGeneratorGuards[i].end())
+                {
+                    m_sSortedGeneratorGuards[i].erase(pCreature->GetGUIDLow());
+                    if (m_sSortedGeneratorGuards[i].empty())
+                        SetData(TYPE_PYLON_1 + i, DONE);
+
+                    break;
+                }
+            }
+            break;
+        // - Set InstData for ImmolThar
+        case NPC_IMMOLTHAR:
+            SetData(TYPE_IMMOLTHAR, DONE);
+            break;
+
+        // North
+        // - Handling of Ogre Boss (Assume boss can be handled in Acid)
+        case NPC_KING_GORDOK:
+            SetData(TYPE_KING_GORDOK, DONE);
+            break;
+    }
+}
+
+void instance_dire_maul::Load(const char* chrIn)
+{
+    if (!chrIn)
+    {
+        OUT_LOAD_INST_DATA_FAIL;
+        return;
+    }
+
+    OUT_LOAD_INST_DATA(chrIn);
+
+    std::istringstream loadStream(chrIn);
+    loadStream >>   m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >>
+                    m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5] >>
+                    m_auiEncounter[6] >> m_auiEncounter[7] >> m_auiEncounter[8] >>
+                    m_auiEncounter[9] >> m_auiEncounter[10];
+
+    if (m_auiEncounter[TYPE_ALZZIN] >= DONE)
+       m_bWallDestroyed = true;
+
+    for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    {
+        if (m_auiEncounter[i] == IN_PROGRESS)
+            m_auiEncounter[i] = NOT_STARTED;
+    }
+
+    OUT_LOAD_INST_DATA_COMPLETE;
+}
+
+bool instance_dire_maul::CheckAllGeneratorsDestroyed()
+{
+    if (m_auiEncounter[TYPE_PYLON_1] != DONE || m_auiEncounter[TYPE_PYLON_2] != DONE || m_auiEncounter[TYPE_PYLON_3] != DONE || m_auiEncounter[TYPE_PYLON_4] != DONE || m_auiEncounter[TYPE_PYLON_5] != DONE)
+        return false;
+
+    return true;
+}
+
+void instance_dire_maul::ProcessForceFieldOpening()
+{
+    // 'Open' the force field
+    DoUseDoorOrButton(m_uiForcefieldGUID);
+
+    // Let the summoners attack Immol'Thar
+    Creature* pImmolThar = instance->GetCreature(m_uiImmolTharGUID);
+    if (!pImmolThar || pImmolThar->isDead())
+        return;
+
+    bool bHasYelled = false;
+    for (std::list<uint64>::const_iterator itr = m_luiHighborneSummonerGUIDs.begin(); itr != m_luiHighborneSummonerGUIDs.end(); ++itr)
+    {
+        Creature* pSummoner = instance->GetCreature(*itr);
+
+        if (!bHasYelled && pSummoner)
         {
-			case 14354:										//Pusillin
-				m_Encounter[0].dead = false;
-				m_Encounter[0].GUID = pCreature->GetGUID();
-				break;
-			case 14349:										//Pimgib
-				m_Encounter[1].dead = false;
-				m_Encounter[1].GUID = pCreature->GetGUID();
-				break;
-			case 14327:										//Lethtendris
-				m_Encounter[2].dead = false;
-				m_Encounter[2].GUID = pCreature->GetGUID();
-				break;
-			case 13280:										//Hydrospawn
-				m_Encounter[3].dead = false;
-				m_Encounter[3].GUID = pCreature->GetGUID();
-				break;
-			case 11490:										//Zeorim Thornhoot
-				m_Encounter[4].dead = false;
-				m_Encounter[4].GUID = pCreature->GetGUID();
-				break;
-			case 11492:										//Alzzin the Wildshaper
-				m_Encounter[5].dead = false;
-				m_Encounter[5].GUID = pCreature->GetGUID();
-				break;
+            DoScriptText(SAY_KILL_IMMOLTHAR, pSummoner);
+            bHasYelled = true;
         }
+
+        if (!pSummoner || pSummoner->isDead())
+            continue;
+
+        pSummoner->AI()->AttackStart(pImmolThar);
     }
-
-    void OnObjectCreate(GameObject* pGo)
-    {
-        switch (pGo->GetEntry())
-        {
-            case 177220:										//Crumble Wall
-                m_uiCrumbleWallDoorGUID = pGo->GetGUID();
-                break;
-            case 176907:										//Conservatory Door
-                m_uiConservatoryDoorGUID = pGo->GetGUID();
-                break;
-			case 179503:										//Force Field
-				m_uiForceFieldDoorGUID	= pGo->GetGUID();
-
-
-        }
-    }
-	void Update(uint32 uiDiff)
-	{
-		//check every 10 seconds
-		if (uiTimer < uiDiff)
-		{
-			if (!m_bCrumbleWallDoorOPEN)
-				if (!m_Encounter[5].dead)
-					if (Creature *creature = instance->GetCreature(m_Encounter[5].GUID))
-						if (!creature->isAlive())
-						{
-							m_Encounter[5].dead = true;
-							DoUseDoorOrButton(m_uiCrumbleWallDoorGUID);
-							m_bCrumbleWallDoorOPEN = true;
-						}
-
-			if (!m_bConservatoryDoorOPEN)
-			{
-				for (int i = 0; i < 5; ++i)
-				{
-					if (!m_Encounter[i].dead)
-						if (Creature *creature = instance->GetCreature(m_Encounter[i].GUID))
-							if (!creature->isAlive())
-							{
-								m_Encounter[i].dead = true;
-							}
-				}
-				if (m_Encounter[0].dead && m_Encounter[1].dead && m_Encounter[2].dead && m_Encounter[3].dead && m_Encounter[4].dead)
-				{
-					DoUseDoorOrButton(m_uiConservatoryDoorGUID);
-					m_bConservatoryDoorOPEN = true;
-				}				
-			}
-			uiTimer = 10000;
-		}
-		else
-		{
-				uiTimer -= uiDiff;
-		}
-	}
-
-	void SetData(uint32 uiType, uint32 uiData)
-    {
-		switch(uiType)
-        {
-			case TYPE_CRYSTAL_GENERATOR_01: m_uiGenerator[0]	= uiData; break;
-			case TYPE_CRYSTAL_GENERATOR_02:	m_uiGenerator[1]	= uiData; break;
-			case TYPE_CRYSTAL_GENERATOR_03:	m_uiGenerator[2]	= uiData; break;
-			case TYPE_CRYSTAL_GENERATOR_04:	m_uiGenerator[3]	= uiData; break;
-			case TYPE_CRYSTAL_GENERATOR_05:	m_uiGenerator[4]	= uiData; break;
-			default:
-                error_log("SD2: Instance Dire Maul: ERROR SetData = %u for type %u does not exist/not implemented.", uiType, uiData);
-				break;
-		}
-		if (m_uiGenerator[0] == SPECIAL && m_uiGenerator[1] == SPECIAL && m_uiGenerator[2] == SPECIAL && m_uiGenerator[3] == SPECIAL && m_uiGenerator[4] == SPECIAL)
-			DoUseDoorOrButton(m_uiForceFieldDoorGUID);
-        
-
-	}
-};
+    m_luiHighborneSummonerGUIDs.clear();
+}
 
 InstanceData* GetInstanceData_instance_dire_maul(Map* pMap)
 {
     return new instance_dire_maul(pMap);
 }
 
-bool GOUse_go_dire_maul_generator(Player* pPlayer, GameObject* pGo)
-{
-    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
-
-    if (!pInstance)
-        return false;
-
-    switch(pGo->GetEntry())
-    {
-        case DIRE_MAUL_CRYSTAL_GENERATOR_01	:	pInstance->SetData(TYPE_CRYSTAL_GENERATOR_01, SPECIAL); break;
-        case DIRE_MAUL_CRYSTAL_GENERATOR_02	:	pInstance->SetData(TYPE_CRYSTAL_GENERATOR_02, SPECIAL); break;
-        case DIRE_MAUL_CRYSTAL_GENERATOR_03	:	pInstance->SetData(TYPE_CRYSTAL_GENERATOR_03, SPECIAL); break;
-		case DIRE_MAUL_CRYSTAL_GENERATOR_04	:	pInstance->SetData(TYPE_CRYSTAL_GENERATOR_04, SPECIAL); break;
-		case DIRE_MAUL_CRYSTAL_GENERATOR_05	:	pInstance->SetData(TYPE_CRYSTAL_GENERATOR_05, SPECIAL); break;
-    }
-    return false;
-}
-
 void AddSC_instance_dire_maul()
 {
-    Script *newscript;
-    newscript = new Script;
-    newscript->Name = "instance_dire_maul";
-    newscript->GetInstanceData = &GetInstanceData_instance_dire_maul;
-    newscript->RegisterSelf();
+    Script* pNewScript;
 
-	newscript = new Script;
-    newscript->Name = "go_dire_maul_generator";
-    newscript->pGOUse = &GOUse_go_dire_maul_generator;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "instance_dire_maul";
+    pNewScript->GetInstanceData = &GetInstanceData_instance_dire_maul;
+    pNewScript->RegisterSelf();
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -13,8 +13,9 @@
 #include "../system/system.h"
 #include "../../../game/ScriptMgr.h"
 
+typedef std::vector<Script*> SDScriptVec;
 int num_sc_scripts;
-Script *m_scripts[MAX_SCRIPTS];
+SDScriptVec m_scripts;
 
 Config SD2Config;
 
@@ -22,6 +23,8 @@ QueryResult* strSD2Pquery(char* str)
 {
 return SD2Database.Query(str);
 }
+// Not registered scripts storage
+std::map<std::string, Script*> m_scriptStorage;
 
 void FillSpellSummary();
 
@@ -36,7 +39,7 @@ void LoadDatabase()
         return;
     }
 
-    //Initialize connection to DB
+    // Initialize connection to DB
     if (SD2Database.Initialize(strSD2DBinfo.c_str()))
     {
         outstring_log("SD2: ScriptDev2 database at %s initialized.", strSD2DBinfo.c_str());
@@ -68,8 +71,13 @@ void FreeScriptLibrary()
     delete []SpellSummary;
 
     // Free resources before library unload
-    for(int i=0; i<MAX_SCRIPTS; ++i)
-        delete m_scripts[i];
+    for (SDScriptVec::const_iterator itr = m_scripts.begin(); itr != m_scripts.end(); ++itr)
+        delete *itr;
+
+    m_scripts.clear();
+
+    for (std::map<std::string, Script*>::iterator itr = m_scriptStorage.begin(); itr != m_scriptStorage.end(); ++itr)
+        delete itr->second;
 
     num_sc_scripts = 0;
     SD2Database.HaltDelayThread();
@@ -78,7 +86,7 @@ void FreeScriptLibrary()
 MANGOS_DLL_EXPORT
 void InitScriptLibrary()
 {
-    //ScriptDev2 startup
+    // ScriptDev2 startup
     outstring_log("");
     outstring_log(" MMM  MMM    MM");
     outstring_log("M  MM M  M  M  M");
@@ -89,19 +97,19 @@ void InitScriptLibrary()
     outstring_log(" MMM  MMM  http://www.scriptdev2.com");
     outstring_log("");
 
-    //Get configuration file
+    // Get configuration file
     if (!SD2Config.SetSource(_SCRIPTDEV2_CONFIG))
         error_log("SD2: Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
     else
         outstring_log("SD2: Using configuration file %s",_SCRIPTDEV2_CONFIG);
 
-    //Check config file version
+    // Check config file version
     if (SD2Config.GetIntDefault("ConfVersion", 0) != SD2_CONF_VERSION)
         error_log("SD2: Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
 
     outstring_log("");
 
-    //Load database (must be called after SD2Config.SetSource).
+    // Load database (must be called after SD2Config.SetSource).
     LoadDatabase();
 
     outstring_log("SD2: Loading C++ scripts");
@@ -109,12 +117,21 @@ void InitScriptLibrary()
     bar.step();
     outstring_log("");
 
-    for(int i=0; i<MAX_SCRIPTS; ++i)
-        m_scripts[i]=NULL;
+    // Resize script ids to needed ammount of assigned ScriptNames (from core)
+    m_scripts.resize(GetScriptIdsCount(), NULL);
+
+    m_scriptStorage.clear();
 
     FillSpellSummary();
 
     AddScripts();
+
+    // Check existance scripts for all registered by core script names
+    for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
+    {
+        if (!m_scripts[i])
+            error_log("SD2: No script found for ScriptName '%s'.", GetScriptName(i));
+    }
 
     outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
 }
@@ -210,8 +227,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 
 void Script::RegisterSelf(bool bReportError)
 {
-    int id = GetScriptId(Name.c_str());
-    if (id != 0)
+    if (uint32 id = GetScriptId(Name.c_str()))
     {
         m_scripts[id] = this;
         ++num_sc_scripts;
@@ -219,9 +235,9 @@ void Script::RegisterSelf(bool bReportError)
     else
     {
         if (bReportError)
-            error_log("SD2: Script registering but ScriptName %s is not assigned in database. Script will not be used.", (this)->Name.c_str());
+            error_log("SD2: Script registering but ScriptName %s is not assigned in database. Script will not be used.", Name.c_str());
 
-        delete this;
+        m_scriptStorage.insert(std::make_pair(Name.c_str(), this));
     }
 }
 
@@ -522,4 +538,13 @@ InstanceData* CreateInstanceData(Map* pMap)
         return NULL;
 
     return tmpscript->GetInstanceData(pMap);
+}
+
+Script* GetScriptByName(std::string scriptName)
+{
+    std::map<std::string, Script*>::const_iterator itr = m_scriptStorage.find(scriptName);
+    if (itr != m_scriptStorage.end())
+        return itr->second;
+    else
+        return NULL;
 }

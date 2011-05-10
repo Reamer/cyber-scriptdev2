@@ -48,4 +48,4 @@ INSERT INTO `achievement_criteria_requirement` VALUES
 -- ********PORTALS*************
 DELETE FROM spell_target_position WHERE id = 28444;
 INSERT INTO spell_target_position VALUES (28444, 533, 2956.474609, -3434.322266,299.549896, 0.068890);
-UPDATE gameobject SET spawnMask = 3 WHERE gameobject.id IN (181575,181576,181577,181578);
+UPDATE gameobject SET spawnMask = 3, flags = 48WHERE gameobject.id IN (181575,181576,181577,181578);

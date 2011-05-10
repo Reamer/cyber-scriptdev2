@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -36,6 +36,9 @@ spell 45109
 spell 45111
 spell 39246
 spell 52090
+spell 51331
+spell 51332
+spell 51366
 EndContentData */
 
 #include "precompiled.h"
@@ -268,7 +271,40 @@ enum
 
     // quest 12659, item 38731
     SPELL_AHUNAES_KNIFE                 = 52090,
-    NPC_SCALPS_KILL_CREDIT_BUNNY        = 28622
+    NPC_SCALPS_KILL_CREDIT_BUNNY        = 28622,
+
+    // quest 13549
+    SPELL_TAILS_UP_GENDER_MASTER        = 62110,
+    SPELL_TAILS_UP_AURA                 = 62109,
+    SPELL_FORCE_LEOPARD_SUMMON          = 62117,
+    SPELL_FORCE_BEAR_SUMMON             = 62118,
+    NPC_FROST_LEOPARD                   = 29327,
+    NPC_ICEPAW_BEAR                     = 29319,
+    NPC_LEOPARD_KILL_CREDIT             = 33005,
+    NPC_BEAR_KILL_CREDIT                = 33006,
+    SAY_ITS_FEMALE                      = -1000642,
+    SAY_ITS_MALE                        = -1000643,
+
+    // quest 9849, item 24501
+    SPELL_THROW_GORDAWG_BOULDER         = 32001,
+    NPC_MINION_OF_GUROK                 = 18181,
+
+    // quest 12589
+    SPELL_HIT_APPLE                     = 51331,
+    SPELL_MISS_APPLE                    = 51332,
+    SPELL_MISS_APPLE_HIT_BIRD           = 51366,
+    SPELL_APPLE_FALLS_TO_GROUND         = 51371,
+    NPC_APPLE                           = 28053,
+    NPC_LUCKY_WILHELM                   = 28054,
+    NPC_DROSTAN                         = 28328,
+    SAY_LUCKY_HIT_1                     = -1000644,
+    SAY_LUCKY_HIT_2                     = -1000645,
+    SAY_LUCKY_HIT_3                     = -1000646,
+    SAY_LUCKY_HIT_APPLE                 = -1000647,
+    SAY_DROSTAN_GOT_LUCKY_1             = -1000648,
+    SAY_DROSTAN_GOT_LUCKY_2             = -1000649,
+    SAY_DROSTAN_HIT_BIRD_1              = -1000650,
+    SAY_DROSTAN_HIT_BIRD_2              = -1000651,
 };
 
 bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
@@ -300,7 +336,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
             {
                 if (Player* pPlayer = (Player*)pAura->GetCaster())
                 {
-                    pPlayer->KilledMonsterCredit(NPC_FALLEN_HERO_SPIRIT_PROXY, pCreature->GetGUID());
+                    pPlayer->KilledMonsterCredit(NPC_FALLEN_HERO_SPIRIT_PROXY, pCreature->GetObjectGuid());
                     pCreature->ForcedDespawn();
                 }
             }
@@ -507,7 +543,7 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                         }
 
                         pCreatureTarget->SetStandState(UNIT_STAND_STATE_STAND);
-                        pCreatureTarget->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_WORK);
+                        pCreatureTarget->HandleEmote(EMOTE_STATE_WORK);
                         break;
                     }
                 }
@@ -755,6 +791,118 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
             }
             return true;
         }
+        case SPELL_TAILS_UP_GENDER_MASTER:
+        {
+            if (uiEffIndex == EFFECT_INDEX_0)
+            {
+                bool isMale = urand(0,1);
+                Player* pPlayer = pCreatureTarget->GetLootRecipient();
+
+                if (!pPlayer)
+                    return true;
+
+                if (isMale)
+                    DoScriptText(SAY_ITS_MALE, pCreatureTarget, pPlayer);
+                else
+                    DoScriptText(SAY_ITS_FEMALE, pCreatureTarget, pPlayer);
+
+                switch(pCreatureTarget->GetEntry())
+                {
+                    case NPC_FROST_LEOPARD:
+                    {
+                        if (isMale)
+                            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_TAILS_UP_AURA, true);
+                        else
+                        {
+                            pPlayer->KilledMonsterCredit(NPC_LEOPARD_KILL_CREDIT, pCreatureTarget->GetObjectGuid());
+                            pCreatureTarget->CastSpell(pPlayer, SPELL_FORCE_LEOPARD_SUMMON, true);
+                            pCreatureTarget->ForcedDespawn();
+                        }
+
+                        break;
+                    }
+                    case NPC_ICEPAW_BEAR:
+                    {
+                        if (isMale)
+                            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_TAILS_UP_AURA, true);
+                        else
+                        {
+                            pPlayer->KilledMonsterCredit(NPC_BEAR_KILL_CREDIT, pCreatureTarget->GetObjectGuid());
+                            pCreatureTarget->CastSpell(pPlayer, SPELL_FORCE_BEAR_SUMMON, true);
+                            pCreatureTarget->ForcedDespawn();
+                        }
+
+                        break;
+                    }
+                }
+                return true;
+            }
+            return true;
+        }
+        case SPELL_THROW_GORDAWG_BOULDER:
+        {
+            if (uiEffIndex == EFFECT_INDEX_0)
+            {
+                for(int i = 0; i < 3; ++i)
+                {
+                    if (irand(i, 2))                        // 2-3 summons
+                        pCreatureTarget->SummonCreature(NPC_MINION_OF_GUROK, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 5000);
+                }
+
+                if (pCreatureTarget->getVictim())
+                {
+                    pCaster->DealDamage(pCreatureTarget, pCreatureTarget->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    return true;
+                }
+
+                // If not in combat, no xp or loot
+                pCreatureTarget->SetDeathState(JUST_DIED);
+                pCreatureTarget->SetHealth(0);
+                return true;
+            }
+            return true;
+        }
+        case SPELL_HIT_APPLE:
+        {
+            if (uiEffIndex == EFFECT_INDEX_0)
+            {
+                if (pCaster->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)pCaster)->KilledMonsterCredit(pCreatureTarget->GetEntry(), pCreatureTarget->GetObjectGuid());
+
+                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_APPLE_FALLS_TO_GROUND, false);
+
+                if (Creature* pLuckyWilhelm = GetClosestCreatureWithEntry(pCreatureTarget, NPC_LUCKY_WILHELM, 2*INTERACTION_DISTANCE))
+                    DoScriptText(SAY_LUCKY_HIT_APPLE, pLuckyWilhelm);
+            }
+            return true;
+        }
+        case SPELL_MISS_APPLE:
+        {
+            if (uiEffIndex == EFFECT_INDEX_0)
+            {
+                switch (urand(1, 3))
+                {
+                    case 1: DoScriptText(SAY_LUCKY_HIT_1, pCreatureTarget); break;
+                    case 2: DoScriptText(SAY_LUCKY_HIT_2, pCreatureTarget); break;
+                    case 3: DoScriptText(SAY_LUCKY_HIT_3, pCreatureTarget); break;
+                }
+
+                if (Creature* pDrostan = GetClosestCreatureWithEntry(pCreatureTarget, NPC_DROSTAN, 4*INTERACTION_DISTANCE))
+                    DoScriptText(urand(0, 1) ? SAY_DROSTAN_GOT_LUCKY_1 : SAY_DROSTAN_GOT_LUCKY_2, pDrostan);
+            }
+            return true;
+        }
+        case SPELL_MISS_APPLE_HIT_BIRD:
+        {
+            if (uiEffIndex == EFFECT_INDEX_0)
+            {
+                if (Creature* pDrostan = GetClosestCreatureWithEntry(pCreatureTarget, NPC_DROSTAN, 5*INTERACTION_DISTANCE))
+                    DoScriptText(urand(0, 1) ? SAY_DROSTAN_HIT_BIRD_1 : SAY_DROSTAN_HIT_BIRD_2, pDrostan);
+
+                pCreatureTarget->DealDamage(pCreatureTarget, pCreatureTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            }
+            return true;
+        }
     }
 
     return false;
@@ -762,16 +910,16 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
 
 void AddSC_spell_scripts()
 {
-    Script* newscript;
+    Script* pNewscript;
 
-    newscript = new Script;
-    newscript->Name = "spell_dummy_go";
-    newscript->pEffectDummyGO = &EffectDummyGameObj_spell_dummy_go;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "spell_dummy_go";
+    pNewscript->pEffectDummyGO = &EffectDummyGameObj_spell_dummy_go;
+    pNewscript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "spell_dummy_npc";
-    newscript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_npc;
-    newscript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "spell_dummy_npc";
+    pNewscript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_npc;
+    pNewscript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc;
+    pNewscript->RegisterSelf();
 }

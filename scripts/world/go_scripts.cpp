@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -577,6 +577,30 @@ bool GOUse_go_lab_work_reagents(Player* pPlayer, GameObject* pGo)
     return false;
 }
 
+/*######
+## go_hand_of_iruxos_crystal
+######*/
+
+/* TODO
+ * Actually this script is extremely vague, but as long as there is no valid information
+ * hidden in some dark places, this will be the best we can do here :(
+ * Do not consider this a well proven script.
+ */
+
+enum
+{
+    // QUEST_HAND_OF_IRUXOS     = 5381,
+    NPC_IRUXOS                  = 11876,
+};
+
+bool GOUse_go_hand_of_iruxos_crystal(Player* pPlayer, GameObject* pGo)
+{
+    if (Creature* pIruxos = pGo->SummonCreature(NPC_IRUXOS, 0.0f, 0.0f, 0.0f, pPlayer->GetOrientation() + M_PI_F, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000))
+        pIruxos->AI()->AttackStart(pPlayer);
+
+    return false;
+}
+
 void AddSC_go_scripts()
 {
     Script* pNewScript;
@@ -696,4 +720,8 @@ void AddSC_go_scripts()
     pNewScript->pGOUse =          &GOUse_go_lab_work_reagents;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "go_hand_of_iruxos_crystal";
+    pNewScript->pGOUse =          &GOUse_go_hand_of_iruxos_crystal;
+    pNewScript->RegisterSelf();
 }
