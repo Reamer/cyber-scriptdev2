@@ -1,5 +1,5 @@
-/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
-* This program is free software; you can redistribute it and/or modify
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+ * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
@@ -551,11 +551,11 @@ struct MANGOS_DLL_DECL mob_toc5_hunterAI : public ScriptedAI
 		{
 			if (!m_creature->IsWithinDistInMap(m_creature->getVictim(), 8) && m_creature->IsWithinDistInMap(m_creature->getVictim(), 30))
 			{
-				m_creature->SetSpeedRate(MOVE_RUN, 0.0001f);
+				m_creature->SetSpeedRate(MOVE_RUN, 0.0001);
 			}
 			else
 			{
-				m_creature->SetSpeedRate(MOVE_RUN, 1.2f);
+				m_creature->SetSpeedRate(MOVE_RUN, 1.2);
 			}
 			enemy_check = 100;
 		}else enemy_check -= diff;

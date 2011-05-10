@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -22,7 +22,7 @@ SDCategory: Icecrown Citadel
 EndScriptData */
 // Need correct timers
 #include "precompiled.h"
-#include "def_spire.h"
+#include "icecrown_citadel.h"
 
 enum BossSpells
 {
@@ -41,7 +41,6 @@ enum BossSpells
     SPELL_INOCULATE          = 69291,
     SPELL_REMOVE_UNOCULATE   = 69298,
     SPELL_GASTRIC_BLOAT      = 72219,
-    SPELL_GASTRIC_EXPLOSION  = 72227,
     SPELL_VILE_GAS           = 72272,
     SPELL_VILE_GAS_AURA      = 69244,
     SPELL_VILE_GAS_AURA_0    = 69248,
@@ -340,12 +339,6 @@ struct MANGOS_DLL_DECL boss_festergutAI : public BSWScriptedAI
         timedCast(SPELL_GAS_SPORE, diff);
 
         timedCast(SPELL_GASTRIC_BLOAT, diff);
-
-        if (auraCount(SPELL_GASTRIC_BLOAT,m_creature->getVictim(),EFFECT_INDEX_1) > 9)
-        {
-            m_creature->getVictim()->RemoveAurasDueToSpell(SPELL_GASTRIC_BLOAT);
-            doCast(SPELL_GASTRIC_EXPLOSION,m_creature->getVictim());
-        };
 
         if (timedQuery(SPELL_VILE_GAS, diff))
         {

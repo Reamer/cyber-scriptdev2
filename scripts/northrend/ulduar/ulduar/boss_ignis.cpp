@@ -337,8 +337,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                 if (Player *pTarget = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHARGE_SLAG_POT : SPELL_CHARGE_SLAG_POT_H) == CAST_OK)
                     {
-                        if (m_creature->CreateVehicleKit(342))
-                            pTarget->EnterVehicle(m_creature->GetVehicleKit(), 0);
+                        pTarget->EnterVehicle(m_creature->GetVehicleKit(), 0);
                         pTarget->CastSpell(pTarget, m_bIsRegularMode ? SPELL_SLAG_POT_AURA : SPELL_SLAG_POT_AURA_H, true, 0,0, m_creature->GetObjectGuid()); 
                         m_bIsSlagPot = true;
                         m_uiSlagPotSwitchTimer = 1500;

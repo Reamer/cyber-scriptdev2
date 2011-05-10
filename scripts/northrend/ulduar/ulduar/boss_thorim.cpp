@@ -827,12 +827,12 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
         switch(m_uiPhase)
         {
             // start the encounter when all the preadds have died
-        case PHASE_PREADDS:
-            if(m_uiPreAddsKilled == 4)
-                StartEncounter();
-            break;
+            case PHASE_PREADDS:
+                if(m_uiPreAddsKilled == 4)
+                    StartEncounter();
+                break;
             // do intro
-        case PHASE_INTRO:
+            case PHASE_INTRO:
             {
                 // intro
                 if(m_bIsIntro)
@@ -885,7 +885,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 break;
             }
             // balcony phase
-        case PHASE_BALCONY:
+            case PHASE_BALCONY:
             {
                 if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                     return;
@@ -947,35 +947,9 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                     uint8 k;    
                     switch(urand(0, 4))
                     {
-                    case 0:
-                        i = urand(0, 5);
-                        if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_CHAMPION, ArenaLoc[i].x, ArenaLoc[i].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                        {
-                            pTemp->GetMotionMaster()->MovePoint(0, 2134.72f, -263.148f, 419.846f);
-                            if(pTemp->IsWithinLOSInMap(m_creature->getVictim()))
-                            {
-                                pTemp->AI()->AttackStart(m_creature->getVictim());
-                                pTemp->AddThreat(m_creature->getVictim(), 100.0f);
-                            }
-                        }
-                        break;
-                    case 1:
-                        i = urand(0, 5);
-                        if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_EVOKER, ArenaLoc[i].x, ArenaLoc[i].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                        {
-                            pTemp->GetMotionMaster()->MovePoint(0, 2134.72f, -263.148f, 419.846f);
-                            if(pTemp->IsWithinLOSInMap(m_creature->getVictim()))
-                            {
-                                pTemp->AI()->AttackStart(m_creature->getVictim());
-                                pTemp->AddThreat(m_creature->getVictim(), 100.0f);
-                            }
-                        }
-                        break;
-                    case 2:
-                        i = urand(5, 6);
-                        for(uint8 j = 0; j < i; j++)
-                        {
-                            if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_COMMONER, ArenaLoc[j].x, ArenaLoc[j].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+                        case 0:
+                            i = urand(0, 5);
+                            if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_CHAMPION, ArenaLoc[i].x, ArenaLoc[i].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
                             {
                                 pTemp->GetMotionMaster()->MovePoint(0, 2134.72f, -263.148f, 419.846f);
                                 if(pTemp->IsWithinLOSInMap(m_creature->getVictim()))
@@ -984,14 +958,10 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                                     pTemp->AddThreat(m_creature->getVictim(), 100.0f);
                                 }
                             }
-                        }
-                        break;
-                    case 3:
-                        k = urand(0, 3);
-                        i = urand(k + 1, k + 2);
-                        for(uint8 j = k; j < i; j++)
-                        {
-                            if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_WARBRINGER, ArenaLoc[j].x, ArenaLoc[j].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+                            break;
+                        case 1:
+                            i = urand(0, 5);
+                            if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_EVOKER, ArenaLoc[i].x, ArenaLoc[i].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
                             {
                                 pTemp->GetMotionMaster()->MovePoint(0, 2134.72f, -263.148f, 419.846f);
                                 if(pTemp->IsWithinLOSInMap(m_creature->getVictim()))
@@ -1000,20 +970,50 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                                     pTemp->AddThreat(m_creature->getVictim(), 100.0f);
                                 }
                             }
-                        }
-                        break;
-                    case 4:
-                        i = urand(0, 5);
-                        if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_ACOLYTE, ArenaLoc[i].x, ArenaLoc[i].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                        {
-                            pTemp->GetMotionMaster()->MovePoint(0, 2134.72f, -263.148f, 419.846f);
-                            if(pTemp->IsWithinLOSInMap(m_creature->getVictim()))
+                            break;
+                        case 2:
+                            i = urand(5, 6);
+                            for(uint8 j = 0; j < i; j++)
                             {
-                                pTemp->AI()->AttackStart(m_creature->getVictim());
-                                pTemp->AddThreat(m_creature->getVictim(), 100.0f);
+                                if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_COMMONER, ArenaLoc[j].x, ArenaLoc[j].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+                                {
+                                    pTemp->GetMotionMaster()->MovePoint(0, 2134.72f, -263.148f, 419.846f);
+                                    if(pTemp->IsWithinLOSInMap(m_creature->getVictim()))
+                                    {
+                                        pTemp->AI()->AttackStart(m_creature->getVictim());
+                                        pTemp->AddThreat(m_creature->getVictim(), 100.0f);
+                                    }
+                                }
                             }
-                        }
-                        break;
+                            break;
+                        case 3:
+                            k = urand(0, 3);
+                            i = urand(k + 1, k + 2);
+                            for(uint8 j = k; j < i; j++)
+                            {
+                                if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_WARBRINGER, ArenaLoc[j].x, ArenaLoc[j].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+                                {
+                                    pTemp->GetMotionMaster()->MovePoint(0, 2134.72f, -263.148f, 419.846f);
+                                    if(pTemp->IsWithinLOSInMap(m_creature->getVictim()))
+                                    {
+                                        pTemp->AI()->AttackStart(m_creature->getVictim());
+                                        pTemp->AddThreat(m_creature->getVictim(), 100.0f);
+                                    }
+                                }
+                            }
+                            break;
+                        case 4:
+                            i = urand(0, 5);
+                            if(Creature* pTemp = m_creature->SummonCreature(MOB_DARK_RUNE_ACOLYTE, ArenaLoc[i].x, ArenaLoc[i].y, LOC_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+                            {
+                                pTemp->GetMotionMaster()->MovePoint(0, 2134.72f, -263.148f, 419.846f);
+                                if(pTemp->IsWithinLOSInMap(m_creature->getVictim()))
+                                {
+                                    pTemp->AI()->AttackStart(m_creature->getVictim());
+                                    pTemp->AddThreat(m_creature->getVictim(), 100.0f);
+                                }
+                            }
+                            break;
                     }
                     m_uiSummonWavesTimer = urand (7000, 10000);
                 }
@@ -1072,7 +1072,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 break;
             }
             // arena phase
-        case PHASE_ARENA:
+            case PHASE_ARENA:
             {
                 if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                     return;
@@ -1128,7 +1128,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 break;
             }
             // outro
-        case PHASE_OUTRO:
+            case PHASE_OUTRO:
             {
                 switch(m_uiOutroStep)
                 {

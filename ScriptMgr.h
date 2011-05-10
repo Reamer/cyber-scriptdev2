@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -23,7 +23,6 @@ class WorldObject;
 class Aura;
 class Object;
 
-#define MAX_SCRIPTS         5000                            //72 bytes each (approx 351kb)
 #define VISIBLE_RANGE       (166.0f)                        //MAX visible range (size of grid)
 #define DEFAULT_TEXT        "<ScriptDev2 Text Entry Missing!>"
 
@@ -75,6 +74,9 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget = NULL);
 
 //DB query
 QueryResult* strSD2Pquery(char*);
+
+// Not registered scripts storage
+Script* GetScriptByName(std::string scriptName);
 
 #if COMPILER == COMPILER_GNU
 #define FUNC_PTR(name,callconvention,returntype,parameters)    typedef returntype(*name)parameters __attribute__ ((callconvention));

@@ -1559,6 +1559,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\scripts\kalimdor\razorfen_kraul\razorfen_kraul.h"
 						>
 					</File>
@@ -2473,10 +2477,6 @@
 							RelativePath="..\scripts\northrend\icecrown_citadel\icecrown_citadel\instance_icecrown_citadel.cpp"
 							>
 						</File>
-						<File
-							RelativePath="..\scripts\northrend\icecrown_citadel\icecrown_citadel\instance_icecrown_spire.cpp"
-							>
-						</File>
 					</Filter>
 					<Filter
 						Name="frozen_halls"
@@ -2549,19 +2549,11 @@
 								>
 							</File>
 							<File
-								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\forge_of_souls\def_forge.h"
-								>
-							</File>
-							<File
 								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\forge_of_souls\forge_of_souls.cpp"
 								>
 							</File>
 							<File
 								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\forge_of_souls\instance_forge_of_souls.cpp"
-								>
-							</File>
-							<File
-								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\forge_of_souls\trash_forge_of_souls.cpp"
 								>
 							</File>
 						</Filter>
@@ -3080,6 +3072,70 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="outdoor_pvp"
+				>
+				<File
+					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.h"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_northrend.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_northrend.h"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_outland.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_outland.h"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\outdoor_pvp\outdoor_pvp_zone_selector.h"
+					>
+				</File>
+				<Filter
+					Name="eastern_kingdoms"
+					>
+					<File
+						RelativePath="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="kalimdor"
+					>
+					<File
+						RelativePath="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="include"
@@ -3166,6 +3222,14 @@
 			</File>
 			<File
 				RelativePath="..\include\sc_instance.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\sc_outdoor_pvp.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\include\sc_outdoor_pvp.h"
 				>
 			</File>
 		</Filter>

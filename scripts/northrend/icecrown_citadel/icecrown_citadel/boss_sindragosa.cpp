@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -22,7 +22,7 @@ SDCategory: Icecrown Citadel
 EndScriptData */
 // Need correct timers and models
 #include "precompiled.h"
-#include "def_spire.h"
+#include "icecrown_citadel.h"
 
 enum BossSpells
 {
@@ -51,7 +51,8 @@ enum BossSpells
     NPC_FROST_BOMB           = 37186,
 
     SPELL_FLY                = 59553,
-    QUEST_24757              = 72289,
+    FROST_IMBUED_BLADE_AURA  = 72290,
+
     SPELL_BERSERK            = 47008,
 
 // Rimefang
@@ -162,6 +163,9 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public BSWScriptedAI
 
         DoScriptText(-1631420,m_creature,who);
         doCast(SPELL_FROST_AURA_1);
+
+        if (Unit* pTarget = doSelectRandomPlayer(SPELL_SHADOWS_EDGE, true, 100.0f))
+            doAura(FROST_IMBUED_BLADE_AURA,pTarget);
     }
 
     void JustDied(Unit *killer)
@@ -171,7 +175,7 @@ struct MANGOS_DLL_DECL boss_sindragosaAI : public BSWScriptedAI
         doRemoveFromAll(SPELL_ICY_TOMB);
         pInstance->SetData(TYPE_SINDRAGOSA, DONE);
         DoScriptText(-1631423,m_creature,killer);
-        doCast(QUEST_24757);
+
         if (Creature* pTemp = m_creature->GetMap()->GetCreature(pInstance->GetData64(NPC_RIMEFANG)))
             pTemp->SetRespawnDelay(7*DAY);
         if (Creature* pTemp = m_creature->GetMap()->GetCreature(pInstance->GetData64(NPC_SPINESTALKER)))

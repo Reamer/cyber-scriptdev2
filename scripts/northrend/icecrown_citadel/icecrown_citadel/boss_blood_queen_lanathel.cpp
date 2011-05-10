@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -22,7 +22,7 @@ SDCategory: Icecrown Citadel
 EndScriptData */
 // Need correct work of spells and timers
 #include "precompiled.h"
-#include "def_spire.h"
+#include "icecrown_citadel.h"
 
 enum BossSpells
 {
@@ -44,7 +44,7 @@ enum BossSpells
 
         NPC_SWARMING_SHADOWS                    = 38163,
         SPELL_SWARMING_SHADOWS_VISUAL           = 71267,
-        QUEST_24756                             = 72934,
+        THIRST_QUENCHED_AURA                    = 72154,
 };
 
 static Locations SpawnLoc[]=
@@ -144,6 +144,9 @@ struct MANGOS_DLL_DECL boss_blood_queen_lanathelAI : public BSWScriptedAI
             };
         };
 
+        if (Unit* pTarget = doSelectRandomPlayer(SPELL_SHADOWS_EDGE, true, 100.0f))
+            doAura(THIRST_QUENCHED_AURA,pTarget);
+
     }
 
     void JustDied(Unit *killer)
@@ -155,6 +158,7 @@ struct MANGOS_DLL_DECL boss_blood_queen_lanathelAI : public BSWScriptedAI
         DoScriptText(-1631333,m_creature,killer);
         m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 0);
         m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+
         doRemoveFromAll(getSpellWithDifficulty(SPELL_ESSENCE_OF_BLOOD_QWEEN));
         doRemoveFromAll(SPELL_ESSENCE_OF_BLOOD_QWEEN_2);
         doRemoveFromAll(SPELL_PACT_OF_DARKFALLEN);
@@ -180,7 +184,7 @@ struct MANGOS_DLL_DECL boss_blood_queen_lanathelAI : public BSWScriptedAI
                         if (Unit* pTarget= m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,1))
                             doCast(SPELL_DELRIOUS_SLASH, pTarget);
 
-                    timedCast(SPELL_PACT_OF_DARKFALLEN, diff);
+//                    timedCast(SPELL_PACT_OF_DARKFALLEN, diff);
 
                     timedCast(SPELL_SWARMING_SHADOWS, diff);
 

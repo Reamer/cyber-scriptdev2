@@ -526,6 +526,17 @@ void instance_ulduar::OnObjectCreate(GameObject *pGo)
     }
 }
 
+void instance_ulduar::OnCreatureDeath(Creature * pCreature)
+{
+    if (GetData(TYPE_HODIR) == IN_PROGRESS) // Hodir
+        m_lHodirMobsGUIDs.push_back(pCreature->GetGUID());
+    else if (GetData(TYPE_THORIM) == IN_PROGRESS) // Thorim
+    {
+        if (pCreature->GetEntry() != 33125)
+            m_lThorimMobsGUIDs.push_back(pCreature->GetGUID());
+    }
+}
+
 // functions to open or close some doors
 void instance_ulduar::OpenDoor(uint64 guid)
 {
