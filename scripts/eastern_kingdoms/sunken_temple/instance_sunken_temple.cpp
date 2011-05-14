@@ -97,7 +97,6 @@ void instance_sunken_temple::OnCreatureDeath(Creature* pCreature)
     }
 }
 
-
 void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
 {
     switch(uiType)
@@ -159,7 +158,7 @@ void instance_sunken_temple::DoSpawnAtalarionIfCan()
     DoRespawnGameObject(m_uiIdolOfHakkarGUID, 30 * MINUTE);
 
     // Spawn the big green lights
-    for (std::list<uint64>::const_iterator itr = m_luiBigLightGUIDs.begin(); itr != m_luiBigLightGUIDs.end(); ++itr)
+    for (GUIDList::const_iterator itr = m_luiBigLightGUIDs.begin(); itr != m_luiBigLightGUIDs.end(); ++itr)
         DoRespawnGameObject(*itr, 30*MINUTE*IN_MILLISECONDS);
 }
 
