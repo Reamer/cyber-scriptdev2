@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -27,6 +27,7 @@ npc_iruk
 npc_kara_thricestar
 npc_nesingwary_trapper
 go_caribou_trap
+npc_sinkhole_kill_credit
 npc_surristrasz
 npc_tiare
 npc_lurgglbr
