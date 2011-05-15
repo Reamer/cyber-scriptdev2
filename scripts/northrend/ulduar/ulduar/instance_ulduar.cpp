@@ -209,6 +209,12 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
     case NPC_RUNIC_COLOSSUS:
         m_uiRunicColossusGUID = pCreature->GetGUID();
         break;
+    case NPC_RIGHT_HAND_TRIGGER:
+        m_lRightHandTrigger.push_back(pCreature->GetGUID());
+        break;
+    case NPC_LEFT_HAND_TRIGGER:
+        m_lLeftHandTrigger.push_back(pCreature->GetGUID());
+        break;
     case NPC_RUNE_GIANT:
         m_uiRuneGiantGUID = pCreature->GetGUID();
         break;
@@ -530,10 +536,14 @@ void instance_ulduar::OnCreatureDeath(Creature * pCreature)
 {
     if (GetData(TYPE_HODIR) == IN_PROGRESS) // Hodir
         m_lHodirMobsGUIDs.push_back(pCreature->GetGUID());
-    else if (GetData(TYPE_THORIM) == IN_PROGRESS) // Thorim
+    else if (GetData(TYPE_THORIM) == IN_PROGRESS // Thorim
+        || pCreature->GetEntry() == NPC_JORMUNGAR_BEHEMOTH // Preadds
+        || pCreature->GetEntry() == NPC_CAPTAIN_ALY               
+        || pCreature->GetEntry() == NPC_CAPTAIN_HORDE
+        || pCreature->GetEntry() == NPC_MERCENARY_ALY
+        || pCreature->GetEntry() == NPC_MERCENARY_HORDE) 
     {
-        if (pCreature->GetEntry() != 33125)
-            m_lThorimMobsGUIDs.push_back(pCreature->GetGUID());
+        m_lThorimMobsGUIDs.push_back(pCreature->GetGUID());
     }
 }
 
