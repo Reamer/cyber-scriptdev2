@@ -92,8 +92,14 @@ enum
     NPC_HODIR                   = 32845,
     NPC_THORIM                  = 32865,
     NPC_RUNIC_COLOSSUS          = 32872,
+    NPC_RIGHT_HAND_TRIGGER      = 33140,
+    NPC_LEFT_HAND_TRIGGER       = 33141,
     NPC_RUNE_GIANT              = 32873,
     NPC_JORMUNGAR_BEHEMOTH      = 32882,
+    NPC_CAPTAIN_ALY             = 32908,
+    NPC_CAPTAIN_HORDE           = 32907,
+    NPC_MERCENARY_ALY           = 32885,
+    NPC_MERCENARY_HORDE         = 32883,
     NPC_FREYA                   = 32906,
     NPC_BRIGHTLEAF              = 32915,
     NPC_IRONBRACH               = 32913,
@@ -255,9 +261,12 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         void CheckKeepers();
         void SpawnFriendlyKeeper(uint32 uiWho);
 
-        std::list<uint64> m_lIronConstructsGUIDs;
-        std::list<uint64> m_lHodirMobsGUIDs;
-        std::list<uint64> m_lThorimMobsGUIDs;
+        GUIDList m_lIronConstructsGUIDs;
+        GUIDList m_lHodirMobsGUIDs;
+        GUIDList m_lThorimMobsGUIDs;
+        GUIDList m_lLeftHandTrigger;
+        GUIDList m_lRightHandTrigger;
+
 
     protected:
         
