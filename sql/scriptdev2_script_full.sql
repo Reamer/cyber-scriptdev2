@@ -714,7 +714,12 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000663,'We made it! Thank you for getting me out of that hell hole. Tell Hemet to expect me!',0,0,0,4,'helice SAY_HELICE_COMPLETE'),
 
 (-1000664,'The Destructive Ward gains in power.',0,5,0,0,'destructive ward SAY_WARD_POWERUP'),
-(-1000665,'The Destructive Ward is fully charged!',0,5,0,0,'destructive ward SAY_WARD_CHARGED');
+(-1000665,'The Destructive Ward is fully charged!',0,5,0,0,'destructive ward SAY_WARD_CHARGED'),
+
+(-1000666,'I can sense the SHADOW on your hearts. There can be no rest for the wicked!',0,1,0,0,'lethon SAY_LETHON_AGGRO'),
+(-1000667,'Your wicked souls shall feed my power!',0,1,0,0,'lethon SAY_LETHON_SHADE'),
+
+(-1000668,'%s releases the last of its energies into the nearby runestone, successfully reactivating it.',0,2,0,0,'infused crystal SAY_DEFENSE_FINISH');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -852,7 +857,16 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1129001,'To me, my servants!',5828,1,0,0,'amnennar SAY_SUMMON60'),
 (-1129002,'Come, spirits, attend your master!',5829,1,0,0,'amnennar SAY_SUMMON30'),
 (-1129003,'I am the hand of the Lich King!',5827,1,0,0,'amnennar SAY_HP'),
-(-1129004,'Too...easy!',5826,1,0,0,'amnennar SAY_KILL');
+(-1129004,'Too...easy!',5826,1,0,0,'amnennar SAY_KILL'),
+
+(-1129005,'All right, stay close. These fiends will jump right out of the shadows at you if you let your guard down.',0,0,0,0,'belnistrasz SAY_READY'),
+(-1129006,'Okay, here we go. It\'s going to take about five minutes to shut this thing down through the ritual. Once I start, keep the vermin off of me or it will be the end of us all!',0,0,0,0,'belnistrasz SAY_START_RIT'),
+(-1129007,'You\'ll rue the day you crossed me, $N',0,0,0,0,'belnistrasz SAY_AGGRO_1'),
+(-1129008,'Incoming $N - look sharp, friends!',0,0,0,0,'belnistrasz SAY_AGGRO_2'),
+(-1129009,'Three minutes left -- I can feel the energy starting to build! Keep up the solid defense!',0,1,0,0,'belnistrasz SAY_3_MIN'),
+(-1129010,'Just two minutes to go! We\'re half way there, but don\'t let your guard down!',0,1,0,0,'belnistrasz SAY_2_MIN'),
+(-1129011,'One more minute! Hold on now, the ritual is about to take hold!',0,1,0,0,'belnistrasz SAY_1_MIN'),
+(-1129012,'That\'s it -- we made it! The ritual is set in motion, and idol fires are about to go out for good! You truly are the heroes I thought you would be!',0,1,0,4,'belnistrasz SAY_FINISH');
 
 -- -1 189 000 SCARLET MONASTERY
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -904,6 +918,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 -- -1 209 000 ZUL'FARRAK
 
 -- -1 229 000 BLACKROCK SPIRE
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1229000,'%s begins to regain its strength!',0,2,0,0,'pyroguard EMOTE_BEGIN'),
+(-1229001,'%s is nearly at full strength!',0,2,0,0,'pyroguard EMOTE_NEAR'),
+(-1229002,'%s regains its power and breaks free of its bonds!',0,2,0,0,'pyroguard EMOTE_FULL'),
+(-1229003,'Ha! Ha! Ha! Thank you for freeing me, fools. Now let me repay you by charring the flesh from your bones.',0,1,0,0,'pyroguard SAY_FREE');
 
 -- -1 230 000 BLACKROCK DEPTHS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -1076,19 +1095,19 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1469000,'None of your kind should be here! You\'ve doomed only yourselves!',8286,1,0,0,'broodlord SAY_AGGRO'),
 (-1469001,'Clever Mortals but I am not so easily lured away from my sanctum!',8287,1,0,0,'broodlord SAY_LEASH'),
 
-(-1469002,'REUSE ME',0,0,0,0,'REUSE ME'),
+(-1469002,'Run! They are coming!',0,1,0,0,'vaelastrasz blackwing tech SAY_INTRO_TECH'),
 (-1469003,'%s flinches as its skin shimmers.',0,2,0,0,'chromaggus EMOTE_SHIMMER'),
 
-(-1469004,'In this world where time is your enemy, it is my greatest ally. This grand game of life that you think you play in fact plays you. To that I say...',0,0,0,0,'victor_nefarius SAY_GAMESBEGIN_1'),
-(-1469005,'Let the games begin!',8280,1,0,0,'victor_nefarius SAY_GAMESBEGIN_2'),
-(-1469006,'Ah, the heroes. You are persistent, aren\'t you. Your allied attempted to match his power against mine, and had to pay the price. Now he shall serve me, by slaughtering you. Get up little red wyrm and destroy them!',8279,1,0,0,'victor_nefarius SAY_NEFARIUS_CORRUPT'),
+(-1469004,'In this world where time is your enemy, it is my greatest ally. This grand game of life that you think you play in fact plays you. To that I say...',0,1,0,1,'victor_nefarius SAY_GAMESBEGIN_1'),
+(-1469005,'Let the games begin!',8280,1,0,22,'victor_nefarius SAY_GAMESBEGIN_2'),
+(-1469006,'Ah...the heroes. You are persistent, aren\'t you? Your ally here attempted to match his power against mine - and paid the price. Now he shall serve me...by slaughtering you.',8279,1,0,23,'victor_nefarius SAY_NEFARIUS_CORRUPT'),
 
 (-1469007,'Well done, my minions. The mortals\' courage begins to wane! Now, let\'s see how they contend with the true Lord of Blackrock Spire!',8288,1,0,0,'nefarian SAY_AGGRO'),
 (-1469008,'Enough! Now you vermin shall feel the force of my birthright, the fury of the earth itself.',8289,1,0,0,'nefarian SAY_XHEALTH'),
-(-1469009,'Burn, you wretches! Burn!',8290,1,0,0,'nefarian SAY_SHADOWFLAME'),
+(-1469009,'BURN! You wretches! BURN!',8290,1,0,0,'nefarian SAY_SHADOWFLAME'),
 (-1469010,'Impossible! Rise my minions! Serve your master once more!',8291,1,0,0,'nefarian SAY_RAISE_SKELETONS'),
 (-1469011,'Worthless $N! Your friends will join you soon enough!',8293,1,0,0,'nefarian SAY_SLAY'),
-(-1469012,'This cannot be! I am the Master here! You mortals are nothing to my kind! DO YOU HEAR? NOTHING!',8292,1,0,0,'nefarian SAY_DEATH'),
+(-1469012,'This cannot be!  I am the master here!  You mortals are nothing to my kind!  Do you hear me? Nothing!',8292,1,0,0,'nefarian SAY_DEATH'),
 (-1469013,'Mages too? You should be more careful when you play with magic...',0,1,0,0,'nefarian SAY_MAGE'),
 (-1469014,'Warriors, I know you can hit harder than that! Let\'s see it!',0,1,0,0,'nefarian SAY_WARRIOR'),
 (-1469015,'Druids and your silly shapeshifting. Let\'s see it in action!',0,1,0,0,'nefarian SAY_DRUID'),
@@ -1100,17 +1119,21 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1469021,'Rogues? Stop hiding and face me!',0,1,0,0,'nefarian SAY_ROGUE'),
 
 (-1469022,'You\'ll pay for forcing me to do this.',8275,1,0,0,'razorgore SAY_EGGS_BROKEN1'),
-(-1469023,'Fools! These eggs are more precious than you know.',8276,1,0,0,'razorgore SAY_EGGS_BROKEN2'),
-(-1469024,'No! Not another one! I\'ll have your heads for this atrocity.',8277,1,0,0,'razorgore SAY_EGGS_BROKEN3'),
+(-1469023,'Fools! These eggs are more precious than you know!',8276,1,0,0,'razorgore SAY_EGGS_BROKEN2'),
+(-1469024,'No - not another one! I\'ll have your heads for this atrocity!',8277,1,0,0,'razorgore SAY_EGGS_BROKEN3'),
 (-1469025,'If I fall into the abyss I\'ll take all of you mortals with me...',8278,1,0,0,'razorgore SAY_DEATH'),
 
-(-1469026,'Too late...friends. Nefarius\' corruption has taken hold. I cannot...control myself.',8281,1,0,0,'vaelastrasz SAY_LINE1'),
-(-1469027,'I beg you Mortals, flee! Flee before I lose all control. The Black Fire rages within my heart. I must release it!',8282,1,0,0,'vaelastrasz SAY_LINE2'),
-(-1469028,'FLAME! DEATH! DESTRUCTION! COWER MORTALS BEFORE THE WRATH OF LORD....NO! I MUST FIGHT THIS!',8283,1,0,0,'vaelastrasz SAY_LINE3'),
-(-1469029,'Nefarius\' hate has made me stronger than ever before. You should have fled, while you could, mortals! The fury of Blackrock courses through my veins!',8285,1,0,0,'vaelastrasz SAY_HALFLIFE'),
-(-1469030,'Forgive me $N, your death only adds to my failure.',8284,1,0,0,'vaelastrasz SAY_KILLTARGET'),
+(-1469026,'Too late, friends! Nefarius\' corruption has taken hold...I cannot...control myself.',8281,1,0,1,'vaelastrasz SAY_LINE1'),
+(-1469027,'I beg you, mortals - FLEE! Flee before I lose all sense of control! The black fire rages within my heart! I MUST- release it!',8282,1,0,1,'vaelastrasz SAY_LINE2'),
+(-1469028,'FLAME! DEATH! DESTRUCTION! Cower, mortals before the wrath of Lord...NO - I MUST fight this! Alexstrasza help me, I MUST fight it!',8283,1,0,1,'vaelastrasz SAY_LINE3'),
+(-1469029,'Nefarius\' hate has made me stronger than ever before! You should have fled while you could, mortals! The fury of Blackrock courses through my veins!',8285,1,0,0,'vaelastrasz SAY_HALFLIFE'),
+(-1469030,'Forgive me, $N! Your death only adds to my failure!',8284,1,0,0,'vaelastrasz SAY_KILLTARGET'),
 
-(-1469031,'Death Knights, get over here!',0,1,0,0,'nefarian SAY_DEATH_KNIGHT');
+(-1469031,'Death Knights, get over here!',0,1,0,0,'nefarian SAY_DEATH_KNIGHT'),
+
+(-1469032,'Get up, little red wyrm...and destroy them!',0,1,0,1,'victor_nefarius SAY_NEFARIUS_CORRUPT_2'),
+
+(-1469033,'%s flee as the controlling power of the orb is drained.',0,2,0,0,'razorgore EMOTE_TROOPS_FLEE');
 
 -- -1 509 000 RUINS OF AHN'QIRAJ
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -3513,7 +3536,10 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3469000,'I\'ve made no mistakes.','victor_nefarius GOSSIP_ITEM_NEFARIUS_1'),
 (-3469001,'You have lost your mind, Nefarius. You speak in riddles.','victor_nefarius GOSSIP_ITEM_NEFARIUS_2'),
-(-3469002,'Please do.','victor_nefarius GOSSIP_ITEM_NEFARIUS_3');
+(-3469002,'Please do.','victor_nefarius GOSSIP_ITEM_NEFARIUS_3'),
+
+(-3469003,'I cannot, Vaelastrasz! Surely something can be done to heal you!','vaelastrasz GOSSIP_ITEM_VAEL_1'),
+(-3469004,'Vaelastrasz, no!!!','vaelastrasz GOSSIP_ITEM_VAEL_2');
 
 -- -3 560 000 ESCAPE FROM DURNHOLDE (OLD HILLSBRAD)
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
@@ -5619,5 +5645,33 @@ INSERT INTO script_waypoint VALUES
 (4508, 44, 1954.87, 1592.02, 82.18, 3000, 'SAY_WILLIX_7'),
 (4508, 45, 1948.35, 1571.35, 80.96, 30000, 'SAY_WILLIX_END'),
 (4508, 46, 1947.02, 1566.42, 81.80, 30000, '');
+
+DELETE FROM script_waypoint WHERE entry = 8516;
+INSERT INTO script_waypoint VALUES
+(8516, 1,2603.18, 725.259, 54.6927, 0, ''),
+(8516, 2,2587.13, 734.392, 55.231, 0, ''),
+(8516, 3,2570.69, 753.572, 54.5855, 0, ''),
+(8516, 4,2558.51, 747.66, 54.4482, 0, ''),
+(8516, 5,2544.23, 772.924, 47.9255, 0, ''),
+(8516, 6,2530.08, 797.475, 45.97, 0, ''),
+(8516, 7,2521.83, 799.127, 44.3061, 0, ''),
+(8516, 8,2502.61, 789.222, 39.5074, 0, ''),
+(8516, 9,2495.25, 789.406, 39.499, 0, ''),
+(8516, 10,2488.07, 802.455, 42.9834, 0, ''),
+(8516, 11,2486.64, 826.649, 43.6363, 0, ''),
+(8516, 12,2492.64, 835.166, 45.1427, 0, ''),
+(8516, 13,2505.02, 847.564, 47.6487, 0, ''),
+(8516, 14,2538.96, 877.362, 47.6781, 0, ''),
+(8516, 15,2546.07, 885.672, 47.6789, 0, ''),
+(8516, 16,2548.02, 897.584, 47.7277, 0, ''),
+(8516, 17,2544.29, 909.116, 46.2506, 0, ''),
+(8516, 18,2523.60, 920.306, 45.8717, 0, ''),
+(8516, 19,2522.69, 933.546, 47.5769, 0, ''),
+(8516, 20,2531.63, 959.893, 49.4111, 0, ''),
+(8516, 21,2540.23, 973.338, 50.1241, 0, ''),
+(8516, 22,2547.21, 977.489, 49.9759, 0, ''),
+(8516, 23,2558.75, 969.243, 50.7353, 0, ''),
+(8516, 24,2575.60, 950.138, 52.8460, 0, ''),
+(8516, 25,2575.60, 950.138, 52.8460, 0, '');
 
 -- EOF

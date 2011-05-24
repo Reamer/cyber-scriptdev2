@@ -49,13 +49,9 @@ enum Galen
 
 struct MANGOS_DLL_DECL npc_galen_goodwardAI : public npc_escortAI
 {
-    npc_galen_goodwardAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        m_uiGalensCageGUID = 0;
-        Reset();
-    }
+    npc_galen_goodwardAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
-    uint64 m_uiGalensCageGUID;
+    ObjectGuid m_galensCageGuid;
     uint32 m_uiPeriodicSay;
 
     void Reset()
@@ -76,14 +72,15 @@ struct MANGOS_DLL_DECL npc_galen_goodwardAI : public npc_escortAI
             case 0:
                 {
                     GameObject* pCage = NULL;
-                    if (m_uiGalensCageGUID)
-                        pCage = m_creature->GetMap()->GetGameObject(m_uiGalensCageGUID);
+                    if (!m_galensCageGuid.IsEmpty())
+                        pCage = m_creature->GetMap()->GetGameObject(m_galensCageGuid);
                     else
                         pCage = GetClosestGameObjectWithEntry(m_creature, GO_GALENS_CAGE, INTERACTION_DISTANCE);
+
                     if (pCage)
                     {
                         pCage->UseDoorOrButton();
-                        m_uiGalensCageGUID = pCage->GetGUID();
+                        m_galensCageGuid = pCage->GetObjectGuid();
                     }
                     break;
                 }
@@ -98,7 +95,7 @@ struct MANGOS_DLL_DECL npc_galen_goodwardAI : public npc_escortAI
         switch (uiPointId)
         {
             case 0:
-                if (GameObject* pCage = m_creature->GetMap()->GetGameObject(m_uiGalensCageGUID))
+                if (GameObject* pCage = m_creature->GetMap()->GetGameObject(m_galensCageGuid))
                     pCage->ResetDoorOrButton();
                 break;
             case 20:
@@ -140,7 +137,7 @@ bool QuestAccept_npc_galen_goodward(Player* pPlayer, Creature* pCreature, const 
 
         if (npc_galen_goodwardAI* pEscortAI = dynamic_cast<npc_galen_goodwardAI*>(pCreature->AI()))
         {
-            pEscortAI->Start(false, pPlayer->GetGUID(), pQuest);
+            pEscortAI->Start(false, pPlayer, pQuest);
             pCreature->setFaction(FACTION_ESCORT_N_NEUTRAL_ACTIVE);
             DoScriptText(SAY_QUEST_ACCEPTED, pCreature);
         }

@@ -42,7 +42,7 @@ bool GossipHello_npc_blood_knight_dawnstar(Player* pPlayer, Creature* pCreature)
     if (pPlayer->GetQuestStatus(9692) == QUEST_STATUS_INCOMPLETE && !pPlayer->HasItemCount(24226,1,true))
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,GOSSIP_ITEM_INSIGNIA,GOSSIP_SENDER_MAIN,GOSSIP_ACTION_INFO_DEF+1);
 
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
 
     return true;
 }
@@ -68,12 +68,12 @@ bool GossipSelect_npc_blood_knight_dawnstar(Player* pPlayer, Creature* pCreature
 bool GossipHello_npc_budd_nedreck(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->isQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     if (pPlayer->GetQuestStatus(11166) == QUEST_STATUS_INCOMPLETE)
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,GOSSIP_ITEM_DISGUISE,GOSSIP_SENDER_MAIN,GOSSIP_ACTION_INFO_DEF);
 
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
     return true;
 }
 
@@ -109,24 +109,19 @@ enum
 
 struct MANGOS_DLL_DECL npc_ranger_lilathaAI : public npc_escortAI
 {
-    npc_ranger_lilathaAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        m_uiGoCageGUID = 0;
-        m_uiHeliosGUID = 0;
-        Reset();
-    }
+    npc_ranger_lilathaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
-    uint64 m_uiGoCageGUID;
-    uint64 m_uiHeliosGUID;
+    ObjectGuid m_goCageGuid;
+    ObjectGuid m_heliosGuid;
 
     void MoveInLineOfSight(Unit* pUnit)
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
         {
-            if (!m_uiHeliosGUID && pUnit->GetEntry() == NPC_CAPTAIN_HELIOS)
+            if (m_heliosGuid.IsEmpty() && pUnit->GetEntry() == NPC_CAPTAIN_HELIOS)
             {
                 if (m_creature->IsWithinDistInMap(pUnit, 30.0f))
-                    m_uiHeliosGUID = pUnit->GetGUID();
+                    m_heliosGuid = pUnit->GetObjectGuid();
             }
         }
 
@@ -145,7 +140,7 @@ struct MANGOS_DLL_DECL npc_ranger_lilathaAI : public npc_escortAI
             case 0:
                 if (GameObject* pGoTemp = GetClosestGameObjectWithEntry(m_creature, GO_CAGE, 10.0f))
                 {
-                    m_uiGoCageGUID = pGoTemp->GetGUID();
+                    m_goCageGuid = pGoTemp->GetObjectGuid();
                     pGoTemp->SetGoState(GO_STATE_ACTIVE);
                 }
 
@@ -154,7 +149,7 @@ struct MANGOS_DLL_DECL npc_ranger_lilathaAI : public npc_escortAI
                 DoScriptText(SAY_START, m_creature, pPlayer);
                 break;
             case 1:
-                if (GameObject* pGo = m_creature->GetMap()->GetGameObject(m_uiGoCageGUID))
+                if (GameObject* pGo = m_creature->GetMap()->GetGameObject(m_goCageGuid))
                     pGo->SetGoState(GO_STATE_READY);
                 break;
             case 5:
@@ -184,7 +179,7 @@ struct MANGOS_DLL_DECL npc_ranger_lilathaAI : public npc_escortAI
                 break;
             case 33:
                 DoScriptText(SAY_END2, m_creature, pPlayer);
-                if (Creature* pHelios = m_creature->GetMap()->GetCreature(m_uiHeliosGUID))
+                if (Creature* pHelios = m_creature->GetMap()->GetCreature(m_heliosGuid))
                     DoScriptText(CAPTAIN_ANSWER, pHelios, m_creature);
                 break;
         }
@@ -194,8 +189,8 @@ struct MANGOS_DLL_DECL npc_ranger_lilathaAI : public npc_escortAI
     {
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
         {
-            m_uiGoCageGUID = 0;
-            m_uiHeliosGUID = 0;
+            m_goCageGuid.Clear();
+            m_heliosGuid.Clear();
         }
     }
 };
@@ -212,7 +207,7 @@ bool QuestAccept_npc_ranger_lilatha(Player* pPlayer, Creature* pCreature, const 
         pCreature->setFaction(FACTION_SMOON_E);
 
         if (npc_ranger_lilathaAI* pEscortAI = dynamic_cast<npc_ranger_lilathaAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer->GetGUID(), pQuest);
+            pEscortAI->Start(false, pPlayer, pQuest);
     }
     return true;
 }
@@ -224,14 +219,14 @@ bool QuestAccept_npc_ranger_lilatha(Player* pPlayer, Creature* pCreature, const 
 bool GossipHello_npc_rathis_tomber(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->isQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     if (pCreature->isVendor() && pPlayer->GetQuestRewardStatus(9152))
     {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
-        pPlayer->SEND_GOSSIP_MENU(8432, pCreature->GetGUID());
+        pPlayer->SEND_GOSSIP_MENU(8432, pCreature->GetObjectGuid());
     }else
-        pPlayer->SEND_GOSSIP_MENU(8431, pCreature->GetGUID());
+        pPlayer->SEND_GOSSIP_MENU(8431, pCreature->GetObjectGuid());
 
     return true;
 }
@@ -239,7 +234,7 @@ bool GossipHello_npc_rathis_tomber(Player* pPlayer, Creature* pCreature)
 bool GossipSelect_npc_rathis_tomber(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
     if (uiAction == GOSSIP_ACTION_TRADE)
-        pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
+        pPlayer->SEND_VENDORLIST(pCreature->GetObjectGuid());
 
     return true;
 }

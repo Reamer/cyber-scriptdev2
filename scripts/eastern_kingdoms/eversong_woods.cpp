@@ -31,6 +31,7 @@ EndContentData */
 
 #include "precompiled.h"
 #include "escort_ai.h"
+#include "TemporarySummon.h"
 
 /*######
 ## npc_kelerun_bloodmourn
@@ -76,8 +77,8 @@ struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
     }
 
     uint32 m_uiNpcFlags;
-    uint64 m_uiPlayerGUID;
-    uint64 uiChallengerGUID[MAX_CHALLENGER];
+    ObjectGuid m_playerGuid;
+    ObjectGuid m_aChallengerGuids[MAX_CHALLENGER];
 
     uint8 m_uiChallengerCount;
 
@@ -91,9 +92,10 @@ struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
     {
         m_creature->SetUInt32Value(UNIT_NPC_FLAGS, m_uiNpcFlags);
 
-        m_uiPlayerGUID = 0;
+        m_playerGuid.Clear();
 
-        memset(&uiChallengerGUID, 0, sizeof(uiChallengerGUID));
+        for (uint8 i = 0; i < MAX_CHALLENGER; ++i)
+            m_aChallengerGuids[i].Clear();
 
         m_uiChallengerCount = 0;
 
@@ -110,11 +112,11 @@ struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
         m_bIsEventInProgress = true;
     }
 
-    bool CanProgressEvent(uint64 uiPlayer)
+    bool CanProgressEvent(Player* pPlayer)
     {
         if (m_bIsEventInProgress)
         {
-            m_uiPlayerGUID = uiPlayer;
+            m_playerGuid = pPlayer->GetObjectGuid();
             DoSpawnChallengers();
             m_uiEngageTimer = 15000;
 
@@ -133,7 +135,7 @@ struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
                 fChallengerLoc[i][2], fChallengerLoc[i][3],
                 TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000))
             {
-                uiChallengerGUID[i] = pCreature->GetGUID();
+                m_aChallengerGuids[i] = pCreature->GetObjectGuid();
                 pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
         }
@@ -145,7 +147,7 @@ struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
         {
             if (m_uiTimeOutTimer && m_uiTimeOutTimer < uiDiff)
             {
-                if (!m_uiPlayerGUID)
+                if (m_playerGuid.IsEmpty())
                 {
                     //player are expected to use GO within a minute, if not, event will fail.
                     Reset();
@@ -159,11 +161,11 @@ struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
 
             if (m_uiCheckAliveStateTimer < uiDiff)
             {
-                if (Creature* pChallenger = m_creature->GetMap()->GetCreature(uiChallengerGUID[m_uiChallengerCount]))
+                if (Creature* pChallenger = m_creature->GetMap()->GetCreature(m_aChallengerGuids[m_uiChallengerCount]))
                 {
                     if (!pChallenger->isAlive())
                     {
-                        Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiPlayerGUID);
+                        Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
                         if (pPlayer && !pPlayer->isAlive())
                         {
@@ -193,11 +195,11 @@ struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
 
             if (m_uiEngageTimer && m_uiEngageTimer < uiDiff)
             {
-                Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiPlayerGUID);
+                Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
                 if (pPlayer && pPlayer->isAlive())
                 {
-                    if (Creature* pCreature = m_creature->GetMap()->GetCreature(uiChallengerGUID[m_uiChallengerCount]))
+                    if (Creature* pCreature = m_creature->GetMap()->GetCreature(m_aChallengerGuids[m_uiChallengerCount]))
                     {
                         DoScriptText(uiSayId[m_uiChallengerCount], m_creature, pPlayer);
                         pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -236,9 +238,8 @@ bool GOUse_go_harbinger_second_trial(Player* pPlayer, GameObject* pGO)
     {
         if (Creature* pCreature = GetClosestCreatureWithEntry(pGO, NPC_KELERUN, 30.0f))
         {
-            npc_kelerun_bloodmournAI* pKelrunAI = dynamic_cast<npc_kelerun_bloodmournAI*>(pCreature->AI());
-            if (pKelrunAI && pKelrunAI->CanProgressEvent(pPlayer->GetGUID()))
-                return false;
+            if (npc_kelerun_bloodmournAI* pKelrunAI = dynamic_cast<npc_kelerun_bloodmournAI*>(pCreature->AI()))
+                pKelrunAI->CanProgressEvent(pPlayer);
         }
     }
 
@@ -312,7 +313,7 @@ bool GossipHello_npc_prospector_anvilward(Player* pPlayer, Creature* pCreature)
     if (pPlayer->GetQuestStatus(QUEST_THE_DWARVEN_SPY) == QUEST_STATUS_INCOMPLETE)
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_MOMENT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-    pPlayer->SEND_GOSSIP_MENU(8239, pCreature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(8239, pCreature->GetObjectGuid());
     return true;
 }
 
@@ -322,13 +323,13 @@ bool GossipSelect_npc_prospector_anvilward(Player* pPlayer, Creature* pCreature,
     {
         case GOSSIP_ACTION_INFO_DEF+1:
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SHOW, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-            pPlayer->SEND_GOSSIP_MENU(8240, pCreature->GetGUID());
+            pPlayer->SEND_GOSSIP_MENU(8240, pCreature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF+2:
             pPlayer->CLOSE_GOSSIP_MENU();
 
             if (npc_prospector_anvilwardAI* pEscortAI = dynamic_cast<npc_prospector_anvilwardAI*>(pCreature->AI()))
-                pEscortAI->Start(false, pPlayer->GetGUID());
+                pEscortAI->Start(false, pPlayer);
 
             break;
     }
@@ -441,96 +442,98 @@ CreatureAI* GetAI_npc_apprentice_mirvedaAI(Creature* pCreature)
 
 enum
 {
-    NPC_ENRAGED_WRATH           = 17086,
-    QUEST_POWERING_OUR_DEFENSES = 8490,
-    INFUSED_CRYSTAL_EMOTE       = -1999811
+    QUEST_POWERING_OUR_DEFENSES     = 8490,
+    SAY_DEFENSE_FINISH              = -1000668,
+    NPC_ENRAGED_WRAITH              = 17086,
 };
 
-float fEnragedWrathPosition[3][4] =
+static const float aSummonPos[6][4] =
 {
-    {8259.375977f, -7202.288574f, 139.287430f, 5.0f},
-    {8255.425781f, -7222.026367f, 139.607162f, 5.0f},
-    {8267.902344f, -7193.510742f, 139.430374f, 5.0f}
+    {8250.539f, -7239.028f, 139.7099f, 0.8975816f},
+    {8263.437f, -7181.188f, 139.4102f, 5.237229f},
+    {8317.124f, -7210.098f, 140.1064f, 3.022202f},
+    {8293.848f, -7179.062f, 138.6693f, 4.153376f},
+    {8239.229f, -7207.673f, 139.1196f, 0.06059111f},
+    {8301.548f, -7247.548f, 139.974f, 1.828518f}
 };
 
-struct MANGOS_DLL_DECL npc_infused_crystalAI : public ScriptedAI
+struct MANGOS_DLL_DECL npc_infused_crystalAI : public Scripted_NoMovementAI
 {
-    npc_infused_crystalAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_infused_crystalAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
-        SetCombatMovement(false);
+        m_bFirstWave = true;
+        m_uiWaveTimer = 1000;
+        m_uiKilledCount = 0;
+        m_uiFinishTimer = 60*IN_MILLISECONDS;
         Reset();
     }
-    
-    uint32 m_uiQuestTimer;
-    uint32 m_uiSpawnTimer;
-    uint64 m_uiPlayerGUID;
 
-    bool bCompleted;
-            
-    void Reset()
+    bool m_bFirstWave;
+    uint32 m_uiWaveTimer;
+    uint8 m_uiKilledCount;
+    uint32 m_uiFinishTimer;
+
+    void Reset() {}
+
+    void JustSummoned(Creature* pSummoned)
     {
-        m_uiQuestTimer = 60000;
-        m_uiSpawnTimer  = 1000;
-        m_uiPlayerGUID = 0;
-        bCompleted = false;
+        pSummoned->AI()->AttackStart(m_creature);
     }
 
-    void MoveInLineOfSight(Unit* pWho)
+    void SummonedCreatureJustDied(Creature* pSummoned)
     {
-        if (pWho->GetTypeId() != TYPEID_PLAYER)
-            return;
-        Player* pPlayer = (Player*)pWho;
-            
-        if (pPlayer->GetQuestStatus(QUEST_POWERING_OUR_DEFENSES) != QUEST_STATUS_INCOMPLETE)
-            return;
-            
-        m_uiPlayerGUID = pPlayer->GetGUID();
-    }
+        ++m_uiKilledCount;
 
-    void Aggro(Unit* pWho){}
-
-    void JustDied(Unit* pWho) 
-    {
-        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiPlayerGUID))
-            if (pPlayer->GetQuestStatus(QUEST_POWERING_OUR_DEFENSES) == QUEST_STATUS_INCOMPLETE)
-                pPlayer->FailQuest(QUEST_POWERING_OUR_DEFENSES);
+        if (m_uiKilledCount == 3)
+            m_uiWaveTimer = std::min(m_uiWaveTimer, (uint32)10000);
     }
 
     void UpdateAI(const uint32 uiDiff)
-    {    
-        if (bCompleted) 
-            return;
-
-        if (m_uiSpawnTimer < uiDiff)
+    {
+        if (m_uiWaveTimer)
         {
-            for (uint8 i = 0; i < 3; ++i)
+            if (m_uiWaveTimer <= uiDiff)
             {
-                if (Creature* pEnragedWrath = m_creature->SummonCreature(NPC_ENRAGED_WRATH, fEnragedWrathPosition[i][0], fEnragedWrathPosition[i][1], fEnragedWrathPosition[i][2], fEnragedWrathPosition[i][3], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000))
+                if (m_bFirstWave)
                 {
-                    pEnragedWrath->AI()->AttackStart(m_creature);
+                    for (uint8 i = 0; i < 3; ++i)
+                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 5*MINUTE);
+                    m_uiWaveTimer = 29000;
+                    m_bFirstWave = false;
+                }
+                else
+                {
+                    for (uint8 i = 3; i < 6; ++i)
+                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 5*MINUTE);
+                    m_uiWaveTimer = 0;
                 }
             }
-            m_uiSpawnTimer = 40000;
+            else
+                m_uiWaveTimer -= uiDiff;
         }
-        else
-            m_uiSpawnTimer -= uiDiff;
 
-        if (m_uiQuestTimer < uiDiff)
+        if (m_uiFinishTimer)
         {
-            if(Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiPlayerGUID))
+            if (m_uiFinishTimer <= uiDiff)
             {
-                pPlayer->KilledMonsterCredit(m_creature->GetEntry());
-                DoScriptText(INFUSED_CRYSTAL_EMOTE , m_creature);
-                m_creature->ForcedDespawn(5000);
+                DoScriptText(SAY_DEFENSE_FINISH, m_creature);
+                if (m_creature->IsTemporarySummon())
+                {
+                    TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
+
+                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                        pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                }
+                m_uiFinishTimer = 0;
+                m_creature->ForcedDespawn(1000);
             }
-            bCompleted = true;          
+            else
+                m_uiFinishTimer -= uiDiff;
         }
-        else
-            m_uiQuestTimer -= uiDiff;
     }
 };
 
-CreatureAI* GetAI_npc_infused_crystal(Creature* pCreature)
+CreatureAI* GetAI_npc_infused_crystalAI(Creature* pCreature)
 {
     return new npc_infused_crystalAI (pCreature);
 }
@@ -564,7 +567,7 @@ void AddSC_eversong_woods()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name= "npc_infused_crystal";
-    pNewScript->GetAI = &GetAI_npc_infused_crystal;
+    pNewScript->Name = "npc_infused_crystal";
+    pNewScript->GetAI = &GetAI_npc_infused_crystalAI;
     pNewScript->RegisterSelf();
 }

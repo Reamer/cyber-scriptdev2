@@ -104,13 +104,13 @@ struct MANGOS_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
 
     uint32 m_uiExecuteSpeech_Timer;
     uint32 m_uiExecuteSpeech_Counter;
-    uint64 m_uiPlayerGUID;
+    ObjectGuid m_playerGuid;
 
     void Reset()
     {
         m_uiExecuteSpeech_Timer = 0;
         m_uiExecuteSpeech_Counter = 0;
-        m_uiPlayerGUID = 0;
+        m_playerGuid.Clear();
     }
 
     bool MeetQuestCondition(Player* pPlayer)
@@ -164,20 +164,20 @@ struct MANGOS_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho)
     {
-        if (m_uiPlayerGUID || pWho->GetTypeId() != TYPEID_PLAYER || !pWho->IsWithinDist(m_creature, INTERACTION_DISTANCE))
+        if (!m_playerGuid.IsEmpty() || pWho->GetTypeId() != TYPEID_PLAYER || !pWho->IsWithinDist(m_creature, INTERACTION_DISTANCE))
             return;
 
         if (MeetQuestCondition((Player*)pWho))
-            m_uiPlayerGUID = pWho->GetGUID();
+            m_playerGuid = pWho->GetObjectGuid();
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (m_uiPlayerGUID && !m_creature->getVictim() && m_creature->isAlive())
+        if (!m_playerGuid.IsEmpty() && !m_creature->getVictim() && m_creature->isAlive())
         {
             if (m_uiExecuteSpeech_Timer < uiDiff)
             {
-                Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiPlayerGUID);
+                Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
                 if (!pPlayer)
                 {
@@ -505,11 +505,6 @@ enum
     SAY_DUEL_H                  = -1609023,
     SAY_DUEL_I                  = -1609024,
 
-    SPELL_BLOOD_STRIKE          = 52374,
-    SPELL_DEATH_COIL            = 52375,
-    SPELL_ICY_TOUCH             = 52372,
-    SPELL_PLAGUE_STRIKE         = 52373,
-
     SPELL_DUEL                  = 52996,
     SPELL_DUEL_TRIGGERED        = 52990,
     SPELL_DUEL_VICTORY          = 52994,
@@ -530,12 +525,8 @@ struct MANGOS_DLL_DECL npc_death_knight_initiateAI : public ScriptedAI
 {
     npc_death_knight_initiateAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    uint64 m_uiDuelerGUID;
+    ObjectGuid m_duelerGuid;
     uint32 m_uiDuelTimer;
-    uint32 m_uiBloodStrike_Timer;
-    uint32 m_uiDeathCoil_Timer;
-    uint32 m_uiIcyTouch_Timer;
-    uint32 m_uiPlagueStrike_Timer;
     bool m_bIsDuelInProgress;
 
     void Reset()
@@ -545,12 +536,8 @@ struct MANGOS_DLL_DECL npc_death_knight_initiateAI : public ScriptedAI
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
 
-        m_uiDuelerGUID = 0;
+        m_duelerGuid.Clear();
         m_uiDuelTimer = 5000;
-        m_uiBloodStrike_Timer = 4000;
-        m_uiDeathCoil_Timer = 5000;
-        m_uiIcyTouch_Timer = 2000;
-        m_uiPlagueStrike_Timer = 3000;
         m_bIsDuelInProgress = false;
     }
 
@@ -569,7 +556,7 @@ struct MANGOS_DLL_DECL npc_death_knight_initiateAI : public ScriptedAI
     {
         if (!m_bIsDuelInProgress && pSpell->Id == SPELL_DUEL_TRIGGERED && pCaster->GetTypeId() == TYPEID_PLAYER)
         {
-            m_uiDuelerGUID = pCaster->GetGUID();
+            m_duelerGuid = pCaster->GetObjectGuid();
             m_bIsDuelInProgress = true;
         }
     }
@@ -580,7 +567,7 @@ struct MANGOS_DLL_DECL npc_death_knight_initiateAI : public ScriptedAI
         {
             uiDamage = 0;
 
-            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiDuelerGUID))
+            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_duelerGuid))
                 m_creature->CastSpell(pPlayer, SPELL_DUEL_VICTORY, true);
 
             //possibly not evade, but instead have end sequenze
@@ -598,7 +585,7 @@ struct MANGOS_DLL_DECL npc_death_knight_initiateAI : public ScriptedAI
                 {
                     m_creature->setFaction(FACTION_HOSTILE);
 
-                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiDuelerGUID))
+                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_duelerGuid))
                         AttackStart(pPlayer);
                 }
                 else
@@ -607,37 +594,7 @@ struct MANGOS_DLL_DECL npc_death_knight_initiateAI : public ScriptedAI
             return;
         }
 
-        if (m_uiIcyTouch_Timer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_ICY_TOUCH);
-            m_uiIcyTouch_Timer = 8000;
-        }
-        else
-            m_uiIcyTouch_Timer -= uiDiff;
-
-        if (m_uiPlagueStrike_Timer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_PLAGUE_STRIKE);
-            m_uiPlagueStrike_Timer = 8000;
-        }
-        else
-            m_uiPlagueStrike_Timer -= uiDiff;
-
-        if (m_uiBloodStrike_Timer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_BLOOD_STRIKE);
-            m_uiBloodStrike_Timer = 8000;
-        }
-        else
-            m_uiBloodStrike_Timer -= uiDiff;
-
-        if (m_uiDeathCoil_Timer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_DEATH_COIL);
-            m_uiDeathCoil_Timer = 8000;
-        }
-        else
-            m_uiDeathCoil_Timer -= uiDiff;
+        // TODO: spells
 
         DoMeleeAttackIfReady();
     }
@@ -653,7 +610,7 @@ bool GossipHello_npc_death_knight_initiate(Player* pPlayer, Creature* pCreature)
     if (pPlayer->GetQuestStatus(QUEST_DEATH_CHALLENGE) == QUEST_STATUS_INCOMPLETE)
     {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ACCEPT_DUEL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        pPlayer->SEND_GOSSIP_MENU(13433, pCreature->GetGUID());
+        pPlayer->SEND_GOSSIP_MENU(13433, pCreature->GetObjectGuid());
         return true;
     }
     return false;
@@ -719,7 +676,7 @@ struct MANGOS_DLL_DECL npc_koltira_deathweaverAI : public npc_escortAI
 
     uint32 m_uiWave;
     uint32 m_uiWave_Timer;
-    uint64 m_uiValrothGUID;
+    ObjectGuid m_valrothGuid;
 
     void Reset()
     {
@@ -727,7 +684,7 @@ struct MANGOS_DLL_DECL npc_koltira_deathweaverAI : public npc_escortAI
         {
             m_uiWave = 0;
             m_uiWave_Timer = 3000;
-            m_uiValrothGUID = 0;
+            m_valrothGuid.Clear();
         }
     }
 
@@ -767,13 +724,10 @@ struct MANGOS_DLL_DECL npc_koltira_deathweaverAI : public npc_escortAI
     void JustSummoned(Creature* pSummoned)
     {
         if (Player* pPlayer = GetPlayerForEscort())
-        {
             pSummoned->AI()->AttackStart(pPlayer);
-            pSummoned->AddThreat(m_creature);
-        }
 
         if (pSummoned->GetEntry() == NPC_HIGH_INQUISITOR_VALROTH)
-            m_uiValrothGUID = pSummoned->GetGUID();
+            m_valrothGuid = pSummoned->GetObjectGuid();
     }
 
     void SummonAcolyte(uint32 uiAmount)
@@ -812,7 +766,7 @@ struct MANGOS_DLL_DECL npc_koltira_deathweaverAI : public npc_escortAI
                         break;
                     case 4:
                     {
-                        Creature* pTemp = m_creature->GetMap()->GetCreature(m_uiValrothGUID);
+                        Creature* pTemp = m_creature->GetMap()->GetCreature(m_valrothGuid);
 
                         if (!pTemp || !pTemp->isAlive())
                         {
@@ -862,7 +816,7 @@ bool QuestAccept_npc_koltira_deathweaver(Player* pPlayer, Creature* pCreature, c
         pCreature->SetStandState(UNIT_STAND_STATE_STAND);
 
         if (npc_koltira_deathweaverAI* pEscortAI = dynamic_cast<npc_koltira_deathweaverAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer->GetGUID(), pQuest);
+            pEscortAI->Start(false, pPlayer, pQuest);
     }
     return true;
 }
@@ -881,6 +835,11 @@ enum
     SPELL_CHAINED_PESANT_CHEST      = 54612,
     SPELL_CHAINED_PESANT_BREATH     = 54613,
     SPELL_INITIATE_VISUAL           = 51519,
+
+    SPELL_BLOOD_STRIKE              = 52374,
+    SPELL_DEATH_COIL                = 52375,
+    SPELL_ICY_TOUCH                 = 52372,
+    SPELL_PLAGUE_STRIKE             = 52373,
 
     NPC_ANCHOR                      = 29521,
     FACTION_MONSTER                 = 16,
@@ -926,21 +885,17 @@ DisplayToSpell m_aDisplayToSpell[] =
 
 struct MANGOS_DLL_DECL npc_unworthy_initiate_anchorAI : public ScriptedAI
 {
-    npc_unworthy_initiate_anchorAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_unworthy_initiate_anchorAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    ObjectGuid m_myInitiateGuid;
+    ObjectGuid m_myPrisonGuid;
+
+    void Reset() {}
+
+    void NotifyMe(Unit* pSource, GameObject* pGo)
     {
-        m_uiMyInitiate = 0;
-        Reset();
-    }
-
-    uint64 m_uiMyInitiate;
-    uint64 m_uiMyPrisonGUID;
-
-    void Reset() { }
-
-    void NotifyMe(Unit* pSource, uint64 uiPrisonGuid)
-    {
-        m_uiMyPrisonGUID = uiPrisonGuid;
-        Creature* pInitiate = m_creature->GetMap()->GetCreature(m_uiMyInitiate);
+        m_myPrisonGuid = pGo->GetObjectGuid();
+        Creature* pInitiate = m_creature->GetMap()->GetCreature(m_myInitiateGuid);
 
         if (pInitiate && pSource)
         {
@@ -949,14 +904,14 @@ struct MANGOS_DLL_DECL npc_unworthy_initiate_anchorAI : public ScriptedAI
         }
     }
 
-    void RegisterCloseInitiate(uint64 uiGuid)
+    void RegisterCloseInitiate(Creature* pCreature)
     {
-        m_uiMyInitiate = uiGuid;
+        m_myInitiateGuid = pCreature->GetObjectGuid();
     }
 
     void ResetPrison()
     {
-        if (GameObject* pPrison = m_creature->GetMap()->GetGameObject(m_uiMyPrisonGUID))
+        if (GameObject* pPrison = m_creature->GetMap()->GetGameObject(m_myPrisonGuid))
             pPrison->ResetDoorOrButton();
     }
 };
@@ -994,7 +949,7 @@ struct MANGOS_DLL_DECL npc_unworthy_initiateAI : public ScriptedAI
 
     DisplayToSpell* m_pToTransform;
 
-    uint64 m_uiMyAnchorGUID;
+    ObjectGuid m_myAnchorGuid;
     uint32 m_uiNormFaction;
     uint32 m_uiAnchorCheckTimer;
     uint32 m_uiPhase;
@@ -1009,7 +964,7 @@ struct MANGOS_DLL_DECL npc_unworthy_initiateAI : public ScriptedAI
         if (m_creature->getFaction() != m_uiNormFaction)
             m_creature->setFaction(m_uiNormFaction);
 
-        m_uiMyAnchorGUID = 0;
+        m_myAnchorGuid.Clear();
         m_uiAnchorCheckTimer = 5000;
         m_uiPhase = PHASE_INACTIVE_OR_COMBAT;
         m_uiPhaseTimer = 7500;
@@ -1042,8 +997,8 @@ struct MANGOS_DLL_DECL npc_unworthy_initiateAI : public ScriptedAI
 
     Creature* GetAnchor()
     {
-        if (m_uiMyAnchorGUID)
-            return m_creature->GetMap()->GetCreature(m_uiMyAnchorGUID);
+        if (!m_myAnchorGuid.IsEmpty())
+            return m_creature->GetMap()->GetCreature(m_myAnchorGuid);
         else
             return GetClosestCreatureWithEntry(m_creature, NPC_ANCHOR, INTERACTION_DISTANCE*2);
     }
@@ -1053,9 +1008,10 @@ struct MANGOS_DLL_DECL npc_unworthy_initiateAI : public ScriptedAI
         if (Creature* pAnchor = GetAnchor())
         {
             if (npc_unworthy_initiate_anchorAI* pAnchorAI = dynamic_cast<npc_unworthy_initiate_anchorAI*>(pAnchor->AI()))
-                pAnchorAI->RegisterCloseInitiate(m_creature->GetGUID());
+                pAnchorAI->RegisterCloseInitiate(m_creature);
 
             pAnchor->CastSpell(m_creature, SPELL_CHAINED_PESANT_CHEST, false);
+            m_myAnchorGuid = pAnchor->GetObjectGuid();
 
             m_uiAnchorCheckTimer = 0;
             return;
@@ -1178,7 +1134,7 @@ bool GOUse_go_acherus_soul_prison(Player* pPlayer, GameObject* pGo)
     if (Creature* pAnchor = GetClosestCreatureWithEntry(pGo, NPC_ANCHOR, INTERACTION_DISTANCE))
     {
         if (npc_unworthy_initiate_anchorAI* pAnchorAI = dynamic_cast<npc_unworthy_initiate_anchorAI*>(pAnchor->AI()))
-            pAnchorAI->NotifyMe(pPlayer, pGo->GetGUID());
+            pAnchorAI->NotifyMe(pPlayer, pGo);
     }
 
     return false;
@@ -1188,6 +1144,21 @@ bool GOUse_go_acherus_soul_prison(Player* pPlayer, GameObject* pGo)
 ## npc_eye_of_acherus
 ######*/
 
+enum eEyeOfAcherus
+{
+    DISPLAYID_EYE_HUGE      = 26320,
+    DISPLAYID_EYE_SMALL     = 25499,
+
+    SPELL_EYE_PHASEMASK     = 70889,
+    SPELL_EYE_VISUAL        = 51892,
+    //SPELL_EYE_FL_BOOST_RUN  = 51923,
+    SPELL_EYE_FL_BOOST_FLY  = 51890,
+    SPELL_EYE_CONTROL       = 51852,
+
+    TEXT_EYE_UNDER_CONTROL  = -1666452,
+    TEXT_EYE_LAUNCHED       = -1666451,
+};
+
 struct MANGOS_DLL_DECL npc_eye_of_acherusAI : public ScriptedAI
 {
     npc_eye_of_acherusAI(Creature *pCreature) : ScriptedAI(pCreature)
@@ -1195,80 +1166,64 @@ struct MANGOS_DLL_DECL npc_eye_of_acherusAI : public ScriptedAI
         Reset();
     }
 
-    int32 StartTimer;
-    bool Active;
-    ObjectGuid ownerGuid;
+    bool m_isActive;
 
     void Reset()
     {
-        m_creature->SetDisplayId(26320);
-        StartTimer = 2000;
-        Active = false;
+        m_creature->SetDisplayId(DISPLAYID_EYE_HUGE);
+        m_isActive = false;
     }
 
-    void AttackStart(Unit *) {}
-    void MoveInLineOfSight(Unit*) {}
-
-    void JustDied(Unit* killer)
+    void AttackStart(Unit *)
     {
-        if(!m_creature || m_creature->GetTypeId() != TYPEID_UNIT)
-            return;
+    }
 
-        m_creature->RemoveAurasDueToSpell(530);
+    void MoveInLineOfSight(Unit *)
+    {
+    }
 
-        Player* owner = m_creature->GetMap()->GetPlayer(ownerGuid);
-
-        if(!owner)
-            return;
-
-        owner->RemoveAurasDueToSpell(51923);
-        owner->RemoveAurasDueToSpell(51852);
+    void JustDied(Unit *)
+    {
+        if (Unit* charmer = m_creature->GetCharmer())
+            charmer->RemoveAurasDueToSpell(SPELL_EYE_CONTROL);
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId)
     {
-        if (uiType != POINT_MOTION_TYPE && uiPointId == 0)
+       if (uiType != POINT_MOTION_TYPE || uiPointId != 0)
             return;
 
-            DoScriptText(-1666452, m_creature);
-            m_creature->SetDisplayId(25499);
-//            m_creature->SetDisplayId(26320);
-            m_creature->RemoveAurasDueToSpell(51923);
-            m_creature->CastSpell(m_creature, 51890, true);
+        DoScriptText(TEXT_EYE_UNDER_CONTROL, m_creature);
+        m_creature->SetDisplayId(DISPLAYID_EYE_SMALL);
+        m_creature->CastSpell(m_creature, SPELL_EYE_FL_BOOST_FLY, true);
+    }
+
+    void AttackedBy(Unit * attacker)
+    {
+        // called on remove SPELL_AURA_MOD_POSSESS
+        if (!m_creature->isCharmed() && attacker->GetTypeId() == TYPEID_PLAYER)
+        {
+            attacker->RemoveAurasDueToSpell(SPELL_EYE_CONTROL);
+//            m_creature->ForcedDespawn();
+        }
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if(m_creature->isCharmed())
+        if (m_creature->isCharmed())
         {
-            if (ownerGuid.IsEmpty())
-                ownerGuid = m_creature->GetCharmerOrOwner()->GetObjectGuid();
-
-            if (StartTimer < uiDiff && !Active)
+            if (!m_isActive)
             {
-                m_creature->CastSpell(m_creature, 70889, true);
-                m_creature->CastSpell(m_creature, 51892, true);
-                m_creature->CastSpell(m_creature, 51923, true);
-                m_creature->SetSpeedRate(MOVE_FLIGHT, 4.0f,true);
-                DoScriptText(-1666451, m_creature);
-                m_creature->GetMotionMaster()->MovePoint(0, 1750.8276f, -5873.788f, 147.2266f);
-                Active = true;
+                m_creature->CastSpell(m_creature, SPELL_EYE_PHASEMASK, true);
+                m_creature->CastSpell(m_creature, SPELL_EYE_VISUAL, true);
+                m_creature->CastSpell(m_creature, SPELL_EYE_FL_BOOST_FLY, true);
+                DoScriptText(TEXT_EYE_LAUNCHED, m_creature);
+                m_creature->GetMotionMaster()->MovePoint(0,1750.8276f, -5873.788f, 147.2266f);
+                m_isActive = true;
             }
-            else
-                StartTimer -= uiDiff;
         }
         else
-        {
-            if (StartTimer < uiDiff)
-            {
-                m_creature->ForcedDespawn();
-                if (Player* owner = m_creature->GetMap()->GetPlayer(ownerGuid))
-                {
-                    owner->RemoveAurasDueToSpell(51852);
-                    owner->RemoveAurasDueToSpell(51923);
-                }
-            }
-        }
+            m_creature->ForcedDespawn();
     }
 };
 
@@ -1286,18 +1241,18 @@ enum
     SPELL_HARVESTER_PING_DUMMY  = 52514,
     ENTRY_GOTHIK                = 28658,
 
-    SAY_SCARLET_GHOUL_SPAWN1    = -1609286,
-    SAY_SCARLET_GHOUL_SPAWN2    = -1609285,
-    SAY_SCARLET_GHOUL_SPAWN3    = -1609284,
-    SAY_SCARLET_GHOUL_SPAWN4    = -1609283,
-    SAY_SCARLET_GHOUL_SPAWN5    = -1609282,
-    SAY_SCARLET_GHOUL_SPAWN6    = -1609281,
+    SAY_SCARLET_GHOUL_SPAWN1    = -1609300,
+    SAY_SCARLET_GHOUL_SPAWN2    = -1609301,
+    SAY_SCARLET_GHOUL_SPAWN3    = -1609302,
+    SAY_SCARLET_GHOUL_SPAWN4    = -1609303,
+    SAY_SCARLET_GHOUL_SPAWN5    = -1609304,
+    SAY_SCARLET_GHOUL_SPAWN6    = -1609305,
 
-    SAY_SCARLET_GOTHIK1         = -1609280,
-    SAY_SCARLET_GOTHIK2         = -1609279,
-    SAY_SCARLET_GOTHIK3         = -1609278,
-    SAY_SCARLET_GOTHIK4         = -1609277,
-    SAY_SCARLET_GOTHIK5         = -1609276,
+    SAY_SCARLET_GOTHIK1         = -1609306,
+    SAY_SCARLET_GOTHIK2         = -1609307,
+    SAY_SCARLET_GOTHIK3         = -1609308,
+    SAY_SCARLET_GOTHIK4         = -1609309,
+    SAY_SCARLET_GOTHIK5         = -1609310,
 };
 
 struct MANGOS_DLL_DECL mob_scarlet_ghoulAI : public ScriptedAI
@@ -1362,7 +1317,7 @@ struct MANGOS_DLL_DECL mob_scarlet_ghoulAI : public ScriptedAI
     {
         if (!m_bIsSpawned)
         {
-            DoScriptText(SAY_SCARLET_GHOUL_SPAWN1 + urand(0, 5), m_creature);
+            DoScriptText(SAY_SCARLET_GHOUL_SPAWN1 - urand(0, 5), m_creature);
             m_bIsSpawned = true;
         }
 
@@ -1373,7 +1328,7 @@ struct MANGOS_DLL_DECL mob_scarlet_ghoulAI : public ScriptedAI
                 if (Creature* pGothik = m_creature->GetMap()->GetCreature(m_uiHarvesterGUID) )
                 {
                     if (pGothik->AI()->DoCastSpellIfCan(m_creature, roll_chance_i(50) ? 52519 : 52521) == CAST_OK)
-                        DoScriptText(SAY_SCARLET_GOTHIK1 + urand(0, 4), pGothik);
+                        DoScriptText(SAY_SCARLET_GOTHIK1 - urand(0, 4), pGothik);
 
                     m_uiWaitForThrowTimer = 5000;
                     m_creature->KnockBackFrom(pGothik, 15.0, 5.0);
@@ -3021,7 +2976,7 @@ bool GossipSelect_npc_highlord_darion_mograine(Player* pPlayer, Creature* pCreat
         case GOSSIP_ACTION_INFO_DEF+1:
             pPlayer->CLOSE_GOSSIP_MENU();
             ((npc_highlord_darion_mograineAI*)pCreature->AI())->uiStep = 1;
-            ((npc_highlord_darion_mograineAI*)pCreature->AI())->Start(false, pPlayer->GetGUID());
+            ((npc_highlord_darion_mograineAI*)pCreature->AI())->Start(false, pPlayer);
             break;
     }
     return true;

@@ -357,6 +357,22 @@
 			Name="base"
 			>
 			<File
+				RelativePath="..\base\BSW_ai.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\base\BSW_ai.h"
+				>
+			</File>
+			<File
+				RelativePath="..\base\BSW_instance.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\base\BSW_instance.h"
+				>
+			</File>
+			<File
 				RelativePath="..\base\escort_ai.cpp"
 				>
 			</File>
@@ -1378,11 +1394,11 @@
 							>
 						</File>
 						<File
-							RelativePath="..\scripts\kalimdor\caverns_of_time\culling_of_stratholme\culling_of_stratholmeai.cpp"
+							RelativePath="..\scripts\kalimdor\caverns_of_time\culling_of_stratholme\culling_of_stratholme.h"
 							>
 						</File>
 						<File
-							RelativePath="..\scripts\kalimdor\caverns_of_time\culling_of_stratholme\def_culling_of_stratholme.h"
+							RelativePath="..\scripts\kalimdor\caverns_of_time\culling_of_stratholme\culling_of_stratholmeAI.cpp"
 							>
 						</File>
 						<File
@@ -1482,10 +1498,6 @@
 				<Filter
 					Name="dire_maul"
 					>
-					<File
-						RelativePath="..\scripts\kalimdor\dire_maul\boss_pusillin.cpp"
-						>
-					</File>
 					<File
 						RelativePath="..\scripts\kalimdor\dire_maul\dire_maul.cpp"
 						>
@@ -1887,10 +1899,6 @@
 						>
 					</File>
 					<File
-						RelativePath="..\scripts\northrend\draktharon_keep\draktharon_keep.h"
-						>
-					</File>
-					<File
 						RelativePath="..\scripts\northrend\draktharon_keep\instance_draktharon_keep.cpp"
 						>
 					</File>
@@ -2112,10 +2120,6 @@
 					</File>
 					<File
 						RelativePath="..\scripts\northrend\ruby_sanctum\boss_zarithrian.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\scripts\northrend\ruby_sanctum\instance_ruby_sanctum.cpp"
 						>
 					</File>
 					<File
@@ -2454,10 +2458,6 @@
 							>
 						</File>
 						<File
-							RelativePath="..\scripts\northrend\icecrown_citadel\icecrown_citadel\def_spire.h"
-							>
-						</File>
-						<File
 							RelativePath="..\scripts\northrend\icecrown_citadel\icecrown_citadel\gunship_battle.cpp"
 							>
 						</File>
@@ -2497,15 +2497,15 @@
 								>
 							</File>
 							<File
-								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\pit_of_saron\def_pit.h"
-								>
-							</File>
-							<File
 								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\pit_of_saron\instance_pit_of_saron.cpp"
 								>
 							</File>
 							<File
 								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\pit_of_saron\pit_of_saron.cpp"
+								>
+							</File>
+							<File
+								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\pit_of_saron\pit_of_saron.h"
 								>
 							</File>
 						</Filter>
@@ -2550,6 +2550,10 @@
 							</File>
 							<File
 								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\forge_of_souls\forge_of_souls.cpp"
+								>
+							</File>
+							<File
+								RelativePath="..\scripts\northrend\icecrown_citadel\frozen_halls\forge_of_souls\forge_of_souls.h"
 								>
 							</File>
 							<File
@@ -3127,27 +3131,19 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="outland"
+					>
+				</Filter>
+				<Filter
+					Name="northrend"
+					>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="include"
 			>
-			<File
-				RelativePath="..\base\BSW_ai.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\base\BSW_ai.h"
-				>
-			</File>
-			<File
-				RelativePath="..\base\BSW_instance.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\base\BSW_instance.h"
-				>
-			</File>
 			<File
 				RelativePath="..\include\precompiled.cpp"
 				>
@@ -3339,6 +3335,14 @@
 		</File>
 		<File
 			RelativePath="..\ScriptMgr.h"
+			>
+		</File>
+		<File
+			RelativePath="..\sd2_revision_nr.h"
+			>
+		</File>
+		<File
+			RelativePath="..\sd2_revision_sql.h"
 			>
 		</File>
 	</Files>

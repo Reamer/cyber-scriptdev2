@@ -132,17 +132,6 @@ uint32 m_auiSpellSummonWeapon[]=
     SPELL_SUMMON_WEAPONE, SPELL_SUMMON_WEAPONF, SPELL_SUMMON_WEAPONG
 };
 
-enum Phases
-{
-    PHASE_0_NOT_BEGUN       = 0,
-    PHASE_1_ADVISOR         = 1,
-    PHASE_2_WEAPON          = 2,
-    PHASE_3_ADVISOR_ALL     = 3,
-    PHASE_4_SOLO            = 4,
-    PHASE_5_GRAVITY         = 5,
-    PHASE_6_COMPLETE        = 6
-};
-
 const float CAPERNIAN_DISTANCE          = 20.0f;            //she casts away from the target
 const float KAEL_VISIBLE_RANGE          = 50.0f;
 
@@ -189,7 +178,7 @@ struct MANGOS_DLL_DECL advisorbase_ai : public ScriptedAI
         //reset encounter
         if (m_pInstance && (m_pInstance->GetData(TYPE_KAELTHAS_PHASE) == PHASE_1_ADVISOR || m_pInstance->GetData(TYPE_KAELTHAS_PHASE) == PHASE_3_ADVISOR_ALL))
         {
-            if (Creature* pKaelthas = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_KAELTHAS)))
+            if (Creature* pKaelthas = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_KAELTHAS)))
                 pKaelthas->AI()->EnterEvadeMode();
         }
     }
@@ -257,7 +246,7 @@ struct MANGOS_DLL_DECL advisorbase_ai : public ScriptedAI
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->ClearAllReactives();
-            m_creature->SetUInt64Value(UNIT_FIELD_TARGET,0);
+            m_creature->SetTargetGuid(ObjectGuid());
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMotionMaster()->MoveIdle();
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
@@ -372,10 +361,10 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        m_auiAdvisorGuid[0] = m_pInstance->GetData64(DATA_THALADRED);
-        m_auiAdvisorGuid[1] = m_pInstance->GetData64(DATA_SANGUINAR);
-        m_auiAdvisorGuid[2] = m_pInstance->GetData64(DATA_CAPERNIAN);
-        m_auiAdvisorGuid[3] = m_pInstance->GetData64(DATA_TELONICUS);
+        m_auiAdvisorGuid[0] = m_pInstance->GetData64(NPC_THALADRED);
+        m_auiAdvisorGuid[1] = m_pInstance->GetData64(NPC_SANGUINAR);
+        m_auiAdvisorGuid[2] = m_pInstance->GetData64(NPC_CAPERNIAN);
+        m_auiAdvisorGuid[3] = m_pInstance->GetData64(NPC_TELONICUS);
 
         if (!m_auiAdvisorGuid[0] || !m_auiAdvisorGuid[1] || !m_auiAdvisorGuid[2] || !m_auiAdvisorGuid[3])
         {
@@ -457,7 +446,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_FLAME_STRIKE_TRIGGER)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetGUID());
+            pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid());
             return;
         }
 
@@ -960,8 +949,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                                         m_creature->CastSpell(pUnit, SPELL_KNOCKBACK, true);
                                         //Gravity lapse - needs an exception in Spell system to work
 
-                                        pUnit->CastSpell(pUnit, SPELL_GRAVITY_LAPSE, true, 0, 0, m_creature->GetGUID());
-                                        pUnit->CastSpell(pUnit, SPELL_GRAVITY_LAPSE_AURA, true, 0, 0, m_creature->GetGUID());
+                                        pUnit->CastSpell(pUnit, SPELL_GRAVITY_LAPSE, true, NULL, NULL, m_creature->GetObjectGuid());
+                                        pUnit->CastSpell(pUnit, SPELL_GRAVITY_LAPSE_AURA, true, NULL, NULL, m_creature->GetObjectGuid());
                                     }
                                 }
                                 m_uiGravityLapse_Timer = 10000;

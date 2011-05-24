@@ -81,7 +81,7 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
 
     ScriptedInstance* m_pInstance;
 
-    std::list<uint64> m_lGolemGUIDList;
+    GUIDList m_lGolemGUIDList;
 
     bool m_bIsRegularMode;
 
@@ -149,7 +149,7 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
         if (m_lGolemGUIDList.empty())
             return;
 
-        for(std::list<uint64>::iterator itr = m_lGolemGUIDList.begin(); itr != m_lGolemGUIDList.end(); ++itr)
+        for(GUIDList::const_iterator itr = m_lGolemGUIDList.begin(); itr != m_lGolemGUIDList.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
             {
@@ -183,10 +183,9 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
                 pSummoned->AI()->AttackStart(pTarget);
 
             //why healing when just summoned?
-            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_HEAT_N : SPELL_HEAT_H, false, NULL, NULL, m_creature->GetGUID());
+            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_HEAT_N : SPELL_HEAT_H, false, NULL, NULL, m_creature->GetObjectGuid());
         }
     }
-
 
     void UpdateAI(const uint32 uiDiff)
     {
