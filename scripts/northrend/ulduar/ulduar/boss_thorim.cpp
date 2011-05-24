@@ -17,7 +17,8 @@
 /* ScriptData
 SDName: boss_thorim
 SD%Complete:
-SDComment: Implement lightning orbs, summon Sit on the platform in the first 3 min.
+SDComment:  better solution for teleport into arena
+            Implement lightning orbs, summon Sit on the platform in the first 3 min.
             Runic Smash from Runic Colossus need core support, unknow trigger spell 62406 and 62403
 SDCategory: Ulduar
 EndScriptData */
@@ -374,10 +375,10 @@ struct MANGOS_DLL_DECL mob_dark_rune_commonerAI : public ScriptedAI
             {
                 case 0:
                     DoCast(m_creature->getVictim(), SPELL_LOW_BLOW);
-                break;
+                    break;
                 case 1:
                     DoCast(m_creature->getVictim(), SPELL_PUMMEL);
-                break;
+                    break;
             }
             m_uiSpell_Timer = urand(3000, 6000);
         }else m_uiSpell_Timer -= uiDiff;        
@@ -421,15 +422,15 @@ struct MANGOS_DLL_DECL mob_dark_rune_evokerAI : public ScriptedAI
                 case 1:
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                         DoCast(pTarget, m_bIsRegularMode ? SPELL_RUNIC_LIGHTNING : SPELL_RUNIC_LIGHTNING_H);
-                break;
+                    break;
                 case 2:
                 case 3:
                     if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
                         DoCast(pTarget, m_bIsRegularMode ? SPELL_RUNIC_MENDING : SPELL_RUNIC_MENDING_H);
-                break;
+                    break;
                 case 4:
                     DoCast(m_creature, m_bIsRegularMode ? SPELL_RUNIC_SHIELD : SPELL_RUNIC_SHIELD_H);
-                break;
+                    break;
             }
             m_uiSpell_Timer = urand(3000, 6000);
         }else m_uiSpell_Timer -= uiDiff;        
@@ -594,6 +595,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
     uint32 m_uiDeafeningThunderTimer;
     uint32 m_uiChargeOrbTimer;
     uint32 m_uiSummonWavesTimer;
+    uint32 m_uiJumpTimer;
     uint64 m_uiStormTargetGUID;
 
     uint32 m_uiChainLightningTimer;
@@ -601,7 +603,6 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
     uint32 m_uiOrbChargeTimer;
     uint32 m_uiUnbalancingStrikeTimer;
 
-    uint32 m_uiPhase2Timer;
     uint32 m_uiHardModeTimer;
 
     bool m_bIsPhaseOneEnd;
@@ -633,13 +634,14 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
         SetCombatMovement(false);
 
         m_bIsHardMode           = true;
-        m_bIsPhaseOneEnd           = false;
+        m_bIsPhaseOneEnd        = false;
 
         m_uiArenaBerserkTimer   = 280000; // 5 min - 20 secs intro
         m_uiBerserkTimer        = 300000; // 5 min
         m_uiHardModeTimer       = 160000; // 3 min - 20 sec intro
         m_uiArenaYellTimer      = 30000;
         m_uiSummonWavesTimer    = 10000;
+        m_uiJumpTimer           = 5000;
 
         m_uiStormHammerTimer        = 20000;
         m_uiDeafeningThunderTimer   = 22000;
@@ -706,13 +708,6 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
             }
         }*/
         // Respawn all Adds
-        if (m_pInstance)
-        {
-            for (GUIDList::iterator itr = m_pInstance->m_lThorimMobsGUIDs.begin(); itr != m_pInstance->m_lThorimMobsGUIDs.end(); itr++)
-                if (Creature *pTmp = m_pInstance->instance->GetCreature(*itr))
-                    if (!pTmp->isAlive())
-                        pTmp->Respawn();
-        }
         for (GUIDList::iterator itr = m_lArenaSummonGUID.begin(); itr != m_lArenaSummonGUID.end(); itr++)
         {
             if (Creature *pTmp = m_creature->GetMap()->GetCreature(*itr))
@@ -720,6 +715,14 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 pTmp->ForcedDespawn();
             }
         }
+        if (m_pInstance)
+        {
+            for (GUIDList::iterator itr = m_pInstance->m_lThorimMobsGUIDs.begin(); itr != m_pInstance->m_lThorimMobsGUIDs.end(); itr++)
+                if (Creature *pTmp = m_pInstance->instance->GetCreature(*itr))
+                    if (!pTmp->isAlive())
+                        pTmp->Respawn();
+        }
+
 
             
     }
@@ -771,24 +774,8 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
     // start phase 2 and outro
     void DamageTaken(Unit *done_by, uint32 &uiDamage)
     {
-        // phase 2
-        if(uiDamage > 0 && m_uiPhase == PHASE_BALCONY && !m_bIsPhaseOneEnd)
-        {
-            if(m_pInstance->GetData(TYPE_RUNIC_COLOSSUS) == DONE && m_pInstance->GetData(TYPE_RUNE_GIANT) == DONE)
-            {
-                // say
-                DoScriptText(SAY_JUMP, m_creature);
-                // move in arena
-                m_creature->GetMotionMaster()->MovePoint(0, 2134.719f, -263.148f, 419.846f, false);
-                m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
-                m_creature->SetSplineFlags(SPLINEFLAG_FALLING); 
-                m_bIsPhaseOneEnd = true;
-                m_uiPhase2Timer = 9000;
-            }
-        }
-
         // outro
-        if(m_creature->GetHealthPercent() < 1.0f && m_uiPhase == PHASE_ARENA)
+        if((m_creature->GetHealthPercent() < 1.0f || m_creature->GetHealth() <= uiDamage) && m_uiPhase == PHASE_ARENA)
         {
             uiDamage = 0;
             m_uiPhase = PHASE_OUTRO;
@@ -907,36 +894,53 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                     return;
 
-                // phase 2 prepared
-                if(m_uiPhase2Timer < uiDiff && m_bIsPhaseOneEnd)
+                // phase 2
+                if(!m_bIsPhaseOneEnd)
                 {
-                    m_creature->RemoveSplineFlag(SPLINEFLAG_FALLING);
-                    m_creature->RemoveAurasDueToSpell(SPELL_SHEAT_OF_LIGHTNING);
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    if(!m_bIsHardMode)
-                        DoCast(m_creature, SPELL_TOUTCH_OF_DOMINION);
-                    if(m_bIsHardMode)
+                    if(m_pInstance->GetData(TYPE_RUNIC_COLOSSUS) == DONE && m_pInstance->GetData(TYPE_RUNE_GIANT) == DONE)
                     {
-                        if(Creature* Sif = m_pInstance->instance->GetCreature(m_uiSifGUID))
-                        {
-                            Sif->setFaction(14);
-                            DoScriptText(SAY_SIF_EVENT, Sif);
-                            Sif->SetInCombatWithZone();
-                            Sif->GetMotionMaster()->MovePoint(0, 2134.719f, -263.148f, 419.846f, false);
-                                                       // hacky way to complete achievements; use only if you have this function
-                            //m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_SIFFED : ACHIEV_SIFFED_H);
+                        if (GetPlayerAtMinimumRange(15.0f))
+                        {                           
+                            // say
+                            DoScriptText(SAY_JUMP, m_creature);
+                            m_creature->RemoveAurasDueToSpell(SPELL_SHEAT_OF_LIGHTNING);
+                            // move in arena
+                            SetCombatMovement(true);
+                            m_bIsPhaseOneEnd = true;
+                            if(m_bIsHardMode)
+                            {
+                                if(Creature* Sif = m_pInstance->instance->GetCreature(m_uiSifGUID))
+                                {
+                                    Sif->setFaction(14);
+                                    DoScriptText(SAY_SIF_EVENT, Sif);
+                                    Sif->SetInCombatWithZone();
+                                    Sif->MonsterJump(2134.719f, -263.148f, 419.846f, 0, 30, 30);
+                                    // hacky way to complete achievements; use only if you have this function
+                                    //m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_SIFFED : ACHIEV_SIFFED_H);
+                                }
+                            }
+                            else
+                            {
+                                DoCast(m_creature, SPELL_TOUTCH_OF_DOMINION, true);
+                            }
+                            
                         }
                     }
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                    SetCombatMovement(true);
-                    m_uiPhase = PHASE_ARENA;
-                    m_bIsPhaseOneEnd = false;
                 }
-                else m_uiPhase2Timer -= uiDiff;
+                if (m_bIsPhaseOneEnd)
+                {
+                    if(m_uiJumpTimer < uiDiff && m_bIsPhaseOneEnd)
+                    {
+                        m_creature->GetMap()->CreatureRelocation(m_creature, 2134.719f, -263.148f, 419.846f, 0);
+                        m_creature->SendMonsterMove(2134.719f, -263.148f, 419.846f, SPLINETYPE_NORMAL, SPLINEFLAG_DONE, 0);
+                        m_creature->Relocate(2134.719f, -263.148f, 419.846f, 0);
+                        m_creature->GetMotionMaster()->MovePoint(0, 2134.719f, -263.148f, 419.846f, false);
 
-                // return if jumping to second phase
-                if(m_bIsPhaseOneEnd)
-                    return;
+                        m_uiPhase = PHASE_ARENA;
+                    }
+                    else
+                        m_uiJumpTimer -= uiDiff;
+                }
 
                 // hard mode check
                 if (m_uiHardModeTimer <= uiDiff && m_bIsHardMode)
@@ -1067,9 +1071,9 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                 {
                     switch(urand(0, 2))
                     {
-                    case 0: DoScriptText(SAY_SPECIAL1, m_creature); break;
-                    case 1: DoScriptText(SAY_SPECIAL2, m_creature); break;
-                    case 2: DoScriptText(SAY_SPECIAL3, m_creature); break;
+                        case 0: DoScriptText(SAY_SPECIAL1, m_creature); break;
+                        case 1: DoScriptText(SAY_SPECIAL2, m_creature); break;
+                        case 2: DoScriptText(SAY_SPECIAL3, m_creature); break;
                     }
                     m_uiArenaYellTimer = 30000;
                 }
@@ -1275,9 +1279,9 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
             m_pInstance->SetData(TYPE_RUNIC_COLOSSUS, DONE);
     }
 
-    void Aggro(Unit* pWho)
+    void AttackedBy(Unit* pWho)
     {
-        if (m_bIsSmash && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 10))
+        if (m_bIsSmash && pWho->GetTypeId() == TYPEID_PLAYER)
         {
             m_creature->SetInCombatWith(pWho);
             m_bIsSmash = false;
@@ -1388,8 +1392,8 @@ struct MANGOS_DLL_DECL boss_ancient_rune_giantAI : public ScriptedAI
     void Reset()
     {
         m_uiSpellTimer = urand(5000, 10000);
-        m_uiSummonTimer = 10000;
-        m_bIsSummoning = false;
+        m_uiSummonTimer = 5000;
+        m_bIsSummoning = true;
 
         if(m_pInstance) 
             m_pInstance->SetData(TYPE_RUNE_GIANT, NOT_STARTED);
@@ -1401,9 +1405,9 @@ struct MANGOS_DLL_DECL boss_ancient_rune_giantAI : public ScriptedAI
             m_pInstance->SetData(TYPE_RUNE_GIANT, DONE);
     }
 
-    void Aggro(Unit* pWho)
+    void AttackedBy(Unit* pWho)
     {
-        if (m_bIsSummoning && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 10))
+        if (m_bIsSummoning && pWho->GetTypeId() == TYPEID_PLAYER)
         {
             m_creature->SetInCombatWith(pWho);
             DoCast(m_creature, SPELL_RUNIC_FORTIFICATION, true);
@@ -1413,23 +1417,21 @@ struct MANGOS_DLL_DECL boss_ancient_rune_giantAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if(m_pInstance->GetData(TYPE_RUNIC_COLOSSUS) == DONE && !m_bIsSummoning)
+        if ((m_pInstance->GetData(TYPE_RUNIC_COLOSSUS) == DONE) && m_bIsSummoning)
         {
-            m_bIsSummoning = true;
-        }
-
-        // summon adds before aggro and after the runic colossus has died
-        if(m_uiSummonTimer < uiDiff && m_bIsSummoning)
-        {
-            // honor guard
-            if(Creature* pTemp = m_creature->SummonCreature(MOB_IRON_HONOR_GUARD, OrbLoc[0].x + 30, OrbLoc[0].y, OrbLoc[0].z, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+            // summon adds before aggro and after the runic colossus has died
+            if(m_uiSummonTimer < uiDiff)
             {
-                pTemp->GetMotionMaster()->MovePoint(0, OrbLoc[1].x, OrbLoc[1].y, OrbLoc[1].z);
-                pTemp->SetInCombatWithZone();
+                // honor guard
+                if(Creature* pTemp = m_creature->SummonCreature(MOB_IRON_HONOR_GUARD, OrbLoc[0].x + 30, OrbLoc[0].y, OrbLoc[0].z, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                {
+                    pTemp->GetMotionMaster()->MovePoint(0, OrbLoc[1].x, OrbLoc[1].y, OrbLoc[1].z);
+                    pTemp->SetInCombatWithZone();
+                }
+                m_uiSummonTimer = 7000;
             }
-            m_uiSummonTimer = 7000;
+            else m_uiSummonTimer -= uiDiff;
         }
-        else m_uiSummonTimer -= uiDiff;
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -1613,8 +1615,8 @@ struct MANGOS_DLL_DECL npc_sifAI : public ScriptedAI
     npc_sifAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        //pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        //pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -1805,5 +1807,6 @@ void AddSC_boss_thorim()
     newscript->Name = "mob_thorim_trap_bunny";
     newscript->GetAI = &GetAI_mob_thorim_trap_bunny;
     newscript->RegisterSelf();
+
 
 }

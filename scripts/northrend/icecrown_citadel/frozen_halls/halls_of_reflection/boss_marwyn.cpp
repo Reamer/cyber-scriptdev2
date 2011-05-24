@@ -23,7 +23,7 @@ SDCategory: Halls of Reflection
 EndScriptData */
 
 #include "precompiled.h"
-#include "def_halls.h"
+#include "halls_of_reflection.h"
 
 enum
 {
@@ -56,12 +56,12 @@ struct MANGOS_DLL_DECL boss_marwynAI : public BSWScriptedAI
    uint32 m_uiSummonTimer;
 
    uint32 m_uiLocNo;
-   uint64 m_uiSummonGUID[16];
+   ObjectGuid m_uiSummonGUID[16];
    uint32 m_uiCheckSummon;
 
    uint8 SummonCount;
 
-   uint64 pSummon;
+   uint32 pSummon;
 
    void Reset()
    {
@@ -191,9 +191,10 @@ struct MANGOS_DLL_DECL boss_marwynAI : public BSWScriptedAI
         {
            if(m_uiSummonTimer < uiDiff) 
            {
-                   ++SummonCount;
-                   if(SummonCount == 1)
-                      DoScriptText(SAY_MARWYN_INTRO, m_creature);
+                    ++SummonCount;
+                    m_pInstance->SetData(DATA_WAVE_COUNT,SummonCount+5);
+                    if(SummonCount == 1)
+                        DoScriptText(SAY_MARWYN_INTRO, m_creature);
 
                    if(SummonCount > 4) 
                    {

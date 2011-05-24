@@ -215,6 +215,8 @@ extern void AddSC_boss_epoch_hunter();
 extern void AddSC_boss_lieutenant_drake();
 extern void AddSC_instance_old_hillsbrad();
 extern void AddSC_old_hillsbrad();
+extern void AddSC_dire_maul();                              // dire_maul
+extern void AddSC_instance_dire_maul();
 extern void AddSC_boss_celebras_the_cursed();               //maraudon
 extern void AddSC_boss_landslide();
 extern void AddSC_boss_noxxion();
@@ -243,6 +245,7 @@ extern void AddSC_instance_wailing_caverns();               // wailing_caverns
 extern void AddSC_wailing_caverns();
 extern void AddSC_boss_zumrah();                            // zulfarrak
 extern void AddSC_instance_zulfarrak();
+extern void AddSC_zulfarrak();
 
 // culling of stratholme
 extern void AddSC_boss_lord_epoch();
@@ -512,10 +515,10 @@ extern void AddSC_instance_arcatraz();
 extern void AddSC_boss_high_botanist_freywinn();            //TK, botanica
 extern void AddSC_boss_laj();
 extern void AddSC_boss_warp_splinter();
-extern void AddSC_boss_kaelthas();                          //TK, the_eye
-extern void AddSC_boss_void_reaver();
 extern void AddSC_boss_alar();                              // TK, the_eye
 extern void AddSC_boss_high_astromancer_solarian();
+extern void AddSC_boss_kaelthas();
+extern void AddSC_boss_void_reaver();
 extern void AddSC_instance_the_eye();
 extern void AddSC_the_eye();
 extern void AddSC_boss_gatewatcher_iron_hand();             //TK, the_mechanar
@@ -747,6 +750,8 @@ void AddScripts()
     AddSC_boss_epoch_hunter();
     AddSC_boss_lieutenant_drake();
     AddSC_instance_old_hillsbrad();
+    AddSC_dire_maul();                                      // dire_maul
+    AddSC_instance_dire_maul();
     AddSC_old_hillsbrad();
     AddSC_boss_celebras_the_cursed();                       //maraudon
     AddSC_boss_landslide();
@@ -775,6 +780,7 @@ void AddScripts()
     AddSC_instance_wailing_caverns();                       // wailing_caverns
     AddSC_wailing_caverns();
     AddSC_boss_zumrah();                                    // zulfarrak
+    AddSC_zulfarrak();
     AddSC_instance_zulfarrak();
 
     AddSC_ashenvale();
@@ -1033,10 +1039,10 @@ void AddScripts()
     AddSC_boss_high_botanist_freywinn();                    //TK, botanica
     AddSC_boss_laj();
     AddSC_boss_warp_splinter();
-    AddSC_boss_kaelthas();                                  //TK, the_eye
-    AddSC_boss_void_reaver();
     AddSC_boss_alar();                                      // TK, the_eye
     AddSC_boss_high_astromancer_solarian();
+    AddSC_boss_kaelthas();
+    AddSC_boss_void_reaver();
     AddSC_instance_the_eye();
     AddSC_the_eye();
     AddSC_boss_gatewatcher_iron_hand();                     //TK, the_mechanar

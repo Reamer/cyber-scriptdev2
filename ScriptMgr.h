@@ -118,6 +118,7 @@ QueryResult* strSD2Pquery(char*);
 
 // Not registered scripts storage
 Script* GetScriptByName(std::string scriptName);
+
 // *********************************************************
 // **************** Internal hook mechanics ****************
 

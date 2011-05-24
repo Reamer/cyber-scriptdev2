@@ -12,12 +12,30 @@
 #include "../system/ScriptLoader.h"
 #include "../system/system.h"
 #include "../../../game/ScriptMgr.h"
+#include "World.h"
 
 typedef std::vector<Script*> SDScriptVec;
 int num_sc_scripts;
 SDScriptVec m_scripts;
 
 Config SD2Config;
+
+/**********************************************************************
++additions for windows compiler
+**********************************************************************/
+template<> bool MaNGOS::Singleton<World>::si_destroyed;
+template<> bool MaNGOS::Singleton<ObjectMgr>::si_destroyed;
+template<> World *MaNGOS::Singleton<World>::si_instance;
+World::World()
+{
+}
+World::~World()
+{
+}
+ObjectMgr::~ObjectMgr()
+{
+}
+/***********************************************************************/
 
 QueryResult* strSD2Pquery(char* str)
 {
@@ -253,6 +271,9 @@ char const* GetScriptLibraryVersion()
 MANGOS_DLL_EXPORT
 bool GossipHello(Player* pPlayer, Creature* pCreature)
 {
+    if (!pCreature)
+        return false;
+
     Script *tmpscript = m_scripts[pCreature->GetScriptId()];
 
     if (!tmpscript || !tmpscript->pGossipHello)
@@ -266,6 +287,9 @@ bool GossipHello(Player* pPlayer, Creature* pCreature)
 MANGOS_DLL_EXPORT
 bool GOGossipHello(Player *pPlayer, GameObject *pGo)
 {
+    if (!pGo)
+        return false;
+
     Script *tmpscript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
     if (!tmpscript || !tmpscript->pGossipHelloGO)
@@ -280,6 +304,9 @@ MANGOS_DLL_EXPORT
 bool GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
     debug_log("SD2: Gossip selection, sender: %u, action: %u", uiSender, uiAction);
+
+    if (!pCreature)
+        return false;
 
     Script *tmpscript = m_scripts[pCreature->GetScriptId()];
 
@@ -298,6 +325,9 @@ bool GOGossipSelect(Player *pPlayer, GameObject *pGo, uint32 sender, uint32 acti
 {
     debug_log("SD2: GO Gossip selection, sender: %u, action: %u", sender, action);
 
+    if (!pGo)
+        return false;
+
     Script *tmpscript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
     if (!tmpscript || !tmpscript->pGossipSelectGO)
@@ -312,6 +342,9 @@ MANGOS_DLL_EXPORT
 bool GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
     debug_log("SD2: Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
+
+    if (!pCreature)
+        return false;
 
     Script *tmpscript = m_scripts[pCreature->GetScriptId()];
 
@@ -328,6 +361,9 @@ bool GOGossipSelectWithCode(Player *pPlayer, GameObject *pGo, uint32 sender, uin
 {
     debug_log("SD2: GO Gossip selection with code, sender: %u, action: %u", sender, action);
 
+    if (!pGo)
+        return false;
+
     Script *tmpscript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
     if (!tmpscript || !tmpscript->pGossipSelectGOWithCode)
@@ -341,6 +377,9 @@ bool GOGossipSelectWithCode(Player *pPlayer, GameObject *pGo, uint32 sender, uin
 MANGOS_DLL_EXPORT
 bool QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
+    if (!pCreature)
+        return false;
+
     Script *tmpscript = m_scripts[pCreature->GetScriptId()];
 
     if (!tmpscript || !tmpscript->pQuestAcceptNPC)
@@ -354,6 +393,9 @@ bool QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 MANGOS_DLL_EXPORT
 bool QuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
+    if (!pCreature)
+        return false;
+
     Script *tmpscript = m_scripts[pCreature->GetScriptId()];
 
     if (!tmpscript || !tmpscript->pQuestRewardedNPC)
@@ -380,6 +422,9 @@ uint32 GetNPCDialogStatus(Player* pPlayer, Creature* pCreature)
 MANGOS_DLL_EXPORT
 uint32 GetGODialogStatus(Player* pPlayer, GameObject* pGo)
 {
+    if (!pGo)
+        return false;
+
     Script *tmpscript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
     if (!tmpscript || !tmpscript->pDialogStatusGO)
@@ -393,6 +438,9 @@ uint32 GetGODialogStatus(Player* pPlayer, GameObject* pGo)
 MANGOS_DLL_EXPORT
 bool ItemQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 {
+    if (!pItem)
+        return false;
+
     Script *tmpscript = m_scripts[pItem->GetProto()->ScriptId];
 
     if (!tmpscript || !tmpscript->pQuestAcceptItem)
@@ -406,6 +454,9 @@ bool ItemQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 MANGOS_DLL_EXPORT
 bool GOUse(Player* pPlayer, GameObject* pGo)
 {
+    if (!pGo)
+        return false;
+
     Script *tmpscript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
     if (!tmpscript || !tmpscript->pGOUse)
@@ -417,6 +468,9 @@ bool GOUse(Player* pPlayer, GameObject* pGo)
 MANGOS_DLL_EXPORT
 bool GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
 {
+    if (!pGo)
+        return false;
+
     Script *tmpscript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
     if (!tmpscript || !tmpscript->pQuestAcceptGO)
@@ -430,6 +484,9 @@ bool GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
 MANGOS_DLL_EXPORT
 bool GOQuestRewarded(Player* pPlayer, GameObject* pGo, Quest const* pQuest)
 {
+    if (!pGo)
+        return false;
+
     Script *tmpscript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
     if (!tmpscript || !tmpscript->pQuestRewardedGO)
@@ -466,6 +523,9 @@ bool ProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsSt
 MANGOS_DLL_EXPORT
 CreatureAI* GetCreatureAI(Creature* pCreature)
 {
+    if (!pCreature)
+        return false;
+
     Script *tmpscript = m_scripts[pCreature->GetScriptId()];
 
     if (!tmpscript || !tmpscript->GetAI)
@@ -477,6 +537,9 @@ CreatureAI* GetCreatureAI(Creature* pCreature)
 MANGOS_DLL_EXPORT
 bool ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
+    if (!pItem)
+        return false;
+
     Script *tmpscript = m_scripts[pItem->GetProto()->ScriptId];
 
     if (!tmpscript || !tmpscript->pItemUse)
@@ -488,6 +551,9 @@ bool ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 MANGOS_DLL_EXPORT
 bool EffectDummyCreature(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget)
 {
+    if (!pTarget)
+        return false;
+
     Script *tmpscript = m_scripts[pTarget->GetScriptId()];
 
     if (!tmpscript || !tmpscript->pEffectDummyNPC)
@@ -499,6 +565,9 @@ bool EffectDummyCreature(Unit* pCaster, uint32 spellId, SpellEffectIndex effInde
 MANGOS_DLL_EXPORT
 bool EffectDummyGameObject(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget)
 {
+    if (!pTarget)
+        return false;
+
     Script *tmpscript = m_scripts[pTarget->GetGOInfo()->ScriptId];
 
     if (!tmpscript || !tmpscript->pEffectDummyGO)
@@ -510,6 +579,9 @@ bool EffectDummyGameObject(Unit* pCaster, uint32 spellId, SpellEffectIndex effIn
 MANGOS_DLL_EXPORT
 bool EffectDummyItem(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget)
 {
+    if (!pTarget)
+        return false;
+
     Script *tmpscript = m_scripts[pTarget->GetProto()->ScriptId];
 
     if (!tmpscript || !tmpscript->pEffectDummyItem)

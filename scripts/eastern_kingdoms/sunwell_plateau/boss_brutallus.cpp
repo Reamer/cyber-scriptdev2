@@ -52,15 +52,7 @@ enum Brutallus
     SPELL_BURN                      = 45141,
     SPELL_BURN_AURA_EFFECT          = 46394,
     SPELL_STOMP                     = 45185,
-    SPELL_BERSERK                   = 26662,
-
-	//Madrigosa
-    SPELL_FROST_BLAST               = 45203,
-	SPELL_ENCAPSULATE				= 44883,
-    NPC_MADRIGOSA					= 25160,
-	SPELL_BREAK_ICE					= 46650,	// related to the door
-	SPELL_OPEN_DOOR					= 46652,
-	SPELL_FELMYST_SUMMON            = 45069,
+    SPELL_BERSERK                   = 26662
 };
 
 struct MANGOS_DLL_DECL boss_brutallusAI : public ScriptedAI
@@ -68,7 +60,6 @@ struct MANGOS_DLL_DECL boss_brutallusAI : public ScriptedAI
     boss_brutallusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-		m_bIsIntroNow = true;
         Reset();
     }
 
@@ -79,10 +70,6 @@ struct MANGOS_DLL_DECL boss_brutallusAI : public ScriptedAI
     uint32 m_uiStompTimer;
     uint32 m_uiBerserkTimer;
     uint32 m_uiLoveTimer;
-	uint32 m_uiIntroCount;
-    uint32 m_uiIntroTimer;
-    bool m_bIsIntroNow;
-    uint64 m_uiMadrigosaGuid;
 
     void Reset()
     {
@@ -91,22 +78,14 @@ struct MANGOS_DLL_DECL boss_brutallusAI : public ScriptedAI
         m_uiBurnTimer = 60000;
         m_uiBerserkTimer = 360000;
         m_uiLoveTimer = urand(10000, 17000);
-		m_uiIntroTimer = 5000;
-        m_uiIntroCount = 0;
-        m_uiMadrigosaGuid = 0;
-    }
 
-	void JustReachedHome()
-	{
-		if (m_pInstance)
+        //TODO: correct me when pre-event implemented
+        if (m_pInstance)
             m_pInstance->SetData(TYPE_BRUTALLUS, NOT_STARTED);
-	}
+    }
 
     void Aggro(Unit* pWho)
     {
-		if(pWho->GetTypeId() != TYPEID_PLAYER)
-			return;
-
         DoScriptText(YELL_AGGRO, m_creature);
 
         if (m_pInstance)
@@ -134,115 +113,11 @@ struct MANGOS_DLL_DECL boss_brutallusAI : public ScriptedAI
     void SpellHitTarget(Unit* pCaster, const SpellEntry* pSpell)
     {
         if (pSpell->Id == SPELL_BURN)
-            pCaster->CastSpell(pCaster, SPELL_BURN_AURA_EFFECT, true, NULL, NULL, m_creature->GetGUID());
+            pCaster->CastSpell(pCaster, SPELL_BURN_AURA_EFFECT, true, NULL, NULL, m_creature->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
-		if(m_pInstance->GetData(TYPE_BRUTALLUS) == SPECIAL && m_bIsIntroNow)
-		{
-			if(m_uiIntroTimer < uiDiff)
-			{
-				switch(m_uiIntroCount)
-				{
-				case 0:
-					m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-					if(Creature* Madrigosa = m_creature->SummonCreature(NPC_MADRIGOSA, 1465.831f, 647.065f, m_creature->GetPositionZ(), 4.729f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300000))
-						m_uiMadrigosaGuid = Madrigosa->GetGUID();
-					m_uiIntroTimer = 3000;
-					break;
-				case 1:
-					if(Creature* pMadrigosa = m_pInstance->instance->GetCreature(m_uiMadrigosaGuid))
-					{
-						DoScriptText(YELL_MADR_ICE_BARRIER, pMadrigosa);
-						m_creature->SetUInt64Value(UNIT_FIELD_TARGET, pMadrigosa->GetGUID());
-					}
-					m_uiIntroTimer = 6000; 
-					break;
-				case 2:
-					if(Creature* pMadrigosa = m_pInstance->instance->GetCreature(m_uiMadrigosaGuid))
-						DoScriptText(YELL_MADR_INTRO, pMadrigosa);
-					m_uiIntroTimer = 5000; 
-					break;
-				case 3:
-					DoScriptText(YELL_INTRO, m_creature);
-					if(Creature* pMadrigosa = m_pInstance->instance->GetCreature(m_uiMadrigosaGuid))
-					{
-						//m_creature->SetInCombatWith(pMadrigosa);
-						//m_creature->AI()->AttackStart(pMadrigosa);
-						//m_creature->AddThreat(pMadrigosa, 10000.0f);
-						//pMadrigosa->SetInCombatWith(m_creature);
-						//pMadrigosa->AI()->AttackStart(m_creature);
-						//pMadrigosa->AddThreat(m_creature, 10000.0f);
-					}
-					m_uiIntroTimer = 10000; 
-					break;
-				case 4:
-					if(Creature* pMadrigosa = m_pInstance->instance->GetCreature(m_uiMadrigosaGuid))
-					{
-						DoScriptText(YELL_MADR_ICE_BLOCK, pMadrigosa);
-						pMadrigosa->CastSpell(m_creature, SPELL_FROST_BLAST, true);
-					}
-					m_uiIntroTimer = 2000; 
-					break;
-				case 5:
-					if(Creature* pMadrigosa = m_pInstance->instance->GetCreature(m_uiMadrigosaGuid))
-						pMadrigosa->CastSpell(m_creature, SPELL_FROST_BLAST, true);
-					m_uiIntroTimer = 2000; 
-					break;
-				case 6:
-					if(Creature* pMadrigosa = m_pInstance->instance->GetCreature(m_uiMadrigosaGuid))
-						pMadrigosa->CastSpell(m_creature, SPELL_FROST_BLAST, true);
-					m_uiIntroTimer = 2000; 
-					break;
-				case 7:
-					DoScriptText(YELL_INTRO_BREAK_ICE, m_creature);
-					m_uiIntroTimer = 5000; 
-					break;
-				case 8:
-					if(Creature* pMadrigosa = m_pInstance->instance->GetCreature(m_uiMadrigosaGuid))
-					{
-						pMadrigosa->CastSpell(m_creature, SPELL_ENCAPSULATE, true);
-						DoScriptText(YELL_MADR_TRAP, pMadrigosa);
-					}
-					m_uiIntroTimer = 15000; 
-					break;
-				case 9:
-					DoScriptText(YELL_INTRO_CHARGE, m_creature);
-					//if(Creature* pMadrigosa = m_pInstance->instance->GetCreature(m_uiMadrigosaGuid))
-					//	m_creature->GetMotionMaster()->MoveChase(pMadrigosa);
-					m_uiIntroTimer = 3000; 
-					break;
-				case 10:
-					if(Creature* pMadrigosa = m_pInstance->instance->GetCreature(m_uiMadrigosaGuid))
-					{
-						DoScriptText(YELL_MADR_DEATH, pMadrigosa);
-						pMadrigosa->DealDamage(pMadrigosa, pMadrigosa->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-					}
-					m_uiIntroTimer = 5000; 
-					break;
-				case 11:
-					DoScriptText(YELL_INTRO_KILL_MADRIGOSA, m_creature);
-					m_uiIntroTimer = 6000; 
-					break;
-				case 12:
-					DoScriptText(YELL_INTRO_TAUNT, m_creature);
-					if(GameObject* pIce = m_creature->GetMap()->GetGameObject(m_pInstance->GetData64(DATA_GO_ICE_BARRIER)))
-						pIce->SetGoState(GO_STATE_ACTIVE);
-					m_creature->GetMotionMaster()->Clear();
-					m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-					m_bIsIntroNow = false; 
-					break;
-				}
-				++m_uiIntroCount;
-			}
-			else m_uiIntroTimer -= uiDiff;
-
-			DoMeleeAttackIfReady();
-
-			return;
-		}
-
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 

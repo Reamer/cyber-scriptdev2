@@ -17,69 +17,17 @@
 /* ScriptData
 SDName: Silverpine_Forest
 SD%Complete: 100
-SDComment: Quest support: 435, 452, 1886
+SDComment: Quest support: 435, 452
 SDCategory: Silverpine Forest
 EndScriptData */
 
 /* ContentData
-npc_astor_hadren
 npc_deathstalker_erland
 npc_deathstalker_faerleia
 EndContentData */
 
 #include "precompiled.h"
 #include "escort_ai.h"
-
-/*######
-## npc_astor_hadren
-######*/
-
-struct MANGOS_DLL_DECL npc_astor_hadrenAI : public ScriptedAI
-{
-    npc_astor_hadrenAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
-
-    void Reset()
-    {
-        m_creature->setFaction(68);
-    }
-
-    void JustDied(Unit *who)
-    {
-        m_creature->setFaction(68);
-    }
-};
-
-CreatureAI* GetAI_npc_astor_hadren(Creature *_creature)
-{
-    return new npc_astor_hadrenAI(_creature);
-}
-
-bool GossipHello_npc_astor_hadren(Player* pPlayer, Creature* pCreature)
-{
-    if (pPlayer->GetQuestStatus(1886) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "You're Astor Hadren, right?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-    pPlayer->SEND_GOSSIP_MENU(623, pCreature->GetGUID());
-
-    return true;
-}
-
-bool GossipSelect_npc_astor_hadren(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
-{
-    switch(uiAction)
-    {
-        case GOSSIP_ACTION_INFO_DEF + 1:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "You've got something I need, Astor. And I'll be taking it now.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            pPlayer->SEND_GOSSIP_MENU(624, pCreature->GetGUID());
-            break;
-        case GOSSIP_ACTION_INFO_DEF + 2:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pCreature->setFaction(21);
-            pCreature->AI()->AttackStart(pPlayer);
-            break;
-    }
-    return true;
-}
 
 /*#####
 ## npc_deathstalker_erland
@@ -108,34 +56,7 @@ enum
 
 struct MANGOS_DLL_DECL npc_deathstalker_erlandAI : public npc_escortAI
 {
-    npc_deathstalker_erlandAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        uiRaneGUID = 0;
-        uiQuinnGUID = 0;
-        Reset();
-    }
-
-    uint64 uiRaneGUID;
-    uint64 uiQuinnGUID;
-
-    void MoveInLineOfSight(Unit* pUnit)
-    {
-        if (HasEscortState(STATE_ESCORT_ESCORTING))
-        {
-            if (!uiRaneGUID && pUnit->GetEntry() == NPC_RANE)
-            {
-                if (m_creature->IsWithinDistInMap(pUnit, 30.0f))
-                    uiRaneGUID = pUnit->GetGUID();
-            }
-            if (!uiQuinnGUID && pUnit->GetEntry() == NPC_QUINN)
-            {
-                if (m_creature->IsWithinDistInMap(pUnit, 30.0f))
-                    uiQuinnGUID = pUnit->GetGUID();
-            }
-        }
-
-        npc_escortAI::MoveInLineOfSight(pUnit);
-    }
+    npc_deathstalker_erlandAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
     void WaypointReached(uint32 i)
     {
@@ -154,7 +75,7 @@ struct MANGOS_DLL_DECL npc_deathstalker_erlandAI : public npc_escortAI
                 pPlayer->GroupEventHappens(QUEST_ERLAND, m_creature);
                 break;
             case 14:
-                if (Creature* pRane = m_creature->GetMap()->GetCreature(uiRaneGUID))
+                if (Creature* pRane = GetClosestCreatureWithEntry(m_creature, NPC_RANE, 45.0f))
                     DoScriptText(SAY_RANE, pRane, m_creature);
                 break;
             case 15:
@@ -167,7 +88,7 @@ struct MANGOS_DLL_DECL npc_deathstalker_erlandAI : public npc_escortAI
                 DoScriptText(SAY_QUINN, m_creature);
                 break;
             case 25:
-                if (Creature* pQuinn = m_creature->GetMap()->GetCreature(uiQuinnGUID))
+                if (Creature* pQuinn = GetClosestCreatureWithEntry(m_creature, NPC_QUINN, 45.0f))
                     DoScriptText(SAY_QUINN_REPLY, pQuinn, m_creature);
                 break;
             case 26:
@@ -176,14 +97,7 @@ struct MANGOS_DLL_DECL npc_deathstalker_erlandAI : public npc_escortAI
         }
     }
 
-    void Reset()
-    {
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
-        {
-            uiRaneGUID = 0;
-            uiQuinnGUID = 0;
-        }
-    }
+    void Reset() {}
 
     void Aggro(Unit* who)
     {
@@ -203,7 +117,7 @@ bool QuestAccept_npc_deathstalker_erland(Player* pPlayer, Creature* pCreature, c
         DoScriptText(SAY_START_1, pCreature);
 
         if (npc_deathstalker_erlandAI* pEscortAI = dynamic_cast<npc_deathstalker_erlandAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer->GetGUID(), pQuest);
+            pEscortAI->Start(false, pPlayer, pQuest);
     }
     return true;
 }
@@ -261,23 +175,21 @@ static float m_afMoveCoords[] = {-410.69f, 1498.04f, 19.77f};
 
 struct MANGOS_DLL_DECL npc_deathstalker_faerleiaAI : public ScriptedAI
 {
-    npc_deathstalker_faerleiaAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_deathstalker_faerleiaAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    void Reset()
-    {
-    }
+    void Reset() {}
 
-    uint64 m_uiPlayerGUID;
+    ObjectGuid m_playerGuid;
     uint32 m_uiWaveTimer;
     uint32 m_uiSummonCount;
     uint8  m_uiWaveCount;
     bool   m_bEventStarted;
 
-    void StartEvent(uint64 uiPlayerGUID)
+    void StartEvent(Player* pPlayer)
     {
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
 
-        m_uiPlayerGUID  = uiPlayerGUID;
+        m_playerGuid  = pPlayer->GetObjectGuid();
         m_bEventStarted = true;
         m_uiWaveTimer   = 10000;
         m_uiSummonCount = 0;
@@ -286,14 +198,14 @@ struct MANGOS_DLL_DECL npc_deathstalker_faerleiaAI : public ScriptedAI
 
     void FinishEvent()
     {
-        m_uiPlayerGUID = 0;
+        m_playerGuid.Clear();
         m_bEventStarted = false;
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
 
     void JustDied(Unit* pKiller)
     {
-        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiPlayerGUID))
+        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
             pPlayer->SendQuestFailed(QUEST_PYREWOOD_AMBUSH);
 
         FinishEvent();
@@ -322,7 +234,7 @@ struct MANGOS_DLL_DECL npc_deathstalker_faerleiaAI : public ScriptedAI
             {
                 DoScriptText(SAY_COMPLETED, m_creature);
 
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiPlayerGUID))
+                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                     pPlayer->GroupEventHappens(QUEST_PYREWOOD_AMBUSH, m_creature);
 
                 FinishEvent();
@@ -380,7 +292,7 @@ bool QuestAccept_npc_deathstalker_faerleia(Player* pPlayer, Creature* pCreature,
         DoScriptText(SAY_START, pCreature, pPlayer);
 
         if (npc_deathstalker_faerleiaAI* pFaerleiaAI = dynamic_cast<npc_deathstalker_faerleiaAI*>(pCreature->AI()))
-            pFaerleiaAI->StartEvent(pPlayer->GetGUID());
+            pFaerleiaAI->StartEvent(pPlayer);
     }
     return true;
 }
@@ -393,13 +305,6 @@ CreatureAI* GetAI_npc_deathstalker_faerleia(Creature* pCreature)
 void AddSC_silverpine_forest()
 {
     Script* newscript;
-
-    newscript = new Script;
-    newscript->Name = "npc_astor_hadren";
-    newscript->pGossipHello =  &GossipHello_npc_astor_hadren;
-    newscript->pGossipSelect = &GossipSelect_npc_astor_hadren;
-    newscript->GetAI = &GetAI_npc_astor_hadren;
-    newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_deathstalker_erland";
