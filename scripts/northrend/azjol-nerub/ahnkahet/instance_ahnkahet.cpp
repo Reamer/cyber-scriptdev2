@@ -59,11 +59,11 @@ void instance_ahnkahet::OnObjectCreate(GameObject* pGo)
             break;
         case GO_ANCIENT_DEVICE_L:
             if (m_auiEncounter[1] == NOT_STARTED)
-                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
         case GO_ANCIENT_DEVICE_R:
             if (m_auiEncounter[1] == NOT_STARTED)
-                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
         case GO_VORTEX:
             m_uiTaldaramVortexGUID = pGo->GetGUID();
