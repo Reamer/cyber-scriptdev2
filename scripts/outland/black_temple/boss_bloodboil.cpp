@@ -219,18 +219,12 @@ struct MANGOS_DLL_DECL boss_gurtogg_bloodboilAI : public ScriptedAI
             if (BewilderingStrikeTimer < diff)
             {
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_BEWILDERING_STRIKE);
-                float mt_threat = m_creature->getThreatManager().getThreat(m_creature->getVictim());
-
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1))
-                    m_creature->AddThreat(target, mt_threat);
-
                 BewilderingStrikeTimer = 20000;
             }else BewilderingStrikeTimer -= diff;
 
             if (EjectTimer < diff)
             {
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT1);
-                m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -40);
                 EjectTimer = 15000;
             }else EjectTimer -= diff;
 

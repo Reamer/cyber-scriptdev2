@@ -251,6 +251,9 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
     case NPC_ALGALON:
         m_uiAlgalonGUID = pCreature->GetGUID();
         break;
+    case NPC_OMINOUS_CLOUD:
+        m_lCLoudGUIDs.push_back(pCreature->GetGUID());
+        break;
         // used to handle the keepers images
         // set to invisible by default and only made visible if the encounter is done
     case HODIR_IMAGE:

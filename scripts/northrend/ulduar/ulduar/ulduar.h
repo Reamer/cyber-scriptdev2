@@ -111,6 +111,8 @@ enum
     NPC_ALGALON                 = 32871,
     NPC_SARA                    = 33134,
     NPC_YOGG_BRAIN              = 33890, 
+    NPC_OMINOUS_CLOUD           = 33292,
+
     // keepers images used to start the encounter
     THORIM_IMAGE                = 33413,
     MIMIRON_IMAGE               = 33412,
@@ -266,6 +268,7 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         GUIDList m_lThorimMobsGUIDs;
         GUIDList m_lLeftHandTrigger;
         GUIDList m_lRightHandTrigger;
+        GUIDList m_lCLoudGUIDs;
 
 
     protected:
