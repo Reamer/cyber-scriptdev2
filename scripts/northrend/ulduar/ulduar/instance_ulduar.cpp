@@ -305,7 +305,7 @@ void instance_ulduar::OnObjectCreate(GameObject *pGo)
         break;
     case GO_BROKEN_HARPOON:
         m_uiBrokenHarpoonGUID = pGo->GetGUID();
-        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
         break;
 
         // Archivum
@@ -374,7 +374,7 @@ void instance_ulduar::OnObjectCreate(GameObject *pGo)
     case GO_MIMIRON_BUTTON:
         m_uiMimironButtonGUID = pGo->GetGUID();
         if (m_auiEncounter[7] == NOT_STARTED)
-            pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+            pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
         break;
     case GO_MIMIRON_DOOR_1:
         m_uiMimironDoor1GUID = pGo->GetGUID();
@@ -430,7 +430,7 @@ void instance_ulduar::OnObjectCreate(GameObject *pGo)
         break;
     case GO_DOOR_LEVER:
         m_uiThorimLeverGUID = pGo->GetGUID();
-        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
         break;
 
         // Prison

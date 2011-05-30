@@ -424,7 +424,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(m_uiAracEyeRampGUID);
                 DoRespawnGameObject(m_uiAracPortalGUID, 30*MINUTE);
                 if (GameObject* pTele = instance->GetGameObject(m_uiAracPortalGUID))
-                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 DoTaunt();
             }
             break;
@@ -451,7 +451,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(m_uiPlagEyeRampGUID);
                 DoRespawnGameObject(m_uiPlagPortalGUID, 30*MINUTE);
                 if (GameObject* pTele = instance->GetGameObject(m_uiPlagPortalGUID))
-                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 DoTaunt();
             }
             break;
@@ -527,7 +527,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(m_uiMiliEyeRampGUID);
                 DoRespawnGameObject(m_uiMiliPortalGUID, 30*MINUTE);
                 if (GameObject* pTele = instance->GetGameObject(m_uiMiliPortalGUID))
-                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 DoRespawnGameObject(m_uiHorsemenChestGUID, 30*MINUTE);
                 DoTaunt();
             }
@@ -556,7 +556,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(m_uiConsEyeRampGUID);
                 DoRespawnGameObject(m_uiConsPortalGUID, 30*MINUTE);
                 if (GameObject* pTele = instance->GetGameObject(m_uiConsPortalGUID))
-                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                    pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 DoTaunt();
             }
             break;
