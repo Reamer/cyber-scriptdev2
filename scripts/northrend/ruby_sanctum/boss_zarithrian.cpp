@@ -14,10 +14,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 /* ScriptData
-SDName: boss_zarithian
+SDName: boss_zarithrian
 SD%Complete: 90%
 SDComment: by /dev/rsa && notagain
-SDCategory: ruby_sanctum
+SDCategory: Ruby Sanctum
 EndScriptData */
 
 // Need correct timers
@@ -46,14 +46,23 @@ enum Equipment
 
 static Locations SpawnLoc[]=
 {
-    {3008.552734f, 530.471680f, 89.195290f},     // 0 - Zarithian start point, o = 6,16
+    {3008.552734f, 530.471680f, 89.195290f},     // 0 - Zarithrian start point, o = 6,16
     {3014.313477f, 486.453735f, 89.255096f},    // 1 - Mob spawn 1
     {3025.324951f, 580.588501f, 88.593185f},    // 2 - Mob spawn 2
 };
 
-struct MANGOS_DLL_DECL boss_zarithianAI : public BSWScriptedAI
+enum
 {
-    boss_zarithianAI(Creature* pCreature) : BSWScriptedAI(pCreature)
+    SAY_AGGRO           = -1724019,
+    SAY_SLAY_1          = -1724020,
+    SAY_SLAY_2          = -1724021,
+    SAY_DEATH           = -1724022,
+    SAY_SUMMON          = -1724023,
+};
+
+struct MANGOS_DLL_DECL boss_zarithrianAI : public BSWScriptedAI
+{
+    boss_zarithrianAI(Creature* pCreature) : BSWScriptedAI(pCreature)
     {
         pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
@@ -68,7 +77,7 @@ struct MANGOS_DLL_DECL boss_zarithianAI : public BSWScriptedAI
 
         if (m_creature->isAlive())
         {
-            pInstance->SetData(TYPE_ZARITHIAN, NOT_STARTED);
+            pInstance->SetData(TYPE_ZARITHRIAN, NOT_STARTED);
             resetTimers();
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             setStage(0);
@@ -105,7 +114,7 @@ struct MANGOS_DLL_DECL boss_zarithianAI : public BSWScriptedAI
     void JustReachedHome()
     {
         if (!pInstance) return;
-        pInstance->SetData(TYPE_ZARITHIAN, FAIL);
+        pInstance->SetData(TYPE_ZARITHRIAN, FAIL);
     }
 
     void JustSummoned(Creature* summoned)
@@ -126,7 +135,7 @@ struct MANGOS_DLL_DECL boss_zarithianAI : public BSWScriptedAI
         if(!pInstance) return;
 
         SetEquipmentSlots(false, EQUIP_MAIN, EQUIP_OFFHAND, EQUIP_RANGED);
-        pInstance->SetData(TYPE_ZARITHIAN, IN_PROGRESS);
+        pInstance->SetData(TYPE_ZARITHRIAN, IN_PROGRESS);
         DoScriptText(-1666200,m_creature);
     }
 
@@ -134,7 +143,7 @@ struct MANGOS_DLL_DECL boss_zarithianAI : public BSWScriptedAI
     {
         if(!pInstance) return;
 
-        pInstance->SetData(TYPE_ZARITHIAN, DONE);
+        pInstance->SetData(TYPE_ZARITHRIAN, DONE);
         DoScriptText(-1666203,m_creature);
     }
 
@@ -162,9 +171,9 @@ struct MANGOS_DLL_DECL boss_zarithianAI : public BSWScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_zarithian(Creature* pCreature)
+CreatureAI* GetAI_boss_zarithrian(Creature* pCreature)
 {
-    return new boss_zarithianAI(pCreature);
+    return new boss_zarithrianAI(pCreature);
 };
 
 struct MANGOS_DLL_DECL mob_flamecaller_rubyAI : public BSWScriptedAI
@@ -187,7 +196,7 @@ struct MANGOS_DLL_DECL mob_flamecaller_rubyAI : public BSWScriptedAI
     void UpdateAI(const uint32 diff)
     {
 
-        if (pInstance && pInstance->GetData(TYPE_ZARITHIAN) != IN_PROGRESS)
+        if (pInstance && pInstance->GetData(TYPE_ZARITHRIAN) != IN_PROGRESS)
             m_creature->ForcedDespawn();
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -208,8 +217,8 @@ void AddSC_boss_zarithrian()
 {
     Script *newscript;
     newscript = new Script;
-    newscript->Name = "boss_zarithian";
-    newscript->GetAI = &GetAI_boss_zarithian;
+    newscript->Name = "boss_zarithrian";
+    newscript->GetAI = &GetAI_boss_zarithrian;
     newscript->RegisterSelf();
 
     newscript = new Script;

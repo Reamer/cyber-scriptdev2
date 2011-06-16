@@ -212,7 +212,7 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
             if (m_creature->getVictim())
                 pSummoned->AI()->AttackStart(pTarget ? pTarget : m_creature->getVictim());
 
-            m_lSparkGUIDList.push_back(pSummoned->GetGUID());
+            m_lSparkGUIDList.push_back(pSummoned->GetObjectGuid());
         }
     }
 
@@ -352,7 +352,7 @@ struct MANGOS_DLL_DECL mob_spark_of_ionarAI : public ScriptedAI
 
         if (uiPointId == POINT_CALLBACK)
         {
-            if (Creature* pIonar = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_IONAR)))
+            if (Creature* pIonar = m_pInstance->GetSingleCreatureFromStorage(NPC_IONAR))
             {
                 if (!pIonar->isAlive())
                 {

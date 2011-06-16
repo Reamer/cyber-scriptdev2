@@ -32,7 +32,6 @@ enum
     GO_GYTH_COMBAT_DOOR         = 175185,                   // control in boss_script, because will auto-close after each wave
     GO_GYTH_EXIT_DOOR           = 175186,
 
-
     GO_ROOM_7_RUNE              = 175194,
     GO_ROOM_3_RUNE              = 175195,
     GO_ROOM_6_RUNE              = 175196,
@@ -58,9 +57,8 @@ class MANGOS_DLL_DECL instance_blackrock_spire : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData);
         void SetData64(uint32 uiType, uint64 uiData);
         uint32 GetData(uint32 uiType);
-        uint64 GetData64(uint32 uiType);
 
-        const char* Save() { return strInstData.c_str(); }
+        const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);
 
         void DoSortRoomEventMobs();
@@ -69,21 +67,9 @@ class MANGOS_DLL_DECL instance_blackrock_spire : public ScriptedInstance
 
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string strInstData;
+        std::string m_strInstData;
 
-        uint64 m_uiEmberseerGUID;
-        uint64 m_uiNefariusGUID;
-        uint64 m_uiGythGUID;
-        uint64 m_uiInfiltratorGUID;
-
-        uint64 m_uiEmberseerInDoorGUID;
-        uint64 m_uiEmberseerCombatDoorGUID;
-        uint64 m_uiEmberseerOutDoorGUID;
-        uint64 m_uiGythEntryDoorGUID;
-        uint64 m_uiGythCombatDoorGUID;
-        uint64 m_uiGythExitDoorGUID;
-
-        uint64 m_auiRoomRuneGUID[MAX_ROOMS];
+        ObjectGuid m_aRoomRuneGuid[MAX_ROOMS];
         GUIDList m_alRoomEventMobGUIDSorted[MAX_ROOMS];
         GUIDList m_lRoomEventMobGUIDList;
         GUIDList m_lIncanceratorGUIDList;

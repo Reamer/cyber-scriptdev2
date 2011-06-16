@@ -3064,6 +3064,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\scripts\world\pet_scripts.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\scripts\world\spell_scripts.cpp"
 					>
 				</File>

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: boss_erekem
 SDAuthor: ckegg
-SD%Complete: 0
+SD%Complete: 50%
 SDComment: 
 SDCategory: The Violet Hold
 EndScriptData */
@@ -27,14 +27,14 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                                 = -1608018,
-    SAY_SLAY_1                                = -1608019,
-    SAY_SLAY_2                                = -1608020,
-    SAY_SLAY_3                                = -1608021,
-    SAY_DEATH                                 = -1608022,
-    SAY_SPAWN                                 = -1608023,
-    SAY_ADD_KILED                             = -1608024,
-    SAY_BOTH_ADDS_KILED                       = -1608025,
+    SAY_AGGRO                                 = -1608010,
+    SAY_SLAY_1                                = -1608011,
+    SAY_SLAY_2                                = -1608012,
+    SAY_SLAY_3                                = -1608013,
+    SAY_DEATH                                 = -1608014,
+    SAY_SPAWN                                 = -1608015,
+    SAY_ADD_KILED                             = -1608016,
+    SAY_BOTH_ADDS_KILED                       = -1608017,
 
     SPELL_BLOODLUST                           = 54516,
     SPELL_BREAK_BONDS                         = 59463,
@@ -80,7 +80,7 @@ struct MANGOS_DLL_DECL boss_erekemAI : public ScriptedAI
         m_bIsAddDead = false;
         MovementStarted = false;
         m_uiLightningBolt_Timer = 2000;
-        m_uiEarthShield_Timer = urand(15000, 20000);
+        m_uiEarthShield_Timer = urand(10000, 15000);
         m_uiEarthShock_Timer = urand(12000, 17000);
         m_uiChainHeal_Timer = urand(5000, 25000);
         m_uiBreakBonds_Timer = urand(25000, 30000);
@@ -95,14 +95,22 @@ struct MANGOS_DLL_DECL boss_erekemAI : public ScriptedAI
                     if ((*iter)->isDead())
                         (*iter)->Respawn();
 
-            m_pInstance->SetData(TYPE_EREKEM, NOT_STARTED);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-            //m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     }
 
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+        {
+            m_pInstance->SetData(TYPE_EREKEM, FAIL);
+            m_pInstance->SetData(TYPE_EVENT, FAIL);
+            m_pInstance->SetData(TYPE_RIFT, FAIL);
+            if(m_pInstance->GetData(TYPE_PORTAL6) == IN_PROGRESS) {m_pInstance->SetData(TYPE_PORTAL6, NOT_STARTED);}
+            else {m_pInstance->SetData(TYPE_PORTAL12, NOT_STARTED);}
+        }
+    }
     void Aggro(Unit* pWho)
     {
         if (!m_pInstance) return;
@@ -138,7 +146,7 @@ struct MANGOS_DLL_DECL boss_erekemAI : public ScriptedAI
                         if ((*iter)->isAlive())
                         {
                             (*iter)->AddThreat(pWho, 0.0f);
-                            (*iter)->AI()->AttackStart(pWho);
+                      /*      (*iter)->AI()->AttackStart(pWho);*/ 
                         }
         }
     }
@@ -147,9 +155,7 @@ struct MANGOS_DLL_DECL boss_erekemAI : public ScriptedAI
     {
         m_creature->GetMotionMaster()->MovePoint(id, PortalLoc[id].x, PortalLoc[id].y, PortalLoc[id].z);
         m_creature->AddSplineFlag(SPLINEFLAG_WALKMODE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-        //m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetInCombatWithZone();
         MovementStarted = true;
@@ -179,8 +185,8 @@ struct MANGOS_DLL_DECL boss_erekemAI : public ScriptedAI
         if (m_uiEarthShield_Timer < uiDiff)
         {
             m_creature->InterruptNonMeleeSpells(false);
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_EARTH_SHIELD_H : SPELL_EARTH_SHIELD);
-            m_uiEarthShield_Timer = urand(15000, 20000);
+            DoCast(m_creature, m_bIsRegularMode ? SPELL_EARTH_SHIELD : SPELL_EARTH_SHIELD_H);
+            m_uiEarthShield_Timer = urand(25000, 30000);
         }
         else m_uiEarthShield_Timer -= uiDiff;
 
@@ -196,7 +202,7 @@ struct MANGOS_DLL_DECL boss_erekemAI : public ScriptedAI
         if (m_uiChainHeal_Timer < uiDiff)
         {
             //m_creature->InterruptNonMeleeSpells(false);
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_CHAIN_HEAL_H : SPELL_CHAIN_HEAL);
+            DoCast(m_creature, m_bIsRegularMode ? SPELL_CHAIN_HEAL : SPELL_CHAIN_HEAL_H);
             m_uiChainHeal_Timer = urand(5000, 25000);
         }
         else m_uiChainHeal_Timer -= uiDiff;
@@ -232,22 +238,16 @@ struct MANGOS_DLL_DECL boss_erekemAI : public ScriptedAI
         }
     }
 
-    void JustReachedHome()
-    {
-        if(m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_MAIN,FAIL);
-            m_pInstance->SetData(TYPE_EREKEM,FAIL);
-            m_creature->ForcedDespawn();
-        }
-    }
-
     void JustDied(Unit* pKiller)
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance) 
+        if (m_pInstance) {
             m_pInstance->SetData(TYPE_EREKEM, DONE);
+            if(m_pInstance->GetData(TYPE_PORTAL6) == IN_PROGRESS) {m_pInstance->SetData(TYPE_PORTAL6, DONE);}
+            else {m_pInstance->SetData(TYPE_PORTAL12, DONE);}
+
+        }
     }
 
     void KilledUnit(Unit* pVictim)
@@ -273,24 +273,31 @@ struct MANGOS_DLL_DECL mob_erekem_guardAI : public ScriptedAI
     uint32 m_uiGushingWound_Timer;
     uint32 m_uiHowlingScreech_Timer;
     uint32 m_uiStrike_Timer;
+    uint32 m_uiBloodlust_Timer;
     bool MovementStarted;
 
     void Reset()
     {
         m_uiGushingWound_Timer = urand(5000, 10000);
+        m_uiBloodlust_Timer = urand(25000, 30000);
         m_uiHowlingScreech_Timer = urand(12000, 15000);
         m_uiStrike_Timer = urand(10000, 11000);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         MovementStarted = false;
+
     }
 
     void Aggro(Unit* pWho)
     {
         if (!m_pInstance) return;
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->GetMotionMaster()->MovementExpired();
         SetCombatMovement(true);
     }
 
-    void AttackStart(Unit* pWho)
+   /* void AttackStart(Unit* pWho)
     {
         if (!m_pInstance)
             return;
@@ -308,13 +315,17 @@ struct MANGOS_DLL_DECL mob_erekem_guardAI : public ScriptedAI
             m_creature->SetInCombatWith(pWho);
             pWho->SetInCombatWith(m_creature);
             DoStartMovement(pWho);
+            m_creature->GetMotionMaster()->MovementExpired();
+            SetCombatMovement(true);
         }
-    }
+    }*/ 
 
     void StartMovement(uint32 id)
     {
         m_creature->GetMotionMaster()->MovePoint(id, PortalLoc[id].x, PortalLoc[id].y, PortalLoc[id].z);
         m_creature->AddSplineFlag(SPLINEFLAG_WALKMODE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         MovementStarted = true;
         m_creature->SetInCombatWithZone();
     }
@@ -324,7 +335,6 @@ struct MANGOS_DLL_DECL mob_erekem_guardAI : public ScriptedAI
         if (type != POINT_MOTION_TYPE || !MovementStarted) return;
         if (id == 0)
         {
-            MovementStarted = false;
             m_creature->GetMotionMaster()->MovementExpired();
             SetCombatMovement(true);
             m_creature->SetInCombatWithZone();
@@ -333,10 +343,10 @@ struct MANGOS_DLL_DECL mob_erekem_guardAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (m_pInstance->GetData(TYPE_EREKEM) == SPECIAL && !MovementStarted)
-        {
+        if (!m_pInstance) return;
+
+        if (m_pInstance->GetData(TYPE_EREKEM) == IN_PROGRESS && !MovementStarted && !m_creature->getVictim())
             StartMovement(0);
-        }
 
         //Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -348,6 +358,19 @@ struct MANGOS_DLL_DECL mob_erekem_guardAI : public ScriptedAI
             m_uiGushingWound_Timer = urand(30000, 32000);
         }
         else m_uiGushingWound_Timer -= uiDiff;
+
+        if (m_uiBloodlust_Timer < uiDiff)
+        {
+            if (m_pInstance)
+            if (Creature* pErekem = m_pInstance->GetSingleCreatureFromStorage(DATA_EREKEM))
+                if (pErekem->isAlive())
+                {
+                    pErekem->InterruptNonMeleeSpells(false);
+                    pErekem->CastSpell(pErekem, SPELL_BLOODLUST, false);
+                    m_uiBloodlust_Timer = urand(25000, 30000);
+                }
+        }
+        else m_uiBloodlust_Timer -= uiDiff;
 
         if (m_uiHowlingScreech_Timer < uiDiff)
         {
@@ -369,12 +392,12 @@ struct MANGOS_DLL_DECL mob_erekem_guardAI : public ScriptedAI
     void JustDied(Unit* pKiller)
     {
         if (m_pInstance)
-            if (Creature* pErekem = ((Creature*)m_creature->GetMap()->GetUnit( m_pInstance->GetData64(DATA_EREKEM))))
+            if (Creature* pErekem = m_pInstance->GetSingleCreatureFromStorage(DATA_EREKEM))
                 if (pErekem->isAlive())
                 {
                     DoScriptText(SAY_ADD_KILED, pErekem);
-                    pErekem->InterruptNonMeleeSpells(false);
-                    pErekem->CastSpell(pErekem, SPELL_BLOODLUST, false);
+                   // pErekem->InterruptNonMeleeSpells(false);
+                   // pErekem->CastSpell(pErekem, SPELL_BLOODLUST, false);
                     ((boss_erekemAI*)pErekem->AI())->m_bIsAddDead = true;
                 }
     }

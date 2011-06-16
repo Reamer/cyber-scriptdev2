@@ -9,15 +9,10 @@ enum
 {
     MAX_ENCOUNTER           = 4,
 
-    DATA_BJARNGRIM          = 1,
-    DATA_IONAR              = 2,
-    DATA_LOKEN              = 3,
-    DATA_VOLKHAN            = 4,
-
-    TYPE_BJARNGRIM          = 10,
-    TYPE_IONAR              = 11,
-    TYPE_LOKEN              = 12,
-    TYPE_VOLKHAN            = 13,
+    TYPE_BJARNGRIM          = 0,
+    TYPE_VOLKHAN            = 1,
+    TYPE_IONAR              = 2,
+    TYPE_LOKEN              = 3,
 
     NPC_BJARNGRIM           = 28586,
     NPC_VOLKHAN             = 28587,
@@ -27,7 +22,30 @@ enum
     GO_VOLKHAN_DOOR         = 191325,                       //_doors07
     GO_IONAR_DOOR           = 191326,                       //_doors05
     GO_LOKEN_DOOR           = 191324,                       //_doors02
-    GO_LOKEN_THRONE         = 192654
+    GO_LOKEN_THRONE         = 192654,
+
+    ACHIEV_START_LOKEN_ID   = 20384,
+};
+
+class MANGOS_DLL_DECL instance_halls_of_lightning : public ScriptedInstance
+{
+    public:
+        instance_halls_of_lightning(Map* pMap);
+
+        void Initialize();
+
+        void OnCreatureCreate(Creature* pCreature);
+        void OnObjectCreate(GameObject* pGo);
+
+        void SetData(uint32 uiType, uint32 uiData);
+        uint32 GetData(uint32 uiType);
+
+        const char* Save() { return m_strInstData.c_str(); }
+        void Load(const char* chrIn);
+
+    private:
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        std::string m_strInstData;
 };
 
 #endif

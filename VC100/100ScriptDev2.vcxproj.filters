@@ -298,9 +298,6 @@
     <Filter Include="scripts\northrend\ruby_sanctum">
       <UniqueIdentifier>{e35abead-2389-4eb9-88bd-70e6fe5636b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="scripts\outdoor_pvp">
-      <UniqueIdentifier>{569ce85f-1d25-427e-bf22-a4590ecf37ee}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\base\BSW_ai.cpp">
@@ -996,7 +993,7 @@
     <ClCompile Include="..\scripts\kalimdor\razorfen_kraul\instance_razorfen_kraul.cpp">
       <Filter>scripts\kalimdor\razorfen_kraul</Filter>
     </ClCompile>
-    <ClCompile Include="..\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp">
+	<ClCompile Include="..\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp">
       <Filter>scripts\kalimdor\razorfen_kraul</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\kalimdor\ruins_of_ahnqiraj\boss_ayamiss.cpp">
@@ -1767,7 +1764,7 @@
     <ClCompile Include="..\scripts\outland\tempest_keep\botanica\boss_warp_splinter.cpp">
       <Filter>scripts\outland\tempest_keep\botanica</Filter>
     </ClCompile>
-    <ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_alar.cpp">
+	<ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_alar.cpp">
       <Filter>scripts\outland\tempest_keep\the_eye</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\outland\tempest_keep\the_eye\boss_astromancer.cpp">
@@ -1806,7 +1803,7 @@
     <ClCompile Include="..\scripts\world\areatrigger_scripts.cpp">
       <Filter>scripts\world</Filter>
     </ClCompile>
-    <ClCompile Include="..\scripts\world\bosses_emerald_dragons.cpp">
+	<ClCompile Include="..\scripts\world\bosses_emerald_dragons.cpp">
       <Filter>scripts\world</Filter>
     </ClCompile>
     <ClCompile Include="..\scripts\world\go_scripts.cpp">
@@ -1839,37 +1836,13 @@
     <ClCompile Include="..\system\system.cpp">
       <Filter>system</Filter>
     </ClCompile>
+    <ClCompile Include="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.cpp" />
+    <ClCompile Include="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.cpp" />
+    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.cpp" />
+    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.cpp" />
+    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_northrend.cpp" />
+    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_outland.cpp" />
     <ClCompile Include="..\ScriptMgr.cpp" />
-    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.cpp">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.cpp">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.cpp">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_northrend.cpp">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_outland.cpp">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.cpp">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\scripts\custom\custom_cybernetic.cpp">
-      <Filter>scripts\custom</Filter>
-    </ClCompile>
-    <ClCompile Include="..\scripts\northrend\ulduar\ulduar\boss_leviathan.cpp">
-      <Filter>scripts\northrend\ulduar\ulduar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\scripts\northrend\ulduar\ulduar\boss_iron_council.cpp">
-      <Filter>scripts\northrend\ulduar\ulduar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\scripts\northrend\ulduar\ulduar\boss_vezax.cpp">
-      <Filter>scripts\northrend\ulduar\ulduar</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\base\BSW_ai.h">
@@ -2116,30 +2089,16 @@
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="..\config.h" />
+    <ClInclude Include="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.h" />
+    <ClInclude Include="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.h" />
+    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.h" />
+    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.h" />
+    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_northrend.h" />
+    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_outland.h" />
+    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_zone_selector.h" />
     <ClInclude Include="..\sd2_revision_nr.h" />
     <ClInclude Include="..\sd2_revision_sql.h" />
     <ClInclude Include="..\ScriptMgr.h" />
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_zone_selector.h">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_eastern_kingdoms.h">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\scripts\outdoor_pvp\eastern_kingdoms\outdoor_pvp_eastern_plaguelands.h">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_kalimdor.h">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_northrend.h">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\scripts\outdoor_pvp\outdoor_pvp_outland.h">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\scripts\outdoor_pvp\kalimdor\outdoor_pvp_silithus.h">
-      <Filter>scripts\outdoor_pvp</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\revision.h" />

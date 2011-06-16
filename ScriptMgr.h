@@ -22,6 +22,7 @@ class Unit;
 class WorldObject;
 class Aura;
 class Object;
+class ObjectGuid;
 
 // *********************************************************
 // ************** Some defines used globally ***************
@@ -30,10 +31,11 @@ class Object;
 #define VISIBLE_RANGE       (166.0f)                        // MAX visible range (size of grid)
 #define DEFAULT_TEXT        "<ScriptDev2 Text Entry Missing!>"
 
-// Some typedefs for storing GUIDs
-typedef std::list<uint64> GUIDList;
-typedef std::set<uint64> GUIDSet;
-typedef std::vector<uint64> GUIDVector;
+// Some typedefs for storing Guids
+typedef std::list<ObjectGuid> GUIDList;
+typedef std::set<ObjectGuid> GUIDSet;
+typedef std::vector<ObjectGuid> GUIDVector;
+typedef std::map<uint32, ObjectGuid> EntryGuidMap;
 
 /* Escort Factions
  * TODO: find better namings and definitions.
@@ -112,6 +114,7 @@ struct Script
 
 // Generic scripting text function
 void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget = NULL);
+void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource = NULL, Unit* pTarget = NULL);
 
 //DB query
 QueryResult* strSD2Pquery(char*);

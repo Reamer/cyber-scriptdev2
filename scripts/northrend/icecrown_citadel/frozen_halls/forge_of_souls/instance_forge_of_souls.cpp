@@ -26,9 +26,7 @@ EndScriptData */
 
 instance_forge_of_souls::instance_forge_of_souls(Map* pMap) : ScriptedInstance(pMap),
     m_bCriteriaPhantomBlastFailed(false),
-    m_uiTeam(0),
-    m_uiBronjahmGUID(0),
-    m_uiDevourerOrSoulsGUID(0)
+    m_uiTeam(0)
 {
     Initialize();
 }
@@ -40,11 +38,16 @@ void instance_forge_of_souls::Initialize()
 
 void instance_forge_of_souls::OnCreatureCreate(Creature* pCreature)
 {
-    switch(pCreature->GetEntry())
+    switch (pCreature->GetEntry())
     {
-        case NPC_BRONJAHM:                  m_uiBronjahmGUID = pCreature->GetGUID(); break;
-        case NPC_DEVOURER:                  m_uiDevourerOrSoulsGUID = pCreature->GetGUID(); break;
-        case NPC_CORRUPTED_SOUL_FRAGMENT:   m_luiSoulFragmentAliveGUIDs.push_back(pCreature->GetGUID()); break;
+        case NPC_DEVOURER:
+        case NPC_BRONJAHM:
+            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+
+        case NPC_CORRUPTED_SOUL_FRAGMENT:
+            m_luiSoulFragmentAliveGUIDs.push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -69,7 +72,7 @@ void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer, bool bChanged)
         {
             if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
                                                             aEventBeginLocations[i].fSpawnX, aEventBeginLocations[i].fSpawnY, aEventBeginLocations[i].fSpawnZ, aEventBeginLocations[i].fSpawnO, TEMPSUMMON_DEAD_DESPAWN, 24*HOUR*IN_MILLISECONDS))
-                m_lEventMobGUIDs.push_back(pSummon->GetGUID());
+                m_lEventMobGUIDs.push_back(pSummon->GetObjectGuid());
         }
     }
     else
@@ -147,7 +150,7 @@ void instance_forge_of_souls::SetData(uint32 uiType, uint32 uiData)
         std::ostringstream saveStream;
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1];
 
-        strInstData = saveStream.str();
+        m_strInstData = saveStream.str();
 
         SaveToDB();
         OUT_SAVE_INST_DATA_COMPLETE;
@@ -189,23 +192,10 @@ uint32 instance_forge_of_souls::GetData(uint32 uiType)
     }
 }
 
-uint64 instance_forge_of_souls::GetData64(uint32 uiData)
-{
-    switch(uiData)
-    {
-        case NPC_BRONJAHM:
-            return m_uiBronjahmGUID;
-        case NPC_DEVOURER:
-            return m_uiDevourerOrSoulsGUID;
-        default:
-            return 0;
-    }
-}
-
 void instance_forge_of_souls::SetData64(uint32 uiType, uint64 uiData)
 {
     if (uiType == DATA_SOULFRAGMENT_REMOVE)
-        m_luiSoulFragmentAliveGUIDs.remove(uiData);
+        m_luiSoulFragmentAliveGUIDs.remove(ObjectGuid(uiData));
 }
 
 InstanceData* GetInstanceData_instance_forge_of_souls(Map* pMap)

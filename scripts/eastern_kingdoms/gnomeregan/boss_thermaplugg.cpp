@@ -73,6 +73,17 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
         m_lLandedBombGUIDs.clear();
     }
 
+    void GetAIInformation(ChatHandler& reader)
+    {
+        reader.PSendSysMessage("Thermaplugg, currently phase %s", m_bIsPhaseTwo ? "two" : "one");
+
+        if (m_asBombFaces)
+        {
+            for (uint8 i = 0; i < MAX_GNOME_FACES; ++i)
+                reader.PSendSysMessage("Bomb face %u is %s ", (uint32)i, m_asBombFaces[i].m_bActivated ? "activated" : "not activated");
+        }
+    }
+
     void KilledUnit(Unit* pVictim)
     {
         DoScriptText(SAY_SLAY, m_creature);
@@ -119,7 +130,7 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_WALKING_BOMB)
         {
-            m_lSummonedBombGUIDs.push_back(pSummoned->GetGUID());
+            m_lSummonedBombGUIDs.push_back(pSummoned->GetObjectGuid());
             // calculate point for falling down
             float fX, fY;
             fX = 0.2*m_afSpawnPos[0] + 0.8*pSummoned->GetPositionX();
@@ -131,12 +142,12 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
     void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId)
     {
         if (pSummoned->GetEntry() == NPC_WALKING_BOMB && uiMotionType == POINT_MOTION_TYPE && uiPointId == 1)
-            m_lLandedBombGUIDs.push_back(pSummoned->GetGUID());
+            m_lLandedBombGUIDs.push_back(pSummoned->GetObjectGuid());
     }
 
     void SummonedCreatureDespawn(Creature* pSummoned)
     {
-        m_lSummonedBombGUIDs.remove(pSummoned->GetGUID());
+        m_lSummonedBombGUIDs.remove(pSummoned->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -200,7 +211,7 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
                     {
                         // Calculate the spawning position as 90% between face and thermaplugg spawn-pos, and hight hardcoded
                         float fX = 0.0f, fY = 0.0f;
-                        if (GameObject* pFace = m_creature->GetMap()->GetGameObject(m_asBombFaces[i].m_uiGnomeFaceGUID))
+                        if (GameObject* pFace = m_creature->GetMap()->GetGameObject(m_asBombFaces[i].m_gnomeFaceGuid))
                         {
                             fX = 0.35*m_afSpawnPos[0] + 0.65*pFace->GetPositionX();
                             fY = 0.35*m_afSpawnPos[1] + 0.65*pFace->GetPositionY();

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,8 +17,8 @@
 /* ScriptData
 SDName: boss_moragg
 SDAuthor: ckegg
-SD%Complete: 0
-SDComment: 
+SD%Complete: 50%
+SDComment:
 SDCategory: The Violet Hold
 EndScriptData */
 
@@ -56,14 +56,20 @@ struct MANGOS_DLL_DECL boss_moraggAI : public ScriptedAI
         m_uiCorrosiveSaliva_Timer = urand(10000, 11000);
         m_uiOpticLink_Timer = urand(25000, 30000);
         m_uiRay_Timer = urand(2000, 7000);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MORAGG, NOT_STARTED);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-        //m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
+    }
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+        {
+            m_pInstance->SetData(TYPE_MORAGG, FAIL);
+            m_pInstance->SetData(TYPE_EVENT, FAIL);
+            m_pInstance->SetData(TYPE_RIFT, FAIL);
+            if(m_pInstance->GetData(TYPE_PORTAL6) == IN_PROGRESS) {m_pInstance->SetData(TYPE_PORTAL6, NOT_STARTED);}
+            else {m_pInstance->SetData(TYPE_PORTAL12, NOT_STARTED);}
+            }
     }
 
     void Aggro(Unit* pWho)
@@ -98,9 +104,7 @@ struct MANGOS_DLL_DECL boss_moraggAI : public ScriptedAI
     {
         m_creature->GetMotionMaster()->MovePoint(id, PortalLoc[id].x, PortalLoc[id].y, PortalLoc[id].z);
         m_creature->AddSplineFlag(SPLINEFLAG_WALKMODE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-        //m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         MovementStarted = true;
         m_creature->SetInCombatWithZone();
@@ -152,21 +156,14 @@ struct MANGOS_DLL_DECL boss_moraggAI : public ScriptedAI
 
         DoMeleeAttackIfReady();
     }
-    
-    void JustReachedHome()
-    {
-        if(m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_MAIN,FAIL);
-            m_pInstance->SetData(TYPE_MORAGG,FAIL);
-            m_creature->ForcedDespawn();
-        }
-    }
 
     void JustDied(Unit* pKiller)
     {
-        if (m_pInstance)
+        if (m_pInstance){
             m_pInstance->SetData(TYPE_MORAGG, DONE);
+        if(m_pInstance->GetData(TYPE_PORTAL6) == IN_PROGRESS) {m_pInstance->SetData(TYPE_PORTAL6, DONE);}
+            else {m_pInstance->SetData(TYPE_PORTAL12, DONE);}
+        }
     }
 };
 

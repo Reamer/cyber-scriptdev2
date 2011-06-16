@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -27,6 +27,7 @@ enum
     GO_VORTEX               = 193564,
 
     NPC_ELDER_NADOX         = 29309,
+    NPC_TALDARAM            = 29308,
     NPC_JEDOGA_SHADOWSEEKER = 29310,
 
     ACHIEV_CRITERIA_VOLUNTEER_WORK      = 7359,

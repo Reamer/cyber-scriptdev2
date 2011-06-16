@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: boss_xevozz
 SDAuthor: ckegg
-SD%Complete: 0
+SD%Complete: 60%
 SDComment: 
 SDCategory: The Violet Hold
 EndScriptData */
@@ -27,16 +27,16 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                                 = -1608035,
-    SAY_SLAY_1                                = -1608036,
-    SAY_SLAY_2                                = -1608037,
-    SAY_SLAY_3                                = -1608038,
-    SAY_DEATH                                 = -1608039,
-    SAY_SPAWN                                 = -1608040,
-    SAY_CHARGED                               = -1608041,
-    SAY_REPEAT_SUMMON_1                       = -1608042,
-    SAY_REPEAT_SUMMON_2                       = -1608043,
-    SAY_SUMMON_ENERGY                         = -1608044,
+    SAY_AGGRO                                 = -1608027,
+    SAY_SLAY_1                                = -1608028,
+    SAY_SLAY_2                                = -1608029,
+    SAY_SLAY_3                                = -1608030,
+    SAY_DEATH                                 = -1608031,
+    SAY_SPAWN                                 = -1608032,
+    SAY_CHARGED                               = -1608033,
+    SAY_REPEAT_SUMMON_1                       = -1608034,
+    SAY_REPEAT_SUMMON_2                       = -1608035,
+    SAY_SUMMON_ENERGY                         = -1608036,
 
     SPELL_ARCANE_BARRAGE_VOLLEY               = 54202,
     SPELL_ARCANE_BARRAGE_VOLLEY_H             = 59483,
@@ -51,6 +51,9 @@ enum
     SPELL_ARCANE_POWER                        = 54160,
     SPELL_ARCANE_POWER_H                      = 59474,
     SPELL_SUMMON_PLAYERS                      = 54164,
+    SPELL_ARCANE_TEMPEST                      = 35845,
+    SPELL_ARCANE_TEMPEST_H                    = 49366,
+    SPELL_ETHEREAL_BEACON_VISUAL              = 32368
 };
 
 struct MANGOS_DLL_DECL boss_xevozzAI : public ScriptedAI
@@ -69,21 +72,19 @@ struct MANGOS_DLL_DECL boss_xevozzAI : public ScriptedAI
     uint32 m_uiSummonEtherealSphere_Timer;
     uint32 m_uiArcaneBarrageVolley_Timer;
     uint32 m_uiArcaneBuffet_Timer;
+    uint32 m_uiDespawn_Timer;
 
     void Reset()
     {
-        m_uiSummonEtherealSphere_Timer = urand(10000, 12000);
+        m_uiSummonEtherealSphere_Timer = 10000;
+        m_uiDespawn_Timer  = 35000;
         m_uiArcaneBarrageVolley_Timer = urand(20000, 22000);
         m_uiArcaneBuffet_Timer = m_uiSummonEtherealSphere_Timer + urand(5000, 6000);
         DespawnSphere();
         MovementStarted = false;
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_XEVOZZ, NOT_STARTED);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-        //m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
     }
 
     void Aggro(Unit* pWho)
@@ -94,6 +95,18 @@ struct MANGOS_DLL_DECL boss_xevozzAI : public ScriptedAI
         m_pInstance->SetData(TYPE_XEVOZZ, IN_PROGRESS);
         m_creature->GetMotionMaster()->MovementExpired();
         SetCombatMovement(true);
+    }
+
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+        {
+            m_pInstance->SetData(TYPE_XEVOZZ, FAIL);
+            m_pInstance->SetData(TYPE_EVENT, FAIL);
+            m_pInstance->SetData(TYPE_RIFT, FAIL);
+            if(m_pInstance->GetData(TYPE_PORTAL6) == IN_PROGRESS) {m_pInstance->SetData(TYPE_PORTAL6, NOT_STARTED);}
+            else {m_pInstance->SetData(TYPE_PORTAL12, NOT_STARTED);}
+            }
     }
 
     void AttackStart(Unit* pWho)
@@ -131,20 +144,15 @@ struct MANGOS_DLL_DECL boss_xevozzAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned)
     {
         pSummoned->SetSpeedRate(MOVE_RUN, 0.5f);
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-        {
-            pSummoned->AddThreat(pTarget);
-            pSummoned->AI()->AttackStart(pTarget);
-        }
+        pSummoned->StopMoving();
+        pSummoned->CastSpell(pSummoned, SPELL_ETHEREAL_BEACON_VISUAL, false);
     }
 
     void StartMovement(uint32 id)
     {
         m_creature->GetMotionMaster()->MovePoint(id, PortalLoc[id].x, PortalLoc[id].y, PortalLoc[id].z);
         m_creature->AddSplineFlag(SPLINEFLAG_WALKMODE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-        //m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         MovementStarted = true;
         m_creature->SetInCombatWithZone();
@@ -173,7 +181,7 @@ struct MANGOS_DLL_DECL boss_xevozzAI : public ScriptedAI
 
         if (m_uiArcaneBarrageVolley_Timer < uiDiff)
         {
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_ARCANE_BARRAGE_VOLLEY_H : SPELL_ARCANE_BARRAGE_VOLLEY);
+            DoCast(m_creature, m_bIsRegularMode ? SPELL_ARCANE_BARRAGE_VOLLEY : SPELL_ARCANE_BARRAGE_VOLLEY_H);
             m_uiArcaneBarrageVolley_Timer = urand(20000, 22000);
         }
         else m_uiArcaneBarrageVolley_Timer -= uiDiff;
@@ -181,24 +189,29 @@ struct MANGOS_DLL_DECL boss_xevozzAI : public ScriptedAI
         if (m_uiArcaneBuffet_Timer)
             if (m_uiArcaneBuffet_Timer < uiDiff)
             {
-                DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ARCANE_BUFFET_H : SPELL_ARCANE_BUFFET);
+                DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ARCANE_BUFFET : SPELL_ARCANE_BUFFET_H);
                 m_uiArcaneBuffet_Timer = 0;
             }
             else m_uiArcaneBuffet_Timer -= uiDiff;
 
-        if(m_uiSummonEtherealSphere_Timer)
-            if (m_uiSummonEtherealSphere_Timer < uiDiff)
-            {
-                DoScriptText(SAY_SPAWN, m_creature);
-                DoCast(m_creature, SPELL_SUMMON_ETHEREAL_SPHERE_1);
-                if (!m_bIsRegularMode) // extra one for heroic
-                    m_creature->SummonCreature(NPC_ETHEREAL_SPHERE, m_creature->GetPositionX()-5+rand()%10, m_creature->GetPositionY()-5+rand()%10, m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 40000);
+        if (m_uiSummonEtherealSphere_Timer < uiDiff)
+        {
+            DoScriptText(SAY_SPAWN, m_creature);
+            DoCast(m_creature, SPELL_SUMMON_ETHEREAL_SPHERE_1);
+            if (!m_bIsRegularMode) // extra one for heroic
+                m_creature->SummonCreature(NPC_ETHEREAL_SPHERE, m_creature->GetPositionX()-5+rand()%10, m_creature->GetPositionY()-5+rand()%10, m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 40000);
 
-                //m_uiSummonEtherealSphere_Timer = urand(45000, 47000);
-                m_uiSummonEtherealSphere_Timer = 0;
-                m_uiArcaneBuffet_Timer = urand(5000, 6000);
-            }
-            else m_uiSummonEtherealSphere_Timer -= uiDiff;
+            m_uiSummonEtherealSphere_Timer = 30000;
+            m_uiArcaneBuffet_Timer = urand(5000, 6000);
+            m_uiDespawn_Timer= 30000;
+        }
+        else m_uiSummonEtherealSphere_Timer -= uiDiff;
+
+        if (m_uiDespawn_Timer < uiDiff)
+        {
+            DespawnSphere();
+        }
+        else m_uiDespawn_Timer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -208,17 +221,10 @@ struct MANGOS_DLL_DECL boss_xevozzAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
         DespawnSphere();
 
-        if (m_pInstance)
+        if (m_pInstance){
             m_pInstance->SetData(TYPE_XEVOZZ, DONE);
-    }
-
-    void JustReachedHome()
-    {
-        if(m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_MAIN,FAIL);
-            m_pInstance->SetData(TYPE_XEVOZZ,FAIL);
-            m_creature->ForcedDespawn();
+        if(m_pInstance->GetData(TYPE_PORTAL6) == IN_PROGRESS) {m_pInstance->SetData(TYPE_PORTAL6, DONE);}
+            else {m_pInstance->SetData(TYPE_PORTAL12, DONE);}
         }
     }
 
@@ -246,54 +252,83 @@ struct MANGOS_DLL_DECL mob_ethereal_sphereAI : public ScriptedAI
 
     uint32 m_uiSummonPlayers_Timer;
     uint32 m_uiRangeCheck_Timer;
+    uint32 m_uiPhaseCheck_Timer;
+    bool bNormalPhase;
+
 
     void Reset()
     {
-        m_uiSummonPlayers_Timer = urand(33000, 35000);
+        m_uiSummonPlayers_Timer = 5000;
         m_uiRangeCheck_Timer = 1000;
+        m_uiPhaseCheck_Timer = 10000;
+        bNormalPhase = false;
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
         //Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiRangeCheck_Timer < uiDiff)
+       /* if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;*/ 
+        if(!bNormalPhase)
         {
-            if (m_pInstance)
+            if (m_uiPhaseCheck_Timer < uiDiff )
             {
-                if (Creature* pXevozz = ((Creature*)m_creature->GetMap()->GetUnit( m_pInstance->GetData64(DATA_XEVOZZ))))
+            bNormalPhase = true;
+            m_uiPhaseCheck_Timer=3000000;
+            Creature* pXevozz = m_pInstance->GetSingleCreatureFromStorage(DATA_XEVOZZ);
+            m_creature->GetMotionMaster()->MoveFollow(pXevozz, 0, 0);
+            }
+            else m_uiPhaseCheck_Timer -= uiDiff;
+        }
+        if(bNormalPhase)
+        {
+
+            if (m_uiRangeCheck_Timer < uiDiff)
+            {
+                DoCast(m_creature, m_bIsRegularMode ? SPELL_ARCANE_TEMPEST: SPELL_ARCANE_TEMPEST_H);
+                if (m_pInstance)
+                {
+                    if (Creature* pXevozz = m_pInstance->GetSingleCreatureFromStorage(DATA_XEVOZZ))
+                    {
+                        float fDistance = m_creature->GetDistance2d(pXevozz);
+                        if (fDistance <= 3)
+                        {
+                            m_creature->CastSpell(pXevozz, SPELL_ARCANE_POWER_H, false);
+                        // DoCast(pXevozz,SPELL_ARCANE_POWER_H);
+                        }
+                    }
+                }
+                m_uiRangeCheck_Timer = 1000;
+            }
+            else m_uiRangeCheck_Timer -= uiDiff;
+
+            if (m_uiSummonPlayers_Timer < uiDiff)
+            {
+                if (Creature* pXevozz = (m_pInstance->GetSingleCreatureFromStorage(DATA_XEVOZZ)))
                 {
                     float fDistance = m_creature->GetDistance2d(pXevozz);
-                    if (fDistance <= 3)
-                        DoCast(pXevozz, m_bIsRegularMode ? SPELL_ARCANE_POWER_H : SPELL_ARCANE_POWER);
-                    else
-                        DoCast(m_creature, 35845);
-                }
+
+                    if(fDistance<=20 && fDistance >6)
+                    {
+                        DoCast(m_creature, SPELL_SUMMON_PLAYERS); // not working right
+
+                        Map* pMap = m_creature->GetMap();
+                        if (pMap && pMap->IsDungeon())
+                        {
+                            Map::PlayerList const &PlayerList = pMap->GetPlayers();
+
+                            if (!PlayerList.isEmpty())
+                                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                    if (i->getSource()->isAlive())
+                                        DoTeleportPlayer(i->getSource(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), i->getSource()->GetOrientation());
+                        }
+
+                       m_uiSummonPlayers_Timer = 15000;
+                     }
+                  }
             }
-            m_uiRangeCheck_Timer = 1000;
+            else m_uiSummonPlayers_Timer -= uiDiff; 
         }
-        else m_uiRangeCheck_Timer -= uiDiff;
-
-        if (m_uiSummonPlayers_Timer < uiDiff)
-        {
-            DoCast(m_creature, SPELL_SUMMON_PLAYERS); // not working right
-
-            Map* pMap = m_creature->GetMap();
-            if (pMap && pMap->IsDungeon())
-            {
-                Map::PlayerList const &PlayerList = pMap->GetPlayers();
-
-                if (!PlayerList.isEmpty())
-                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                        if (i->getSource()->isAlive())
-                            DoTeleportPlayer(i->getSource(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), i->getSource()->GetOrientation());
-            }
-
-            m_uiSummonPlayers_Timer = urand(33000, 35000);
-        }
-        else m_uiSummonPlayers_Timer -= uiDiff;
     }
 };
 

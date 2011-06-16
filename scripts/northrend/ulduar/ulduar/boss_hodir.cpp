@@ -243,7 +243,7 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
     {
         //respawn all npc's
         if (m_pInstance)
-            for (std::list<uint64>::iterator i = m_pInstance->m_lHodirMobsGUIDs.begin(); i != m_pInstance->m_lHodirMobsGUIDs.end(); i++)
+            for (GUIDList::iterator i = m_pInstance->m_lHodirMobsGUIDs.begin(); i != m_pInstance->m_lHodirMobsGUIDs.end(); i++)
                 if (Creature *pTmp = m_pInstance->instance->GetCreature(*i))
                     if (!pTmp->isAlive())
                         pTmp->Respawn();

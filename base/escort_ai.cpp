@@ -32,6 +32,27 @@ npc_escortAI::npc_escortAI(Creature* pCreature) : ScriptedAI(pCreature),
     m_bCanReturnToStart(false)
 {}
 
+void npc_escortAI::GetAIInformation(ChatHandler& reader)
+{
+    std::ostringstream oss;
+
+    oss << "EscortAI ";
+    if (m_playerGuid)
+        oss << "started for " << m_playerGuid.GetString() << " ";
+    if (m_pQuestForEscort)
+        oss << "started with quest " << m_pQuestForEscort->GetQuestId();
+
+    if (HasEscortState(STATE_ESCORT_ESCORTING))
+    {
+        oss << "\nEscortFlags: Escorting" << (HasEscortState(STATE_ESCORT_RETURNING) ? ", Returning" : "") << (HasEscortState(STATE_ESCORT_PAUSED) ? ", Paused" : "");
+
+        if (CurrentWP != WaypointList.end())
+            oss << "\nNext Waypoint Id = " << CurrentWP->uiId << " Position: " << CurrentWP->fX << " " << CurrentWP->fY << " " << CurrentWP->fZ;
+    }
+
+    reader.PSendSysMessage(oss.str().c_str());
+}
+
 bool npc_escortAI::IsVisible(Unit* pWho) const
 {
     if (!pWho)
@@ -149,7 +170,7 @@ void npc_escortAI::MoveInLineOfSight(Unit* pWho)
 
 void npc_escortAI::JustDied(Unit* pKiller)
 {
-    if (!HasEscortState(STATE_ESCORT_ESCORTING) || m_playerGuid.IsEmpty() || !m_pQuestForEscort)
+    if (!HasEscortState(STATE_ESCORT_ESCORTING) || !m_playerGuid || !m_pQuestForEscort)
         return;
 
     if (Player* pPlayer = GetPlayerForEscort())
@@ -295,7 +316,7 @@ void npc_escortAI::UpdateAI(const uint32 uiDiff)
     }
 
     //Check if player or any member of his group is within range
-    if (HasEscortState(STATE_ESCORT_ESCORTING) && !m_playerGuid.IsEmpty() && !m_creature->getVictim() && !HasEscortState(STATE_ESCORT_RETURNING))
+    if (HasEscortState(STATE_ESCORT_ESCORTING) && m_playerGuid && !m_creature->getVictim() && !HasEscortState(STATE_ESCORT_RETURNING))
     {
         if (m_uiPlayerCheckTimer < uiDiff)
         {

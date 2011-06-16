@@ -126,7 +126,7 @@ struct MANGOS_DLL_DECL boss_kalecgosAI : public ScriptedAI
         if (m_pInstance)
         {
             // Reset Sathrovarr too
-            if (Creature* pSath = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_SATHROVARR)))
+            if (Creature* pSath = m_pInstance->GetSingleCreatureFromStorage(NPC_SATHROVARR))
             {
                 if (pSath->isAlive() && pSath->getVictim())
                     pSath->AI()->EnterEvadeMode();
@@ -178,7 +178,7 @@ struct MANGOS_DLL_DECL boss_kalecgosAI : public ScriptedAI
             pTarget->CastSpell(pTarget, SPELL_SPECTRAL_REALM_FORCE_FACTION, true);
             pTarget->CastSpell(pTarget, SPELL_SPECTRAL_REALM, true);
 
-            m_pInstance->SetData64(DATA_PLAYER_SPECTRAL_REALM, pTarget->GetGUID());
+            m_pInstance->SetGuid(DATA_PLAYER_SPECTRAL_REALM, pTarget->GetObjectGuid());
         }
     }
 
@@ -209,7 +209,7 @@ struct MANGOS_DLL_DECL boss_kalecgosAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Creature* pSathrovarr = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_SATHROVARR)))
+        if (Creature* pSathrovarr = m_pInstance->GetSingleCreatureFromStorage(NPC_SATHROVARR))
         {
             if (pSathrovarr->isAlive())
             {
@@ -218,7 +218,7 @@ struct MANGOS_DLL_DECL boss_kalecgosAI : public ScriptedAI
             }
         }
 
-        if (Creature* pKalec = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_KALECGOS_HUMAN)))
+        if (Creature* pKalec = m_pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_HUMAN))
         {
             pKalec->DeleteThreatList();
             pKalec->SetVisibility(VISIBILITY_OFF);
@@ -252,7 +252,7 @@ struct MANGOS_DLL_DECL boss_kalecgosAI : public ScriptedAI
 
         if (!m_bEnraged && m_creature->GetHealthPercent() < 10.0f)
         {
-            if (Creature* pSathrovarr = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_SATHROVARR)))
+            if (Creature* pSathrovarr = m_pInstance->GetSingleCreatureFromStorage(NPC_SATHROVARR))
             {
                 if (pSathrovarr->isAlive())
                     pSathrovarr->CastSpell(pSathrovarr, SPELL_CRAZED_RAGE, true);
@@ -378,7 +378,7 @@ struct MANGOS_DLL_DECL boss_sathrovarrAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Creature* pKalec = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_KALECGOS_HUMAN)))
+        if (Creature* pKalec = m_pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_HUMAN))
         {
             m_creature->AddThreat(pKalec, 10000000.0f);
             pKalec->AddThreat(m_creature, 10000000.0f);
@@ -400,7 +400,7 @@ struct MANGOS_DLL_DECL boss_sathrovarrAI : public ScriptedAI
 
             m_pInstance->SetData(DATA_SET_SPECTRAL_CHECK, 5000);
 
-            if (Creature* pKalecgos = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_KALECGOS_DRAGON)))
+            if (Creature* pKalecgos = m_pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_DRAGON))
             {
                 if (boss_kalecgosAI* pKalecgosAI = dynamic_cast<boss_kalecgosAI*>(pKalecgos->AI()))
                 {
@@ -423,7 +423,7 @@ struct MANGOS_DLL_DECL boss_sathrovarrAI : public ScriptedAI
 
         if (!m_bEnraged && m_creature->GetHealthPercent() < 10.0f)
         {
-            if (Creature* pKalecgos = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_KALECGOS_DRAGON)))
+            if (Creature* pKalecgos = m_pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_DRAGON))
             {
                 if (pKalecgos->isAlive())
                     pKalecgos->CastSpell(pKalecgos, SPELL_CRAZED_RAGE, true);
@@ -510,7 +510,7 @@ struct MANGOS_DLL_DECL boss_kalecgos_humanoidAI : public ScriptedAI
         {
             if (m_pInstance)
             {
-                /*Player* pPlayer = m_creature->GetMap()->GetPlayer(m_pInstance->GetData64(DATA_RANDOM_SPECTRAL_PLAYER));
+                /*Player* pPlayer = m_creature->GetMap()->GetPlayer(m_pInstance->GetGuid(DATA_RANDOM_SPECTRAL_PLAYER));
                 if (pPlayer)
                     DoCastSpellIfCan(pPlayer, SPELL_REVITALIZE);*/
                 RevitalizeTimer = 30000;
@@ -553,7 +553,7 @@ bool GOUse_go_spectral_rift(Player* pPlayer, GameObject* pGo)
         pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_REALM, true);
 
         // Add player to pSath's threat list
-        /*if (Creature* pSath = pInstance->instance->GetCreature(pInstance->GetData64(DATA_KALECGOS_DRAGON)))
+        /*if (Creature* pSath = pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_DRAGON)) ++ TODO might contain typos
         {
             if (pSath->isAlive())
             {
@@ -563,7 +563,7 @@ bool GOUse_go_spectral_rift(Player* pPlayer, GameObject* pGo)
         }
 
         // Remove player from Sathrovarr's threat list
-        if (Creature* pKalecgos = pInstance->instance->GetCreature(pInstance->GetData64(DATA_SATHROVARR)))
+        if (Creature* pKalecgos = pInstance->GetSingleCreatureFromStorage(NPC_SATHROVARR)) ++ TODO might contain typos
         {
             if (pKalecgos->isAlive())
             {
@@ -575,7 +575,7 @@ bool GOUse_go_spectral_rift(Player* pPlayer, GameObject* pGo)
             }
         }*/
 
-        pInstance->SetData64(DATA_PLAYER_SPECTRAL_REALM, pPlayer->GetGUID());
+        pInstance->SetGuid(DATA_PLAYER_SPECTRAL_REALM, pPlayer->GetObjectGuid());
     }
 
     return true;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -25,6 +25,7 @@ enum
 
     NPC_CRYSTAL_CHANNEL_TARGET      = 26710,
     NPC_CRYSTAL_CHANNEL             = 26712,
+    NPC_TRIGGER_TARGET              = 26714,
     NPC_NOVOS                       = 26631,
 
     NPC_CRYSTAL_HANDLER             = 26627,
@@ -59,12 +60,12 @@ class MANGOS_DLL_DECL instance_draktharon_keep : public ScriptedInstance
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/);
 
-        const char* Save() { return strInstData.c_str(); }
+        const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);
 
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string strInstData;
+        std::string m_strInstData;
 
         uint32 m_uiDreadAddsKilled;
         bool m_bNovosAddGrounded;
