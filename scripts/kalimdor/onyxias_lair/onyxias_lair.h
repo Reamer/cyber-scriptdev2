@@ -24,6 +24,8 @@ enum
     ACHIEV_CRIT_MANY_WHELPS_H   = 12568,
     ACHIEV_CRIT_NO_BREATH_N     = 12566,                    // Acheivements 4404, 4407
     ACHIEV_CRIT_NO_BREATH_H     = 12569,
+
+    ACHIEV_START_ONYXIA_ID      = 6601,
 };
 
 class MANGOS_DLL_DECL instance_onyxias_lair : public ScriptedInstance
@@ -42,15 +44,11 @@ class MANGOS_DLL_DECL instance_onyxias_lair : public ScriptedInstance
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/);
 
-        uint64 GetOnyxiaTriggerGUID() { return m_uiOnyxTriggerGUID; }
-
     protected:
         uint32 m_uiEncounter;
         uint32 m_uiAchievWhelpsCount;
 
         time_t m_tPhaseTwoStart;
-
-        uint64 m_uiOnyxTriggerGUID;
 };
 
 #endif

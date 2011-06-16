@@ -139,8 +139,6 @@ struct MANGOS_DLL_DECL boss_janalaiAI : public ScriptedAI
 {
     boss_janalaiAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_uiHatcher1GUID = 0;
-        m_uiHatcher2GUID = 0;
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
     }
@@ -159,7 +157,6 @@ struct MANGOS_DLL_DECL boss_janalaiAI : public ScriptedAI
 
     uint32 m_uiEnrageTimer;
     uint32 m_uiHatcherTimer;
-    uint32 eggs;
     uint32 m_uiWipeTimer;
 
     bool m_bIsBombing;
@@ -168,26 +165,26 @@ struct MANGOS_DLL_DECL boss_janalaiAI : public ScriptedAI
     bool m_bIsEnraged;
     bool m_bCanEnrage;
 
-    uint64 m_uiHatcher1GUID;
-    uint64 m_uiHatcher2GUID;
+    ObjectGuid m_hatcherOneGuid;
+    ObjectGuid m_hatcherTwoGuid;
 
     void Reset()
     {
         m_lBombsGUIDList.clear();
         m_lEggsRemainingList.clear();
 
-        if (Creature* pHatcher = m_creature->GetMap()->GetCreature(m_uiHatcher1GUID))
+        if (Creature* pHatcher = m_creature->GetMap()->GetCreature(m_hatcherOneGuid))
         {
             pHatcher->AI()->EnterEvadeMode();
             pHatcher->SetDeathState(JUST_DIED);
-            m_uiHatcher1GUID = 0;
+            m_hatcherOneGuid.Clear();
         }
 
-        if (Creature* pHatcher = m_creature->GetMap()->GetCreature(m_uiHatcher2GUID))
+        if (Creature* pHatcher = m_creature->GetMap()->GetCreature(m_hatcherTwoGuid))
         {
             pHatcher->AI()->EnterEvadeMode();
             pHatcher->SetDeathState(JUST_DIED);
-            m_uiHatcher2GUID = 0;
+            m_hatcherTwoGuid.Clear();
         }
 
         m_uiFireBreathTimer = 8000;
@@ -210,7 +207,7 @@ struct MANGOS_DLL_DECL boss_janalaiAI : public ScriptedAI
     void JustReachedHome()
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_JANALAI, NOT_STARTED);
+            m_pInstance->SetData(TYPE_JANALAI, FAIL);
     }
 
     void JustDied(Unit* Killer)
@@ -239,16 +236,16 @@ struct MANGOS_DLL_DECL boss_janalaiAI : public ScriptedAI
         switch(pSummoned->GetEntry())
         {
             case NPC_AMANI_HATCHER_1:
-                m_uiHatcher1GUID = pSummoned->GetGUID();
+                m_hatcherOneGuid = pSummoned->GetObjectGuid();
                 break;
             case NPC_AMANI_HATCHER_2:
-                m_uiHatcher2GUID = pSummoned->GetGUID();
+                m_hatcherTwoGuid = pSummoned->GetObjectGuid();
                 break;
             case NPC_FIRE_BOMB:
                 if (m_bIsBombing)
                 {
                     //store bombs in list to be used in BlowUpBombs()
-                    m_lBombsGUIDList.push_back(pSummoned->GetGUID());
+                    m_lBombsGUIDList.push_back(pSummoned->GetObjectGuid());
 
                     if (pSummoned->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                         pSummoned->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -363,16 +360,16 @@ struct MANGOS_DLL_DECL boss_janalaiAI : public ScriptedAI
             if (!m_pInstance)
                 return;
 
-            if (uint32 uiEggsRemaining_Right = m_pInstance->GetData(DATA_J_EGGS_RIGHT))
+            if (uint32 uiEggsRemaining_Right = m_pInstance->GetData(TYPE_J_EGGS_RIGHT))
             {
                 for(uint32 i = 0; i < uiEggsRemaining_Right; ++i)
-                    m_pInstance->SetData(DATA_J_EGGS_RIGHT, SPECIAL);
+                    m_pInstance->SetData(TYPE_J_EGGS_RIGHT, SPECIAL);
             }
 
-            if (uint32 uiEggsRemaining_Left = m_pInstance->GetData(DATA_J_EGGS_LEFT))
+            if (uint32 uiEggsRemaining_Left = m_pInstance->GetData(TYPE_J_EGGS_LEFT))
             {
                 for(uint32 i = 0; i < uiEggsRemaining_Left; ++i)
-                    m_pInstance->SetData(DATA_J_EGGS_LEFT, SPECIAL);
+                    m_pInstance->SetData(TYPE_J_EGGS_LEFT, SPECIAL);
             }
         }
     }
@@ -514,14 +511,14 @@ struct MANGOS_DLL_DECL boss_janalaiAI : public ScriptedAI
         {
             if (m_uiHatcherTimer < uiDiff)
             {
-                if (!m_pInstance || (m_pInstance->GetData(DATA_J_EGGS_LEFT) == 0 && m_pInstance->GetData(DATA_J_EGGS_RIGHT) == 0))
+                if (!m_pInstance || (m_pInstance->GetData(TYPE_J_EGGS_LEFT) == 0 && m_pInstance->GetData(TYPE_J_EGGS_RIGHT) == 0))
                     m_bIsEggRemaining = false;
                 else
                 {
                     DoScriptText(SAY_SUMMON_HATCHER, m_creature);
 
-                    Creature* pHatcer1 = m_creature->GetMap()->GetCreature(m_uiHatcher1GUID);
-                    Creature* pHatcer2 = m_creature->GetMap()->GetCreature(m_uiHatcher2GUID);
+                    Creature* pHatcer1 = m_creature->GetMap()->GetCreature(m_hatcherOneGuid);
+                    Creature* pHatcer2 = m_creature->GetMap()->GetCreature(m_hatcherTwoGuid);
 
                     if (!pHatcer1 || (pHatcer1 && !pHatcer1->isAlive()))
                     {
@@ -644,7 +641,7 @@ struct MANGOS_DLL_DECL npc_amanishi_hatcherAI : public ScriptedAI
 
     void DoHatchEggs(uint32 uiCount)
     {
-        uint32 uiSaveRightOrLeft = m_creature->GetEntry() == NPC_AMANI_HATCHER_1 ? DATA_J_EGGS_RIGHT : DATA_J_EGGS_LEFT;
+        uint32 uiSaveRightOrLeft = m_creature->GetEntry() == NPC_AMANI_HATCHER_1 ? TYPE_J_EGGS_RIGHT : TYPE_J_EGGS_LEFT;
 
         for(uint32 i = 0; i < uiCount; ++i)
         {
@@ -681,7 +678,7 @@ struct MANGOS_DLL_DECL npc_amanishi_hatcherAI : public ScriptedAI
                 if (!m_pInstance)
                     return;
 
-                uint32 uiEggsRemaining = m_creature->GetEntry() == NPC_AMANI_HATCHER_1 ? m_pInstance->GetData(DATA_J_EGGS_RIGHT) : m_pInstance->GetData(DATA_J_EGGS_LEFT);
+                uint32 uiEggsRemaining = m_creature->GetEntry() == NPC_AMANI_HATCHER_1 ? m_pInstance->GetData(TYPE_J_EGGS_RIGHT) : m_pInstance->GetData(TYPE_J_EGGS_LEFT);
 
                 if (!uiEggsRemaining)
                 {

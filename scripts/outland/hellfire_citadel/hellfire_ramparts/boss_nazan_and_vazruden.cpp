@@ -55,9 +55,7 @@ enum
     POINT_ID_FLYING         = 101,
     POINT_ID_COMBAT         = 102,
 
-    NPC_VAZRUDEN_HERALD     = 17307,
     NPC_NAZAN               = 17536,
-    NPC_VAZRUDEN            = 17537
 };
 
 const float afCenterPos[3] = {-1399.401f, 1736.365f, 87.008f}; //moves here to drop off nazan
@@ -100,6 +98,12 @@ struct MANGOS_DLL_DECL boss_vazrudenAI : public ScriptedAI
             m_pInstance->SetData(TYPE_VAZRUDEN, DONE);
     }
 
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_VAZRUDEN, FAIL);
+    }
+
     void KilledUnit(Unit* pVictim)
     {
         DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
@@ -107,7 +111,7 @@ struct MANGOS_DLL_DECL boss_vazrudenAI : public ScriptedAI
 
     void PrepareAndDescendMount()
     {
-        if (Creature* pHerald = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_HERALD)))
+        if (Creature* pHerald = m_pInstance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
         {
             if (pHerald->HasSplineFlag(SPLINEFLAG_WALKMODE))
                 pHerald->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
@@ -160,8 +164,8 @@ struct MANGOS_DLL_DECL boss_vazruden_heraldAI : public ScriptedAI
     uint32 m_uiMovementTimer;
     uint32 m_uiFireballTimer;
 
-    uint64 m_uiLastSeenPlayerGUID;
-    uint64 m_uiVazrudenGUID;
+    ObjectGuid m_lastSeenPlayerGuid;
+    ObjectGuid m_vazrudenGuid;
 
     void Reset()
     {
@@ -172,8 +176,8 @@ struct MANGOS_DLL_DECL boss_vazruden_heraldAI : public ScriptedAI
 
         m_uiMovementTimer = 0;
         m_bIsEventInProgress = false;
-        m_uiLastSeenPlayerGUID = 0;
-        m_uiVazrudenGUID = 0;
+        m_lastSeenPlayerGuid.Clear();
+        m_vazrudenGuid.Clear();
         m_uiFireballTimer = 0;
 
         // see boss_onyxia
@@ -184,10 +188,10 @@ struct MANGOS_DLL_DECL boss_vazruden_heraldAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho)
     {
-        if (m_bIsEventInProgress && !m_uiLastSeenPlayerGUID && pWho->GetTypeId() == TYPEID_PLAYER && pWho->isAlive() && !((Player*)pWho)->isGameMaster())
+        if (m_bIsEventInProgress && !m_lastSeenPlayerGuid && pWho->GetTypeId() == TYPEID_PLAYER && pWho->isAlive() && !((Player*)pWho)->isGameMaster())
         {
             if (m_creature->IsWithinDistInMap(pWho, 40.0f))
-                m_uiLastSeenPlayerGUID = pWho->GetGUID();
+                m_lastSeenPlayerGuid = pWho->GetObjectGuid();
         }
 
         if (m_pInstance && m_pInstance->GetData(TYPE_NAZAN) != IN_PROGRESS)
@@ -231,14 +235,15 @@ struct MANGOS_DLL_DECL boss_vazruden_heraldAI : public ScriptedAI
                     m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                     m_creature->RemoveSplineFlag(SPLINEFLAG_FLYING);
 
-                    Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiLastSeenPlayerGUID);
+                    Player* pPlayer = m_creature->GetMap()->GetPlayer(m_lastSeenPlayerGuid);
                     if (pPlayer && pPlayer->isAlive())
                         AttackStart(pPlayer);
 
                     break;
                 }
                 case POINT_ID_FLYING:
-                    m_uiFireballTimer = 3000;
+                    if (m_bIsEventInProgress)               // Additional check for wipe case, while nazan is flying to this point
+                        m_uiFireballTimer = 3000;
                     break;
             }
         }
@@ -279,10 +284,10 @@ struct MANGOS_DLL_DECL boss_vazruden_heraldAI : public ScriptedAI
         if (pSummoned->GetEntry() != NPC_VAZRUDEN)
             return;
 
-        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_uiLastSeenPlayerGUID))
+        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_lastSeenPlayerGuid))
             pSummoned->AI()->AttackStart(pPlayer);
 
-        m_uiVazrudenGUID = pSummoned->GetGUID();
+        m_vazrudenGuid = pSummoned->GetObjectGuid();
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VAZRUDEN, IN_PROGRESS);
@@ -292,6 +297,12 @@ struct MANGOS_DLL_DECL boss_vazruden_heraldAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NAZAN, DONE);
+    }
+
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_NAZAN, FAIL);
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -315,14 +326,14 @@ struct MANGOS_DLL_DECL boss_vazruden_heraldAI : public ScriptedAI
                     m_uiMovementTimer -= uiDiff;
             }
 
-            if (m_uiVazrudenGUID && m_uiFireballTimer)
+            if (m_vazrudenGuid && m_uiFireballTimer)
             {
                 if (m_uiFireballTimer <= uiDiff)
                 {
-                    if (Creature* pVazruden = m_creature->GetMap()->GetCreature(m_uiVazrudenGUID))
+                    if (Creature* pVazruden = m_creature->GetMap()->GetCreature(m_vazrudenGuid))
                     {
                         if (Unit* pEnemy = pVazruden->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                            DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H, 0, pVazruden->GetGUID());
+                            DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H, 0, pVazruden->GetObjectGuid());
                     }
                     m_uiFireballTimer = urand(4000, 8000);
                 }

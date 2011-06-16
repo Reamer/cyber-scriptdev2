@@ -347,7 +347,7 @@ struct MANGOS_DLL_DECL mob_molten_golemAI : public ScriptedAI
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             m_creature->SetHealth(1);
 
-            Creature* pCreature = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(DATA_VOLKHAN));
+            Creature* pCreature = m_pInstance->GetSingleCreatureFromStorage(NPC_VOLKHAN);
 
             m_creature->SetInCombatWith(pCreature);
 

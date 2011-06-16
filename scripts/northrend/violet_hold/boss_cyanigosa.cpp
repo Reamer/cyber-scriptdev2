@@ -27,16 +27,16 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                                 = -1608008,
-    SAY_SLAY_1                                = -1608009,
-    SAY_SLAY_2                                = -1608010,
-    SAY_SLAY_3                                = -1608011,
-    SAY_DEATH                                 = -1608012,
-    SAY_SPAWN                                 = -1608013,
-    SAY_DISRUPTION                            = -1608014,
-    SAY_BREATH_ATTACK                         = -1608015,
-    SAY_SPECIAL_ATTACK_1                      = -1608016,
-    SAY_SPECIAL_ATTACK_2                      = -1608017,
+    SAY_AGGRO                                 = -1608046,
+    SAY_SLAY_1                                = -1608051,
+    SAY_SLAY_2                                = -1608052,
+    SAY_SLAY_3                                = -1608053,
+    SAY_DEATH                                 = -1608054,
+    SAY_SPAWN                                 = -1608045,
+    SAY_DISRUPTION                            = -1608050,
+    SAY_BREATH_ATTACK                         = -1608047,
+    SAY_SPECIAL_ATTACK_1                      = -1608048,
+    SAY_SPECIAL_ATTACK_2                      = -1608049,
 
     SPELL_ARCANE_VACUM                        = 58694,
     SPELL_BLIZZARD                            = 58693,
@@ -79,10 +79,21 @@ struct MANGOS_DLL_DECL boss_cyanigosaAI : public ScriptedAI
         m_creature->SetInCombatWithZone();
     }
 
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+        {
+            m_pInstance->SetData(TYPE_CYANIGOSA, FAIL);
+            m_pInstance->SetData(TYPE_EVENT, FAIL);
+            m_pInstance->SetData(TYPE_RIFT, FAIL);
+        }
+    }
+
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
         DoCast(m_creature, SPELL_CYANIGOSA_TRANSFORM);
+        m_pInstance->SetData(TYPE_CYANIGOSA, IN_PROGRESS);
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -93,7 +104,7 @@ struct MANGOS_DLL_DECL boss_cyanigosaAI : public ScriptedAI
 
         if (m_uiUncontrollableEnergy_Timer < uiDiff)
         {
-            DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_UNCONTROLLABLE_ENERGY_H : SPELL_UNCONTROLLABLE_ENERGY);
+            DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_UNCONTROLLABLE_ENERGY : SPELL_UNCONTROLLABLE_ENERGY_H);
             m_uiUncontrollableEnergy_Timer = urand(15000, 16000);
         }
         else
@@ -111,7 +122,7 @@ struct MANGOS_DLL_DECL boss_cyanigosaAI : public ScriptedAI
         if (m_uiBlizzard_Timer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCast(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD_H : SPELL_BLIZZARD);
+                DoCast(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD: SPELL_BLIZZARD_H );
             m_uiBlizzard_Timer = urand(20000, 25000);
         }
         else
@@ -120,6 +131,15 @@ struct MANGOS_DLL_DECL boss_cyanigosaAI : public ScriptedAI
         if (m_uiArcaneVacuum_Timer < uiDiff)
         {
             DoCast(m_creature, SPELL_ARCANE_VACUM);
+            Map* pMap = m_creature->GetMap();
+              if (pMap && pMap->IsDungeon())
+                {
+                   Map::PlayerList const &PlayerList = pMap->GetPlayers();
+                       if (!PlayerList.isEmpty())
+                            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                                if (i->getSource()->isAlive())
+                                    DoTeleportPlayer(i->getSource(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), i->getSource()->GetOrientation());
+                 }
             DoResetThreat();
             m_uiArcaneVacuum_Timer = urand(28000, 33000);
         }
@@ -128,7 +148,7 @@ struct MANGOS_DLL_DECL boss_cyanigosaAI : public ScriptedAI
 
         if (m_uiTailSweep_Timer < uiDiff)
         {
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_TAIL_SWEEP_H : SPELL_TAIL_SWEEP);
+            DoCast(m_creature, m_bIsRegularMode ? SPELL_TAIL_SWEEP : SPELL_TAIL_SWEEP_H);
             m_uiTailSweep_Timer = urand(10000, 11000);
         }
         else
@@ -142,7 +162,11 @@ struct MANGOS_DLL_DECL boss_cyanigosaAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_CYANIGOSA,DONE);
+        {
+            m_pInstance->SetData(TYPE_RIFT, DONE);
+            m_pInstance->SetData(TYPE_EVENT, DONE);
+            m_pInstance->SetData(TYPE_CYANIGOSA, DONE);
+        }
     }
 
     void KilledUnit(Unit* pVictim)

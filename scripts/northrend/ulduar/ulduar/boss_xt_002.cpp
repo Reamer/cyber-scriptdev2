@@ -755,7 +755,7 @@ CreatureAI* GetAI_boss_xt_002(Creature* pCreature)
     return new boss_xt_002AI(pCreature);
 }
 
-void AddSC_boss_xt_002()
+void AddSC_boss_xt002()
 {
     Script* NewScript;
 

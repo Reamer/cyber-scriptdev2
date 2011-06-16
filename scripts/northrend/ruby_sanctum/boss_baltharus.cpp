@@ -18,7 +18,7 @@
 SDName: boss_baltharus
 SD%Complete: 90%
 SDComment: by notagain and /dev/rsa
-SDCategory: ruby_sanctum
+SDCategory: Ruby Sanctum
 EndScriptData */
 // Not fully offlike clone work, but Blizz idea is intact.
 // Need correct timers
@@ -80,7 +80,7 @@ struct MANGOS_DLL_DECL boss_baltharusAI : public BSWScriptedAI
         pClone = NULL;
         inCombat = false;
         intro = false;
-        if (pDummyTarget = m_creature->GetMap()->GetCreature( pInstance->GetData64(NPC_BALTHARUS_TARGET)))
+        if (pDummyTarget = pInstance->GetSingleCreatureFromStorage(NPC_BALTHARUS_TARGET))
         {
             if (!pDummyTarget->isAlive()) pDummyTarget->Respawn();
 
@@ -93,8 +93,8 @@ struct MANGOS_DLL_DECL boss_baltharusAI : public BSWScriptedAI
             pDummyTarget->GetMotionMaster()->MoveIdle();
         }
 
-        if(Creature* pTarget = m_creature->GetMap()->GetCreature( pInstance->GetData64(NPC_XERESTRASZA)))
-            m_creature->SetUInt64Value(UNIT_FIELD_TARGET, pTarget->GetGUID());
+        if (Creature* pTarget = pInstance->GetSingleCreatureFromStorage(NPC_XERESTRASZA))
+            m_creature->SetGuidValue(UNIT_FIELD_TARGET, pTarget->GetObjectGuid());
     }
 
     void JustReachedHome()
@@ -337,6 +337,28 @@ CreatureAI* GetAI_mob_baltharus_clone(Creature* pCreature)
     return new mob_baltharus_cloneAI(pCreature);
 }
 
+
+enum
+{
+    // Xerestrasza intro and outro texts
+    SAY_HELP                    = -1724000,
+    SAY_THANKS                  = -1724002,
+    SAY_OUTRO_1                 = -1724003,
+    SAY_OUTRO_2                 = -1724004,
+    SAY_OUTRO_3                 = -1724005,
+    SAY_OUTRO_4                 = -1724006,
+    SAY_OUTRO_5                 = -1724007,
+    SAY_OUTRO_6                 = -1724008,
+    SAY_OUTRO_7                 = -1724009,
+
+    // Baltharus texts
+    SAY_INTRO                   = -1724001,
+    SAY_AGGRO                   = -1724010,
+    SAY_SLAY_1                  = -1724011,
+    SAY_SLAY_2                  = -1724012,
+    SAY_DEATH                   = -1724013,
+    SAY_SPLIT                   = -1724014,
+};
 
 void AddSC_boss_baltharus()
 {

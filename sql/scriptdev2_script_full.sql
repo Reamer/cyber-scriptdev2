@@ -3,7 +3,7 @@
 --
 
 DELETE FROM sd2_db_version;
-INSERT INTO sd2_db_version (version) VALUES ('ScriptDev2 (for MaNGOS 11432+) ');
+INSERT INTO sd2_db_version (version) VALUES ('ScriptDev2 (for MaNGOS 11590+) ');
 
 --
 -- Below contains data for table `script_texts` mainly used in C++ parts.
@@ -849,7 +849,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1109003,'Understand this, Eranikus wants nothing more than to be brought to Azeroth from the Dream. Once he is out, he will stop at nothing to destroy my physical manifestation. This, however, is the only way in which you could recover the scepter shard.',0,0,0,0,'malfurion stormrge SAY_MAFLURION3'),
 (-1109004,'You will bring him back into this world, champion.',0,0,0,0,'malfurion Stormrge SAY_MALFURION4'),
 
-(-1109005,'The shield be down! Rise up Atal\'ai! Rise up!',5861,6,0,0,'jammalan SAY_JAMMALAN_INTRO');
+(-1109005,'The shield be down! Rise up Atal\'ai! Rise up!',5861,6,0,0,'jammalan SAY_JAMMALAN_INTRO'),
+
+(-1109006,'HAKKAR LIVES!',5870,1,0,0,'avatar SAY_AVATAR_BRAZIER_1'),
+(-1109007,'I TASTE THE BLOOD OF LIFE!',5868,1,0,0,'avatar SAY_AVATAR_BRAZIER_2'),
+(-1109008,'I DRAW CLOSER TO YOUR WORLD!',5867,1,0,0,'avatar SAY_AVATAR_BRAZIER_3'),
+(-1109009,'I AM NEAR!',5869,1,0,0,'avatar SAY_AVATAR_BRAZIER_4'),
+(-1109010,'I AM HERE!',0,1,0,0,'avatar SAY_AVATAR_SPAWN');
 
 -- -1 129 000 RAZORFEN DOWNS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -1427,7 +1433,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1533086,'I see no complications... Wait... What is this?',14468,1,0,0,'kelthuzad SAY_SAPP_DIALOG3'),
 (-1533087,'Your security measures have failed! See to this interruption immediately!',8882,1,0,0,'kelthuzad SAY_SAPP_DIALOG4_LICH'),
 (-1533088,'Yes, master!',14469,1,0,0,'kelthuzad SAY_SAPP_DIALOG5'),
-(-1533089,'No!!! A curse upon you, interlopers! The armies of the Lich King will hunt you down. You will not escape your fate...',14484,1,0,0,'kelthuzad SAY_CAT_DIED'),
+(-1533089,'No!!! A curse upon you, interlopers! The armies of the Lich King will hunt you down. You will not escape your fate...',14484,6,0,0,'kelthuzad SAY_CAT_DIED'),
 (-1533090,'Who dares violate the sanctity of my domain? Be warned, all who trespass here are doomed.',14463,6,0,0,'kelthuzad SAY_TAUNT1'),
 (-1533091,'Fools, you think yourselves triumphant? You have only taken one step closer to the abyss! ',14464,6,0,0,'kelthuzad SAY_TAUNT2'),
 (-1533092,'I grow tired of these games. Proceed, and I will banish your souls to oblivion!',14465,6,0,0,'kelthuzad SAY_TAUNT3'),
@@ -1619,7 +1625,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1542011,'Anger... Hate... These are tools I can use.',10288,1,0,0,'the_maker SAY_AGGRO_3'),
 (-1542012,'Let\'s see what I can make of you.',10289,1,0,0,'the_maker SAY_KILL_1'),
 (-1542013,'It is pointless to resist.',10290,1,0,0,'the_maker SAY_KILL_2'),
-(-1542014,'Stay away from... me.',10291,1,0,0,'the_maker SAY_DIE');
+(-1542014,'Stay away from... me.',10291,1,0,0,'the_maker SAY_DIE'),
+
+(-1542015,'Kill them!',0,1,0,0,'broggok SAY_BROGGOK_INTRO');
 
 -- -1 543 000 HELLFIRE RAMPARTS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -2319,18 +2327,18 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568065,'Lot more gonna fall like you!',12099,1,0,0,'zuljin SAY_KILL2'),
 (-1568066,'Mebbe me fall...but da Amani empire...never gonna die...',12100,1,0,0,'zuljin SAY_DEATH'),
 
-(-1568067,'Zul\'jin got a surprise for ya...',12052,1,0,0,'zulaman SAY_INST_RELEASE'),
-(-1568068,'Da spirits gonna feast today! Begin da ceremonies, sacrifice da prisoners... make room for our new guests!',12053,1,0,0,'zulaman SAY_INST_BEGIN'),
-(-1568069,'Take your pick, trespassers! Any of ma priests be happy to accommodate ya.',12054,1,0,0,'zulaman SAY_INST_PROGRESS_1'),
-(-1568070,'Don\'t be shy. Thousands have come before you. Ya not be alone in your service.',12055,1,0,0,'zulaman SAY_INST_PROGRESS_2'),
-(-1568071,'Ya gonna fail, strangers. Many try before you, but dey only make us stronger!',12056,1,0,0,'zulaman SAY_INST_PROGRESS_3'),
-(-1568072,'Your efforts was in vain, trespassers. The rituals nearly be complete.',12057,1,0,0,'zulaman SAY_INST_WARN_1'),
-(-1568073,'Soon da cages gonna be empty, da sacrifices be complete, and you gonna take dere places.',12058,1,0,0,'zulaman SAY_INST_WARN_2'),
-(-1568074,'Time be running low, strangers. Soon you gonna join da souls of dem ya failed to save.',12059,1,0,0,'zulaman SAY_INST_WARN_3'),
-(-1568075,'Make haste, ma priests! Da rituals must not be interrupted!',12060,1,0,0,'zulaman SAY_INST_WARN_4'),
-(-1568076,'Ya make a good try... but now you gonna join da ones who already fall.',12061,1,0,0,'zulaman SAY_INST_SACRIF1'),
-(-1568077,'Ya not do too bad. Ya efforts [...] for a small time. Come to me now. Ya prove yourself worthy offerings.',12062,1,0,0,'zulaman SAY_INST_SACRIF2'),
-(-1568078,'Watch now. Every offering gonna strengthen our ties to da spirit world. Soon, we gonna be unstoppable!',12065,1,0,0,'zulaman SAY_INST_COMPLETE'),
+(-1568067,'Zul\'jin got a surprise for ya...',12052,6,0,0,'zulaman SAY_INST_RELEASE'),
+(-1568068,'Da spirits gonna feast today! Begin da ceremonies, sacrifice da prisoners... make room for our new guests!',12053,6,0,0,'zulaman SAY_INST_BEGIN'),
+(-1568069,'Take your pick, trespassers! Any of ma priests be happy to accommodate ya.',12054,6,0,0,'zulaman SAY_INST_PROGRESS_1'),
+(-1568070,'Don\'t be shy. Thousands have come before you. Ya not be alone in your service.',12055,6,0,0,'zulaman SAY_INST_PROGRESS_2'),
+(-1568071,'Ya gonna fail, strangers. Many try before you, but dey only make us stronger!',12056,6,0,0,'zulaman SAY_INST_PROGRESS_3'),
+(-1568072,'Your efforts was in vain, trespassers. The rituals nearly be complete.',12057,6,0,0,'zulaman SAY_INST_WARN_1'),
+(-1568073,'Soon da cages gonna be empty, da sacrifices be complete, and you gonna take dere places.',12058,6,0,0,'zulaman SAY_INST_WARN_2'),
+(-1568074,'Time be running low, strangers. Soon you gonna join da souls of dem ya failed to save.',12059,6,0,0,'zulaman SAY_INST_WARN_3'),
+(-1568075,'Make haste, ma priests! Da rituals must not be interrupted!',12060,6,0,0,'zulaman SAY_INST_WARN_4'),
+(-1568076,'Ya make a good try... but now you gonna join da ones who already fall.',12061,6,0,0,'zulaman SAY_INST_SACRIF1'),
+(-1568077,'Ya not do too bad. Ya efforts [...] for a small time. Come to me now. Ya prove yourself worthy offerings.',12062,6,0,0,'zulaman SAY_INST_SACRIF2'),
+(-1568078,'Watch now. Every offering gonna strengthen our ties to da spirit world. Soon, we gonna be unstoppable!',12065,6,0,0,'zulaman SAY_INST_COMPLETE'),
 
 (-1568079,'Suit yourself. At least five of you must assist me if we\'re to get inside. Follow me.',0,1,0,0,'harrison SAY_START'),
 (-1568080,'According to my calculations, if enough of us bang the gong at once the seal on these doors will break and we can enter.',0,1,0,0,'harrison SAY_AT_GONG'),
@@ -3458,7 +3466,50 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 -- -1 668 000 ICC: HALLS OF REFLECTION
 
 -- -1 724 000 RUBY SANCTUM
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1724000,'Help! I am trapped within this tree! I require aid!',17490,6,0,0,'xerestraza SAY_HELP'),
+(-1724001,'Your power wanes, ancient one! Soon, you will join your friends!',17525,6,0,0,'baltharus SAY_INTRO'),
+(-1724002,'Thank you! I could have not held out for much longer. A terrible thing has happened here.',17491,1,0,0,'xerestraza SAY_THANKS'),
+(-1724003,'We believed that the Sanctum was well fortified, but we were not prepareted for the nature of this assault.',17492,0,0,0,'xerestraza SAY_OUTRO_1'),
+(-1724004,'The Black Dragonkin materialized from thin air, and set upon us before we could react.',17493,0,0,0,'xerestraza SAY_OUTRO_2'),
+(-1724005,'We did not stand a chance. As my brethren perished around me, I managed to retreat hear and bar the entrance.',17494,0,0,0,'xerestraza SAY_OUTRO_3'),
+(-1724006,'They slaughtered us with cold efficiency, but the true focus of their interest seemed to be the eggs kept here in the sanctum.',17495,0,0,0,'xerestraza SAY_OUTRO_4'),
+(-1724007,'The commander of the forces on the ground here is a cruel brute named Zarithrian. But I fear there are greater powers at work.',17496,0,0,0,'xerestraza SAY_OUTRO_5'),
+(-1724008,'In their initial assault I caught a glimpse of their true leader, a fearsome full-grown Twilight Dragon.',17497,0,0,0,'xerestraza SAY_OUTRO_6'),
+(-1724009,'I know not the extent of their plans heroes, but I know this: they cannot be allowed to succeed!',17498,0,0,0,'xerestraza SAY_OUTRO_7'),
 
+(-1724010,'Ah, the entertainment has arrived.',17520,1,0,0,'baltharus SAY_AGGRO'),
+(-1724011,'Baltharus leaves no survivors!',17521,1,0,0,'baltharus SAY_SLAY_1'),
+(-1724012,'This world has enough heroes.',17522,1,0,0,'baltharus SAY_SLAY_2'),
+(-1724013,'I... Didn\'t see that coming...',17523,1,0,0,'baltharus SAY_DEATH'),
+(-1724014,'Twice the pain and half the fun.',17524,1,0,0,'baltharus SAY_SPLIT'),
+
+(-1724015,'You will suffer for this intrusion!',17528,1,0,0,'saviana SAY_AGGRO'),
+(-1724016,'As it should be...',17529,1,0,0,'saviana SAY_SLAY_1'),
+(-1724017,'Halion will be pleased.',17530,1,0,0,'saviana SAY_SLAY_2'),
+(-1724018,'Burn in the master\'s flame!',17532,1,0,0,'saviana SAY_SPECIAL'),
+
+(-1724019,'Alexstrasza has chosen capable allies... A pity that I must END YOU!',17512,1,0,0,'zarithrian SAY_AGGRO'),
+(-1724020,'You thought you stood a chance?',17513,1,0,0,'zarithrian SAY_SLAY_1'),
+(-1724021,'It\'s for the best.',17514,1,0,0,'zarithrian SAY_SLAY_2'),
+(-1724022,'HALION! I...',17515,1,0,0,'zarithrian SAY_DEATH'),
+(-1724023,'Turn them to ash, minions!',17516,1,0,0,'zarithrian SAY_SUMMON'),
+
+(-1724024,'Meddlesome insects! You\'re too late: The Ruby Sanctum\'s lost.',17499,6,0,0,'halion SAY_SPAWN'),
+(-1724025,'Your world teeters on the brink of annihilation. You will ALL bear witness to the coming of a new age of DESTRUCTION!',17500,1,0,0,'halion SAY_AGGRO'),
+(-1724026,'Another hero falls.',17501,1,0,0,'halion SAY_SLAY'),
+(-1724027,'Relish this victory, mortals, for it will be your last! This world will burn with the master\'s return!',17503,1,0,0,'halion SAY_DEATH'),
+(-1724028,'Not good enough.',17504,1,0,0,'halion SAY_BERSERK'),
+(-1724029,'The heavens burn!',17505,1,0,0,'halion SAY_FIREBALL'),
+(-1724030,'Beware the shadow!',17506,1,0,0,'halion SAY_SPHERES'),
+(-1724031,'You will find only suffering within the realm of twilight! Enter if you dare!',17507,1,0,0,'halion SAY_PHASE_2'),
+(-1724032,'I am the light and the darkness! Cower, mortals, before the herald of Deathwing!',17508,1,0,0,'halion SAY_PHASE_3'),
+(-1724033,'The orbining spheres pulse with dark energy!',0,3,0,0,'halion EMOTE_SPHERES'),
+(-1724034,'Your efforts force %s further out of the twillight realm!',0,3,0,0,'halion EMOTE_OUT_OF_TWILLIGHT'),
+(-1724035,'Your efforts force %s further out of the physical realm!',0,3,0,0,'halion EMOTE_OUT_OF_PHYSICAL'),
+(-1724036,'Your companions\' efforts force Halion further into the twillight realm!',0,3,0,0,'halion EMOTE_INTO_TWILLIGHT'),
+(-1724037,'Your companions\' efforts force Halion further into the physical realm!',0,3,0,0,'halion EMOTE_INTO_PHYSICAL'),
+(-1724038,'Without pressure in both realms %s begins to regenerate.',0,3,0,0,'halion EMOTE_REGENERATE');
 
 -- -1 999 900 EXAMPLE TEXT
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -3517,6 +3568,10 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3000106,'Show me where I can fly.','greer orehammer GOSSIP_ITEM_TAXI'),
 (-3000107,'[PH] Get Presicion Bombs','greer orehammer GOSSIP_ITEM_GET_BOMBS'),
 (-3000108,'[PH] Start bombing mission','greer orehammer GOSSIP_ITEM_FLIGHT');
+
+-- -3 033 000 SHADOWFANG KEEP
+INSERT INTO gossip_texts (entry,content_default,comment) VALUES
+(-3033000,'Please unlock the courtyard door.','deathstalker adamant/ sorcerer ashcrombe - GOSSIP_ITEM_DOOR');
 
 -- -3 043 000 WAILING CAVERNS
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
