@@ -222,7 +222,7 @@ bool GossipHello_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo)
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_SCRAPYARD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
 
     // Antechamber
-    //if (pInstance->GetData(TYPE_XT002) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_XT002) == DONE || pPlayer->isGameMaster())
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_ANTECHAMBER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
 
     // Shattered walkway

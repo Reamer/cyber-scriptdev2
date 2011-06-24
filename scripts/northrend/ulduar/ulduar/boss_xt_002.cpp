@@ -210,7 +210,7 @@ struct MANGOS_DLL_DECL mob_pummelerAI : public ScriptedAI
 
     void Reset()
     {        
-        AttackStart(m_pInstance->GetPlayerInMap(true, false));
+        m_creature->SetInCombatWithZone();
         Spell_Timer = urand(5000, 10000);
     }
     
@@ -258,7 +258,7 @@ struct MANGOS_DLL_DECL mob_boombotAI : public ScriptedAI
 
     void Reset()
     {        
-        AttackStart(m_pInstance->GetPlayerInMap(true, false));
+        m_creature->SetInCombatWithZone();
     }
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
@@ -335,7 +335,7 @@ struct MANGOS_DLL_DECL mob_xtheartAI : public ScriptedAI
         if(m_uiDeathTimer < diff)
         {
             // pass damage to boss
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_XT002)))
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_XT002))
             {
                 if (pTemp->isAlive())
                     pTemp->DealDamage(pTemp, m_uiTotalDamage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -523,6 +523,25 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+        if (!m_lScrapbotsGUIDList.empty())
+        {
+            for(std::list<uint64>::iterator itr = m_lScrapbotsGUIDList.begin(); itr != m_lScrapbotsGUIDList.end(); ++itr)
+                if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
+                    pTemp->ForcedDespawn();
+        }
+        if (!m_lBoombotsGUIDList.empty())
+        {
+            for(std::list<uint64>::iterator itr = m_lBoombotsGUIDList.begin(); itr != m_lBoombotsGUIDList.end(); ++itr)
+                if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
+                    pTemp->ForcedDespawn();
+        }
+        if (!m_lPummelerGUIDList.empty())
+        {
+            for(std::list<uint64>::iterator itr = m_lPummelerGUIDList.begin(); itr != m_lPummelerGUIDList.end(); ++itr)
+                if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
+                    pTemp->ForcedDespawn();
+        }
     }
 
     void KilledUnit(Unit* pVictim)
@@ -545,21 +564,23 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
         for (int j = 0; j < (m_bIsRegularMode ? 3 : 5); ++j)
         {
             uint32 addentry = 0;
-            switch(urand(0,2))
+            switch(urand(0,5))
             {
-                case 0: addentry = NPC_SCRAPBOT; break;
-                case 1: addentry = NPC_BOOMBOT;  break;
-                case 2: addentry = NPC_PUMMELER; break;
+                case 0:
+                case 1: addentry = NPC_SCRAPBOT; break;
+                case 2: 
+                case 3: addentry = NPC_BOOMBOT;  break;
+                case 4: addentry = NPC_PUMMELER; break;
                 default:addentry = NPC_SCRAPBOT;
             }
             uint8 i = urand(0, 4);
-            if (Creature* pTemp = m_creature->SummonCreature(addentry, SummonLoc[i].x + urand(0, 10), SummonLoc[i].y + urand(0, 10), SummonLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+            if (Creature* pTemp = m_creature->SummonCreature(addentry, SummonLoc[i].x + urand(0, 10), SummonLoc[i].y + urand(0, 10), SummonLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000))
             {
                 DoCast(pTemp, SPELL_ENERGY_ORB, true);
                 switch (addentry)
                 {
                     case NPC_SCRAPBOT:
-                        pTemp->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f);
+                        pTemp->GetMotionMaster()->MoveChase(m_creature);
                         m_lScrapbotsGUIDList.push_back(pTemp->GetGUID());
                         break;
                     case NPC_BOOMBOT:

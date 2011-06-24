@@ -255,9 +255,13 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
-                DoCastSpellIfCan(pTarget, SPELL_MARK_OF_FACELESS);
+                if (pTarget->GetTypeId() == TYPEID_PLAYER)
+                {
+                    DoCastSpellIfCan(pTarget, SPELL_MARK_OF_FACELESS);
+                    m_uiMarkTimer = urand(25000, 30000);
+                }
             }
-            m_uiMarkTimer = urand(25000, 30000);
+            
         }
         else m_uiMarkTimer -= uiDiff;
 
@@ -310,7 +314,7 @@ struct MANGOS_DLL_DECL mob_saronite_animusAI : public ScriptedAI
     {
         if(m_pInstance)
         {
-            if (Creature* pVezax = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_VEZAX)))
+            if (Creature* pVezax = m_pInstance->GetSingleCreatureFromStorage(NPC_VEZAX))
             {
                 if (pVezax->isAlive())
                 {
@@ -376,7 +380,7 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
         // Mana regen pool
         if(uiDamage >= m_creature->GetHealth())
         {
-            if (Creature* pVezax = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_VEZAX)))
+            if (Creature* pVezax = m_pInstance->GetSingleCreatureFromStorage(NPC_VEZAX))
             {
                 m_creature->CastSpell(m_creature, SPELL_SARONITE_VAPORS, true, 0, 0, pVezax->GetObjectGuid());
             }

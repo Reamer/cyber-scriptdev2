@@ -318,6 +318,8 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
             {
                 m_bHasSupercharge2 = true;
                 m_uiTendrils_start_Timer = 40000;
+                if (SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(SPELL_SUPERCHARGE))
+                    holder->ModStackAmount(1);
             }
             else
             {
@@ -329,19 +331,17 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 
 	void JustDied(Unit* pKiller)
     {
-        DoCast(m_creature, SPELL_SUPERCHARGE,true);
+        DoCast(m_creature, SPELL_SUPERCHARGE, true);
         m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
         // if all of them are dead
         if (m_pInstance)
         {
-            // remove supercharge from players -> spell bug
-            //m_pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERCHARGE);
             // if the others are dead then give loot
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_STEELBREAKER)))
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
             {
                 if (!pTemp->isAlive())
                 {
-                    if (Creature* p2Temp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MOLGEIM)))
+                    if (Creature* p2Temp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
                     {
                         if (!p2Temp->isAlive())
                         {
@@ -369,12 +369,12 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 
 	void Aggro(Unit* pWho)
     {
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_STEELBREAKER)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
         {
 			if (pTemp->isAlive())
 				pTemp->SetInCombatWithZone();
         }
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MOLGEIM)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
         {
 			if (pTemp->isAlive())
 				pTemp->SetInCombatWithZone();
@@ -390,12 +390,12 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 
 	void JustReachedHome()
     {
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_STEELBREAKER)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
         {
 			if (!pTemp->isAlive())
 				pTemp->Respawn();
         }
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MOLGEIM)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
         {
 			if (!pTemp->isAlive())
 				pTemp->Respawn();
@@ -426,10 +426,9 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
             {
 			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
 			    {
-				    m_creature->AddThreat(pTarget,0.0f);
-				    m_creature->AI()->AttackStart(pTarget);
+                    m_creature->GetMotionMaster()->MoveChase(pTarget);
 			    }
-			    m_uiTendrils_Change = 6000;
+			    m_uiTendrils_Change = 4000;
             }else m_uiTendrils_Change -= uiDiff;
 
             if (m_uiTendrils_end_Timer < uiDiff && m_bIsTendrils)
@@ -488,13 +487,12 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
                         DoCast(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_TENDRILS : SPELL_LIGHTNING_TENDRILS_H,true);
 				        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
 				        {
-					        m_creature->AddThreat(pTarget,0.0f);
-					        m_creature->AI()->AttackStart(pTarget);
+                            m_creature->GetMotionMaster()->MoveChase(pTarget);
 				        }
 				        m_bIsTendrils = true;
 				        m_creature->SetSpeedRate(MOVE_RUN, 0.8f);
 				        m_uiTendrils_end_Timer = 40000;
-				        m_uiTendrils_Change = 5000;
+				        m_uiTendrils_Change = 4000;
 			        }else m_uiTendrils_start_Timer -= uiDiff;
                     
                     if (!m_bHasStormshield && m_bHasSupercharge2)
@@ -590,6 +588,8 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
             {
                 m_bHasSupercharge2 = true;                
                 m_uiRune_Summon_Timer = 20000;
+                if (SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(SPELL_SUPERCHARGE))
+                    holder->ModStackAmount(1);
             }
             else
             {
@@ -607,11 +607,11 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
         if (m_pInstance)
 		{
             // if the others are dead then give loot
-			if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_STEELBREAKER)))
+			if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
             {
 				if (!pTemp->isAlive())
                 {
-					if (Creature* p2Temp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_BRUNDIR)))
+					if (Creature* p2Temp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
                     {
 						if (!p2Temp->isAlive())
 						{
@@ -639,12 +639,12 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
 
 	void Aggro(Unit* pWho)
     {
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_STEELBREAKER)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
         {
 			if (pTemp->isAlive())
 				pTemp->SetInCombatWithZone();
         }
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_BRUNDIR)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
         {
 			if (pTemp->isAlive())
 				pTemp->SetInCombatWithZone();
@@ -660,12 +660,12 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
 
 	void JustReachedHome()
     {
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_STEELBREAKER)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
         {
 			if (!pTemp->isAlive())
 				pTemp->Respawn();
         }
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_BRUNDIR)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
         {
 			if (!pTemp->isAlive())
 				pTemp->Respawn();
@@ -702,7 +702,7 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
             switch(urand(0, 2))
             {
                 case 0:
-                    if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_BRUNDIR)))
+                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
                     {
                         if (pTemp->isAlive())
                             DoCast(pTemp, SPELL_RUNE_OF_POWER);
@@ -711,7 +711,7 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
                     }
                     break;
                 case 1:
-                    if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_STEELBREAKER)))
+                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
                     {
                         if (pTemp->isAlive())
                             DoCast(pTemp, SPELL_RUNE_OF_POWER);
@@ -731,10 +731,15 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
         {
             if (m_uiRune_Death_Timer < uiDiff)
 		    {
-                DoScriptText(SAY_MOLGEIM_DEATH_RUNE, m_creature);
 			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-				    DoCast(pTarget, m_bIsRegularMode ? SPELL_RUNE_OF_DEATH : SPELL_RUNE_OF_DEATH_H);
-			    m_uiRune_Death_Timer = 30000;
+                {
+                    if (pTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        DoScriptText(SAY_MOLGEIM_DEATH_RUNE, m_creature);
+				        DoCast(pTarget, m_bIsRegularMode ? SPELL_RUNE_OF_DEATH : SPELL_RUNE_OF_DEATH_H);
+			            m_uiRune_Death_Timer = 30000;
+                    }
+                }
 		    }else m_uiRune_Death_Timer -= uiDiff;
             
             // level 3 spells
@@ -742,11 +747,16 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
             {
 		        if (m_uiRune_Summon_Timer < uiDiff)
 		        {
-                    DoScriptText(SAY_MOLGEIM_SUMMON, m_creature);
 			        m_creature->CastStop();
 			        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-				        DoCast(pTarget, SPELL_RUNE_OF_SUMMONING);
-			        m_uiRune_Summon_Timer = 30000;
+                    {
+                        if (pTarget->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            DoScriptText(SAY_MOLGEIM_SUMMON, m_creature);
+				            DoCast(pTarget, SPELL_RUNE_OF_SUMMONING);
+			                m_uiRune_Summon_Timer = 30000;
+                        }
+                    }
 		        }else m_uiRune_Summon_Timer -= uiDiff;
             }
         }
@@ -857,6 +867,8 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
             {
                 m_bHasSupercharge2 = true;                
                 m_uiPower_Timer = 5000;
+                if (SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(SPELL_SUPERCHARGE))
+                    holder->ModStackAmount(1);
             }
             else
             {
@@ -874,11 +886,11 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
         if (m_pInstance)
 		{
             // if the others are dead then give loot
-			if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MOLGEIM)))
+			if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
             {
 				if (!pTemp->isAlive())
                 {
-					if (Creature* p2Temp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_BRUNDIR)))
+					if (Creature* p2Temp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
                     {
 						if (!p2Temp->isAlive())
 						{
@@ -907,12 +919,12 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 
 	void Aggro(Unit* pWho)
     {
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MOLGEIM)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
         {
 			if (pTemp->isAlive())
 				pTemp->SetInCombatWithZone();
         }
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_BRUNDIR)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
         {
 			if (pTemp->isAlive())
 				pTemp->SetInCombatWithZone();
@@ -929,12 +941,12 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 
 	void JustReachedHome()
     {
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_MOLGEIM)))
+		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
         {
 			if (!pTemp->isAlive())
 				pTemp->Respawn();
         }
-		if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_BRUNDIR)))
+        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
         {
 			if (!pTemp->isAlive())
 				pTemp->Respawn();

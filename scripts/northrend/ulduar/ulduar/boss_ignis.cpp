@@ -52,9 +52,6 @@ enum
     SPELL_SLAG_POT_DMG			= 65722,
     SPELL_SLAG_POT_DMG_H		= 65723,
     
-    BUFF_STRENGHT_OF_CREATOR	= 64473,
-    SPELL_STRENGHT_OF_CREATOR2	= 64474,
-    SPELL_STRENGHT_OF_CREATOR3	= 64475,
     SPELL_HASTE					= 62836,
 
     // Scorch trigger
@@ -72,6 +69,8 @@ enum
     SPELL_SHATTER				= 62383,
     SPELL_ACTIVATE_CONSTRUCT    = 62488,
     SPELL_STRENGTH_OF_THE_CREATOR = 64474,
+    SPELL_STRENGHT_OF_CREATOR_DIE= 64475,
+
     
     //NPC ids
 
@@ -131,11 +130,6 @@ struct MANGOS_DLL_DECL mob_iron_constructAI : public ScriptedAI
                 {
                     m_creature->ForcedDespawn(1000);
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    // Strength of the Creator stack decreasing hack
-                    if (m_pInstance)
-                        if (Creature *pIgnis = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_IGNIS)) )
-                            if (SpellAuraHolder *pHolder = pIgnis->GetSpellAuraHolder(SPELL_STRENGTH_OF_THE_CREATOR) )
-                                pHolder->SetStackAmount(pHolder->GetStackAmount()-1);
                 }
             }
         }
@@ -143,7 +137,7 @@ struct MANGOS_DLL_DECL mob_iron_constructAI : public ScriptedAI
 
     void JustDied(Unit* killer)
     {
-        DoCast(m_creature,64475, true);
+        DoCast(m_creature, SPELL_STRENGHT_OF_CREATOR_DIE, true);
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry *spellInfo)
@@ -159,7 +153,7 @@ struct MANGOS_DLL_DECL mob_iron_constructAI : public ScriptedAI
             if (Unit *pVictim = ((Creature*)pCaster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0) )
                 m_creature->AI()->AttackStart(pVictim);
 
-            DoCast(pCaster, SPELL_STRENGTH_OF_THE_CREATOR, true);
+            m_creature->CastSpell(pCaster, SPELL_STRENGTH_OF_THE_CREATOR, true, 0, 0, pCaster->GetObjectGuid());
         }
         else if (spellInfo->Id == SPELL_HEAT_AURA)
         {

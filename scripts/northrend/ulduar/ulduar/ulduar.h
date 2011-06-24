@@ -89,7 +89,14 @@ enum
     NPC_LEVIATHAN_MK            = 33432,
     NPC_VX001                   = 33651,
     NPC_AERIAL_UNIT             = 33670,
+    // Hodir
     NPC_HODIR                   = 32845,
+    NPC_HELPER_DRUID            = 32941,
+    NPC_HELPER_SHAMAN           = 32950,
+    NPC_HELPER_MAGE             = 32946,
+    NPC_HELPER_PRIEST           = 32948,
+
+    // Thorim
     NPC_THORIM                  = 32865,
     NPC_RUNIC_COLOSSUS          = 32872,
     NPC_RIGHT_HAND_TRIGGER      = 33140,
@@ -246,7 +253,6 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
 
         void SetData(uint32 uiType, uint32 uiData);
         uint32 GetData(uint32 uiType);
-        uint64 GetData64(uint32 uiData);
 
         const char* Save();
         void Load(const char* chrIn);
@@ -255,8 +261,8 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         bool CheckConditionCriteriaMeet(Player const* pSource, uint32 uiMapId, uint32 uiInstanceConditionId);
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, const Player *source);
 
-        void OpenDoor(uint64 guid);
-        void CloseDoor(uint64 guid);
+        void OpenDoor(uint32 uiEntry);
+        void CloseDoor(uint32 uiEntry);
         void DoOpenMadnessDoorIfCan();
         void OpenXtDoor();
         void CheckIronCouncil();
@@ -264,11 +270,12 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         void SpawnFriendlyKeeper(uint32 uiWho);
 
         GUIDList m_lIronConstructsGUIDs;
-        GUIDList m_lHodirMobsGUIDs;
         GUIDList m_lThorimMobsGUIDs;
         GUIDList m_lLeftHandTrigger;
         GUIDList m_lRightHandTrigger;
         GUIDList m_lCLoudGUIDs;
+
+        GUIDVector m_lBreakHarpoonGUID;
 
 
     protected:
@@ -286,98 +293,6 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
     uint32 m_uiMimironPhase;
     uint32 m_uiYoggPhase;
     uint32 m_uiVisionPhase;
-
-	// creature guids
-    uint64 m_uiLeviathanGUID;
-    uint64 m_uiIgnisGUID;
-    uint64 m_uiRazorscaleGUID;
-    uint64 m_uiCommanderGUID;
-    uint64 m_uiXT002GUID;
-    uint64 m_auiAssemblyGUIDs[3];
-    uint64 m_uiKologarnGUID;
-    uint64 m_uiKologarnBridgeDummyGUID;
-    uint64 m_uiAuriayaGUID;
-    uint64 m_uiMimironGUID;
-    uint64 m_uiHodirGUID;
-    uint64 m_uiThorimGUID;
-    uint64 m_uiFreyaGUID;
-    uint64 m_uiVezaxGUID;
-    uint64 m_uiYoggSaronGUID;
-    uint64 m_uiAlgalonGUID;
-    uint64 m_uiRightArmGUID;
-    uint64 m_uiLeftArmGUID;
-    uint64 m_uiFeralDefenderGUID;
-    uint64 m_uiElderBrightleafGUID;
-    uint64 m_uiElderStonebarkGUID;
-    uint64 m_uiElderIronbrachGUID;
-    uint64 m_uiSaroniteAnimusGUID;
-    uint64 m_uiRunicColossusGUID;
-    uint64 m_uiRuneGiantGUID;
-    uint64 m_uiJormungarGUID;
-    uint64 m_uiLeviathanMkGUID;
-    uint64 m_uiHodirImageGUID;
-    uint64 m_uiFreyaImageGUID;
-    uint64 m_uiThorimImageGUID;
-    uint64 m_uiMimironImageGUID;
-    uint64 m_uiSaraGUID;
-    uint64 m_uiYoggBrainGUID;
-
-    //doors & objects
-    // The siege
-    uint64 m_uiShieldWallGUID;
-    uint64 m_uiLeviathanGateGUID;
-    uint64 m_uiXT002GateGUID;
-    uint64 m_uiBrokenHarpoonGUID;
-    // Archivum
-    uint64 m_uiIronCouncilDoorGUID;
-    uint64 m_uiArchivumDoorGUID;
-    uint64 m_uiArchivumConsoleGUID;
-    uint64 m_uiUniverseFloorArchivumGUID;
-    // Celestial planetarium
-    uint64 m_uiCelestialDoorGUID;
-    uint64 m_uiCelestialConsoleGUID;
-    uint64 m_uiUniverseFloorCelestialGUID;
-    uint64 m_uiAzerothGlobeGUID;
-    // Kologarn
-    uint64 m_uiShatteredHallsDoorGUID;
-    uint64 m_uiKologarnBridgeGUID;
-    // Hodir
-    uint64 m_uiHodirEnterDoorGUID;
-    uint64 m_uiHodirWallGUID;
-    uint64 m_uiHodirExitDoorGUID;
-    // Mimiron
-    uint64 m_uiMimironTramGUID;
-    uint64 m_uiMimironButtonGUID;
-    uint64 m_uiMimironDoor1GUID;
-    uint64 m_uiMimironDoor2GUID;
-    uint64 m_uiMimironDoor3GUID;
-    uint64 m_uiMimironElevatorGUID;
-    uint64 m_uiMimironTelGUID[9];
-    // Thorim
-    uint64 m_uiArenaEnterDoorGUID;
-    uint64 m_uiArenaExitDoorGUID;
-    uint64 m_uiHallwayDoorGUID;
-    uint64 m_uiThorimEnterDoorGUID;
-    uint64 m_uiThorimLeverGUID;
-    // Prison
-    uint64 m_uiAncientGateGUID;
-    uint64 m_uiVezaxGateGUID;
-    uint64 m_uiYoggGateGUID;
-    uint64 m_uiBrainDoor1GUID;
-    uint64 m_uiBrainDoor2GUID;
-    uint64 m_uiBrainDoor3GUID;
-
-    // chests
-    uint64 m_uiKologarnLootGUID;
-    uint64 m_uiHodirLootGUID;
-    uint64 m_uiHodirRareLootGUID;
-    uint64 m_uiThorimLootGUID;
-    uint64 m_uiThorimRareLootGUID;
-    uint64 m_uiFreyaLootGUID;
-    uint64 m_uiFreyaLootHardGUID;
-    uint64 m_uiMimironLootGUID;
-    uint64 m_uiMimironHardLootGUID;
-    uint64 m_uiAlagonLootGUID;
 
 };
 

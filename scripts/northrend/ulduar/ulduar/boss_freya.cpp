@@ -588,17 +588,17 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         if(m_pInstance) 
         {
             // remove elder auras
-            if (Creature* pBrightleaf = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_BRIGHTLEAF)))
+            if (Creature* pBrightleaf = m_pInstance->GetSingleCreatureFromStorage(NPC_BRIGHTLEAF))
             {
                 if (pBrightleaf->isAlive())
                     pBrightleaf->RemoveAllAuras();
             }
-            if (Creature* pIronbranch = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_IRONBRACH)))
+            if (Creature* pIronbranch = m_pInstance->GetSingleCreatureFromStorage(NPC_IRONBRACH))
             {
                 if (pIronbranch->isAlive())
                     pIronbranch->RemoveAllAuras();
             }
-            if (Creature* pStonebark = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_STONEBARK)))
+            if (Creature* pStonebark = m_pInstance->GetSingleCreatureFromStorage(NPC_STONEBARK))
             {
                 if (pStonebark->isAlive())
                     pStonebark->RemoveAllAuras();
@@ -616,7 +616,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
             m_pInstance->SetData(TYPE_FREYA, IN_PROGRESS);
 
             // check brightleaf
-            if (Creature* pBrightleaf = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_BRIGHTLEAF)))
+            if (Creature* pBrightleaf = m_pInstance->GetSingleCreatureFromStorage(NPC_BRIGHTLEAF))
             {
                 if (pBrightleaf->isAlive())
                 {
@@ -630,7 +630,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
             }
 
             // check ironbranch
-            if (Creature* pIronbranch = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_IRONBRACH)))
+            if (Creature* pIronbranch = m_pInstance->GetSingleCreatureFromStorage(NPC_IRONBRACH))
             {
                 if (pIronbranch->isAlive())
                 {
@@ -644,7 +644,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
             }
 
             // check stonebark
-            if (Creature* pStonebark = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_STONEBARK)))
+            if (Creature* pStonebark = m_pInstance->GetSingleCreatureFromStorage(NPC_STONEBARK))
             {
                 if (pStonebark->isAlive())
                 {
@@ -742,7 +742,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         DoScriptText(SAY_ADDS_LASHER, m_creature);
         int i;
         float x,y;
-        for(i = 0; i < 10; ++i)
+        for(i = 0; i < 8; ++i)
         {
             x = (rand_norm() * 30.0f) - 15.0f;
             y = (rand_norm() * 30.0f) - 15.0f;
@@ -1154,10 +1154,10 @@ struct MANGOS_DLL_DECL mob_freya_groundAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        /*if (m_pInstance && m_pInstance->GetData(TYPE_FREYA) != IN_PROGRESS && !m_bNpcSunBeamBright && !m_bNpcNatureBomb && !m_bNpcHealthySpore) 
+        if (m_pInstance && m_pInstance->GetData(TYPE_FREYA) != IN_PROGRESS) 
         {
             m_creature->ForcedDespawn();
-        } */ 
+        }
 
         if(!m_creature->isAlive())
             return;
@@ -1325,7 +1325,7 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
         // hacky way. Should be done by spell which needs core support
         if (m_bAncientConservator)
         {
-            if (Creature* pFreya = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_FREYA)))
+            if (Creature* pFreya = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA))
             {
                 if(SpellAuraHolder* natureAura = pFreya->GetSpellAuraHolder(SPELL_ATTUNED_TO_NATURE))
                 {
@@ -1344,7 +1344,7 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
             m_bHasExploded = true;
             DoCast(m_creature, m_bIsRegularMode ? SPELL_DETONATE : SPELL_DETONATE_H, true);
             m_creature->ForcedDespawn(700);
-            if (Creature* pFreya = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_FREYA)))
+            if (Creature* pFreya = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA))
             {
                 if(SpellAuraHolder* natureAura = pFreya->GetSpellAuraHolder(SPELL_ATTUNED_TO_NATURE))
                 {
@@ -1367,8 +1367,8 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        //if (m_pInstance && m_pInstance->GetData(TYPE_FREYA) != IN_PROGRESS) 
-          //  m_creature->ForcedDespawn();
+        if (m_pInstance && m_pInstance->GetData(TYPE_FREYA) != IN_PROGRESS) 
+            m_creature->ForcedDespawn();
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
