@@ -369,7 +369,7 @@ struct MANGOS_DLL_DECL boss_flame_leviathan : public ScriptedAI
     {
         if (!isHodirsTower)
         {
-            if (GameObject* pTower = m_creature->GetMap()->GetGameObject(m_pInstance->GetData64(GO_TOWER_OF_FROST)))
+            if (GameObject* pTower = m_pInstance->GetSingleGameObjectFromStorage(GO_TOWER_OF_FROST))
                 if (pTower->GetHealth())
                 {
                     isHodirsTower = true;
@@ -380,7 +380,7 @@ struct MANGOS_DLL_DECL boss_flame_leviathan : public ScriptedAI
         }
         if (!isFreyasTower)
         {
-            if (GameObject* pTower = m_creature->GetMap()->GetGameObject(m_pInstance->GetData64(GO_TOWER_OF_LIFE)))
+            if (GameObject* pTower = m_pInstance->GetSingleGameObjectFromStorage(GO_TOWER_OF_LIFE))
                 if (pTower->GetHealth())
                 {
                     isFreyasTower = true;
@@ -391,7 +391,7 @@ struct MANGOS_DLL_DECL boss_flame_leviathan : public ScriptedAI
         }
         if (!isMimironsTower)
         {
-            if (GameObject* pTower = m_creature->GetMap()->GetGameObject(m_pInstance->GetData64(GO_TOWER_OF_FLAME)))
+            if (GameObject* pTower = m_pInstance->GetSingleGameObjectFromStorage(GO_TOWER_OF_FLAME))
                 if (pTower->GetHealth())
                 {
                     isMimironsTower = true;
@@ -402,7 +402,7 @@ struct MANGOS_DLL_DECL boss_flame_leviathan : public ScriptedAI
         }
         if (!isThorimsTower)
         {
-            if (GameObject* pTower = m_creature->GetMap()->GetGameObject(m_pInstance->GetData64(GO_TOWER_OF_STORMS)))
+            if (GameObject* pTower = m_pInstance->GetSingleGameObjectFromStorage(GO_TOWER_OF_STORMS))
                 if (pTower->GetHealth())
                 {
                     isThorimsTower = true;

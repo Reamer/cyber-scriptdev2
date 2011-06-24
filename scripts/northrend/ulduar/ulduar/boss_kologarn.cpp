@@ -520,7 +520,7 @@ struct MANGOS_DLL_DECL boss_left_armAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Creature* pKologarn = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_KOLOGARN)))
+        if (Creature* pKologarn = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
         {
             if (pKologarn->isAlive())
                 pKologarn->DealDamage(pKologarn, m_creature->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -540,7 +540,7 @@ struct MANGOS_DLL_DECL boss_left_armAI : public ScriptedAI
 
         if (m_uiShockwave_Timer < uiDiff)
         {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_KOLOGARN)))
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
                 DoScriptText(SAY_SHOCKWEAVE, pTemp);
 
             DoCast(m_creature, m_bIsRegularMode ? SPELL_ARM_SWEEP : SPELL_ARM_SWEEP_H);
@@ -611,7 +611,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Creature* pKologarn = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_KOLOGARN)))
+        if (Creature* pKologarn = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
         {
             if (pKologarn->isAlive())
                 pKologarn->DealDamage(pKologarn, m_creature->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -655,7 +655,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
 
         if (m_uiStone_Grip_Timer < uiDiff)
         {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_KOLOGARN)))
+            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
                 DoScriptText(SAY_GRAB, pTemp);
 
             DoScriptText(EMOTE_STONE_GRIP, m_creature);
@@ -702,15 +702,15 @@ struct MANGOS_DLL_DECL mob_kologarn_pit_kill_bunnyAI : public ScriptedAI
         {
             if (m_pInstance)
             {
-                Creature *pKolo = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_KOLOGARN));
+                Creature *pKolo = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN);
                 if (!pKolo || pKolo && !pKolo->isAlive())
                 {
-                    if (GameObject *pGo = m_pInstance->instance->GetGameObject(m_pInstance->GetData64(GO_KOLOGARN_BRIDGE)))
+                    if (GameObject *pGo = m_pInstance->GetSingleGameObjectFromStorage(GO_KOLOGARN_BRIDGE))
                     {
                         pGo->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
                         pGo->SetGoState(GO_STATE_READY);
                     }
-                    if (Creature *pBridge = m_pInstance->instance->GetCreature(m_pInstance->GetData64(NPC_KOLOGARN_BRIDGE_DUMMY)))
+                    if (Creature *pBridge = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN_BRIDGE_DUMMY))
                         pBridge->SetVisibility(VISIBILITY_ON);
                     m_bBridgeLocked = true;
                 }

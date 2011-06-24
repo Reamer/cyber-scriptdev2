@@ -687,21 +687,21 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
         if(m_pInstance) 
         {
             // respawn runic colossus
-            if (Creature* pColossus = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_RUNIC_COLOSSUS)))
+            if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_RUNIC_COLOSSUS))
             {
                 if (!pColossus->isAlive())
                     pColossus->Respawn();
             }
 
             // respawn ancient rune giant
-            if (Creature* pRuneGiant = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_RUNE_GIANT)))
+            if (Creature* pRuneGiant = m_pInstance->GetSingleCreatureFromStorage(NPC_RUNE_GIANT))
             {
                 if (!pRuneGiant->isAlive())
                     pRuneGiant->Respawn();
             }
 
             // respawn jormungar
-            if (Creature* pJormungar = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_JORMUNGAR_BEHEMOTH)))
+            if (Creature* pJormungar = m_pInstance->GetSingleCreatureFromStorage(NPC_JORMUNGAR_BEHEMOTH))
             {
                 if (!pJormungar->isAlive())
                     pJormungar->Respawn();
@@ -935,6 +935,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                         m_creature->SendMonsterMove(2134.719f, -263.148f, 419.846f, SPLINETYPE_NORMAL, SPLINEFLAG_DONE, 0);
                         m_creature->Relocate(2134.719f, -263.148f, 419.846f, 0);
                         m_creature->GetMotionMaster()->MovePoint(0, 2134.719f, -263.148f, 419.846f, false);
+                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
 
                         m_uiPhase = PHASE_ARENA;
                     }
@@ -1464,13 +1465,13 @@ struct MANGOS_DLL_DECL mob_thorim_preaddsAI : public ScriptedAI
 {
     mob_thorim_preaddsAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
     bool m_bIsRegularMode;
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     // jormungar
     uint32 m_uiAcidBreathTimer;
@@ -1518,7 +1519,7 @@ struct MANGOS_DLL_DECL mob_thorim_preaddsAI : public ScriptedAI
     void JustDied(Unit *killer)
     {
         // start the encounter
-        if (Creature* pThorim = m_creature->GetMap()->GetCreature( m_pInstance->GetData64(NPC_THORIM)))
+        if (Creature* pThorim = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM))
         {
             if(pThorim->isAlive())
                 ((boss_thorimAI*)pThorim->AI())->m_uiPreAddsKilled++;
