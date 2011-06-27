@@ -5,10 +5,8 @@ UPDATE gameobject_template SET ScriptName = "go_ulduar_teleporter" WHERE entry =
 UPDATE creature SET spawntimesecs=604800 WHERE creature.map = 603;
 
 -- ****** Ignis the Furnace Master ******
-UPDATE creature_template SET ScriptName = "boss_ignis" WHERE `entry` = 33118;
 UPDATE creature_template SET lootid = entry, `mechanic_immune_mask` = 617299839 WHERE entry IN (33118, 33190);
 UPDATE creature_template SET ScriptName = "mob_iron_construct" WHERE `entry` = 33121;
-UPDATE creature_model_info SET bounding_radius='4' WHERE modelid='26154';
 UPDATE creature_template SET faction_h=1925, faction_a=1925, scale=0.5, `AIName` = "EventAI" WHERE `entry` = 33221;
 DELETE FROM creature_ai_scripts WHERE creature_id = 33221;
 INSERT INTO creature_ai_scripts VALUES
@@ -21,7 +19,6 @@ INSERT INTO spell_script_target (entry, type, targetEntry) VALUES ('64474', '1',
 
 -- ****** Razorscale****** 
 UPDATE creature_template SET scriptname='boss_razorscale' WHERE entry=33186;
-UPDATE creature_model_info SET bounding_radius=4 WHERE modelid = 28787;  
 UPDATE creature_template SET mechanic_immune_mask=617299803, `lootid` = `entry` WHERE entry IN (33186, 33724);
 -- original x=587.547, y= -174.927, z = 391.517; make the boss fly before encounter starts
 UPDATE creature SET position_x = 590.346741, position_y = -226.947647, position_z = 442.897583 WHERE id = 33186;
@@ -84,7 +81,7 @@ DELETE FROM creature WHERE id IN (32933, 32934);
 -- set proper Kologarn position
 UPDATE creature SET position_x = 1797.15, position_y = -24.4027, position_z = 448.741 WHERE id = 32930;
 
-UPDATE creature_model_info SET bounding_radius = 20, combat_reach = 20 WHERE modelid IN (28638, 28822, 28821);
+
 UPDATE creature_template SET scriptname='boss_kologarn' WHERE entry = 32930;
 UPDATE creature_template SET scriptname='boss_right_arm' WHERE entry=32934;
 UPDATE creature_template SET scriptname='boss_left_arm' WHERE entry=32933;
@@ -177,8 +174,6 @@ UPDATE creature_template SET ScriptName = 'mob_dark_rune_warbringer' WHERE entry
 UPDATE creature_template SET unit_flags=0, ScriptName = 'mob_dark_rune_ring_guard' WHERE entry = 32874;
 UPDATE creature_template SET unit_flags=0 WHERE entry=33162; --  heroic
 UPDATE creature_template SET ScriptName = 'mob_dark_rune_honor_guard' WHERE entry = 33125;
-UPDATE `creature_model_info` SET `bounding_radius`='5' WHERE (`modelid`='28349') ;
-UPDATE `creature_model_info` SET `bounding_radius`='5' WHERE (`modelid`='26965');
 
 UPDATE `creature_template` SET `ScriptName`='mob_thorim_thunder_orb' WHERE (`entry`='33378');
 

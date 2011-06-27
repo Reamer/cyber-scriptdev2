@@ -65,12 +65,12 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
 {
     boss_vezaxAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiEnrageTimer;
@@ -295,11 +295,11 @@ struct MANGOS_DLL_DECL mob_saronite_animusAI : public ScriptedAI
 {
     mob_saronite_animusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     uint32 m_uiProfoundDarknessTimer;
 
@@ -351,11 +351,11 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
 {
     mob_saronite_vaporAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     uint32 m_uiDieTimer;
 

@@ -1247,7 +1247,6 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
         if(m_pInstance)
         {
             m_pInstance->SetData(TYPE_MIMIRON_PHASE, PHASE_IDLE);
-            m_pInstance->SetData(TYPE_MIMIRON_HARD, NOT_STARTED);
         }
 
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -1256,7 +1255,10 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
     void JustReachedHome()
     {
         if(m_pInstance) 
-            m_pInstance->SetData(TYPE_MIMIRON, NOT_STARTED);
+        {
+            m_pInstance->SetData(TYPE_MIMIRON, FAIL);
+            m_pInstance->SetData(TYPE_MIMIRON_HARD, FAIL);
+        }
     }
 
 	// start event
@@ -1296,9 +1298,9 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
     {
        if(m_pInstance) 
         {
-            m_pInstance->SetData(TYPE_MIMIRON, DONE);
             if(m_bIsHardMode)
                 m_pInstance->SetData(TYPE_MIMIRON_HARD, DONE);
+            m_pInstance->SetData(TYPE_MIMIRON, DONE);
         }
     }
 
@@ -1642,6 +1644,12 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
 
                     if(m_bIsTankDead && m_bIsTorsoDead && m_bIsHeadDead)
                     {
+                        if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
+                            m_creature->DealDamage(pTank, pTank->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        if(Creature* pHead = m_pInstance->instance->GetCreature(m_uiHeadGUID))
+                            m_creature->DealDamage(pHead, pHead->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        if(Creature* pTorso = m_pInstance->instance->GetCreature(m_uiTorsoGUID))
+                            m_creature->DealDamage(pTorso, pTorso->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                         DoScriptText(SAY_ROBOT_DEATH, m_creature);
                         m_uiOutroTimer = 15000;
                         m_pInstance->SetData(TYPE_MIMIRON_PHASE, PHASE_OUTRO);
@@ -1684,12 +1692,6 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
             {
                 if(m_uiOutroTimer < uiDiff)
                 {
-                    if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
-                        m_creature->DealDamage(pTank, pTank->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    if(Creature* pHead = m_pInstance->instance->GetCreature(m_uiHeadGUID))
-                        m_creature->DealDamage(pHead, pHead->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    if(Creature* pTorso = m_pInstance->instance->GetCreature(m_uiTorsoGUID))
-                        m_creature->DealDamage(pTorso, pTorso->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     DoOutro();
                     m_uiOutroTimer = 60000;
                 }

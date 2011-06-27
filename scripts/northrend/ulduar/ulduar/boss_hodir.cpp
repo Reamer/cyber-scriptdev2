@@ -227,7 +227,10 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
     void JustReachedHome()
     {
         if(m_pInstance)
+        {
             m_pInstance->SetData(TYPE_HODIR, FAIL);
+            m_pInstance->SetData(TYPE_HODIR_HARD, FAIL);
+        }
     }
 
 
@@ -262,9 +265,9 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
     {
         if(m_pInstance)
         {
-            m_pInstance->SetData(TYPE_HODIR, DONE);
-            if(m_uiSpeedKillTimer > 0)
+            if(m_uiSpeedKillTimer < 180000)
                 m_pInstance->SetData(TYPE_HODIR_HARD, DONE);
+            m_pInstance->SetData(TYPE_HODIR, DONE);
         }
     }
 

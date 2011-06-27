@@ -29,10 +29,6 @@ enum
     TYPE_YOGGSARON              = 12,
     TYPE_ALGALON                = 13,
 
-    // Freya 1, 2 elders
-    TYPE_FREYA_1                = 35,
-    TYPE_FREYA_2                = 36,
-
     // hard mode bosses
     TYPE_LEVIATHAN_HARD         = 37,
     TYPE_XT002_HARD             = 38,
@@ -43,17 +39,18 @@ enum
     TYPE_FREYA_HARD             = 43, // this means 3 elders up
     TYPE_VEZAX_HARD             = 44,
     TYPE_YOGGSARON_HARD         = 45,
+    TYPE_YOGGSARON_HARD_4       = 46,
 
     // keepers help at Yogg
-    TYPE_KEEPER_HODIR           = 46,
-    TYPE_KEEPER_FREYA           = 47,
-    TYPE_KEEPER_THORIM          = 48,
-    TYPE_KEEPER_MIMIRON         = 49,
+    TYPE_KEEPER_HODIR           = 47,
+    TYPE_KEEPER_FREYA           = 48,
+    TYPE_KEEPER_THORIM          = 49,
+    TYPE_KEEPER_MIMIRON         = 50,
 
     // teleporters
-    TYPE_LEVIATHAN_TP           = 50,
-    TYPE_XT002_TP               = 51,
-    TYPE_MIMIRON_TP             = 52,
+    TYPE_LEVIATHAN_TP           = 51,
+    TYPE_XT002_TP               = 52,
+    TYPE_MIMIRON_TP             = 53,
 
     //other-> these won't be saved to db
     TYPE_RUNE_GIANT             = 14,
@@ -143,8 +140,8 @@ enum
     // Thorim
     GO_CACHE_OF_STORMS          = 194312,
     GO_CACHE_OF_RARE_STORMS     = 194313,
-    GO_CACHE_OF_STORMS_H        = 194314,
-    GO_CACHE_OF_RARE_STORMS_H   = 194315,
+    GO_CACHE_OF_STORMS_H        = 194315,
+    GO_CACHE_OF_RARE_STORMS_H   = 194314,
     // Alagon
     GO_GIFT_OF_OBSERVER_H       = 194821,
     GO_GIFT_OF_OBSERVER         = 194822,
@@ -155,7 +152,7 @@ enum
     GO_FREYA_GIFT_HARD          = 194327,//10 3 elders
     // 25 man
     GO_FREYA_GIFT_H             = 194328,//25 normal
-    GO_FREYA_GIFT_H_HARD        = 194331,//25 3 elders
+    GO_FREYA_GIFT_HARD_H        = 194331,//25 3 elders
     // Mimiron
     GO_CACHE_OF_INOV            = 194789,
     GO_CACHE_OF_INOV_H          = 194956,
@@ -285,7 +282,6 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
     uint32 m_auiEncounter[MAX_ENCOUNTER];
     uint32 m_auiHardBoss[HARD_MODE_ENCOUNTER];
     uint32 m_auiUlduarKeepers[KEEPER_ENCOUNTER];
-    uint32 m_auiFreyaElders[FREYA_ELDERS_ENCOUNTER];
     uint32 m_auiUlduarTeleporters[3];
     uint32 m_auiMiniBoss[6];
 

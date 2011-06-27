@@ -257,26 +257,23 @@ void instance_ulduar::OnObjectCreate(GameObject *pGo)
 
         // Hodir
     case GO_CACHE_OF_WINTER:
-    case GO_CACHE_OF_WINTER_H:
-        // Hodir rare
     case GO_CACHE_OF_RARE_WINTER:
+    case GO_CACHE_OF_WINTER_H:
     case GO_CACHE_OF_RARE_WINTER_H:
         // Freya
     case GO_FREYA_GIFT:
-    case GO_FREYA_GIFT_H:
-        // Freya hard modes
     case GO_FREYA_GIFT_HARD:
-    case GO_FREYA_GIFT_H_HARD:
+    case GO_FREYA_GIFT_H:
+    case GO_FREYA_GIFT_HARD_H:
         // Thorim
     case GO_CACHE_OF_STORMS:
-    case GO_CACHE_OF_STORMS_H:
-        // Thorim rare
     case GO_CACHE_OF_RARE_STORMS:
+    case GO_CACHE_OF_STORMS_H:
     case GO_CACHE_OF_RARE_STORMS_H:
         // Mimiron
     case GO_CACHE_OF_INOV:
-    case GO_CACHE_OF_INOV_H:
     case GO_CACHE_OF_INOV_HARD:
+    case GO_CACHE_OF_INOV_H:
     case GO_CACHE_OF_INOV_HARD_H:
         // Alagon
     case GO_GIFT_OF_OBSERVER:
@@ -405,9 +402,18 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         DoUseDoorOrButton(GO_MIMIRON_DOOR_2);
         DoUseDoorOrButton(GO_MIMIRON_DOOR_3);
         if (uiData == DONE)
-        {
-            if(m_auiHardBoss[3] != DONE)
-                DoRespawnGameObject(GO_CACHE_OF_INOV, 30*MINUTE);
+        {         
+            if (m_auiHardBoss[3] != DONE)
+            {
+                if (instance->IsRegularDifficulty())
+                {
+                    DoRespawnGameObject(GO_CACHE_OF_INOV, 30*MINUTE);
+                }
+                else
+                {
+                    DoRespawnGameObject(GO_CACHE_OF_INOV_H, 30*MINUTE);
+                }
+            }
             // used to make the friendly keeper visible
             if(Creature* pImage = GetSingleCreatureFromStorage(KEEPER_MIMIRON))
                 pImage->SetVisibility(VISIBILITY_ON);
@@ -429,7 +435,6 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             {
                 DoRespawnGameObject(GO_CACHE_OF_WINTER_H, 30*MINUTE);
             }
-
             // used to make the friendly keeper visible
             if(Creature* pImage = GetSingleCreatureFromStorage(KEEPER_HODIR))
                 pImage->SetVisibility(VISIBILITY_ON);
@@ -449,7 +454,16 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         if (uiData == DONE)
         {
             if(m_auiHardBoss[5] != DONE)
-                DoRespawnGameObject(GO_CACHE_OF_RARE_STORMS, 30*MINUTE);
+            {
+                if (instance->IsRegularDifficulty())
+                {
+                    DoRespawnGameObject(GO_CACHE_OF_STORMS, 30*MINUTE);
+                }
+                else
+                {
+                    DoRespawnGameObject(GO_CACHE_OF_STORMS_H, 30*MINUTE);
+                }
+            }
             // used to make the friendly keeper visible
             if(Creature* pImage = GetSingleCreatureFromStorage(KEEPER_THORIM))
                 pImage->SetVisibility(VISIBILITY_ON);
@@ -462,27 +476,23 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         {
             // do this in order to see how many elders were alive and spawn the correct chest
             // hard mode drop
-            if(m_auiHardBoss[6] == 3)
-                DoRespawnGameObject(GO_FREYA_GIFT_HARD, 30*MINUTE);
-            // normal mode
-            else
-                DoRespawnGameObject(GO_FREYA_GIFT, 30*MINUTE);
+            if(m_auiHardBoss[6] != DONE)
+            {
+                if (instance->IsRegularDifficulty())
+                {
+                    DoRespawnGameObject(GO_FREYA_GIFT, 30*MINUTE);
+                }
+                else
+                {
+                    DoRespawnGameObject(GO_FREYA_GIFT_H, 30*MINUTE);
+                }
+            }
             // used to make the friendly keeper visible
             if(Creature* pImage = GetSingleCreatureFromStorage(KEEPER_FREYA))
                 pImage->SetVisibility(VISIBILITY_ON);
             DoOpenMadnessDoorIfCan();
         }
         break;
-    // 1 elder up +1 emblem drops
-    case TYPE_FREYA_1:
-        m_auiFreyaElders[1] = uiData;
-        break;
-    // 2 elders up +2 emblems drop
-    case TYPE_FREYA_2:
-        m_auiFreyaElders[2] = uiData;
-        break;
-    // 3 elders up is TYPE_FREYA_HARD
-
         // Prison
     case TYPE_VEZAX:
         m_auiEncounter[uiType] = uiData;
@@ -510,6 +520,23 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
     case TYPE_XT002_HARD:
         m_auiHardBoss[1] = uiData;
         break;
+    case TYPE_ASSEMBLY_HARD:
+        m_auiHardBoss[2] = uiData;
+        break;
+    case TYPE_MIMIRON_HARD:
+        m_auiHardBoss[3] = uiData;
+        if(uiData == DONE)
+        {
+            if (instance->IsRegularDifficulty())
+            {
+                DoRespawnGameObject(GO_CACHE_OF_INOV_HARD, 30*MINUTE);
+            }
+            else
+            {
+                DoRespawnGameObject(GO_CACHE_OF_INOV_HARD_H, 30*MINUTE);
+            }
+        }
+        break;
     case TYPE_HODIR_HARD:
         m_auiHardBoss[4] = uiData;
         if(uiData == DONE)
@@ -523,12 +550,6 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 DoRespawnGameObject(GO_CACHE_OF_RARE_WINTER_H, 30*MINUTE);
             }
         }
-        break;
-    case TYPE_ASSEMBLY_HARD:
-        m_auiHardBoss[2] = uiData;
-        break;
-    case TYPE_FREYA_HARD:
-        m_auiHardBoss[6] = uiData;
         break;
     case TYPE_THORIM_HARD:
         m_auiHardBoss[5] = uiData;
@@ -544,17 +565,17 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }            
         }
         break;
-    case TYPE_MIMIRON_HARD:
-        m_auiHardBoss[3] = uiData;
+    case TYPE_FREYA_HARD:
+        m_auiHardBoss[6] = uiData;
         if(uiData == DONE)
         {
             if (instance->IsRegularDifficulty())
             {
-                DoRespawnGameObject(GO_CACHE_OF_INOV_HARD, 30*MINUTE);
+                DoRespawnGameObject(GO_FREYA_GIFT_HARD, 30*MINUTE);
             }
             else
             {
-                DoRespawnGameObject(GO_CACHE_OF_INOV_HARD_H, 30*MINUTE);
+                DoRespawnGameObject(GO_FREYA_GIFT_HARD_H, 30*MINUTE);
             }
         }
         break;
@@ -707,10 +728,6 @@ uint32 instance_ulduar::GetData(uint32 uiType)
         return m_auiEncounter[9];
     case TYPE_FREYA:
         return m_auiEncounter[10];
-    case TYPE_FREYA_1:
-        return m_auiFreyaElders[1];
-    case TYPE_FREYA_2:
-        return m_auiFreyaElders[2];
     case TYPE_VEZAX:
         return m_auiEncounter[11];
     case TYPE_YOGGSARON:

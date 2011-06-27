@@ -201,12 +201,12 @@ struct MANGOS_DLL_DECL boss_flame_leviathan : public ScriptedAI
 {
     boss_flame_leviathan(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiBatteringRamTimer;
@@ -622,11 +622,11 @@ struct MANGOS_DLL_DECL mob_freyas_wardAI : public ScriptedAI
 {
     mob_freyas_wardAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     uint32 summonTimer ;
 
@@ -659,11 +659,11 @@ struct MANGOS_DLL_DECL mob_hodirs_furyAI : public ScriptedAI
 {
     mob_hodirs_furyAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     uint32 m_uiHodirFuryTimer;
     uint32 m_uiSwitchTargetTimer;                       //hack for RandomMovement
@@ -731,11 +731,11 @@ struct MANGOS_DLL_DECL mob_mimirons_infernoAI : public ScriptedAI
 {
     mob_mimirons_infernoAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     uint32 infernoTimer;
     uint32 m_uiWalkTimer;
     uint8 waypointId;
@@ -791,11 +791,11 @@ struct MANGOS_DLL_DECL mob_thorims_hammerAI : public ScriptedAI
 {
     mob_thorims_hammerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     uint32 m_uiHammerTimer;
     uint32 m_uiSwitchTargetTimer;                       //hack for RandomMovement
 
