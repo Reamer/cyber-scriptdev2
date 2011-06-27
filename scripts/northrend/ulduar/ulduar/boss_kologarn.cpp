@@ -372,7 +372,7 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
                     for (Map::PlayerList::const_iterator itr = pPlayers.begin(); itr != pPlayers.end(); ++itr)
                     {
                         Player* pTarget = itr->getSource();
-                        if (pTarget && pTarget->isAlive() && pTarget->IsWithinDistInMap(m_creature, 25))
+                        if (pTarget && pTarget->isAlive() && pTarget->IsWithinDistInMap(m_creature, 45))
                         {
                             m_bReset = false;
                             break;
@@ -467,7 +467,7 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
         
         //Petrifying breath
         if (m_creature->GetCombatDistance(m_creature->getVictim()) >= ATTACK_DISTANCE)
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_PETRIFYING_BREATH : SPELL_PETRIFYING_BREATH_H);
+            DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PETRIFYING_BREATH : SPELL_PETRIFYING_BREATH_H);
 
         // disarmed achiev check
         if (m_bHasLeftDied || m_bHasRightDied)
