@@ -201,11 +201,11 @@ struct MANGOS_DLL_DECL mob_pummelerAI : public ScriptedAI
 {
     mob_pummelerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     uint32 Spell_Timer;
 
     void Reset()
@@ -250,11 +250,11 @@ struct MANGOS_DLL_DECL mob_boombotAI : public ScriptedAI
 {
     mob_boombotAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     void Reset()
     {        
@@ -296,12 +296,12 @@ struct MANGOS_DLL_DECL mob_xtheartAI : public ScriptedAI
 {
     mob_xtheartAI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         SetCombatMovement(false);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     uint32 m_uiDeathTimer;
     uint32 m_uiTotalDamage;
@@ -357,12 +357,12 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
 {
     boss_xt_002AI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiPhase;

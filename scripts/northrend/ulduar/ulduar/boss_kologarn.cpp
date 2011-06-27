@@ -184,7 +184,8 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
 
     void Reset()
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         m_uiSpell_Timer     = 10000;
         m_uiRange_Timer     = 1000;
@@ -301,10 +302,7 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if(irand(0,1))
-            DoScriptText(SAY_SLAY1, m_creature);
-        else
-            DoScriptText(SAY_SLAY2, m_creature);
+        DoScriptText(urand(0,1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
     void JustReachedHome()
@@ -574,7 +572,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
     uint32 m_uiStone_Grip_Timer;
     uint32 m_uiFreeDamage;
     uint32 m_uiMaxDamage;
-    std::list<uint64> m_lGripTargetGUIDList;
+    std::list<ObjectGuid> m_lGripTargetGUIDList;
 
     void Reset()
     {
@@ -592,11 +590,11 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
         {
             if (!m_lGripTargetGUIDList.empty())
             {
-                for(std::list<uint64>::iterator itr = m_lGripTargetGUIDList.begin(); itr != m_lGripTargetGUIDList.end(); ++itr)
+                for(std::list<ObjectGuid>::iterator itr = m_lGripTargetGUIDList.begin(); itr != m_lGripTargetGUIDList.end(); ++itr)
                     if (Unit* pTemp = m_creature->GetMap()->GetUnit(*itr))
                     {
                         pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H);
-                        pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP_VEH : SPELL_STONE_GRIP_VEH_H);
+                        //pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP_VEH : SPELL_STONE_GRIP_VEH_H);
                         pTemp->RemoveAurasDueToSpell(54661); //HACK
                         pTemp->ExitVehicle();
                         DoTeleportPlayer(pTemp,KoloFront[0],KoloFront[1],KoloFront[2],0.0f);
@@ -625,11 +623,11 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
 
         if (!m_lGripTargetGUIDList.empty())
         {
-            for(std::list<uint64>::iterator itr = m_lGripTargetGUIDList.begin(); itr != m_lGripTargetGUIDList.end(); ++itr)
+            for(std::list<ObjectGuid>::iterator itr = m_lGripTargetGUIDList.begin(); itr != m_lGripTargetGUIDList.end(); ++itr)
                 if (Unit* pTemp = m_creature->GetMap()->GetUnit(*itr))
                 {
                     pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H);
-                    pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP_VEH : SPELL_STONE_GRIP_VEH_H);
+                    //pTemp->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_STONE_GRIP_VEH : SPELL_STONE_GRIP_VEH_H);
                     pTemp->RemoveAurasDueToSpell(54661); //HACK
                     pTemp->ExitVehicle();
                     DoTeleportPlayer(pTemp,KoloFront[0],KoloFront[1],KoloFront[2],0.0f);
@@ -638,7 +636,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
         m_lGripTargetGUIDList.clear();
     }
 
-    void SpellHitTarget(Unit* victim, const SpellEntry* spell)
+    /*void SpellHitTarget(Unit* victim, const SpellEntry* spell)
     {
         if (spell->Id == SPELL_STONE_GRIP_GRAB || spell->Id == SPELL_STONE_GRIP_GRAB_H)
         {
@@ -646,7 +644,7 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
             m_lGripTargetGUIDList.push_back(victim->GetGUID());
             victim->EnterVehicle(vehicle);
         }
-    }
+    }*/ 
 
     void UpdateAI(const uint32 uiDiff)
     {
@@ -655,13 +653,24 @@ struct MANGOS_DLL_DECL boss_right_armAI : public ScriptedAI
 
         if (m_uiStone_Grip_Timer < uiDiff)
         {
-            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
-                DoScriptText(SAY_GRAB, pTemp);
-
-            DoScriptText(EMOTE_STONE_GRIP, m_creature);
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_STONE_GRIP_GRAB : SPELL_STONE_GRIP_GRAB_H, true);       
-            m_uiFreeDamage = 0;
-            m_uiStone_Grip_Timer = 30000;
+            if (Creature* pKologarn = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
+            {
+                DoScriptText(SAY_GRAB, pKologarn);
+                DoScriptText(EMOTE_STONE_GRIP, m_creature);
+                for (int i = 0; i < (m_bIsRegularMode ? 1 : 3); ++i)
+                {
+                    if (Unit* pTarget = pKologarn->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        pTarget->CastSpell(pTarget, 54661 , true);//HACK
+                        pTarget->CastSpell(pTarget, m_bIsRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H, true, 0, 0, pKologarn->GetObjectGuid());
+                        m_lGripTargetGUIDList.push_back(pTarget->GetObjectGuid());
+                        pTarget->EnterVehicle(vehicle, i+1);
+                    }
+                }
+                m_uiFreeDamage = 0;
+                m_uiStone_Grip_Timer = 30000;            
+            //DoCast(m_creature, m_bIsRegularMode ? SPELL_STONE_GRIP_GRAB : SPELL_STONE_GRIP_GRAB_H, true);
+            }
         }else m_uiStone_Grip_Timer -= uiDiff;
     }
 };

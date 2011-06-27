@@ -146,11 +146,11 @@ struct MANGOS_DLL_DECL mob_ulduar_lightning_elementalAI : public ScriptedAI
 {
     mob_ulduar_lightning_elementalAI(Creature* pCreature) : ScriptedAI(pCreature)
 	{
-		m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+		m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         Reset();
 	}
 
-	ScriptedInstance* m_pInstance;
+	instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
 	uint32 m_uiDeath_Timer;
@@ -196,12 +196,12 @@ struct MANGOS_DLL_DECL mob_rune_of_summoningAI : public ScriptedAI
 {
     mob_rune_of_summoningAI(Creature* pCreature) : ScriptedAI(pCreature)
 	{
-		m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+		m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         SetCombatMovement(false);
         Reset();
 	}
 
-	ScriptedInstance* m_pInstance;
+	instance_ulduar* m_pInstance;
 
 	uint32 m_uiDeath_Timer;
 	uint32 m_uiSummon_Timer;
@@ -249,12 +249,12 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 {
     boss_brundirAI(Creature* pCreature) : ScriptedAI(pCreature) 
 	{
-		m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+		m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty(); 
 		Reset();
 	}
 
-	ScriptedInstance* m_pInstance;
+	instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
 	uint32 m_uiChain_Lightning_Timer;
@@ -525,12 +525,12 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
 {
     boss_molgeimAI(Creature* pCreature) : ScriptedAI(pCreature) 
 	{
-		m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+		m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
 		Reset();
 	}
 
-	ScriptedInstance* m_pInstance;
+	instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
 	uint32 m_uiShield_Timer;
@@ -783,12 +783,12 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 {
     boss_steelbreakerAI(Creature* pCreature) : ScriptedAI(pCreature) 
 	{
-		m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+		m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
 		Reset();
 	}
 
-	ScriptedInstance* m_pInstance;
+	instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
 	uint32 m_uiFusion_Punch_Timer;

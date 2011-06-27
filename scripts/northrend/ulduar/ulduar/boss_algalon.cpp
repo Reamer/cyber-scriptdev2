@@ -122,13 +122,13 @@ struct MANGOS_DLL_DECL mob_black_holeAI : public ScriptedAI
 {
     mob_black_holeAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
 
         SetCombatMovement(false);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     bool m_bHasAura;
     uint32 m_uiRaidCheckTimer;
@@ -187,7 +187,7 @@ struct MANGOS_DLL_DECL boss_algalonAI : public ScriptedAI
 {
     boss_algalonAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_bHasStarted       = false;    // flag used to check if the encounter has been started from the console
@@ -200,7 +200,7 @@ struct MANGOS_DLL_DECL boss_algalonAI : public ScriptedAI
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;   
 
     uint32 m_uiBerserk_Timer;
@@ -671,12 +671,12 @@ struct MANGOS_DLL_DECL mob_collapsing_starAI : public ScriptedAI
 {
     mob_collapsing_starAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiHealthTimer;
@@ -739,12 +739,12 @@ struct MANGOS_DLL_DECL mob_living_constellationAI : public ScriptedAI
 {
     mob_living_constellationAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiArcaneBarrageTimer;
@@ -777,7 +777,7 @@ struct MANGOS_DLL_DECL mob_cosmic_smash_targetAI : public ScriptedAI
 {
     mob_cosmic_smash_targetAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
@@ -785,7 +785,7 @@ struct MANGOS_DLL_DECL mob_cosmic_smash_targetAI : public ScriptedAI
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiSpellTimer;
@@ -815,7 +815,7 @@ struct MANGOS_DLL_DECL mob_cosmic_smash_targetAI : public ScriptedAI
 
 bool GOHello_go_celestial_acces(Player* pPlayer, GameObject* pGo)
 {
-    ScriptedInstance* m_pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+    instance_ulduar* m_pInstance = (instance_ulduar*)pGo->GetInstanceData();
     bool m_bIsRegularMode = pGo->GetMap()->IsRegularDifficulty();
     bool m_bHasItem = false;
 

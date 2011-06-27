@@ -88,7 +88,7 @@ struct MANGOS_DLL_DECL mob_seeping_feral_essenceAI : public ScriptedAI
 {
     mob_seeping_feral_essenceAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         SetCombatMovement(false);
         pCreature->setFaction(14);
@@ -96,7 +96,7 @@ struct MANGOS_DLL_DECL mob_seeping_feral_essenceAI : public ScriptedAI
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     void Reset()
@@ -122,12 +122,12 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
 {
     mob_sanctum_sentryAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     bool m_bIsFollowing;
@@ -226,12 +226,12 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
 {
     mob_feral_defenderAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiPounce_Timer;
@@ -415,12 +415,12 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
 {
     boss_auriayaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiEnrage_Timer;

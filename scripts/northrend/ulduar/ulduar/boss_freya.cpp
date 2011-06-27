@@ -223,7 +223,7 @@ struct MANGOS_DLL_DECL mob_iron_rootsAI : public ScriptedAI
 {
     mob_iron_rootsAI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         m_uiCreatureEntry = m_creature->GetEntry();
         m_creature->setFaction(16);
@@ -232,7 +232,7 @@ struct MANGOS_DLL_DECL mob_iron_rootsAI : public ScriptedAI
     }
 
     bool m_bIsRegularMode;
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     uint32 m_uiCreatureEntry;
 
@@ -271,13 +271,13 @@ struct MANGOS_DLL_DECL boss_elder_brightleafAI : public ScriptedAI
 {
     boss_elder_brightleafAI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
     bool m_bIsRegularMode;
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     uint32 m_uiBrightleafFluxTimer;
     uint32 m_uiSolarFlareTimer;
@@ -354,13 +354,13 @@ struct MANGOS_DLL_DECL boss_elder_ironbranchAI : public ScriptedAI
 {
     boss_elder_ironbranchAI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
     bool m_bIsRegularMode;
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     uint32 m_uiImpaleTimer;
     uint32 m_uiIronrootsTimer;
@@ -433,13 +433,13 @@ struct MANGOS_DLL_DECL boss_elder_stonebarkAI : public ScriptedAI
 {
     boss_elder_stonebarkAI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
     bool m_bIsRegularMode;
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
 
     uint32 m_uiFistsOfStoneTimer;
     uint32 m_uiGroundTremorTimer;
@@ -510,12 +510,12 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
 {
     boss_freyaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiSummonTimer;
@@ -669,30 +669,30 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
     void JustReachedHome()
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_FREYA, FAIL);
+            m_pInstance->SetData(TYPE_FREYA_HARD, FAIL);
+        }
+
     }
 
     void DoOutro()
     {
         if(m_pInstance) 
         {
-            m_pInstance->SetData(TYPE_FREYA_HARD, 0);
-
             // hacky way to complete achievements; use only if you have this function
             if(m_uiAchievProgress == 1)
             {
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_KNOCK_WOOD : ACHIEV_KNOCK_WOOD_H);
-                m_pInstance->SetData(TYPE_FREYA_HARD, 1);
             }
             else if (m_uiAchievProgress == 2)
             {
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_KNOCK_KNOCK_WOOD : ACHIEV_KNOCK_KNOCK_WOOD_H);
-                m_pInstance->SetData(TYPE_FREYA_HARD, 2);
             }
             else if (m_uiAchievProgress == 3)
             {
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_KNOCK_KNOCK_KNOCK_WOOD : ACHIEV_KNOCK_KNOCK_KNOCK_WOOD_H);
-                m_pInstance->SetData(TYPE_FREYA_HARD, 3);
+                m_pInstance->SetData(TYPE_FREYA_HARD, DONE);
             }
 
             if (m_bNature)
@@ -700,7 +700,6 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
 
             m_pInstance->SetData(TYPE_FREYA, DONE);
         }
-
         m_creature->ForcedDespawn();
     }
 
@@ -709,9 +708,9 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
     {
         if(m_pInstance) 
         {
-            m_pInstance->SetData(TYPE_FREYA, DONE);
             if(m_bIsHardMode)
                 m_pInstance->SetData(TYPE_FREYA_HARD, DONE);
+            m_pInstance->SetData(TYPE_FREYA, DONE);
         }
     }
 
@@ -1042,13 +1041,13 @@ struct MANGOS_DLL_DECL mob_freya_groundAI : public ScriptedAI
 {
      mob_freya_groundAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         SetCombatMovement(false);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiNatureBomb_Timer;
@@ -1246,12 +1245,12 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
 {
     mob_freya_spawnedAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     bool m_bAncientConservator;

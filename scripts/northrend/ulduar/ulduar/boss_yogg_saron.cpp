@@ -605,27 +605,29 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
         if(m_pInstance) 
         {
             m_pInstance->SetData(TYPE_YOGGSARON, DONE);
-            m_pInstance->SetData(TYPE_YOGGSARON_HARD, 0);
+            m_pInstance->SetData(TYPE_YOGGSARON_HARD, FAIL);
+            m_pInstance->SetData(TYPE_YOGGSARON_HARD_4, FAIL);
 
             // hacky way to complete achievements; use only if you have this function
             if(m_uiKeepersActive == 0)
             {
-                m_pInstance->SetData(TYPE_YOGGSARON_HARD, 4);
+                m_pInstance->SetData(TYPE_YOGGSARON_HARD_4, DONE);
+                m_pInstance->SetData(TYPE_YOGGSARON_HARD, DONE);
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_ALONE : ACHIEV_ALONE_H);
             }
             else if (m_uiKeepersActive == 1)
             {
-                m_pInstance->SetData(TYPE_YOGGSARON_HARD, 3);
+                m_pInstance->SetData(TYPE_YOGGSARON_HARD, DONE);
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_ONE_LIGHT : ACHIEV_ONE_LIGHT_H);
             }
             else if (m_uiKeepersActive == 2)
             {
-                m_pInstance->SetData(TYPE_YOGGSARON_HARD, 2);
+                m_pInstance->SetData(TYPE_YOGGSARON_HARD, FAIL);
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_TWO_LIGHTS : ACHIEV_TWO_LIGHTS_H);
             }
             else if (m_uiKeepersActive == 3)
             {
-                m_pInstance->SetData(TYPE_YOGGSARON_HARD, 1);
+                m_pInstance->SetData(TYPE_YOGGSARON_HARD, FAIL);
                 m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_THREE_LIGHTS : ACHIEV_THREE_LIGHTS_H);
             }
 

@@ -736,7 +736,11 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
     void JustReachedHome()
     {
         if(m_pInstance)
-            m_pInstance->SetData(TYPE_THORIM, NOT_STARTED);
+        {
+            m_pInstance->SetData(TYPE_THORIM, FAIL);
+            m_pInstance->SetData(TYPE_THORIM_HARD, FAIL);
+        }
+
     }
 
     void KilledUnit(Unit* pVictim)
@@ -1615,14 +1619,14 @@ struct MANGOS_DLL_DECL npc_sifAI : public ScriptedAI
 {
     npc_sifAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         //pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         //pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiSpellTimer;
@@ -1687,7 +1691,7 @@ struct MANGOS_DLL_DECL npc_lightning_orbAI : public ScriptedAI
 {
     npc_lightning_orbAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
@@ -1696,7 +1700,7 @@ struct MANGOS_DLL_DECL npc_lightning_orbAI : public ScriptedAI
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiMoveTimer;

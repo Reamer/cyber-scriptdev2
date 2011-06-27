@@ -42,7 +42,7 @@ EndScriptData */
 // HODIR
 bool GossipHello_hodir_image(Player* pPlayer, Creature* pCreature)
 {
-    ScriptedInstance *m_pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+    instance_ulduar *m_pInstance = (instance_ulduar *) pCreature->GetInstanceData();
 
     if(m_pInstance && m_pInstance->GetData(TYPE_KEEPER_HODIR) != DONE && m_pInstance->GetData(TYPE_KEEPER_HODIR) != FAIL)
     {
@@ -56,7 +56,7 @@ bool GossipHello_hodir_image(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_hodir_image(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    ScriptedInstance *m_pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+    instance_ulduar *m_pInstance = (instance_ulduar *) pCreature->GetInstanceData();
     pPlayer->CLOSE_GOSSIP_MENU();
 
     if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
@@ -75,7 +75,7 @@ bool GossipSelect_hodir_image(Player* pPlayer, Creature* pCreature, uint32 uiSen
 // FREYA
 bool GossipHello_freya_image(Player* pPlayer, Creature* pCreature)
 {
-    ScriptedInstance *m_pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+    instance_ulduar *m_pInstance = (instance_ulduar *) pCreature->GetInstanceData();
 
     if(m_pInstance && m_pInstance->GetData(TYPE_KEEPER_FREYA) != DONE && m_pInstance->GetData(TYPE_KEEPER_FREYA) != FAIL)
     {
@@ -89,7 +89,7 @@ bool GossipHello_freya_image(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_freya_image(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    ScriptedInstance *m_pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+    instance_ulduar *m_pInstance = (instance_ulduar *) pCreature->GetInstanceData();
     pPlayer->CLOSE_GOSSIP_MENU();
 
     if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
@@ -107,7 +107,7 @@ bool GossipSelect_freya_image(Player* pPlayer, Creature* pCreature, uint32 uiSen
 // MIMIRON
 bool GossipHello_mimiron_image(Player* pPlayer, Creature* pCreature)
 {
-    ScriptedInstance *m_pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+    instance_ulduar *m_pInstance = (instance_ulduar *) pCreature->GetInstanceData();
 
     if(m_pInstance && m_pInstance->GetData(TYPE_KEEPER_MIMIRON) != DONE && m_pInstance->GetData(TYPE_KEEPER_MIMIRON) != FAIL)
     {
@@ -121,7 +121,7 @@ bool GossipHello_mimiron_image(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_mimiron_image(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    ScriptedInstance *m_pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+    instance_ulduar *m_pInstance = (instance_ulduar *) pCreature->GetInstanceData();
     pPlayer->CLOSE_GOSSIP_MENU();
 
     if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
@@ -140,7 +140,7 @@ bool GossipSelect_mimiron_image(Player* pPlayer, Creature* pCreature, uint32 uiS
 // THORIM
 bool GossipHello_thorim_image(Player* pPlayer, Creature* pCreature)
 {
-    ScriptedInstance *m_pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+    instance_ulduar *m_pInstance = (instance_ulduar *) pCreature->GetInstanceData();
 
     if(m_pInstance && m_pInstance->GetData(TYPE_KEEPER_THORIM) != DONE && m_pInstance->GetData(TYPE_KEEPER_THORIM) != FAIL)
     {
@@ -154,7 +154,7 @@ bool GossipHello_thorim_image(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_thorim_image(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    ScriptedInstance *m_pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+    instance_ulduar *m_pInstance = (instance_ulduar *) pCreature->GetInstanceData();
     pPlayer->CLOSE_GOSSIP_MENU();
 
     if (uiAction == GOSSIP_ACTION_INFO_DEF+1)

@@ -231,7 +231,7 @@ CreatureAI* GetAI_npc_expedition_commander(Creature* pCreature)
 
 bool GossipHello_npc_expedition_commander(Player* pPlayer, Creature* pCreature)
 {
-    ScriptedInstance* pInstance = (ScriptedInstance *) pCreature->GetInstanceData();
+    instance_ulduar* pInstance = (instance_ulduar *) pCreature->GetInstanceData();
 
     if(pInstance->GetData(TYPE_RAZORSCALE) != DONE)
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
