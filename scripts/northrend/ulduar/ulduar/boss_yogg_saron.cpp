@@ -1952,7 +1952,7 @@ struct MANGOS_DLL_DECL mob_immortal_guardianAI : public ScriptedAI
 
     void DamageTaken(Unit *done_by, uint32 &uiDamage)
     {
-        if(m_creature->GetHealthPercent() < 5)
+        if(m_creature->GetHealth() < uiDamage)
         {
             uiDamage = 0;
         }
