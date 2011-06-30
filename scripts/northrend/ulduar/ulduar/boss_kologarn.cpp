@@ -28,18 +28,18 @@ EndScriptData */
 enum
 {
     //yells
-    SAY_AGGRO           = -1603150,
-    SAY_SHOCKWEAVE      = -1603151,
-    SAY_GRAB            = -1603152,
-    SAY_LEFT_ARM_LOST   = -1603153,
-    SAY_RIGHT_ARM_LOST  = -1603154,
-    SAY_SLAY1           = -1603155,
-    SAY_SLAY2           = -1603156,
-    SAY_BERSERK         = -1603157,
-    SAY_DEATH           = -1603158,
-    EMOTE_RIGHT_ARM     = -1603355,
-    EMOTE_LEFT_ARM      = -1603356,
-    EMOTE_STONE_GRIP    = -1603357,
+    SAY_AGGRO           = -1603090,
+    SAY_SHOCKWEAVE      = -1603091,
+    SAY_GRAB            = -1603092,
+    SAY_LEFT_ARM_LOST   = -1603093,
+    SAY_RIGHT_ARM_LOST  = -1603094,
+    SAY_SLAY1           = -1603095,
+    SAY_SLAY2           = -1603096,
+    SAY_BERSERK         = -1603097,
+    SAY_DEATH           = -1603098,
+    EMOTE_RIGHT_ARM     = -1603099,
+    EMOTE_LEFT_ARM      = -1603100,
+    EMOTE_STONE_GRIP    = -1603101,
 
     //kologarn
     SPELL_OVERHEAD_SMASH		= 63356,
@@ -538,8 +538,8 @@ struct MANGOS_DLL_DECL boss_left_armAI : public ScriptedAI
 
         if (m_uiShockwave_Timer < uiDiff)
         {
-            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
-                DoScriptText(SAY_SHOCKWEAVE, pTemp);
+            if (Creature* pKologarn = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
+                DoScriptText(SAY_SHOCKWEAVE, pKologarn);
 
             DoCast(m_creature, m_bIsRegularMode ? SPELL_ARM_SWEEP : SPELL_ARM_SWEEP_H);
             m_uiShockwave_Timer = 17000;

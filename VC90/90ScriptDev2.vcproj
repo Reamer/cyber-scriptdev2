@@ -44,6 +44,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="-Zm120"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\dep\include\;..\..\..\shared\;..\..\..\framework\;..\..\..\game\;..\include\;..\base\;..\..\..\..\dep\ACE_wrappers\"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
@@ -2375,10 +2376,6 @@
 						>
 					</File>
 					<File
-						RelativePath="..\scripts\northrend\violet_hold\boss_ichoron.cpp"
-						>
-					</File>
-					<File
 						RelativePath="..\scripts\northrend\violet_hold\boss_lavanthor.cpp"
 						>
 					</File>
@@ -2399,11 +2396,11 @@
 						>
 					</File>
 					<File
-						RelativePath="..\scripts\northrend\violet_hold\instance_violet_hold.cpp"
+						RelativePath="..\scripts\northrend\violet_hold\violet_hold.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\scripts\northrend\violet_hold\violet_hold.cpp"
+						RelativePath="..\scripts\northrend\violet_hold\violet_hold.h"
 						>
 					</File>
 				</Filter>

@@ -28,16 +28,16 @@ EndScriptData */
 enum
 {
     //yells
-    SAY_AGGRO       = -1603010,
-    SAY_SCORCH1     = -1603011,
-    SAY_SCORCH2     = -1603012,
-    SAY_SLAGPOT     = -1603013,
-    EMOTE_FLAMEJETS = -1603014,
-    SAY_SUMMON      = -1603015,
-    SAY_SLAY_1       = -1603016,
-    SAY_SLAY_2       = -1603017,
-    SAY_BERSERK     = -1603018,
-    SAY_DEATH       = -1603019,
+    SAY_AGGRO       = -1603020,
+    SAY_SCORCH1     = -1603021,
+    SAY_SCORCH2     = -1603022,
+    SAY_SLAGPOT     = -1603023,
+    EMOTE_FLAMEJETS = -1603024,
+    SAY_SUMMON      = -1603025,
+    SAY_SLAY_1      = -1603026,
+    SAY_SLAY_2      = -1603027,
+    SAY_BERSERK     = -1603028,
+    SAY_DEATH       = -1603029,
 
     //ignis the furnace master
     SPELL_FLAME_JETS			= 62680,
@@ -229,6 +229,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
     uint32 m_uiActivateConstructTimer;
 
     uint32 m_uiEncounterTimer;
+    uint32 m_uiBerserkerTimer;
 
     void Reset()
     {
@@ -237,6 +238,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         m_uiFlameJetsTimer = 21000;
         m_uiActivateConstructTimer = 25000;
         m_uiEncounterTimer = 0;
+
+        m_uiBerserkerTimer = 600000; // 10 Minutes
 
         m_bIsSlagPot = false;
 
@@ -321,7 +324,10 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         if (m_uiScorchTimer <= uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SCORCH_TRIGGER, CAST_TRIGGERED) == CAST_OK)
+            {
+                DoScriptText(urand(0,1) ? SAY_SCORCH1 : SAY_SCORCH2, m_creature);
                 m_uiScorchTimer = urand(20000, 25000);
+            }
         }
         else m_uiScorchTimer -= uiDiff;
 
@@ -331,6 +337,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                 if (Player *pTarget = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHARGE_SLAG_POT : SPELL_CHARGE_SLAG_POT_H) == CAST_OK)
                     {
+                        DoScriptText(SAY_SLAGPOT, m_creature);
                         pTarget->EnterVehicle(m_creature->GetVehicleKit(), 0);
                         pTarget->CastSpell(pTarget, m_bIsRegularMode ? SPELL_SLAG_POT_AURA : SPELL_SLAG_POT_AURA_H, true, 0,0, m_creature->GetObjectGuid()); 
                         m_bIsSlagPot = true;
@@ -381,16 +388,32 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         if (m_uiFlameJetsTimer <= uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FLAME_JETS : SPELL_FLAME_JETS_H) == CAST_OK)
+            {
+                DoScriptText(EMOTE_FLAMEJETS, m_creature);
                 m_uiFlameJetsTimer = urand(20000, 25000);
+            }
         }
         else m_uiFlameJetsTimer -= uiDiff;
 
         if (m_uiActivateConstructTimer <= uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ACTIVATE_CONSTRUCT) == CAST_OK)
+            {
+                DoScriptText(SAY_SUMMON, m_creature);
                 m_uiActivateConstructTimer = m_bIsRegularMode ? 30000 : 40000;
+            }
         }
         else m_uiActivateConstructTimer -= uiDiff;
+
+        if (m_uiBerserkerTimer <= uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, 26662, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED) == CAST_OK)
+            {
+                DoScriptText(SAY_BERSERK, m_creature);
+            }   
+        }
+        else
+            m_uiBerserkerTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

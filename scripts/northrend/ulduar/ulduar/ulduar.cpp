@@ -206,6 +206,9 @@ bool GossipHello_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo)
     if (!pInstance)
         return true;
 
+    if (roll_chance_i(10))
+        DoOrSimulateScriptTextForMap(-1603430, 1000103, pGo->GetMap());
+
     // Base camp
     pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_BASE_CAMP, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
 

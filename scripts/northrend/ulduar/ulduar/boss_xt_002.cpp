@@ -27,17 +27,18 @@ EndScriptData */
 enum
 {
     //xt yells
-    SAY_AGGRO				= -1603038,
-    SAY_DEATH				= -1603030,
-    SAY_TANCTRUM			= -1603037,
-    SAY_SLAY_01				= -1603036,
-    SAY_SLAY_02				= -1603035,
-    SAY_BERSERK				= -1603031,
-    SAY_ADDS				= -1603032,
-    SAY_HEART_OPEN			= -1603034,
-    SAY_HEART_CLOSE			= -1603033,
-    EMOTE_HEART             = -1603350,
-    EMOTE_REPAIR            = -1603351,
+    
+    SAY_DEATH				= -1603040,
+    SAY_BERSERK				= -1603041,
+    SAY_ADDS				= -1603042,
+    SAY_HEART_CLOSE			= -1603043,
+    SAY_HEART_OPEN			= -1603044,    
+    SAY_SLAY_02				= -1603045,
+    SAY_SLAY_01				= -1603046,
+    SAY_TANCTRUM			= -1603047,
+    SAY_AGGRO				= -1603048,
+    EMOTE_HEART             = -1603049,
+    EMOTE_REPAIR            = -1603050,
 
     //xt-002
     SPELL_TANCTRUM			= 62776,
@@ -546,11 +547,7 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        switch(urand(0, 1))
-        {
-            case 0: DoScriptText(SAY_SLAY_01, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY_02, m_creature); break;
-        }
+        DoScriptText(urand(0,1) ? SAY_SLAY_01 : SAY_SLAY_02, m_creature);
     }
 
     void SummonAdds()
