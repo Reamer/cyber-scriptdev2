@@ -288,6 +288,6 @@ INSERT INTO `script_texts` (`entry`, `content_default`, `content_loc3`, `sound`,
 -- Archivum
 */ 
 -- FUN
-(-1603430,"Rin and Goldi are watching you!","Rin and Goldi is watching you!",0,6,0,0,"FUN Stuff");
+(-1603430,"Rin and Goldi are watching you!","Rin and Goldi are watching you!",0,6,0,0,"FUN Stuff");
 
 
