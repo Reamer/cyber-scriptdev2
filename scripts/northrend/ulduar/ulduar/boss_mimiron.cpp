@@ -28,27 +28,28 @@ EndScriptData */
 enum
 {
     //yells
-    SAY_AGGRO           = -1603241,
-    SAY_HARD_MODE       = -1603242,
-    SAY_BERSERK         = -1603243,
-    SAY_TANK_ACTIVE     = -1603244,
-    SAY_TANK_SLAY1      = -1603245,
-    SAY_TANK_SLAY2      = -1603246,
-    SAY_TANK_DEATH      = -1603247,
-    SAY_TORSO_ACTIVE    = -1603248,
-    SAY_TORSO_SLAY1     = -1603249,
-    SAY_TORSO_SLAY2     = -1603250,
-    SAY_TORSO_DEATH     = -1603251,
-    SAY_HEAD_ACTIVE     = -1603252,
-    SAY_HEAD_SLAY1      = -1603253,
-    SAY_HEAD_SLAY2      = -1603254,
-    SAY_HEAD_DEATH      = -1603255,
-    SAY_ROBOT_ACTIVE    = -1603256,
-    SAY_ROBOT_SLAY1     = -1603257,
-    SAY_ROBOT_SLAY2     = -1603258,
-    SAY_ROBOT_DEATH     = -1603259,
+    SAY_AGGRO           = -1603220,
+    SAY_HARD_MODE       = -1603221,
+    SAY_BERSERK         = -1603222,
+    SAY_TANK_ACTIVE     = -1603223,
+    SAY_TANK_SLAY1      = -1603224,
+    SAY_TANK_SLAY2      = -1603225,
+    SAY_TANK_DEATH      = -1603226,
+    SAY_TORSO_ACTIVE    = -1603227,
+    SAY_TORSO_SLAY1     = -1603228,
+    SAY_TORSO_SLAY2     = -1603229,
+    SAY_TORSO_DEATH     = -1603230,
+    SAY_HEAD_ACTIVE     = -1603231,
+    SAY_HEAD_SLAY1      = -1603232,
+    SAY_HEAD_SLAY2      = -1603233,
+    SAY_HEAD_DEATH      = -1603234,
+    SAY_ROBOT_ACTIVE    = -1603235,
+    SAY_ROBOT_SLAY1     = -1603236,
+    SAY_ROBOT_SLAY2     = -1603237,
+    SAY_ROBOT_DEATH     = -1603238,
 
-    EMOTE_PLASMA_BLAST      = -1603371,
+    EMOTE_PLASMA_BLAST     = -1603240,
+    EMOTE_LASER_SLAVE      = -1603241,
 
     SPELL_JET_PACK          = 63341, // used by mimiron to change seats
     SPELL_SELF_REPAIR       = 64383,
@@ -766,7 +767,7 @@ struct MANGOS_DLL_DECL boss_vx001AI : public ScriptedAI
             m_bIsInLaserBarrage = true;
             m_uiLaserBarrageWarningTimer = urand(50000, 60000);
             m_uiOrientationCount = 0;
-            m_creature->MonsterYell("Superangriff erfolg gleich", 0);
+            DoScriptText(EMOTE_LASER_SLAVE, m_creature);
         }
         else
             m_uiLaserBarrageWarningTimer -= uiDiff;
@@ -1704,6 +1705,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
         // berserk
         if (m_uiBerserkTimer <= uiDiff)
         {
+            DoScriptText(SAY_BERSERK, m_creature);
             if(Creature* pTank = m_pInstance->instance->GetCreature(m_uiTankGUID))
             {
                 if(pTank && pTank->isAlive())

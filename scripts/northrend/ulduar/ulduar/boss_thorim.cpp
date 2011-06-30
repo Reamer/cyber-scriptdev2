@@ -29,28 +29,28 @@ EndScriptData */
 enum
 {
     //yells
-    SAY_AGGRO1          = -1603221,
-    SAY_AGGRO2          = -1603222,
-    SAY_SPECIAL1        = -1603223,
-    SAY_SPECIAL2        = -1603224,
-    SAY_SPECIAL3        = -1603225,
-    SAY_JUMP            = -1603226,
-    SAY_SLAY1           = -1603227,
-    SAY_SLAY2           = -1603228,
-    SAY_BERSERK         = -1603229,
-    SAY_ARENA_WIPE      = -1603230,
-    SAY_DEATH           = -1603231,
-    SAY_OUTRO1          = -1603232,
-    SAY_OUTRO2          = -1603233,
-    SAY_OUTRO3          = -1603234,
-    SAY_OUTRO_HARD1     = -1603235,
-    SAY_OUTRO_HARD2     = -1603236,
-    SAY_OUTRO_HARD3     = -1603237,
+    SAY_AGGRO1          = -1603190,
+    SAY_AGGRO2          = -1603191,
+    SAY_SPECIAL1        = -1603192,
+    SAY_SPECIAL2        = -1603193,
+    SAY_SPECIAL3        = -1603194,
+    SAY_JUMP            = -1603195,
+    SAY_SLAY1           = -1603196,
+    SAY_SLAY2           = -1603197,
+    SAY_BERSERK         = -1603198,
+    SAY_ARENA_WIPE      = -1603199,
+    SAY_DEATH           = -1603200,
+    SAY_OUTRO1          = -1603201,
+    SAY_OUTRO2          = -1603202,
+    SAY_OUTRO3          = -1603203,
+    SAY_OUTRO_HARD1     = -1603204,
+    SAY_OUTRO_HARD2     = -1603205,
+    SAY_OUTRO_HARD3     = -1603206,
 
     // Sif
-    SAY_SIF_INTRO           = -1603185,
-    SAY_SIF_EVENT           = -1603186,
-    SAY_SIF_DESPAWN         = -1603187,
+    SAY_SIF_INTRO           = -1603210,
+    SAY_SIF_EVENT           = -1603211,
+    SAY_SIF_DESPAWN         = -1603212,
 
     // spells
     // phase1

@@ -28,60 +28,61 @@ EndScriptData */
 enum
 {
     //yells
-    //sara
-    SAY_INTRO1                  = -1603307,
-    SAY_INTRO2                  = -1603308,
-    SAY_AGGRO                   = -1603300,
-    SAY_HELP1                   = -1603301,
-    SAY_HELP2                   = -1603302,
-    SAY_SPECIAL1                = -1603305,
-    SAY_SPECIAL2                = -1603306,
-    SAY_KILL1                   = -1603303,
-    SAY_KILL2                   = -1603304,
-    SAY_WIPE                    = -1603309,
+    //sara    
+    SAY_AGGRO                   = -1603360,
+    SAY_HELP1                   = -1603361,
+    SAY_HELP2                   = -1603362,
+    SAY_KILL1                   = -1603363,
+    SAY_KILL2                   = -1603364,
+    SAY_SPECIAL1                = -1603365,
+    SAY_SPECIAL2                = -1603366,
+    SAY_INTRO1                  = -1603367,
+    SAY_INTRO2                  = -1603368,    
+    SAY_WIPE                    = -1603369,
 
     //yogg
-    SAY_PHASE2                  = -1603321,
-    SAY_VISION                  = -1603322,
-    EMOTE_PORTALS               = -1603372,
-    EMOTE_SHATTER               = -1603373,
-    SAY_PHASE3                  = -1603323,
-    SAY_SLAY1                   = -1603324,
-    SAY_SLAY2                   = -1603325,
-    SAY_DEATH                   = -1603326,
-    SAY_INSANITY1               = -1603327,
-    SAY_INSANITY2               = -1603328,
+    SAY_PHASE2                  = -1603370,
+    SAY_VISION                  = -1603371,
+    SAY_PHASE3                  = -1603372,
+    SAY_SLAY1                   = -1603373,
+    SAY_SLAY2                   = -1603374,
+    SAY_DEATH                   = -1603375,
+    SAY_INSANITY1               = -1603376,
+    SAY_INSANITY2               = -1603377,
+    EMOTE_PORTALS               = -1603378,
+    EMOTE_SHATTER               = -1603379,
 
     //visions
     //stormwind
-    SAY_GARONA1                 = -1603341,
-    SAY_GARONA2                 = -1603342,
-    SAY_YOGG_V1_1               = -1603343,
-    SAY_YOGG_V1_2               = -1603344,
-    SAY_GARONA3                 = -1603345,
-    SAY_GARONA4                 = -1603346,
-    SAY_YOGG_V1_3               = -1603347,
+    SAY_GARONA1                 = -1603400,
+    SAY_GARONA2                 = -1603401,
+    SAY_GARONA3                 = -1603402,
+    SAY_YOGG_V1_1               = -1603403,
+    SAY_YOGG_V1_2               = -1603404,
+    SAY_ILANE                   = -1603405,
+    SAY_GARONA4                 = -1603406,
+    SAY_YOGG_V1_3               = -1603407,
 
     //dragons
-    SAY_NELTHARION1             = -1603336,
-    SAY_YSERA                   = -1603337,
-    SAY_NELTHARION2             = -1603338,
-    SAY_MALYGOS                 = -1603339,
-    SAY_YOGG_V2                 = -1603340,
+    SAY_NELTHARION1             = -1603390,
+    SAY_YSERA                   = -1603391,
+    SAY_NELTHARION2             = -1603392,
+    SAY_MALYGOS                 = -1603393,
+    SAY_YOGG_V2                 = -1603394,
 
     //lich king
-    SAY_LICH_KING1              = -1603330,
-    SAY_CHAMPION1               = -1603331,
-    SAY_CHAMPION2               = -1603332,
-    SAY_LICH_KING2              = -1603333,
-    SAY_YOGG_V3_1               = -1603334,
-    SAY_YOGG_V3_2               = -1603335,
+    SAY_LICH_KING1              = -1603380,
+    SAY_CHAMPION1               = -1603381,
+    SAY_CHAMPION2               = -1603382,
+    SAY_LICH_KING2              = -1603383,
+    SAY_YOGG_V3_1               = -1603384,
+    SAY_YOGG_V3_2               = -1603385,
 
     //keepers yells
-    SAY_HODIR_ACTIVE            = -1603086,
-    SAY_FREYA_ACTIVE            = -1603009,
-    SAY_THORIM_ACTIVE           = -1603238,
-    SAY_MIMIRON_ACTIVE          = -1603260,
+    SAY_HODIR_ACTIVE            = -1603126,
+    SAY_FREYA_ACTIVE            = -1603149,
+    SAY_THORIM_ACTIVE           = -1603207,
+    SAY_MIMIRON_ACTIVE          = -1603239,
 
     //vision npc
     //stormwind
@@ -530,36 +531,40 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
             // summon thorim
             if(m_pInstance->GetData(TYPE_KEEPER_THORIM) == DONE)
             {
-                if (Creature* pTemp = m_creature->SummonCreature(KEEPER_THORIM, KeepersLoc[0].x, KeepersLoc[0].y, KeepersLoc[0].z, KeepersLoc[0].o, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                if (Creature* pThorim = m_creature->SummonCreature(KEEPER_THORIM, KeepersLoc[0].x, KeepersLoc[0].y, KeepersLoc[0].z, KeepersLoc[0].o, TEMPSUMMON_MANUAL_DESPAWN, 0))
                 {
-                    m_lKeeperGUID.push_back(pTemp->GetObjectGuid());
+                    DoScriptText(SAY_THORIM_ACTIVE, pThorim);
+                    m_lKeeperGUID.push_back(pThorim->GetObjectGuid());
                     m_uiKeepersActive += 1;
                 }
             }
             // summon hodir
             if(m_pInstance->GetData(TYPE_KEEPER_HODIR) == DONE)
             {
-                if (Creature* pTemp = m_creature->SummonCreature(KEEPER_HODIR, KeepersLoc[1].x, KeepersLoc[1].y, KeepersLoc[1].z, KeepersLoc[1].o, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                if (Creature* pHodir = m_creature->SummonCreature(KEEPER_HODIR, KeepersLoc[1].x, KeepersLoc[1].y, KeepersLoc[1].z, KeepersLoc[1].o, TEMPSUMMON_MANUAL_DESPAWN, 0))
                 {
-                    m_lKeeperGUID.push_back(pTemp->GetObjectGuid());
+                    DoScriptText(SAY_HODIR_ACTIVE, pHodir);
+                    m_lKeeperGUID.push_back(pHodir->GetObjectGuid());
                     m_uiKeepersActive += 1;
                 }
             }
             // summon freya
             if(m_pInstance->GetData(TYPE_KEEPER_FREYA) == DONE)
             {
-                if (Creature* pTemp = m_creature->SummonCreature(KEEPER_FREYA, KeepersLoc[2].x, KeepersLoc[2].y, KeepersLoc[2].z, KeepersLoc[2].o, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                if (Creature* pFreya = m_creature->SummonCreature(KEEPER_FREYA, KeepersLoc[2].x, KeepersLoc[2].y, KeepersLoc[2].z, KeepersLoc[2].o, TEMPSUMMON_MANUAL_DESPAWN, 0))
                 {
-                    m_lKeeperGUID.push_back(pTemp->GetObjectGuid());
+                    DoScriptText(SAY_FREYA_ACTIVE, pFreya);
+                    m_lKeeperGUID.push_back(pFreya->GetObjectGuid());
                     m_uiKeepersActive += 1;
                 }
             }
             // summon mimiron
             if(m_pInstance->GetData(TYPE_KEEPER_MIMIRON) == DONE)
             {
-                if (Creature* pTemp = m_creature->SummonCreature(KEEPER_MIMIRON, KeepersLoc[3].x, KeepersLoc[3].y, KeepersLoc[3].z, KeepersLoc[3].o, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                if (Creature* pMimiron = m_creature->SummonCreature(KEEPER_MIMIRON, KeepersLoc[3].x, KeepersLoc[3].y, KeepersLoc[3].z, KeepersLoc[3].o, TEMPSUMMON_MANUAL_DESPAWN, 0))
                 {
-                    m_lKeeperGUID.push_back(pTemp->GetObjectGuid());
+                    DoScriptText(SAY_MIMIRON_ACTIVE, pMimiron);
+                    m_lKeeperGUID.push_back(pMimiron->GetObjectGuid());
                     m_uiKeepersActive += 1;
                 }
             }
@@ -1089,7 +1094,13 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
                         break;
                     case 6:
                         if(Creature* Garona = m_pInstance->instance->GetCreature(m_uiGaronaGUID))
+                        {
                             Garona->GetMotionMaster()->MovePoint(0, 1931.348f, 61.033f, 241.709f);
+                        }
+                        if(Creature* KingLlane = m_pInstance->instance->GetCreature(m_uiKingLlaneGUID))
+                        {
+                            DoScriptText(SAY_ILANE, KingLlane);                             
+                        }
                         ++m_uiVisionPhase;
                         m_uiSpeechTimer = 6000;
                         break;

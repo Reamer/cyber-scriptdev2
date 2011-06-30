@@ -27,13 +27,13 @@ EndScriptData */
 enum
 {
     //yells
-    SAY_AGGRO       = -1603070,
-    SAY_SLAY_1      = -1603071,
-    SAY_SLAY_2      = -1603072,
-    SAY_BERSERK     = -1603073,
-    SAY_DEATH       = -1603074,
-    EMOTE_SCREECH   = -1603358,
-    EMOTE_DEFENDER  = -1603359,
+    SAY_AGGRO       = -1603110,
+    SAY_SLAY_1      = -1603112,
+    SAY_SLAY_2      = -1603111,
+    SAY_BERSERK     = -1603113,
+    SAY_DEATH       = -1603114,
+    EMOTE_SCREECH   = -1603115,
+    EMOTE_DEFENDER  = -1603116,
 
     //auriaya
     SPELL_BERSERK               = 47008,

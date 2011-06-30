@@ -27,31 +27,31 @@ EndScriptData */
 enum
 {
 	//yells
-    SAY_MOLGEIM_AGGRO       = -1603040,
-    SAY_MOLGEIM_DEATH1      = -1603041,
-    SAY_MOLGEIM_DEATH2      = -1603042,
-    SAY_MOLGEIM_DEATH_RUNE  = -1603043,
-    SAY_MOLGEIM_SUMMON      = -1603044,
-    SAY_MOLGEIM_SLAY1       = -1603045,
-    SAY_MOLGEIM_SLAY2       = -1603046,
-    SAY_MOLGEIM_BERSERK     = -1603047,
+    SAY_MOLGEIM_AGGRO       = -1603060,
+    SAY_MOLGEIM_DEATH1      = -1603061,
+    SAY_MOLGEIM_DEATH2      = -1603062,
+    SAY_MOLGEIM_DEATH_RUNE  = -1603063,
+    SAY_MOLGEIM_SUMMON      = -1603064,
+    SAY_MOLGEIM_SLAY1       = -1603065,
+    SAY_MOLGEIM_SLAY2       = -1603066,
+    SAY_MOLGEIM_BERSERK     = -1603067,
 
-    SAY_STEEL_AGGRO         = -1603050,
-    SAY_STEEL_DEATH1        = -1603051,
-    SAY_STEEL_DEATH2        = -1603052,
-    SAY_STEEL_SLAY1         = -1603053,
-    SAY_STEEL_SLAY2         = -1603054,
-    SAY_STEEL_OVERWHELMING  = -1603055,
-    SAY_STEEL_BERSERK       = -1603056,
+    SAY_STEEL_AGGRO         = -1603070,
+    SAY_STEEL_DEATH1        = -1603071,
+    SAY_STEEL_DEATH2        = -1603072,
+    SAY_STEEL_SLAY1         = -1603073,
+    SAY_STEEL_SLAY2         = -1603074,
+    SAY_STEEL_OVERWHELMING  = -1603075,
+    SAY_STEEL_BERSERK       = -1603076,
 
-    SAY_BRUNDIR_AGGR0       = -1603060,
-    SAY_BRUNDIR_WHIRL       = -1603062,
-    SAY_BRUNDIR_DEATH1      = -1603063,
-    SAY_BRUNDIR_DEATH2      = -1603064,
-    SAY_BRUNDIR_SLAY1       = -1603065,
-    SAY_BRUNDIR_SLAY2       = -1603066,
-    SAY_BRUNDIR_BERSERK     = -1603067,
-    SAY_BRUNDIR_FLY         = -1603068,
+    SAY_BRUNDIR_AGGR0       = -1603080,
+    SAY_BRUNDIR_WHIRL       = -1603081,
+    SAY_BRUNDIR_DEATH1      = -1603082,
+    SAY_BRUNDIR_DEATH2      = -1603083,
+    SAY_BRUNDIR_SLAY1       = -1603084,
+    SAY_BRUNDIR_SLAY2       = -1603085,
+    SAY_BRUNDIR_BERSERK     = -1603086,
+    SAY_BRUNDIR_FLY         = -1603087,
 
 	//all
 	SPELL_BERSERK				= 47008,
@@ -360,11 +360,7 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
                 }
             }
         }
-
-        if(urand(0,1))
-            DoScriptText(SAY_BRUNDIR_DEATH1, m_creature);
-        else
-            DoScriptText(SAY_BRUNDIR_DEATH2, m_creature);
+        DoScriptText(urand(0,1) ? SAY_BRUNDIR_DEATH1 : SAY_BRUNDIR_DEATH2 , m_creature);
     }
 
 	void Aggro(Unit* pWho)
@@ -409,10 +405,7 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 
     void KilledUnit(Unit *who)
     {
-        if(urand(0,1))
-            DoScriptText(SAY_BRUNDIR_SLAY1, m_creature);
-        else
-            DoScriptText(SAY_BRUNDIR_SLAY2, m_creature);
+        DoScriptText(urand(0,1) ? SAY_BRUNDIR_SLAY1 : SAY_BRUNDIR_SLAY2 , m_creature);
     }
 
 	void UpdateAI(const uint32 uiDiff)
@@ -631,10 +624,7 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
             }
 		}
 
-        if(irand(0,1))
-            DoScriptText(SAY_MOLGEIM_DEATH1, m_creature);
-        else
-            DoScriptText(SAY_MOLGEIM_DEATH2, m_creature);
+        DoScriptText(urand(0,1) ? SAY_MOLGEIM_DEATH1 : SAY_MOLGEIM_DEATH2, m_creature);
     }
 
 	void Aggro(Unit* pWho)
@@ -679,10 +669,7 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
 
     void KilledUnit(Unit *who)
     {
-        if(irand(0,1))
-            DoScriptText(SAY_MOLGEIM_SLAY1, m_creature);
-        else
-            DoScriptText(SAY_MOLGEIM_SLAY2, m_creature);
+        DoScriptText(urand(0,1) ? SAY_MOLGEIM_SLAY1 : SAY_MOLGEIM_SLAY2, m_creature);
     }
 
 	void UpdateAI(const uint32 uiDiff)
@@ -829,10 +816,7 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 		if (m_bHasSupercharge2)
 			DoCast(m_creature, SPELL_ELECTRICAL_CHARGE);
 
-        if(urand(0,1))
-            DoScriptText(SAY_STEEL_SLAY1, m_creature);
-        else
-            DoScriptText(SAY_STEEL_SLAY2, m_creature);
+        DoScriptText(urand(0,1) ? SAY_STEEL_SLAY1 : SAY_STEEL_SLAY2, m_creature);
     }
 
     void OnYourSide()
@@ -910,11 +894,7 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
                 }
             }
 		}
-
-        if(irand(0,1))
-            DoScriptText(SAY_STEEL_DEATH1, m_creature);
-        else
-            DoScriptText(SAY_STEEL_DEATH2, m_creature);
+        DoScriptText(urand(0,1) ? SAY_STEEL_DEATH1 : SAY_STEEL_DEATH2, m_creature);
     }
 
 	void Aggro(Unit* pWho)

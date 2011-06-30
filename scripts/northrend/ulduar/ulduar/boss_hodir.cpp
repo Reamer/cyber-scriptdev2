@@ -31,17 +31,17 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1603176,
-    SAY_SLAY_1                  = -1603174,
-    SAY_SLAY_2                  = -1603173,
-    SAY_FLASH_FREEZE            = -1603172,
-    SAY_FROZEN_BLOWS            = -1603171,
-    SAY_DEATH                   = -1603175,
-    SAY_BERSERK                 = -1603178,
-    SAY_HELP_YOGG               = -1603177,
+    SAY_AGGRO                   = -1603125,
+    SAY_SLAY_1                  = -1603123,
+    SAY_SLAY_2                  = -1603122,
+    SAY_FLASH_FREEZE            = -1603121,
+    SAY_FROZEN_BLOWS            = -1603120,
+    SAY_DEATH                   = -1603124,
+    SAY_BERSERK                 = -1603127,
 
-    EMOTE_FLASH_FREEZE          = -1603179,
-    EMOTE_FROZEN_BLOWS          = -1603180,
+    EMOTE_FLASH_FREEZE          = -1603128,
+    EMOTE_FROZEN_BLOWS          = -1603129,
+    EMOTE_SPEEDKILL             = -1603130,
 
     SPELL_ENRAGE                = 26662,
 
@@ -180,7 +180,7 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
     uint32 m_uiFrozenBlowsTimer;
     uint32 m_uiFreezeTimer;
 
-    bool m_bIsOutro;
+    bool   m_bIsOutro;
     uint32 m_uiOutroTimer;
     uint32 m_uiStep;
 
@@ -188,6 +188,8 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
     uint64 m_uiDruidHelperGUID;
     uint64 m_uiMageHelperGUID;
     uint64 m_uiPriestHelperGUID;
+
+    bool   m_bhardmode;
 
     void Reset()
     {
@@ -200,6 +202,7 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
         m_uiOutroTimer          = 10000;
         m_uiStep                = 1;
         m_bIsOutro              = false;
+        m_bhardmode             = true;
 
         if (Creature* pMage = m_pInstance->GetSingleCreatureFromStorage(NPC_HELPER_MAGE))
         {
@@ -249,7 +252,7 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
     {
         if(m_pInstance)
         {
-            if(m_uiSpeedKillTimer < 180000)
+            if(m_bhardmode)
             {
                 m_pInstance->SetData(TYPE_HODIR_HARD, DONE);
                 m_pInstance->SetData(TYPE_HODIR, DONE);
@@ -315,7 +318,16 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
                 EnterEvadeMode();
 
             // hard mode check
-            m_uiSpeedKillTimer += uiDiff;
+            if (m_bhardmode)
+            {
+                m_uiSpeedKillTimer += uiDiff;
+                if (m_uiSpeedKillTimer > 180000)
+                {
+                    m_bhardmode = false;
+                    DoScriptText(EMOTE_SPEEDKILL, m_creature);
+                }
+            }
+
 
             // Flash freeze
             if(m_uiFlashFreezeTimer < uiDiff)

@@ -26,16 +26,16 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO       = -1603120,
-    SAY_SURGE       = -1603123,
-    SAY_HARD        = -1603126,
-    SAY_SLAY1       = -1603121,
-    SAY_SLAY2       = -1603122,
-    SAY_BERSERK     = -1603125,
-    SAY_DEATH       = -1603124,
-    EMOTE_VAPORS    = -1603366,
-    EMOTE_SURGE     = -1603367,
-    EMOTE_ANIMUS    = -1603368,
+    SAY_AGGRO       = -1603350,
+    SAY_SLAY1       = -1603351,
+    SAY_SLAY2       = -1603352,
+    SAY_SURGE       = -1603353,
+    SAY_DEATH       = -1603354,
+    SAY_BERSERK     = -1603355,
+    SAY_HARD        = -1603356,
+    EMOTE_VAPORS    = -1603357,
+    EMOTE_SURGE     = -1603358,
+    EMOTE_ANIMUS    = -1603359,
 
     SPELL_AURA_OF_DESPAIR       = 62692,
     SPELL_SHADOW_CRASH          = 62660,
@@ -149,10 +149,7 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        if(irand(0,1))
-            DoScriptText(SAY_SLAY1, m_creature);
-        else
-            DoScriptText(SAY_SLAY2, m_creature);
+        DoScriptText(urand(0,1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
     void PrepareHardMode()

@@ -27,15 +27,15 @@ EndScriptData */
 enum
 {
 	//yells/emotes
-    SAY_INTRO               = -1603020,
-    SAY_AGGRO1              = -1603021,
-    SAY_AGGRO2              = -1603022,
-    SAY_AGGRO3              = -1603023,
-    SAY_GROUND              = -1603024,
-    EMOTE_DEEP_BREATH       = -1603025,
-    SAY_FIRES_EXTINGUISH    = -1603026,
-    EMOTE_HARPOON           = -1603353,
-    EMOTE_GROUNDED          = -1603354,
+    SAY_INTRO               = -1603030,
+    SAY_AGGRO1              = -1603031,
+    SAY_AGGRO2              = -1603032,
+    SAY_AGGRO3              = -1603033,
+    SAY_GROUND              = -1603034,
+    EMOTE_DEEP_BREATH       = -1603035,
+    SAY_FIRES_EXTINGUISH    = -1603036,
+    EMOTE_HARPOON           = -1603337,
+    EMOTE_GROUNDED          = -1603338,
 
 	//razorscale air phase
 	SPELL_FIREBALL				= 62796,
@@ -679,7 +679,9 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
     }
 
     void SetToAirPhase()
-    {        
+    {
+        if(Creature* pCommander = m_pInstance->GetSingleCreatureFromStorage(NPC_COMMANDER))
+            DoScriptText(SAY_FIRES_EXTINGUISH, pCommander);
 	    m_creature->GetMap()->CreatureRelocation(m_creature, PositionLoc[4].x, PositionLoc[4].y, PositionLoc[4].z, 0.0f);
         m_creature->SendMonsterMove(PositionLoc[4].x, PositionLoc[4].y, PositionLoc[4].z, SPLINETYPE_NORMAL, m_creature->GetSplineFlags(), 1);
         m_uiRazorscalePhase         = PHASE_AIR;
