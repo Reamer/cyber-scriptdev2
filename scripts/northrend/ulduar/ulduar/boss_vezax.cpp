@@ -266,10 +266,13 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
         // shadow crash
         if(m_uiCrashTimer < uiDiff)
         {
-            if (Player* pTarget = GetPlayerAtMinimumRange(15.0f))
-                DoCast(pTarget, SPELL_SHADOW_CRASH);
-            else 
-                DoCast(m_creature->getVictim(), SPELL_SHADOW_CRASH);
+            if (Player* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 1))
+            {
+                if (m_creature->GetDistance(pTarget) < 30.0f)
+                    DoCast(pTarget, SPELL_SHADOW_CRASH);
+                else 
+                    DoCast(m_creature->getVictim(), SPELL_SHADOW_CRASH);
+            }
             m_uiCrashTimer = 10000;
         }
         else m_uiCrashTimer -= uiDiff;
