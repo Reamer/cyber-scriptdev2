@@ -663,6 +663,7 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
 
         if (m_pInstance)
         {
+            //remove Clouds
             for(GUIDList::iterator iter = m_pInstance->m_lCLoudGUIDs.begin(); iter != m_pInstance->m_lCLoudGUIDs.end(); ++iter)
                 if (Creature *pTmp = m_pInstance->instance->GetCreature(*iter))
                     pTmp->ForcedDespawn();
@@ -697,7 +698,7 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
 		float homeY = m_creature->GetPositionY() + creatureDist*sin(angle*(M_PI/180));
         float homeZ = m_creature->GetTerrain()->GetWaterOrGroundLevel(homeX, homeY, m_creature->GetPositionZ());
 		// summon tentacle
-		if(Creature *pTemp = m_creature->SummonCreature(pEntry, homeX, homeY, homeZ, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 240000))
+		if(Creature *pTemp = m_creature->SummonCreature(pEntry, homeX, homeY, homeZ, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000))
 			pTemp->SetInCombatWithZone();
 	}
 
@@ -772,7 +773,7 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
                 if (m_uiSummonTimer < uiDiff)
                 {
                     // spell 64158 radius to high
-                    if(Creature *pTemp = m_creature->SummonCreature(MOB_IMMORTAL_GUARDIAN, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+                    if(Creature *pTemp = m_creature->SummonCreature(MOB_IMMORTAL_GUARDIAN, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000))
 						pTemp->SetInCombatWithZone();
                     m_uiSummonTimer = 30000;
                 }
@@ -930,6 +931,8 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
     uint64 m_uiYseraGUID;
     uint64 m_uiVoiceOfYoggGUID;
 
+    GUIDList m_lVisionTentacle;
+
     void Reset()
     {
         m_bIsPhaseFinished  = false;
@@ -952,13 +955,16 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
         if(m_pInstance) 
             m_pInstance->SetData(TYPE_YOGG_BRAIN, NOT_STARTED);
 
-        // close doors on reset
-        if(GameObject* pVisionDoor = GetClosestGameObjectWithEntry(m_creature, GO_BRAIN_DOOR1, 100.0f))
-            pVisionDoor->SetGoState(GO_STATE_READY);
-        if(GameObject* pVisionDoor = GetClosestGameObjectWithEntry(m_creature, GO_BRAIN_DOOR2, 100.0f))
-            pVisionDoor->SetGoState(GO_STATE_READY);
-        if(GameObject* pVisionDoor = GetClosestGameObjectWithEntry(m_creature, GO_BRAIN_DOOR3, 100.0f))
-            pVisionDoor->SetGoState(GO_STATE_READY);
+        if (m_pInstance)
+        {
+            // close doors on reset
+            if(GameObject* pVisionDoor = m_pInstance->GetSingleGameObjectFromStorage(GO_BRAIN_DOOR1))
+                pVisionDoor->SetGoState(GO_STATE_READY);
+            if(GameObject* pVisionDoor = m_pInstance->GetSingleGameObjectFromStorage(GO_BRAIN_DOOR2))
+                pVisionDoor->SetGoState(GO_STATE_READY);
+            if(GameObject* pVisionDoor = m_pInstance->GetSingleGameObjectFromStorage(GO_BRAIN_DOOR3))
+                pVisionDoor->SetGoState(GO_STATE_READY);
+        }
     }
 
     // for debug
@@ -997,13 +1003,28 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
         m_uiMadnessTimer        = 60000;
         m_bIsVisionFinished     = false;
         m_bHasShattered         = false;
+        for(GUIDList::iterator itr = m_lVisionTentacle.begin(); itr != m_lVisionTentacle.end(); itr++)
+        {
+            if (Creature* pVisionTentacle = m_creature->GetMap()->GetCreature(*itr))
+            {
+                pVisionTentacle->ForcedDespawn();
+            }
+        }
+        m_lVisionTentacle.clear();
+
     }
 
 	// check if all the tentacles are dead
     bool IsThereAnyAdd(WorldObject *pSource)
     {
-        if(GetClosestCreatureWithEntry(pSource, MOB_VISION_TENTACLE, 80.0f))
-            return true;
+        for(GUIDList::iterator itr = m_lVisionTentacle.begin(); itr != m_lVisionTentacle.end(); itr++)
+        {
+            if (Creature* pVisionTentacle = m_creature->GetMap()->GetCreature(*itr))
+            {
+                if (pVisionTentacle->isAlive())
+                    return true;
+            }
+        }
 
         if(m_pInstance)
         {
@@ -1011,15 +1032,15 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
             switch(m_pInstance->GetData(TYPE_VISION_PHASE))
             {
             case PHASE_VISION_STORMWIND:
-                if(GameObject* pVisionDoor = GetClosestGameObjectWithEntry(m_creature, GO_BRAIN_DOOR3, 100.0f))
+                if(GameObject* pVisionDoor = m_pInstance->GetSingleGameObjectFromStorage(GO_BRAIN_DOOR3))
                     pVisionDoor->SetGoState(GO_STATE_ACTIVE);
                 break;
             case PHASE_VISION_WYRMREST:
-                if(GameObject* pVisionDoor = GetClosestGameObjectWithEntry(m_creature, GO_BRAIN_DOOR1, 100.0f))
+                if(GameObject* pVisionDoor = m_pInstance->GetSingleGameObjectFromStorage(GO_BRAIN_DOOR1))
                     pVisionDoor->SetGoState(GO_STATE_ACTIVE);
                 break;
             case PHASE_VISION_ICECROWN:
-                if(GameObject* pVisionDoor = GetClosestGameObjectWithEntry(m_creature, GO_BRAIN_DOOR2, 100.0f))
+                if(GameObject* pVisionDoor = m_pInstance->GetSingleGameObjectFromStorage(GO_BRAIN_DOOR2))
                     pVisionDoor->SetGoState(GO_STATE_ACTIVE);
                 break;
             }
@@ -1051,6 +1072,7 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
                         {
                             if(Creature *pTemp = m_creature->SummonCreature(MOB_VISION_TENTACLE, KeepLoc[i].x, KeepLoc[i].y, KeepLoc[i].z, KeepLoc[i].o, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 80000))
                             {
+                                m_lVisionTentacle.push_back(pTemp->GetObjectGuid());
                                 pTemp->SetDisplayId(28621);
                                 pTemp->SetMaxHealth(m_bIsRegularMode ? 15000 : 40000);
                                 pTemp->setFaction(7); 
@@ -1058,7 +1080,7 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
                             }
                         }
                         for(uint8 i = 0; i < 3; i++)
-                            m_creature->SummonCreature(NPC_LAUGHING_SKULL, SkullKeepLoc[i].x, SkullKeepLoc[i].y, SkullKeepLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
+                            m_creature->SummonCreature(NPC_LAUGHING_SKULL, SkullKeepLoc[i].x, SkullKeepLoc[i].y, SkullKeepLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 80000);
                         ++m_uiVisionPhase;
                         m_uiSpeechTimer = 1000;
                         break;
@@ -1157,6 +1179,7 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
                             {
                                 if(Creature *pTemp = m_creature->SummonCreature(MOB_VISION_TENTACLE, DragonLoc[i].x, DragonLoc[i].y, DragonLoc[i].z, DragonLoc[i].o, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 80000))
                                 {
+                                    m_lVisionTentacle.push_back(pTemp->GetObjectGuid());
                                     pTemp->SetDisplayId(DisplayDragons[i]);
                                     pTemp->SetMaxHealth(m_bIsRegularMode ? 15000 : 40000);
                                     pTemp->setFaction(7);
@@ -1164,7 +1187,7 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
                                 }
                             }
                             for(uint8 i = 0; i < 3; i++)
-                                m_creature->SummonCreature(NPC_LAUGHING_SKULL, SkullDragonLoc[i].x, SkullDragonLoc[i].y, SkullDragonLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
+                                m_creature->SummonCreature(NPC_LAUGHING_SKULL, SkullDragonLoc[i].x, SkullDragonLoc[i].y, SkullDragonLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 80000);
                             ++m_uiVisionPhase;
                             m_uiSpeechTimer = 1000;
                             break;
@@ -1225,6 +1248,7 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
                             {
                                 if(Creature *pTemp = m_creature->SummonCreature(MOB_VISION_TENTACLE, IcecrownLoc[i].x, IcecrownLoc[i].y, IcecrownLoc[i].z, IcecrownLoc[i].o, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 80000))
                                 {
+                                    m_lVisionTentacle.push_back(pTemp->GetObjectGuid());
                                     pTemp->SetMaxHealth(m_bIsRegularMode ? 15000 : 40000);
                                     pTemp->SetDisplayId(25627);
                                     pTemp->setFaction(7);
@@ -1232,7 +1256,7 @@ struct MANGOS_DLL_DECL boss_brain_of_yogg_saronAI : public ScriptedAI
                                 }
                             }
                             for(uint8 i = 0; i < 4; i++)
-                                m_creature->SummonCreature(NPC_LAUGHING_SKULL, SkullIcecrownLoc[i].x, SkullIcecrownLoc[i].y, SkullIcecrownLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
+                                m_creature->SummonCreature(NPC_LAUGHING_SKULL, SkullIcecrownLoc[i].x, SkullIcecrownLoc[i].y, SkullIcecrownLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 80000);
                             ++m_uiVisionPhase;
                             m_uiSpeechTimer = 1000;
                             break;
@@ -1946,6 +1970,7 @@ struct MANGOS_DLL_DECL mob_immortal_guardianAI : public ScriptedAI
     {
         m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        pCreature->SetRespawnTime(WEEK * IN_MILLISECONDS);
         Reset();
     }
 
@@ -2151,6 +2176,7 @@ struct MANGOS_DLL_DECL mob_constrictor_tentacleAI : public ScriptedAI
         m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         SetCombatMovement(false);
+        pCreature->SetRespawnTime(WEEK * IN_MILLISECONDS);
         Reset();
     }
 
@@ -2237,6 +2263,7 @@ struct MANGOS_DLL_DECL mob_crusher_tentacleAI : public ScriptedAI
         m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         SetCombatMovement(false);
+        pCreature->SetRespawnTime(WEEK * IN_MILLISECONDS);
         Reset();
     }
 
