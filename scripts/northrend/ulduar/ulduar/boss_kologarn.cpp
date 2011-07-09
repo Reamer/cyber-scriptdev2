@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: boss_kologarn
-SD%Complete:
+SD%Complete: TODO Eyebeam
 SDComment: eye beam
 SDCategory: Ulduar
 EndScriptData */
@@ -426,26 +426,29 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, m_bIsRegularMode ? 4 : 10))
             {
-                //DoCast(m_creature->getVictim(), SPELL_FOCUSED_EYEBEAM, true);
-                if (Creature *pLeft = m_creature->SummonCreature(NPC_FOCUSED_EYEBEAM_LEFT, pTarget->GetPositionX(), pTarget->GetPositionY()-4.0f, pTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 10000))
+                if (pTarget->GetTypeId() == TYPEID_PLAYER)
                 {
-                    pLeft->SetInCombatWithZone();
-                    pLeft->SetDisplayId(11686);
-                    pLeft->SetSpeedRate(MOVE_RUN, 1.0);
-                    pLeft->CastSpell(pLeft, m_bIsRegularMode ? SPELL_EYEBEAM_PERIODIC : SPELL_EYEBEAM_PERIODIC_H, true);
-                    pLeft->CastSpell(pLeft, SPELL_EYEBEAM_VISUAL_LEFT_2, true);
-                    pLeft->AI()->AttackStart(pTarget);
+                    //DoCast(m_creature->getVictim(), SPELL_FOCUSED_EYEBEAM, true);
+                    if (Creature *pLeft = m_creature->SummonCreature(NPC_FOCUSED_EYEBEAM_LEFT, pTarget->GetPositionX(), pTarget->GetPositionY()-4.0f, pTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 10000))
+                    {
+                        pLeft->SetInCombatWithZone();
+                        pLeft->SetDisplayId(11686);
+                        pLeft->SetSpeedRate(MOVE_RUN, 1.0);
+                        pLeft->CastSpell(pLeft, m_bIsRegularMode ? SPELL_EYEBEAM_PERIODIC : SPELL_EYEBEAM_PERIODIC_H, true);
+                        pLeft->CastSpell(pLeft, SPELL_EYEBEAM_VISUAL_LEFT_2, true);
+                        pLeft->AI()->AttackStart(pTarget);
+                    }
+                    if (Creature *pRight = m_creature->SummonCreature(NPC_FOCUSED_EYEBEAM_RIGHT, pTarget->GetPositionX(), pTarget->GetPositionY()+4.0f, pTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 10000))
+                    {
+                        pRight->SetInCombatWithZone();
+                        pRight->SetDisplayId(11686);
+                        pRight->SetSpeedRate(MOVE_RUN, 1.0);
+                        pRight->CastSpell(pRight, SPELL_EYEBEAM_PERIODIC_VIS, true);
+                        pRight->CastSpell(pRight, SPELL_EYEBEAM_VISUAL_RIGHT, true);
+                        pRight->AI()->AttackStart(pTarget);
+                    }
+                    m_uiEyebeam_Timer = 10000 + urand(1000, 5000);
                 }
-                if (Creature *pRight = m_creature->SummonCreature(NPC_FOCUSED_EYEBEAM_RIGHT, pTarget->GetPositionX(), pTarget->GetPositionY()+4.0f, pTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 10000))
-                {
-                    pRight->SetInCombatWithZone();
-                    pRight->SetDisplayId(11686);
-                    pRight->SetSpeedRate(MOVE_RUN, 1.0);
-                    pRight->CastSpell(pRight, SPELL_EYEBEAM_PERIODIC_VIS, true);
-                    pRight->CastSpell(pRight, SPELL_EYEBEAM_VISUAL_RIGHT, true);
-                    pRight->AI()->AttackStart(pTarget);
-                }
-                m_uiEyebeam_Timer = 10000 + urand(1000, 5000);
             }
         }else m_uiEyebeam_Timer -= uiDiff;
 

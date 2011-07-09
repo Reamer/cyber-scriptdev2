@@ -48,7 +48,7 @@ enum
     SPELL_FROZEN_BLOWS          = 62478,
     SPELL_FROZEN_BLOWS_H        = 63512,
     SPELL_FREEZE                = 62469,
-    SPELL_BITTER_COLD           = 62038,	// SPELL BROKEN!!!!
+    SPELL_BITTER_COLD           = 62038,
     SPELL_ICICLE_TARGETING_AURA = 62227,    // spell used for random targeting of Icicle throughout the whole encounter. not used here
     SPELL_ICICLE_FLASH_MARKS    = 62476,    // casts this right befor flash freeze, triggers SPELL_ICICLE_SNOWPACKED. should target Icicles dummy NPCs
     SPELL_ICICLE_FLASH_MARKS_H  = 62477,
@@ -129,7 +129,7 @@ struct MANGOS_DLL_DECL mob_npc_flashFreezeAI : public ScriptedAI
 
     void Reset()
     {
-        m_uiFreezeNPCTimer = 500;
+        m_uiFreezeNPCTimer = 300;
     }
 
     void DamageTaken(Unit* pDonyby, uint32 &uiDamage)
@@ -141,6 +141,11 @@ struct MANGOS_DLL_DECL mob_npc_flashFreezeAI : public ScriptedAI
                 pHodir->SetInCombatWithZone();
             }
         }
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        m_creature->ForcedDespawn();
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -492,7 +497,7 @@ struct MANGOS_DLL_DECL mob_flashFreezeAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (Unit* pVictim = m_pInstance->instance->GetUnit(m_creature->GetCreatorGuid()))
+        if (Unit* pVictim = m_creature->GetCreator())
             pVictim->RemoveAurasDueToSpell(SPELL_FLASH_FREEZE_DEBUFF);
     }
 
@@ -562,7 +567,7 @@ struct MANGOS_DLL_DECL npc_hodir_helperAI : public ScriptedAI
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
     {
-        if (pSpell->Id == SPELL_FLASH_FREEZE && !(m_creature->HasAura(SPELL_SAFE_AREA_BUFF)) && m_creature->isAlive())
+        if (pSpell->Id == SPELL_FLASH_FREEZE && !m_creature->HasAura(SPELL_SAFE_AREA_BUFF) && m_creature->isAlive() && !m_creature->HasAura(SPELL_FLASH_FREEZE_NPC_STUN))
             DoCast(m_creature, SPELL_FLASH_FREEZE_SUMMON_NPC, true);
     }
 
