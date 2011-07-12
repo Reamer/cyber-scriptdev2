@@ -318,7 +318,7 @@ struct MANGOS_DLL_DECL mob_xtheartAI : public ScriptedAI
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
     {
-        m_uiTotalDamage += (uiDamage *2);
+        m_uiTotalDamage += uiDamage;
     }
 
     void JustDied(Unit* pKiller)
