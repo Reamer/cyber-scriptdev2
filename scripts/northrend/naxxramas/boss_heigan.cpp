@@ -229,7 +229,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
             //Damage part of eruption
             if (m_pInstance)
             {
-                for (std::list<uint64>::iterator itr = m_pInstance->m_lEruptionObjectOneGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectOneGUIDs.end(); ++itr)
+                for (GUIDList::iterator itr = m_pInstance->m_lEruptionObjectOneGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectOneGUIDs.end(); ++itr)
                 {
                     if (GameObject* pEruption = m_creature->GetMap()->GetGameObject((*itr)))
                     {
@@ -273,7 +273,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
             }
             if (m_pInstance)
             {
-                for (std::list<uint64>::iterator itr = m_pInstance->m_lEruptionObjectTwoGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectTwoGUIDs.end(); ++itr)
+                for (GUIDList::iterator itr = m_pInstance->m_lEruptionObjectTwoGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectTwoGUIDs.end(); ++itr)
                 {
                     if (GameObject* pEruption = m_creature->GetMap()->GetGameObject((*itr)))
                     {
@@ -315,7 +315,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
             }
             if (m_pInstance)
             {
-                for (std::list<uint64>::iterator itr = m_pInstance->m_lEruptionObjectThreeGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectThreeGUIDs.end(); ++itr)
+                for (GUIDList::iterator itr = m_pInstance->m_lEruptionObjectThreeGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectThreeGUIDs.end(); ++itr)
                 {
                     if (GameObject* pEruption = m_creature->GetMap()->GetGameObject((*itr)))
                     {
@@ -357,7 +357,7 @@ struct MANGOS_DLL_DECL boss_heiganAI : public ScriptedAI
             }
             if (m_pInstance)
             {
-                for (std::list<uint64>::iterator itr = m_pInstance->m_lEruptionObjectFourGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectFourGUIDs.end(); ++itr)
+                for (GUIDList::iterator itr = m_pInstance->m_lEruptionObjectFourGUIDs.begin(); itr != m_pInstance->m_lEruptionObjectFourGUIDs.end(); ++itr)
                 {
                     if (GameObject* pEruption = m_creature->GetMap()->GetGameObject((*itr)))
                     {

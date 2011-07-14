@@ -25,69 +25,6 @@ EndScriptData */
 #include "naxxramas.h"
 
 instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
-    m_uiAracEyeRampGUID(0),
-    m_uiPlagEyeRampGUID(0),
-    m_uiMiliEyeRampGUID(0),
-    m_uiConsEyeRampGUID(0),
-
-    m_uiAracPortalGUID(0),
-    m_uiPlagPortalGUID(0),
-    m_uiMiliPortalGUID(0),
-    m_uiConsPortalGUID(0),
-
-    m_uiAnubRekhanGUID(0),
-    m_uiFaerlinanGUID(0),
-    m_uiWorshipperCount(0),
-    m_uiFollowerCount(0),
-    m_uiMaexxnaGUID(0),
-
-    m_uiRazuviousGUID(0),
-    m_uiGothikGUID(0),
-    m_uiZeliekGUID(0),
-    m_uiThaneGUID(0),
-    m_uiBlaumeuxGUID(0),
-    m_uiRivendareGUID(0),
-
-    m_uiPatchwerkGUID(0),
-    m_uiGrobbulusGUID(0),
-    m_uiGluthGUID(0),
-    m_uiThaddiusGUID(0),
-    m_uiStalaggGUID(0),
-    m_uiFeugenGUID(0),
-
-    m_uiNothGUID(0),
-    m_uiHeiganGUID(0),
-    m_uiLoathebGUID(0),
-
-    m_uiSapphironGUID(0),
-    m_uiKelthuzadGUID(0),
-
-    m_uiPathExitDoorGUID(0),
-    m_uiGlutExitDoorGUID(0),
-    m_uiThadDoorGUID(0),
-
-    m_uiAnubDoorGUID(0),
-    m_uiAnubGateGUID(0),
-    m_uiFaerDoorGUID(0),
-    m_uiFaerWebGUID(0),
-    m_uiMaexOuterGUID(0),
-    m_uiMaexInnerGUID(0),
-
-    m_uiGothCombatGateGUID(0),
-    m_uiGothikEntryDoorGUID(0),
-    m_uiGothikExitDoorGUID(0),
-    m_uiHorsemenDoorGUID(0),
-    m_uiHorsemenChestGUID(0),
-    m_uiDeathKnightUnderstudyCount(0),
-
-    m_uiNothEntryDoorGUID(0),
-    m_uiNothExitDoorGUID(0),
-    m_uiHeigEntryDoorGUID(0),
-    m_uiHeigExitDoorGUID(0),
-    m_uiLoathebDoorGUID(0),
-
-    m_uiKelthuzadDoorGUID(0),
-    m_uiKelthuzadExitDoorGUID(0),
 
     m_bBlaumeuxDead(false),
     m_bRivendareDead(false),
@@ -114,39 +51,45 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
 void instance_naxxramas::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-    memset(&m_uiWorshipperGUID, 0, sizeof(m_uiWorshipperGUID));
-    memset(&m_uiDeathKnightUnderstudyGUID, 0, sizeof(m_uiDeathKnightUnderstudyGUID));
 }
 
 void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 {
     switch(pCreature->GetEntry())
     {
-        case NPC_ANUB_REKHAN:       m_uiAnubRekhanGUID  = pCreature->GetGUID(); break;
-        case NPC_FAERLINA:          m_uiFaerlinanGUID   = pCreature->GetGUID(); break;
-        case NPC_MAEXXNA:           m_uiMaexxnaGUID     = pCreature->GetGUID(); break;
-        case NPC_PATCHWERK:         m_uiPatchwerkGUID   = pCreature->GetGUID(); break;
-        case NPC_GROBBULUS:         m_uiGrobbulusGUID   = pCreature->GetGUID(); break;
-        case NPC_GLUTH:             m_uiGluthGUID       = pCreature->GetGUID(); break;
-        case NPC_THADDIUS:          m_uiThaddiusGUID    = pCreature->GetGUID(); break;
-        case NPC_STALAGG:           m_uiStalaggGUID     = pCreature->GetGUID(); break;
-        case NPC_FEUGEN:            m_uiFeugenGUID      = pCreature->GetGUID(); break;
-        case NPC_NOTH:              m_uiNothGUID        = pCreature->GetGUID(); break;
-        case NPC_HEIGAN:            m_uiHeiganGUID      = pCreature->GetGUID(); break;
-        case NPC_LOATHEB:           m_uiLoathebGUID     = pCreature->GetGUID(); break;
-        case NPC_RAZUVIOUS:         m_uiRazuviousGUID   = pCreature->GetGUID(); break;
-        case NPC_ZELIEK:            m_uiZeliekGUID      = pCreature->GetGUID(); break;
-        case NPC_THANE:             m_uiThaneGUID       = pCreature->GetGUID(); break;
-        case NPC_BLAUMEUX:          m_uiBlaumeuxGUID    = pCreature->GetGUID(); break;
-        case NPC_RIVENDARE:         m_uiRivendareGUID   = pCreature->GetGUID(); break;
-        case NPC_GOTHIK:            m_uiGothikGUID      = pCreature->GetGUID(); break;
-        case NPC_SAPPHIRON:         m_uiSapphironGUID   = pCreature->GetGUID(); break;
-        case NPC_KELTHUZAD:         m_uiKelthuzadGUID   = pCreature->GetGUID(); break;
-        case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetGUID()); break;
-        case NPC_WORSHIPPER:        if(m_uiWorshipperCount<5) m_uiWorshipperGUID[m_uiWorshipperCount++] = pCreature->GetGUID(); break;
-        case NPC_FOLLOWER:          if(m_uiFollowerCount<3) m_uiFollowerGUID[m_uiFollowerCount++] = pCreature->GetGUID(); break;
-        case NPC_DEATH_KNIGHT_UNDERSTUDY: if(m_uiDeathKnightUnderstudyCount<5) m_uiDeathKnightUnderstudyGUID[m_uiDeathKnightUnderstudyCount++] = pCreature->GetGUID(); break;
+        case NPC_ANUB_REKHAN:
+        case NPC_FAERLINA:
+        case NPC_MAEXXNA:
+        case NPC_PATCHWERK:
+        case NPC_GROBBULUS:
+        case NPC_GLUTH:
+        case NPC_THADDIUS:
+        case NPC_STALAGG:
+        case NPC_FEUGEN:
+        case NPC_NOTH:
+        case NPC_HEIGAN:
+        case NPC_LOATHEB:
+        case NPC_RAZUVIOUS:
+        case NPC_ZELIEK:
+        case NPC_THANE:
+        case NPC_BLAUMEUX:
+        case NPC_RIVENDARE:
+        case NPC_GOTHIK:
+        case NPC_SAPPHIRON:
+        case NPC_KELTHUZAD:
+            break;
+        case NPC_SUB_BOSS_TRIGGER:
+            m_lGothTriggerList.push_back(pCreature->GetGUID());
+            return;
+        case NPC_WORSHIPPER:
+        case NPC_FOLLOWER:
+            m_lFaerlinaAddsGUID.push_back(pCreature->GetObjectGuid());
+            return;
+        case NPC_DEATH_KNIGHT_UNDERSTUDY:
+            m_lDeathKnightUnderstudyGUID.push_back(pCreature->GetObjectGuid());
+            return;
     }
+    m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
 void instance_naxxramas::OnObjectCreate(GameObject* pGo)
@@ -154,146 +97,115 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
     switch(pGo->GetEntry())
     {
         case GO_ARAC_ANUB_DOOR:
-            m_uiAnubDoorGUID = pGo->GetGUID();
             break;
         case GO_ARAC_ANUB_GATE:
-            m_uiAnubGateGUID = pGo->GetGUID();
-            if (m_auiEncounter[0] == DONE)
+            if (m_auiEncounter[TYPE_ANUB_REKHAN] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_ARAC_FAER_WEB:
-            m_uiFaerWebGUID = pGo->GetGUID();
             break;
         case GO_ARAC_FAER_DOOR:
-            m_uiFaerDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[1] == DONE)
+            if (m_auiEncounter[TYPE_FAERLINA] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_ARAC_MAEX_INNER_DOOR:
-            m_uiMaexInnerGUID = pGo->GetGUID();
             break;
         case GO_ARAC_MAEX_OUTER_DOOR:
-            m_uiMaexOuterGUID = pGo->GetGUID();
-            if (m_auiEncounter[1] == DONE)
+            if (m_auiEncounter[TYPE_FAERLINA] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
 
         case GO_PLAG_NOTH_ENTRY_DOOR:
-            m_uiNothEntryDoorGUID = pGo->GetGUID();
             break;
         case GO_PLAG_NOTH_EXIT_DOOR:
-            m_uiNothExitDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[3] == DONE)
+            if (m_auiEncounter[TYPE_NOTH] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_PLAG_HEIG_ENTRY_DOOR:
-            m_uiHeigEntryDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[3] == DONE)
+            if (m_auiEncounter[TYPE_NOTH] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_PLAG_HEIG_EXIT_DOOR:
-            m_uiHeigExitDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[4] == DONE)
+            if (m_auiEncounter[TYPE_HEIGAN] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_PLAG_LOAT_DOOR:
-            m_uiLoathebDoorGUID = pGo->GetGUID();
             break;
         case GO_ERUPTION_ONE_OBJECT:
-            m_lEruptionObjectOneGUIDs.push_back(pGo->GetGUID());
-            break;
+            m_lEruptionObjectOneGUIDs.push_back(pGo->GetObjectGuid());
+            return;
         case GO_ERUPTION_TWO_OBJECT:
-            m_lEruptionObjectTwoGUIDs.push_back(pGo->GetGUID());
-            break;
+            m_lEruptionObjectTwoGUIDs.push_back(pGo->GetObjectGuid());
+            return;
         case GO_ERUPTION_THREE_OBJECT:
-            m_lEruptionObjectThreeGUIDs.push_back(pGo->GetGUID());
-            break;
+            m_lEruptionObjectThreeGUIDs.push_back(pGo->GetObjectGuid());
+            return;
         case GO_ERUPTION_FOUR_OBJECT:
-            m_lEruptionObjectFourGUIDs.push_back(pGo->GetGUID());
-            break;
+            m_lEruptionObjectFourGUIDs.push_back(pGo->GetObjectGuid());
+            return;
 
         case GO_MILI_GOTH_ENTRY_GATE:
-            m_uiGothikEntryDoorGUID = pGo->GetGUID();
             break;
         case GO_MILI_GOTH_EXIT_GATE:
-            m_uiGothikExitDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[7] == DONE)
+            if (m_auiEncounter[TYPE_GOTHIK] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_MILI_GOTH_COMBAT_GATE:
-            m_uiGothCombatGateGUID = pGo->GetGUID();
             break;
         case GO_MILI_HORSEMEN_DOOR:
-            m_uiHorsemenDoorGUID  = pGo->GetGUID();
-            if (m_auiEncounter[7] == DONE)
+            if (m_auiEncounter[TYPE_GOTHIK] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
 
         case GO_CHEST_HORSEMEN_NORM:
         case GO_CHEST_HORSEMEN_HERO:
-            m_uiHorsemenChestGUID = pGo->GetGUID();
             break;
 
         case GO_CONS_PATH_EXIT_DOOR:
-            m_uiPathExitDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[9] == DONE)
+            if (m_auiEncounter[TYPE_PATCHWERK] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CONS_GLUT_EXIT_DOOR:
-            m_uiGlutExitDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[11] == DONE)
+            if (m_auiEncounter[TYPE_GLUTH] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CONS_THAD_DOOR:
-            m_uiThadDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[11] == DONE)
+            if (m_auiEncounter[TYPE_GLUTH] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
 
         case GO_KELTHUZAD_WATERFALL_DOOR:
-            m_uiKelthuzadDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[13] == DONE)
+            if (m_auiEncounter[TYPE_SAPPHIRON] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-
         case GO_KELTHUZAD_EXIT_DOOR:
-            m_uiKelthuzadExitDoorGUID = pGo->GetGUID();
             break;
 
         case GO_ARAC_EYE_RAMP:
-            m_uiAracEyeRampGUID = pGo->GetGUID();
-            if (m_auiEncounter[2] == DONE)
+            if (m_auiEncounter[TYPE_MAEXXNA] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_PLAG_EYE_RAMP:
-            m_uiPlagEyeRampGUID = pGo->GetGUID();
-            if (m_auiEncounter[5] == DONE)
+            if (m_auiEncounter[TYPE_LOATHEB] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_MILI_EYE_RAMP:
-            m_uiMiliEyeRampGUID = pGo->GetGUID();
-            if (m_auiEncounter[8] == DONE)
+            if (m_auiEncounter[TYPE_FOUR_HORSEMEN] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CONS_EYE_RAMP:
-            m_uiConsEyeRampGUID = pGo->GetGUID();
-            if (m_auiEncounter[12] == DONE)
+            if (m_auiEncounter[TYPE_THADDIUS] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-
         case GO_ARAC_PORTAL:
-            m_uiAracPortalGUID = pGo->GetGUID();
-            break;
         case GO_PLAG_PORTAL:
-            m_uiPlagPortalGUID = pGo->GetGUID();
-            break;
         case GO_MILI_PORTAL:
-            m_uiMiliPortalGUID = pGo->GetGUID();
-            break;
         case GO_CONS_PORTAL:
-            m_uiConsPortalGUID = pGo->GetGUID();
             break;
+        default:
+            return;
     }
+    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 bool instance_naxxramas::IsEncounterInProgress() const
@@ -402,83 +314,78 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
     switch(uiType)
     {
         case TYPE_ANUB_REKHAN:
-            m_auiEncounter[0] = uiData;
-            DoUseDoorOrButton(m_uiAnubDoorGUID);
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_ARAC_ANUB_DOOR);
             if (uiData == DONE)
-                DoUseDoorOrButton(m_uiAnubGateGUID);
+                DoUseDoorOrButton(GO_ARAC_ANUB_GATE);
             break;
         case TYPE_FAERLINA:
-            m_auiEncounter[1] = uiData;
-            DoUseDoorOrButton(m_uiFaerWebGUID);
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_ARAC_FAER_WEB);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(m_uiFaerDoorGUID);
-                DoUseDoorOrButton(m_uiMaexOuterGUID);
+                DoUseDoorOrButton(GO_ARAC_FAER_DOOR);
+                DoUseDoorOrButton(GO_ARAC_MAEX_OUTER_DOOR);
             }
             break;
         case TYPE_MAEXXNA:
-            m_auiEncounter[2] = uiData;
-            DoUseDoorOrButton(m_uiMaexInnerGUID, uiData);
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_ARAC_MAEX_INNER_DOOR);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(m_uiAracEyeRampGUID);
-                DoRespawnGameObject(m_uiAracPortalGUID, 30*MINUTE);
-                if (GameObject* pTele = instance->GetGameObject(m_uiAracPortalGUID))
+                DoUseDoorOrButton(GO_ARAC_EYE_RAMP);
+                DoRespawnGameObject(GO_ARAC_PORTAL, 30*MINUTE);
+                if (GameObject* pTele = GetSingleGameObjectFromStorage(GO_ARAC_PORTAL))
                     pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 DoTaunt();
             }
             break;
         case TYPE_NOTH:
-            m_auiEncounter[3] = uiData;
-            DoUseDoorOrButton(m_uiNothEntryDoorGUID);
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_PLAG_NOTH_ENTRY_DOOR);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(m_uiNothExitDoorGUID);
-                DoUseDoorOrButton(m_uiHeigEntryDoorGUID);
+                DoUseDoorOrButton(GO_PLAG_NOTH_EXIT_DOOR);
+                DoUseDoorOrButton(GO_PLAG_HEIG_ENTRY_DOOR);
             }
             break;
         case TYPE_HEIGAN:
-            m_auiEncounter[4] = uiData;
-            DoUseDoorOrButton(m_uiHeigEntryDoorGUID);
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_PLAG_HEIG_ENTRY_DOOR);
             if (uiData == DONE)
-                DoUseDoorOrButton(m_uiHeigExitDoorGUID);
+                DoUseDoorOrButton(GO_PLAG_HEIG_EXIT_DOOR);
             break;
         case TYPE_LOATHEB:
-            m_auiEncounter[5] = uiData;
-            DoUseDoorOrButton(m_uiLoathebDoorGUID);
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_PLAG_LOAT_DOOR);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(m_uiPlagEyeRampGUID);
-                DoRespawnGameObject(m_uiPlagPortalGUID, 30*MINUTE);
-                if (GameObject* pTele = instance->GetGameObject(m_uiPlagPortalGUID))
+                DoUseDoorOrButton(GO_PLAG_EYE_RAMP);
+                DoRespawnGameObject(GO_PLAG_PORTAL, 30*MINUTE);
+                if (GameObject* pTele = GetSingleGameObjectFromStorage(GO_PLAG_PORTAL))
                     pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 DoTaunt();
             }
             break;
         case TYPE_RAZUVIOUS:
-            m_auiEncounter[6] = uiData;
+            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_GOTHIK:
-            m_auiEncounter[7] = uiData;
+            m_auiEncounter[uiType] = uiData;
             switch(uiData)
             {
                 case IN_PROGRESS:
-                    DoUseDoorOrButton(m_uiGothikEntryDoorGUID);
-                    DoUseDoorOrButton(m_uiGothCombatGateGUID);
+                case FAIL:
+                    DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
+                    DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
                     break;
                 case SPECIAL:
-                    DoUseDoorOrButton(m_uiGothCombatGateGUID);
-                    break;
-                case FAIL:
-                    if (m_auiEncounter[7] == IN_PROGRESS)
-                        DoUseDoorOrButton(m_uiGothCombatGateGUID);
-
-                    DoUseDoorOrButton(m_uiGothikEntryDoorGUID);
+                    DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
                     break;
                 case DONE:
-                    DoUseDoorOrButton(m_uiGothikEntryDoorGUID);
-                    DoUseDoorOrButton(m_uiGothikExitDoorGUID);
-                    DoUseDoorOrButton(m_uiHorsemenDoorGUID);
+                    DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
+                    DoUseDoorOrButton(GO_MILI_GOTH_EXIT_GATE);
+                    DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
                     break;
             }
             break;
@@ -515,8 +422,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             }
             break;
         case TYPE_FOUR_HORSEMEN:
-            m_auiEncounter[8] = uiData;
-            DoUseDoorOrButton(m_uiHorsemenDoorGUID);
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
             if (uiData == DONE)
             {
                 if (instance)
@@ -524,50 +431,51 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                     bool m_bIsRegularMode = instance->IsRegularDifficulty();
                     DoCompleteAchievement(m_bIsRegularMode ? 568 : 569);
                 }                
-                DoUseDoorOrButton(m_uiMiliEyeRampGUID);
-                DoRespawnGameObject(m_uiMiliPortalGUID, 30*MINUTE);
-                if (GameObject* pTele = instance->GetGameObject(m_uiMiliPortalGUID))
+                DoUseDoorOrButton(GO_MILI_EYE_RAMP);
+                DoRespawnGameObject(GO_MILI_PORTAL, 30*MINUTE);
+                if (GameObject* pTele = GetSingleGameObjectFromStorage(GO_MILI_PORTAL))
                     pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-                DoRespawnGameObject(m_uiHorsemenChestGUID, 30*MINUTE);
+
+                DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_CHEST_HORSEMEN_NORM : GO_CHEST_HORSEMEN_HERO, 30*MINUTE);
                 DoTaunt();
             }
             break;
         case TYPE_PATCHWERK:
-            m_auiEncounter[9] = uiData;
+            m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(m_uiPathExitDoorGUID);
+                DoUseDoorOrButton(GO_CONS_PATH_EXIT_DOOR);
             break;
         case TYPE_GROBBULUS:
-            m_auiEncounter[10] = uiData;
+            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_GLUTH:
-            m_auiEncounter[11] = uiData;
+            m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(m_uiGlutExitDoorGUID);
-                DoUseDoorOrButton(m_uiThadDoorGUID);
+                DoUseDoorOrButton(GO_CONS_GLUT_EXIT_DOOR);
+                DoUseDoorOrButton(GO_CONS_THAD_DOOR);
             }
             break;
         case TYPE_THADDIUS:
-            m_auiEncounter[12] = uiData;
-            DoUseDoorOrButton(m_uiThadDoorGUID, uiData);
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_CONS_THAD_DOOR);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(m_uiConsEyeRampGUID);
-                DoRespawnGameObject(m_uiConsPortalGUID, 30*MINUTE);
-                if (GameObject* pTele = instance->GetGameObject(m_uiConsPortalGUID))
+                DoUseDoorOrButton(GO_CONS_EYE_RAMP);
+                DoRespawnGameObject(GO_CONS_PORTAL, 30*MINUTE);
+                if (GameObject* pTele = GetSingleGameObjectFromStorage(GO_CONS_PORTAL))
                     pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 DoTaunt();
             }
             break;
         case TYPE_SAPPHIRON:
-            m_auiEncounter[13] = uiData;
+            m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(m_uiKelthuzadDoorGUID);
+                DoUseDoorOrButton(GO_KELTHUZAD_WATERFALL_DOOR);
             break;
         case TYPE_KELTHUZAD:
-            m_auiEncounter[14] = uiData;
-            DoUseDoorOrButton(m_uiKelthuzadExitDoorGUID);
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_KELTHUZAD_EXIT_DOOR);
             break;
     }
 
@@ -652,70 +560,14 @@ uint32 instance_naxxramas::GetData(uint32 uiType)
     return 0;
 }
 
-uint64 instance_naxxramas::GetData64(uint32 uiData)
-{
-    switch(uiData)
-    {
-        case NPC_ANUB_REKHAN:
-            return m_uiAnubRekhanGUID;
-        case NPC_FAERLINA:
-            return m_uiFaerlinanGUID;
-        case GO_MILI_GOTH_COMBAT_GATE:
-            return m_uiGothCombatGateGUID;
-        case NPC_DEATH_KNIGHT_UNDERSTUDY_1:
-            return m_uiDeathKnightUnderstudyGUID[0];
-        case NPC_DEATH_KNIGHT_UNDERSTUDY_2:
-            return m_uiDeathKnightUnderstudyGUID[1];
-        case NPC_DEATH_KNIGHT_UNDERSTUDY_3:
-            return m_uiDeathKnightUnderstudyGUID[2];
-        case NPC_DEATH_KNIGHT_UNDERSTUDY_4:
-            return m_uiDeathKnightUnderstudyGUID[3];
-        case NPC_ZELIEK:
-            return m_uiZeliekGUID;
-        case NPC_THANE:
-            return m_uiThaneGUID;
-        case NPC_BLAUMEUX:
-            return m_uiBlaumeuxGUID;
-        case NPC_RIVENDARE:
-            return m_uiRivendareGUID;
-        case NPC_THADDIUS:
-            return m_uiThaddiusGUID;
-        case NPC_STALAGG:
-            return m_uiStalaggGUID;
-        case NPC_FEUGEN:
-            return m_uiFeugenGUID;
-        case NPC_LOATHEB:
-            return m_uiLoathebGUID;
-        case NPC_HEIGAN:
-            return m_uiHeiganGUID;
-        case NPC_GOTHIK:
-            return m_uiGothikGUID;
-        case NPC_KELTHUZAD:
-            return m_uiKelthuzadGUID;
-        case NPC_WORSHIPPER_1:
-            return m_uiWorshipperGUID[0];
-        case NPC_WORSHIPPER_2:
-            return m_uiWorshipperGUID[1];
-        case NPC_WORSHIPPER_3:
-            return m_uiWorshipperGUID[2];
-        case NPC_WORSHIPPER_4:
-            return m_uiWorshipperGUID[3];
-        case NPC_FOLLOWER_1:
-            return m_uiFollowerGUID[0];
-        case NPC_FOLLOWER_2:
-            return m_uiFollowerGUID[1];
-    }
-    return 0;
-}
-
 void instance_naxxramas::SetGothTriggers()
 {
-    Creature* pGoth = instance->GetCreature(m_uiGothikGUID);
+    Creature* pGoth = GetSingleCreatureFromStorage(NPC_GOTHIK);
 
     if (!pGoth)
         return;
 
-    for(std::list<uint64>::iterator itr = m_lGothTriggerList.begin(); itr != m_lGothTriggerList.end(); ++itr)
+    for(GUIDList::iterator itr = m_lGothTriggerList.begin(); itr != m_lGothTriggerList.end(); ++itr)
     {
         if (Creature* pTrigger = instance->GetCreature(*itr))
         {
@@ -770,7 +622,7 @@ void instance_naxxramas::GetGothSummonPointCreatures(std::list<Creature*> &lList
 
 bool instance_naxxramas::IsInRightSideGothArea(Unit* pUnit)
 {
-    if (GameObject* pCombatGate = instance->GetGameObject(m_uiGothCombatGateGUID))
+    if (GameObject* pCombatGate = GetSingleGameObjectFromStorage(GO_MILI_GOTH_COMBAT_GATE))
         return (pCombatGate->GetPositionY() >= pUnit->GetPositionY());
 
     error_log("SD2: left/right side check, Gothik combat area failed.");
@@ -786,7 +638,7 @@ void instance_naxxramas::SetChamberCenterCoords(float fX, float fY, float fZ)
 
 void instance_naxxramas::DoTaunt()
 {
-    Creature* pKelThuzad = instance->GetCreature(m_uiKelthuzadGUID);
+    Creature* pKelThuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD);
 
     if (pKelThuzad && pKelThuzad->isAlive())
     {

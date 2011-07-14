@@ -151,136 +151,136 @@ void instance_ulduar::OnObjectCreate(GameObject *pGo)
     {
         // doors & other
         // The siege
-    case GO_SHIELD_WALL:
-        break;
-    case GO_LEVIATHAN_GATE:
-        if(m_auiEncounter[0] == DONE)
-            pGo->SetGoState(GO_STATE_ACTIVE);
-        break;
-    case GO_XT002_GATE:
-        pGo->SetGoState(GO_STATE_READY);
-        if(m_auiEncounter[0] == DONE || m_auiEncounter[3] == DONE)
-            pGo->SetGoState(GO_STATE_ACTIVE);
-        break;
-    case GO_BROKEN_HARPOON:
-        m_lBreakHarpoonGUID.push_back(pGo->GetObjectGuid());
-        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-        break;
-
-        // Archivum
-    case GO_IRON_ENTRANCE_DOOR:
-        break;
-    case GO_ARCHIVUM_DOOR:
-        pGo->SetGoState(GO_STATE_READY);
-        if(m_auiEncounter[4])
-            pGo->SetGoState(GO_STATE_ACTIVE);
-        break;
-    case GO_ARCHIVUM_CONSOLE:
-    case GO_UNIVERSE_FLOOR_ARCHIVUM:
-        // Celestial Planetarium
-    case GO_CELESTIAL_ACCES:
-    case GO_CELESTIAL_DOOR:
-    case GO_UNIVERSE_FLOOR_CELESTIAL:
-    case GO_AZEROTH_GLOBE:
-        break;
-        // Shattered Hallway
-    case GO_KOLOGARN_BRIDGE:
-        pGo->SetGoState(GO_STATE_ACTIVE);
-        break;
-    case GO_SHATTERED_DOOR:
-        break;
-        // The keepers
-        // Hodir
-    case GO_HODIR_EXIT:
-        if(m_auiEncounter[TYPE_HODIR] == DONE)
-            pGo->SetGoState(GO_STATE_ACTIVE);
-        break;
-    case GO_HODIR_ICE_WALL:
-        if(m_auiEncounter[TYPE_HODIR] == DONE)
-            pGo->SetGoState(GO_STATE_ACTIVE);
-        break;
-    case GO_HODIR_ENTER:
-        pGo->SetGoState(GO_STATE_ACTIVE);
-        break;
-        // Mimiron
-    case GO_MIMIRON_TRAM:
-        if (m_auiEncounter[TYPE_AURIAYA] == DONE)
-        {
-            pGo->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
+        case GO_SHIELD_WALL:
+            break;
+        case GO_LEVIATHAN_GATE:
+            if(m_auiEncounter[0] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_XT002_GATE:
             pGo->SetGoState(GO_STATE_READY);
-        }
-        break;
-    case GO_MIMIRON_BUTTON:
-        if (m_auiEncounter[TYPE_MIMIRON] == NOT_STARTED)
-            pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-        break;
-    case GO_MIMIRON_DOOR_1:
-    case GO_MIMIRON_DOOR_2:
-    case GO_MIMIRON_DOOR_3:
-    case GO_MIMIRON_ELEVATOR:
-    case GO_MIMIRON_TEL1:
-    case GO_MIMIRON_TEL2:
-    case GO_MIMIRON_TEL3:
-    case GO_MIMIRON_TEL4:
-    case GO_MIMIRON_TEL5:
-    case GO_MIMIRON_TEL6:
-    case GO_MIMIRON_TEL7:
-    case GO_MIMIRON_TEL8:
-    case GO_MIMIRON_TEL9:
-        // Thorim
-    case GO_DARK_IRON_PORTCULIS:
-    case GO_RUNED_STONE_DOOR:
-    case GO_THORIM_STONE_DOOR:
-    case GO_LIGHTNING_FIELD:
-        break;
-    case GO_DOOR_LEVER:
-        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-        break;
+            if(m_auiEncounter[0] == DONE || m_auiEncounter[3] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_BROKEN_HARPOON:
+            m_lBreakHarpoonGUID.push_back(pGo->GetObjectGuid());
+            pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            break;
 
-        // Prison
-    case GO_ANCIENT_GATE:
-        DoOpenMadnessDoorIfCan();
-        break;
-    case GO_VEZAX_GATE:
-        pGo->SetGoState(GO_STATE_READY);
-        if(m_auiEncounter[11])
+            // Archivum
+        case GO_IRON_ENTRANCE_DOOR:
+            break;
+        case GO_ARCHIVUM_DOOR:
+            pGo->SetGoState(GO_STATE_READY);
+            if(m_auiEncounter[4])
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_ARCHIVUM_CONSOLE:
+        case GO_UNIVERSE_FLOOR_ARCHIVUM:
+            // Celestial Planetarium
+        case GO_CELESTIAL_ACCES:
+        case GO_CELESTIAL_DOOR:
+        case GO_UNIVERSE_FLOOR_CELESTIAL:
+        case GO_AZEROTH_GLOBE:
+            break;
+            // Shattered Hallway
+        case GO_KOLOGARN_BRIDGE:
             pGo->SetGoState(GO_STATE_ACTIVE);
-        break;
-    case GO_YOGG_GATE:
-    case GO_BRAIN_DOOR1:
-    case GO_BRAIN_DOOR2:
-    case GO_BRAIN_DOOR3:
-        // loot
-        // Kologarn
-    case GO_CACHE_OF_LIVING_STONE:
-    case GO_CACHE_OF_LIVING_STONE_H:
+            break;
+        case GO_SHATTERED_DOOR:
+            break;
+            // The keepers
+            // Hodir
+        case GO_HODIR_EXIT:
+            if(m_auiEncounter[TYPE_HODIR] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_HODIR_ICE_WALL:
+            if(m_auiEncounter[TYPE_HODIR] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_HODIR_ENTER:
+            pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+            // Mimiron
+        case GO_MIMIRON_TRAM:
+            if (m_auiEncounter[TYPE_AURIAYA] == DONE)
+            {
+                pGo->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
+                pGo->SetGoState(GO_STATE_READY);
+            }
+            break;
+        case GO_MIMIRON_BUTTON:
+            if (m_auiEncounter[TYPE_MIMIRON] == NOT_STARTED)
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            break;
+        case GO_MIMIRON_DOOR_1:
+        case GO_MIMIRON_DOOR_2:
+        case GO_MIMIRON_DOOR_3:
+        case GO_MIMIRON_ELEVATOR:
+        case GO_MIMIRON_TEL1:
+        case GO_MIMIRON_TEL2:
+        case GO_MIMIRON_TEL3:
+        case GO_MIMIRON_TEL4:
+        case GO_MIMIRON_TEL5:
+        case GO_MIMIRON_TEL6:
+        case GO_MIMIRON_TEL7:
+        case GO_MIMIRON_TEL8:
+        case GO_MIMIRON_TEL9:
+            // Thorim
+        case GO_DARK_IRON_PORTCULIS:
+        case GO_RUNED_STONE_DOOR:
+        case GO_THORIM_STONE_DOOR:
+        case GO_LIGHTNING_FIELD:
+            break;
+        case GO_DOOR_LEVER:
+            pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            break;
 
-        // Hodir
-    case GO_CACHE_OF_WINTER:
-    case GO_CACHE_OF_RARE_WINTER:
-    case GO_CACHE_OF_WINTER_H:
-    case GO_CACHE_OF_RARE_WINTER_H:
-        // Freya
-    case GO_FREYA_GIFT:
-    case GO_FREYA_GIFT_HARD:
-    case GO_FREYA_GIFT_H:
-    case GO_FREYA_GIFT_HARD_H:
-        // Thorim
-    case GO_CACHE_OF_STORMS:
-    case GO_CACHE_OF_RARE_STORMS:
-    case GO_CACHE_OF_STORMS_H:
-    case GO_CACHE_OF_RARE_STORMS_H:
-        // Mimiron
-    case GO_CACHE_OF_INOV:
-    case GO_CACHE_OF_INOV_HARD:
-    case GO_CACHE_OF_INOV_H:
-    case GO_CACHE_OF_INOV_HARD_H:
-        // Alagon
-    case GO_GIFT_OF_OBSERVER:
-    case GO_GIFT_OF_OBSERVER_H:
-        break;
-    default:
-        return;
+            // Prison
+        case GO_ANCIENT_GATE:
+            DoOpenMadnessDoorIfCan();
+            break;
+        case GO_VEZAX_GATE:
+            pGo->SetGoState(GO_STATE_READY);
+            if(m_auiEncounter[11])
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_YOGG_GATE:
+        case GO_BRAIN_DOOR1:
+        case GO_BRAIN_DOOR2:
+        case GO_BRAIN_DOOR3:
+            // loot
+            // Kologarn
+        case GO_CACHE_OF_LIVING_STONE:
+        case GO_CACHE_OF_LIVING_STONE_H:
+
+            // Hodir
+        case GO_CACHE_OF_WINTER:
+        case GO_CACHE_OF_RARE_WINTER:
+        case GO_CACHE_OF_WINTER_H:
+        case GO_CACHE_OF_RARE_WINTER_H:
+            // Freya
+        case GO_FREYA_GIFT:
+        case GO_FREYA_GIFT_HARD:
+        case GO_FREYA_GIFT_H:
+        case GO_FREYA_GIFT_HARD_H:
+            // Thorim
+        case GO_CACHE_OF_STORMS:
+        case GO_CACHE_OF_RARE_STORMS:
+        case GO_CACHE_OF_STORMS_H:
+        case GO_CACHE_OF_RARE_STORMS_H:
+            // Mimiron
+        case GO_CACHE_OF_INOV:
+        case GO_CACHE_OF_INOV_HARD:
+        case GO_CACHE_OF_INOV_H:
+        case GO_CACHE_OF_INOV_HARD_H:
+            // Alagon
+        case GO_GIFT_OF_OBSERVER:
+        case GO_GIFT_OF_OBSERVER_H:
+            break;
+        default:
+            return;
     }
     m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }

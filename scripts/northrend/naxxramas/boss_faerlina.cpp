@@ -55,9 +55,6 @@ enum
     H_SPELL_FIRE_BALL         = 54096
 };
 
-static uint32 m_uiWorshippers[4] = {NPC_WORSHIPPER_1,NPC_WORSHIPPER_2,NPC_WORSHIPPER_3,NPC_WORSHIPPER_4}; 
-static uint32 m_uiFollower[2] = {NPC_FOLLOWER_1, NPC_FOLLOWER_2};
-
 struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
 {
     boss_faerlinaAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -121,14 +118,14 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim)
     {
-        DoScriptText(urand(0, 1)?SAY_SLAY1:SAY_SLAY2, m_creature);
+        DoScriptText(urand(0,1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) 
     {
         if (pSpell->Id == SPELL_WIDOWS_EMBRACE)
         {
-            if (m_creature->HasAura(SPELL_ENRAGE,EFFECT_INDEX_2))
+            if (m_creature->HasAura(SPELL_ENRAGE))
             {
 
                 m_creature->RemoveAurasDueToSpell(SPELL_ENRAGE);
@@ -137,7 +134,8 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
                 //if (!m_bIsRegularMode) //hack worshipper should die
                 //    pCaster->DealDamage(pCaster, pCaster->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
-            }else m_uiEnrageTimer += 30000;
+            }else 
+                m_uiEnrageTimer += 30000;
             if (m_pInstance)
                 m_pInstance->SetAchiev(TYPE_FAERLINA, false);
         }       
@@ -154,20 +152,14 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
     void JustReachedHome()
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_FAERLINA, FAIL);
-
-        for(int i=0;i<4;i++)
-        {
-            if(Creature* worshipper = (Creature*) m_creature->GetMap()->GetUnit(m_pInstance->GetData64(m_uiWorshippers[i])))
+            for (GUIDList::iterator iter = m_pInstance->m_lFaerlinaAddsGUID.begin();iter != m_pInstance->m_lFaerlinaAddsGUID.end(); iter++)
             {
-                worshipper->Respawn();
-            }
-        }
-        for(int i=0;i<2;i++)
-        {
-            if(Creature* follower = (Creature*) m_creature->GetMap()->GetUnit(m_pInstance->GetData64(m_uiFollower[i])))
-            {
-                follower->Respawn();
+                if(Creature* pHelper = m_creature->GetMap()->GetCreature(*iter))
+                {
+                    pHelper->Respawn();
+                }
             }
         }
     }
@@ -196,8 +188,8 @@ struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
         //Enrage_Timer
         if (m_uiEnrageTimer < uiDiff)
         {
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_ENRAGE : H_SPELL_ENRAGE);
-            m_uiEnrageTimer = 60000;
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ENRAGE : H_SPELL_ENRAGE) == CAST_OK)
+                m_uiEnrageTimer = 60000;
         }else m_uiEnrageTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
@@ -235,7 +227,7 @@ struct MANGOS_DLL_DECL mob_worshipperAI : public ScriptedAI
     void JustDied(Unit* pKiller)
     {
         //if (m_bIsRegularMode) //only 10 mode
-            m_creature->CastSpell(m_creature, SPELL_WIDOWS_EMBRACE, true, 0, 0, pKiller->GetGUID());
+            DoCast(m_creature, SPELL_WIDOWS_EMBRACE, true);
     }
 
 };
