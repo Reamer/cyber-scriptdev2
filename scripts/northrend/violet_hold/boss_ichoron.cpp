@@ -47,13 +47,14 @@ enum
     SPELL_WATER_BLAST_H                       = 59520,
     SPELL_WATER_BOLT_VOLLEY                   = 54241,
     SPELL_WATER_BOLT_VOLLEY_H                 = 59521,
+    SPELL_BURST                               = 54379,
 
     NPC_ICHOR_GLOBULE                         = 29321,
     SPELL_SPLASH                              = 59516,
     SPELL_WATER_GLOBULE                       = 54268,
     SPELL_WATER_GLOBULE_2                     = 54260,
     GLOBULE_HEAL_H                            = 9000,
-    GLOBULE_HEAL                              = 5000
+    GLOBULE_HEAL                              = 5000,
 };
 
 struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
@@ -65,7 +66,7 @@ struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
         Reset();
     }
     ScriptedInstance *m_pInstance;
-    std::list<ObjectGuid> m_lWaterElementsGUIDList;
+    GUIDList m_lWaterElementsGUIDList;
 
     bool m_bIsRegularMode;
     bool m_bIsExploded;
@@ -74,6 +75,7 @@ struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
 
     uint32 m_uiBuubleChecker_Timer;
     uint32 m_uiWaterBoltVolley_Timer;
+    uint32 m_uiWaterBlastTimer;
     uint32 m_uiShowup_Counter;
     uint32 m_uiVisible_Timer;
     uint32 m_uiHealth;
@@ -89,6 +91,7 @@ struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
        // m_uiDrained_Timer = 1000;
         m_uiVisible_Timer = 0;
         m_uiWaterBoltVolley_Timer = urand(5000, 10000);
+        m_uiWaterBlastTimer       = urand(5000, 15000);
        // m_uiShowup_Counter = 0;
 
         m_creature->SetVisibility(VISIBILITY_ON);
@@ -108,6 +111,7 @@ struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
             else {m_pInstance->SetData(TYPE_PORTAL12, NOT_STARTED);}
         }
     }
+
     void Aggro(Unit* pWho)
     {
         if (!m_pInstance) return;
@@ -141,22 +145,19 @@ struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
 
     void WaterElementHit()
     {
-       if (Creature* pIchoron = m_pInstance->GetSingleCreatureFromStorage(DATA_ICHORON))
-       {
-          if(pIchoron->isAlive())
-          {
-            pIchoron->ModifyHealth( m_bIsRegularMode ? GLOBULE_HEAL : GLOBULE_HEAL_H);
+        if(m_creature->isAlive())
+        {
+            m_creature->ModifyHealth( m_bIsRegularMode ? GLOBULE_HEAL : GLOBULE_HEAL_H);
             if (m_bIsExploded)
             {
+                m_creature->SetVisibility(VISIBILITY_ON);
                 if(m_creature->HasAura(SPELL_DRAINED))
                 {
-                    m_creature->RemoveAurasByCasterSpell(SPELL_DRAINED,m_creature->GetObjectGuid());
+                    m_creature->RemoveAurasDueToSpell(SPELL_DRAINED);
                 }
-                m_creature->SetVisibility(VISIBILITY_ON);
                 m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
             }
-           }
-       }
+        }
     }
 
     void JustSummoned(Creature* pSummoned)
@@ -166,12 +167,13 @@ struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
         pSummoned->CastSpell(pSummoned, SPELL_WATER_GLOBULE, false);
         m_lWaterElementsGUIDList.push_back(pSummoned->GetObjectGuid());
     }
-   void DespawnWaterElements()
+
+    void DespawnWaterElements()
     {
         if (m_lWaterElementsGUIDList.empty())
             return;
 
-        for(std::list<ObjectGuid>::iterator itr = m_lWaterElementsGUIDList.begin(); itr != m_lWaterElementsGUIDList.end(); ++itr)
+        for(GUIDList::iterator itr = m_lWaterElementsGUIDList.begin(); itr != m_lWaterElementsGUIDList.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
             {
@@ -228,13 +230,12 @@ struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
                 }
                 if(!m_creature->HasAura(SPELL_PROTECTIVE_BUBBLE) && m_creature->GetVisibility() == VISIBILITY_ON && !m_bIsExploded)
                 {
-                    DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WATER_BLAST : SPELL_WATER_BLAST_H);
-
+                    DoCast(m_creature, SPELL_BURST);
                     for(uint8 i = 0; i < 10; i++)
-                        {
-                            int tmp = urand(0, 5);
-                            m_creature->SummonCreature(NPC_ICHOR_GLOBULE, PortalLoc[tmp].x, PortalLoc[tmp].y, PortalLoc[tmp].z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
-                        }
+                    {
+                        int tmp = urand(0, 5);
+                        m_creature->SummonCreature(NPC_ICHOR_GLOBULE, PortalLoc[tmp].x, PortalLoc[tmp].y, PortalLoc[tmp].z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
                     DoScriptText(EMOTE_ICHORON_PROTECTIVE_BUBBLE, m_creature);
                     //DoScriptText(SAY_SHATTER, m_creature);
                     m_creature->DealDamage(m_creature, m_creature->GetMaxHealth()*0.25, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -242,7 +243,6 @@ struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
                     m_bIsExploded = true;
                     m_uiVisible_Timer = 15000;
                 }
-
             }
             else m_uiBuubleChecker_Timer -= uiDiff;
 
@@ -268,18 +268,29 @@ struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
             }
             else m_uiWaterBoltVolley_Timer -= uiDiff;
 
-        }
-        if (!m_bIsFrenzy && (m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) < 25)
+            if (m_uiWaterBlastTimer <uiDiff)
             {
-                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FRENZY : SPELL_FRENZY_H);
-                DoScriptText(SAY_ENRAGE, m_creature);
-                if(m_creature->HasAura(SPELL_DRAINED))
-                {
-                    m_creature->RemoveAurasByCasterSpell(SPELL_DRAINED,m_creature->GetObjectGuid());
-                }
-                if(m_creature->GetVisibility() == VISIBILITY_OFF){m_creature->SetVisibility(VISIBILITY_ON);}
-                m_bIsFrenzy = true;
+                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WATER_BLAST : SPELL_WATER_BLAST_H);
+                m_uiWaterBlastTimer = urand(15000, 20000);
             }
+            else m_uiWaterBlastTimer -= uiDiff;
+
+        }
+        if (!m_bIsFrenzy && m_creature->GetHealthPercent() < 25.0f)
+        {
+            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FRENZY : SPELL_FRENZY_H);
+            DoScriptText(SAY_ENRAGE, m_creature);
+            if(m_creature->HasAura(SPELL_DRAINED))
+            {
+                m_creature->RemoveAurasDueToSpell(SPELL_DRAINED);
+            }
+            if(m_creature->GetVisibility() == VISIBILITY_OFF)
+            {
+                m_creature->SetVisibility(VISIBILITY_ON);
+            }
+            m_bIsFrenzy = true;
+        }
+
         DoMeleeAttackIfReady();
     }
 
@@ -355,9 +366,8 @@ struct MANGOS_DLL_DECL mob_ichor_globuleAI : public ScriptedAI
 
     void JustDied(Unit* pKiller)
     {
-        DoCast(m_creature, SPELL_SPLASH);
-        DoCast(m_creature, SPELL_WATER_GLOBULE_2);
-
+        DoCast(m_creature, SPELL_SPLASH, true);
+        DoCast(m_creature, SPELL_WATER_GLOBULE_2, true);
     }
 };
 
