@@ -45,8 +45,6 @@ enum
     SPELL_HOPELESS           = 29125
 };
 
-static uint32 m_uiDeathKnightUnderstudy[4] = {NPC_DEATH_KNIGHT_UNDERSTUDY_1,NPC_DEATH_KNIGHT_UNDERSTUDY_2, NPC_DEATH_KNIGHT_UNDERSTUDY_3, NPC_DEATH_KNIGHT_UNDERSTUDY_4}; 
-
 struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
 {
     boss_razuviousAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -110,13 +108,16 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
     void JustReachedHome()
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
-
-        for(int i=0;i<4;i++)
         {
-            if(Creature* Understudy = (Creature*) m_creature->GetMap()->GetUnit(m_pInstance->GetData64(m_uiDeathKnightUnderstudy[i])))
-                Understudy->Respawn();
-        } 
+            m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
+            for (GUIDVector::iterator iter = m_pInstance->m_lDeathKnightUnderstudyGUID.begin();iter != m_pInstance->m_lDeathKnightUnderstudyGUID.end(); iter++)
+            {
+                if(Creature* pHelper = m_creature->GetMap()->GetCreature(*iter))
+                {
+                    pHelper->Respawn();
+                }
+            }
+        }
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -170,18 +171,18 @@ CreatureAI* GetAI_boss_razuvious(Creature* pCreature)
 
 bool GossipHello_obedience_crystal(Player* pPlayer, Creature* pCreature)
 {
-    for(int i=0;i<2;i++)
+    if (instance_naxxramas* m_pInstance = (instance_naxxramas*) pCreature->GetInstanceData())
     {
-        if(Creature* Understudy = (Creature*) pCreature->GetMap()->GetUnit(((instance_naxxramas*)pCreature->GetInstanceData())->GetData64(m_uiDeathKnightUnderstudy[i])))
+        for(int i=0;i<2;i++)
         {
-            if(!Understudy->HasAuraType(SPELL_AURA_MOD_POSSESS) && Understudy->isAlive())
+            if (Creature* pUnderstudy = pCreature->GetMap()->GetCreature(m_pInstance->m_lDeathKnightUnderstudyGUID.at(i)))
             {
-                pPlayer->CastSpell(Understudy,SPELL_FORCE_OBEDIENCE,true);
+                pPlayer->CastSpell(pUnderstudy,SPELL_FORCE_OBEDIENCE,true);
                 return true;
             }
         }
     }
-    return false;
+    return true;
 }
 
 void AddSC_boss_razuvious()

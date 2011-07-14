@@ -15,42 +15,36 @@ enum
     SAY_KELTHUZAD_TAUNT3        = -1533092,
     SAY_KELTHUZAD_TAUNT4        = -1533093,
 
-    TYPE_ANUB_REKHAN            = 1,
-    TYPE_FAERLINA               = 2,
-    TYPE_MAEXXNA                = 3,
+    TYPE_ANUB_REKHAN            = 0,
+    TYPE_FAERLINA               = 1,
+    TYPE_MAEXXNA                = 2,
 
-    TYPE_NOTH                   = 4,
-    TYPE_HEIGAN                 = 5,
-    TYPE_LOATHEB                = 6,
+    TYPE_NOTH                   = 3,
+    TYPE_HEIGAN                 = 4,
+    TYPE_LOATHEB                = 5,
 
-    TYPE_RAZUVIOUS              = 7,
-    TYPE_GOTHIK                 = 8,
-    TYPE_FOUR_HORSEMEN          = 9,
-    TYPE_BLAUMEUX               = 91,
-    TYPE_RIVENDARE              = 92,
-    TYPE_KORTHAZZ               = 93,
-    TYPE_ZELIEK                 = 94,
+    TYPE_RAZUVIOUS              = 6,
+    TYPE_GOTHIK                 = 7,
+    TYPE_FOUR_HORSEMEN          = 8,
+    TYPE_BLAUMEUX               = 81,
+    TYPE_RIVENDARE              = 82,
+    TYPE_KORTHAZZ               = 83,
+    TYPE_ZELIEK                 = 84,
 
-    TYPE_PATCHWERK              = 10,
-    TYPE_GROBBULUS              = 11,
-    TYPE_GLUTH                  = 12,
-    TYPE_THADDIUS               = 13,
-    TYPE_STALAGG                = 131,
-    TYPE_FEUGEN                 = 132,
+    TYPE_PATCHWERK              = 9,
+    TYPE_GROBBULUS              = 10,
+    TYPE_GLUTH                  = 11,
+    TYPE_THADDIUS               = 12,
+    TYPE_STALAGG                = 121,
+    TYPE_FEUGEN                 = 122,
 
-    TYPE_SAPPHIRON              = 14,
-    TYPE_KELTHUZAD              = 15,
+    TYPE_SAPPHIRON              = 13,
+    TYPE_KELTHUZAD              = 14,
 
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
     NPC_WORSHIPPER              = 16506,
-    NPC_WORSHIPPER_1            = 165061,
-    NPC_WORSHIPPER_2            = 165062,
-    NPC_WORSHIPPER_3            = 165063,
-    NPC_WORSHIPPER_4            = 165064,
     NPC_FOLLOWER                = 16505,
-    NPC_FOLLOWER_1              = 165051,
-    NPC_FOLLOWER_2              = 165052,
     NPC_MAEXXNA                 = 15952,
 
     NPC_PATCHWERK               = 16028,
@@ -65,11 +59,8 @@ enum
     NPC_LOATHEB                 = 16011,
 
     NPC_RAZUVIOUS               = 16061,
-    NPC_DEATH_KNIGHT_UNDERSTUDY  = 16803,
-    NPC_DEATH_KNIGHT_UNDERSTUDY_1= 168031,
-    NPC_DEATH_KNIGHT_UNDERSTUDY_2= 168032,
-    NPC_DEATH_KNIGHT_UNDERSTUDY_3= 168033,
-    NPC_DEATH_KNIGHT_UNDERSTUDY_4= 168034,
+    NPC_DEATH_KNIGHT_UNDERSTUDY = 16803,
+
     
     NPC_ZELIEK                  = 16063,
     NPC_THANE                   = 16064,
@@ -207,7 +198,6 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         void OnPlayerLeave(Player* pPlayer);
 
         uint32 GetData(uint32 uiType);
-        uint64 GetData64(uint32 uiData);
 
         const char* Save() { return strInstData.c_str(); }
         void Load(const char* chrIn);
@@ -225,87 +215,25 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         void GetChamberCenterCoords(float &fX, float &fY, float &fZ) { fX = m_fChamberCenterX; fY = m_fChamberCenterY; fZ = m_fChamberCenterZ; }
         void DoTaunt();
 
-        std::list<uint64> m_lEruptionObjectOneGUIDs;
-        std::list<uint64> m_lEruptionObjectTwoGUIDs;
-        std::list<uint64> m_lEruptionObjectThreeGUIDs;
-        std::list<uint64> m_lEruptionObjectFourGUIDs;
+        //Heigan
+        GUIDList m_lEruptionObjectOneGUIDs;
+        GUIDList m_lEruptionObjectTwoGUIDs;
+        GUIDList m_lEruptionObjectThreeGUIDs;
+        GUIDList m_lEruptionObjectFourGUIDs;
+
+        // Gothik
+        GUIDList m_lGothTriggerList;
+        UNORDERED_MAP<uint64, GothTrigger> m_mGothTriggerMap;
+        // Faerlina
+        GUIDList m_lFaerlinaAddsGUID;
+        // Razuvious
+        GUIDVector m_lDeathKnightUnderstudyGUID;
 
         time_t m_uiArachnophobiaTimer;
         
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string strInstData;
-
-        uint64 m_uiAracEyeRampGUID;
-        uint64 m_uiPlagEyeRampGUID;
-        uint64 m_uiMiliEyeRampGUID;
-        uint64 m_uiConsEyeRampGUID;
-
-        uint64 m_uiAracPortalGUID;
-        uint64 m_uiPlagPortalGUID;
-        uint64 m_uiMiliPortalGUID;
-        uint64 m_uiConsPortalGUID;
-
-        uint64 m_uiAnubRekhanGUID;
-        uint64 m_uiFaerlinanGUID;
-        uint64 m_uiWorshipperGUID[4];
-        uint8  m_uiWorshipperCount;
-        uint64 m_uiFollowerGUID[2];
-        uint8  m_uiFollowerCount;
-        uint64 m_uiMaexxnaGUID;
-
-        uint64 m_uiRazuviousGUID;
-        uint64 m_uiDeathKnightUnderstudyGUID[4];
-        uint8  m_uiDeathKnightUnderstudyCount;
-        uint64 m_uiGothikGUID;
-
-        uint64 m_uiZeliekGUID;
-        uint64 m_uiThaneGUID;
-        uint64 m_uiBlaumeuxGUID;
-        uint64 m_uiRivendareGUID;
-
-        uint64 m_uiPatchwerkGUID;
-        uint64 m_uiGrobbulusGUID;
-        uint64 m_uiGluthGUID;
-        uint64 m_uiThaddiusGUID;
-        uint64 m_uiStalaggGUID;
-        uint64 m_uiFeugenGUID;
-
-        uint64 m_uiNothGUID;
-        uint64 m_uiHeiganGUID;
-        uint64 m_uiLoathebGUID;
-
-        uint64 m_uiKelthuzadGUID;
-        uint64 m_uiSapphironGUID;
-
-        uint64 m_uiPathExitDoorGUID;
-        uint64 m_uiGlutExitDoorGUID;
-        uint64 m_uiThadDoorGUID;
-
-        uint64 m_uiAnubDoorGUID;
-        uint64 m_uiAnubGateGUID;
-        uint64 m_uiFaerDoorGUID;
-        uint64 m_uiFaerWebGUID;
-        uint64 m_uiMaexOuterGUID;
-        uint64 m_uiMaexInnerGUID;
-
-        uint64 m_uiGothCombatGateGUID;
-        uint64 m_uiGothikEntryDoorGUID;
-        uint64 m_uiGothikExitDoorGUID;
-        std::list<uint64> m_lGothTriggerList;
-        UNORDERED_MAP<uint64, GothTrigger> m_mGothTriggerMap;
-
-        uint64 m_uiHorsemenDoorGUID;
-        uint64 m_uiHorsemenChestGUID;
-
-        uint64 m_uiNothEntryDoorGUID;
-        uint64 m_uiNothExitDoorGUID;
-        uint64 m_uiHeigEntryDoorGUID;
-        uint64 m_uiHeigExitDoorGUID;
-        uint64 m_uiLoathebDoorGUID;
-
-        uint64 m_uiKelthuzadDoorGUID;
-        uint64 m_uiKelthuzadExitDoorGUID;
 
         bool m_bBlaumeuxDead;
         bool m_bRivendareDead;

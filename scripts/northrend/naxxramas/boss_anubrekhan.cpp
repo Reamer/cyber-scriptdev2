@@ -177,8 +177,8 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
         // Locust Swarm
         if (m_uiLocustSwarmTimer < uiDiff)
         {
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_LOCUSTSWARM :SPELL_LOCUSTSWARM_H);
-            m_uiLocustSwarmTimer = 80000;
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LOCUSTSWARM :SPELL_LOCUSTSWARM_H) == CAST_OK)
+                m_uiLocustSwarmTimer = 80000;
             //spawn crypt guards with swarm due boss will bug through floor
             m_uiCryptGuardTimer = 2000;
         }else m_uiLocustSwarmTimer -= uiDiff;

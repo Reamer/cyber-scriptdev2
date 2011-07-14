@@ -308,7 +308,7 @@ CreatureAI* GetAI_boss_lady_blaumeux(Creature* pCreature)
 {
     return new boss_lady_blaumeuxAI(pCreature);
 }
-
+// for doors handling
 struct MANGOS_DLL_DECL boss_rivendare_naxxAI : public ScriptedAI
 {
     boss_rivendare_naxxAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -367,8 +367,10 @@ struct MANGOS_DLL_DECL boss_rivendare_naxxAI : public ScriptedAI
         }
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
             m_pInstance->SetData(TYPE_RIVENDARE, IN_PROGRESS);
+        }
 
         m_creature->AddThreat(who, HIGH_THREAT);
         m_creature->CallForHelp(50.0f);
