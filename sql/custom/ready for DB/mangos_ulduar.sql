@@ -19,7 +19,7 @@ INSERT INTO spell_script_target (entry, type, targetEntry) VALUES ('64474', '1',
 
 -- ****** Razorscale****** 
 UPDATE creature_template SET scriptname='boss_razorscale' WHERE entry=33186;
-UPDATE creature_template SET mechanic_immune_mask= 0x24CB3F7F, lootid = entry WHERE entry IN (33186, 33724);
+UPDATE creature_template SET mechanic_immune_mask=617299803, `lootid` = `entry` WHERE entry IN (33186, 33724);
 -- original x=587.547, y= -174.927, z = 391.517; make the boss fly before encounter starts
 UPDATE creature SET position_x = 590.346741, position_y = -226.947647, position_z = 442.897583 WHERE id = 33186;
 -- only 2 harpoons for 10 man
@@ -52,9 +52,9 @@ INSERT INTO spell_script_target VALUES (62505 ,1,33186);
 
 -- ****** XT-002 Deconstructor ******
 UPDATE `creature_template` SET `ScriptName` = "boss_xt_002" WHERE `entry` = 33293;
-UPDATE `creature_template` SET `mechanic_immune_mask` = 0x24CB3F7F, `lootid` = `entry` WHERE entry IN (33293, 33885);
+UPDATE `creature_template` SET `mechanic_immune_mask` = 617299839, `lootid` = `entry` WHERE entry IN (33293, 33885);
 UPDATE `creature_template` SET `ScriptName` = "mob_xtheart" WHERE `entry` = 33329;
-UPDATE `creature_template` SET `mechanic_immune_mask` = 0x24CB3F7F WHERE entry IN (33329, 33995);
+UPDATE `creature_template` SET `mechanic_immune_mask` = 617299839 WHERE entry IN (33329, 33995);
 UPDATE `creature_template` SET `ScriptName` = "mob_pummeler" WHERE `entry` = 33344;
 UPDATE creature_template SET modelid_1 = 19139, modelid_2 = 19139, modelid_3 = 19139, modelid_4 = 19139, Scriptname='mob_boombot' WHERE entry=33346; -- boombot nh
 UPDATE creature_template SET modelid_1 = 19139, modelid_2 = 19139, modelid_3 = 19139, modelid_4 = 19139 WHERE entry = 33886; -- boombot hero
@@ -69,8 +69,8 @@ UPDATE creature_template SET ScriptName='boss_steelbreaker' WHERE entry = 32867;
 UPDATE creature_template SET ScriptName = 'mob_rune_of_power' WHERE entry = 33705;
 UPDATE creature_template SET ScriptName = 'mob_rune_of_summoning' WHERE entry = 33051;
 UPDATE creature_template SET ScriptName = 'mob_ulduar_lightning_elemental' WHERE entry = 32958;
-UPDATE creature_template SET mechanic_immune_mask = 0x24CB3F7B WHERE entry IN (32927, 33692, 32867, 33693);
-UPDATE creature_template SET mechanic_immune_mask = 0x24CB377B WHERE entry IN (32857, 33694); -- Brundir stunnable
+UPDATE creature_template SET mechanic_immune_mask = 617299835 WHERE entry IN (32927, 33692, 32867, 33693);
+UPDATE creature_template SET mechanic_immune_mask = 617297787 WHERE entry IN (32857, 33694); -- Brundir stunnable
 -- supercharge
 DELETE FROM spell_script_target WHERE spell_script_target.entry = 61920;
 INSERT INTO spell_script_target VALUES (61920 ,1,32857), (61920 ,1,32927), (61920 ,1,32867);
@@ -90,7 +90,7 @@ UPDATE creature_template SET ScriptName = "mob_eyebeam_trigger" WHERE entry IN (
 UPDATE creature_template SET scriptname = "mob_kologarn_pit_kill_bunny" WHERE entry = 33742;
 UPDATE creature SET DeathState = 1 WHERE id = 34297;
 UPDATE creature_template SET dmg_multiplier = 0 WHERE entry IN (32934, 32933, 33911, 33910);
-UPDATE creature_template SET mechanic_immune_mask = 0x24CB3F7B WHERE entry IN (32930, 33909, 32934, 32933, 33911, 33910);
+UPDATE creature_template SET mechanic_immune_mask = 617299803 WHERE entry IN (32930, 33909, 32934, 32933, 33911, 33910);
 UPDATE creature_template SET RegenHealth = 1 WHERE entry = 33910;
 UPDATE creature_template SET RegenHealth = 1 WHERE entry = 33911;
 
@@ -105,7 +105,7 @@ UPDATE creature_template SET equipment_id = 103000, scriptname='boss_auriaya' WH
 UPDATE creature_template SET scriptname='mob_feral_defender' WHERE entry IN (34035, 34171);
 UPDATE creature_template SET minlevel=80, maxlevel=80, scriptname='mob_seeping_feral_essence' WHERE entry=34098;
 UPDATE creature_template SET speed_walk= 1.66667, ScriptName = 'mob_sanctum_sentry' WHERE entry = 34014;
-UPDATE `creature_template` SET `mechanic_immune_mask` = 0x24CB37FF WHERE `entry` IN (33515, 34175, 34035, 34171);
+UPDATE `creature_template` SET `mechanic_immune_mask` = 617297919 WHERE `entry` IN (33515, 34175, 34035, 34171);
 
 DELETE FROM spell_script_target WHERE entry = 64449;
 INSERT INTO spell_script_target VALUES (64449, 1, 34096);
@@ -121,7 +121,7 @@ UPDATE creature_template SET ScriptName = 'boss_elder_stonebark' WHERE entry = 3
 UPDATE creature_template SET ScriptName = 'mob_iron_roots' WHERE entry IN (33088, 33168);
 UPDATE creature_template SET ScriptName = 'mob_freya_ground' WHERE entry IN (33215, 33228, 33170, 33050, 34129);
 UPDATE creature_template SET ScriptName = 'mob_freya_spawned' WHERE entry IN (32916, 32919, 33202, 33203, 32918);
-UPDATE creature_template SET mechanic_immune_mask = 0x24EB3FFB WHERE entry IN (32906, 32915, 32913, 32914, 33360, 33392, 33393, 33391);
+UPDATE creature_template SET mechanic_immune_mask = 619397115 WHERE entry IN (32906, 32915, 32913, 32914, 33360, 33392, 33393, 33391);
 
 -- some spell_script_target fixes, this may be wrong
 DELETE FROM spell_script_target WHERE spell_script_target.entry IN (62584, 64185, 62385, 62386, 62387, 62483, 62484, 62485, 65585, 65586, 65587, 65588, 65589, 65590);
@@ -144,7 +144,7 @@ INSERT INTO spell_script_target (`entry`, `type`, `targetEntry`) VALUES
 
 -- **********Hodir*************
 UPDATE creature_template SET ScriptName = 'boss_hodir' WHERE entry = 32845;
-UPDATE creature_template SET mechanic_immune_mask = 0x26CB3F5F WHERE entry IN (32845, 32846);
+UPDATE creature_template SET mechanic_immune_mask = 650854239 WHERE entry IN (32845, 32846);
 UPDATE creature_template SET ScriptName = 'mob_icicle' WHERE entry IN (33169,33173,33174);
 UPDATE creature_template SET ScriptName = 'mob_toasty_fire' WHERE entry = 33342;
 UPDATE creature_template SET ScriptName = 'mob_flashFreeze' WHERE entry = 32926;
@@ -157,7 +157,7 @@ UPDATE creature SET spawndist = 0, MovementType = 0 WHERE id IN (32941, 32950, 3
 
 -- ************THORIM*********************
 UPDATE creature_template SET ScriptName = 'boss_thorim' WHERE entry = 32865;
-UPDATE creature_template SET mechanic_immune_mask = 0x26CB3F5F WHERE entry IN (32865, 33147);
+UPDATE creature_template SET mechanic_immune_mask = 650854239 WHERE entry IN (32865, 33147);
 UPDATE creature_template SET unit_flags=0, ScriptName = 'boss_runic_colossus' WHERE entry = 32872;
 UPDATE creature_template SET unit_flags=0 WHERE entry=33149; -- heroic
 UPDATE creature_template SET unit_flags=0, ScriptName = 'boss_ancient_rune_giant' WHERE entry = 32873;
@@ -184,7 +184,7 @@ INSERT INTO spell_script_target VALUES (62942 , 1, 33125);
 
 -- *************Genral Vezax****************
 UPDATE creature_template SET unit_flags = 0, ScriptName = 'boss_vezax' WHERE entry = 33271;
-UPDATE creature_template SET mechanic_immune_mask = 0x24CB3FFB WHERE `entry` IN (33271, 33449);
+UPDATE creature_template SET mechanic_immune_mask = 617299963 WHERE `entry` IN (33271, 33449);
 UPDATE creature_template SET armor=10673, mindmg=468,maxdmg=702,attackpower=175,dmg_multiplier=2, minhealth=1575785,maxhealth=1575785, faction_A=14,faction_H=14, minlevel=83,maxlevel=83, ScriptName = 'mob_saronite_animus' WHERE entry = 33524;
 UPDATE creature_template SET armor=10673,mindmg=468, maxdmg=702,attackpower=175,dmg_multiplier=4, minhealth=9412875,maxhealth=9412875, faction_A=14,faction_H=14, minlevel=83,maxlevel=83 WHERE entry = 34152;
 UPDATE creature_template SET ScriptName = 'mob_saronite_vapor', movementType = 1  WHERE entry = 33488;
@@ -233,7 +233,7 @@ VALUES (63992, 603, 1951.097, -25.420, 326.162 , 3);
 UPDATE creature_template SET ScriptName = 'boss_yogg_saron' WHERE entry = 33288;
 UPDATE creature_template SET ScriptName = 'boss_sara' WHERE entry = 33134;
 UPDATE creature_template SET ScriptName = 'boss_brain_of_yogg_saron' WHERE entry = 33890;
-UPDATE creature_template SET mechanic_immune_mask = 0x26CB3F7F WHERE `entry` IN (33288, 33955,33134, 34332,33890,33954);
+UPDATE creature_template SET mechanic_immune_mask = 650854271 WHERE `entry` IN (33288, 33955,33134, 34332,33890,33954);
 UPDATE creature_template SET ScriptName = 'mob_corruptor_tentacle' WHERE entry = 33985;
 UPDATE creature_template SET ScriptName = 'mob_constrictor_tentacle' WHERE entry = 33983;
 UPDATE creature_template SET ScriptName = 'mob_vision_tentacle' WHERE entry = 33943;
@@ -248,10 +248,15 @@ UPDATE creature_template SET scriptname='mob_ominous_cloud' WHERE `entry`=33292;
 
 -- Keepers
 -- Keepers images
-UPDATE creature_template SET `npcflag` = 1, `unit_flags` = 2, ScriptName = 'hodir_image' WHERE entry = 33411;
-UPDATE creature_template SET `npcflag` = 1, `unit_flags` = 2, ScriptName = 'freya_image' WHERE entry = 33410;
-UPDATE creature_template SET `npcflag` = 1, `unit_flags` = 2, ScriptName = 'thorim_image' WHERE entry = 33413;
-UPDATE creature_template SET `npcflag` = 1, `unit_flags` = 2, ScriptName = 'mimiron_image' WHERE entry = 33412;
+UPDATE creature_template SET ScriptName = 'keeper_hodir' WHERE entry = 33213;
+UPDATE creature_template SET ScriptName = 'keeper_freya' WHERE entry = 33241;
+UPDATE creature_template SET ScriptName = 'keeper_thorim' WHERE entry = 33242;
+UPDATE creature_template SET ScriptName = 'keeper_mimiron' WHERE entry = 33244;
+-- images
+-- UPDATE creature_template SET `npcflag` = 1, `unit_flags` = 2, ScriptName = 'hodir_image' WHERE entry = 33411;
+-- UPDATE creature_template SET `npcflag` = 1, `unit_flags` = 2, ScriptName = 'freya_image' WHERE entry = 33410;
+-- UPDATE creature_template SET `npcflag` = 1, `unit_flags` = 2, ScriptName = 'thorim_image' WHERE entry = 33413;
+-- UPDATE creature_template SET `npcflag` = 1, `unit_flags` = 2, ScriptName = 'mimiron_image' WHERE entry = 33412;
 
 DELETE FROM creature_template WHERE entry in (1000103);
 INSERT INTO creature_template(entry,difficulty_entry_1,difficulty_entry_2,difficulty_entry_3,KillCredit1,KillCredit2,modelid_1,modelid_2,modelid_3,modelid_4,name,subname,IconName,gossip_menu_id,minlevel,maxlevel,minhealth,maxhealth,minmana,maxmana,armor,faction_A,faction_H,npcflag,speed_walk,speed_run,scale,rank,mindmg,maxdmg,dmgschool,attackpower,dmg_multiplier,baseattacktime,rangeattacktime,unit_class,unit_flags,dynamicflags,family,trainer_type,trainer_spell,trainer_class,trainer_race,minrangedmg,maxrangedmg,rangedattackpower,type,type_flags,lootid,pickpocketloot,skinloot,resistance1,resistance2,resistance3,resistance4,resistance5,resistance6,spell1,spell2,spell3,spell4,PetSpellDataId,mingold,maxgold,AIName,MovementType,InhabitType,unk16,unk17,RacialLeader,questItem1,questItem2,questItem3,questItem4,questItem5,questItem6,movementId,RegenHealth,equipment_id,mechanic_immune_mask,flags_extra,ScriptName) VALUES 
@@ -264,7 +269,7 @@ UPDATE creature_template SET ScriptName = 'leviathan_turret' WHERE entry = 34071
 UPDATE creature_template SET ScriptName = 'mob_mimiron_flames' WHERE entry IN (34363, 34121);
 UPDATE creature_template SET ScriptName = 'boss_vx001' WHERE entry = 33651;
 UPDATE creature_template SET ScriptName = 'boss_aerial_command_unit' WHERE entry = 33670;
-UPDATE creature_template SET mechanic_immune_mask = 0x24CB3F7F WHERE `entry` IN (33432, 34106,33651, 34108,33670,34109);
+UPDATE creature_template SET mechanic_immune_mask = 617299839 WHERE `entry` IN (33432, 34106,33651, 34108,33670,34109);
 UPDATE gameobject_template SET data2 = 2000, ScriptName='go_red_button' WHERE entry = 194739;
 UPDATE creature_template SET ScriptName = 'mob_proximity_mine' WHERE entry = 34362;
 UPDATE creature_template SET ScriptName = 'mob_bomb_bot' WHERE entry IN (33836, 34192);
@@ -289,7 +294,6 @@ DELETE FROM spell_script_target WHERE entry = 64444;       	-- Magnetischer Kern
 INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (64444, 1,33670);
 DELETE FROM spell_script_target WHERE entry = 64436;       	-- Magnetischer Kern
 INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (64436, 1,33670);
-
 
 DELETE FROM creature_loot_template WHERE entry = 34057;
 INSERT INTO creature_loot_template (entry, item, ChanceOrQuestChance, mincountOrRef, maxcount)
