@@ -63,7 +63,7 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
     uint32 bashTimer;
     uint32 venomBoltVolleyTimer;
     uint32 entanglingRootsTimer;
-    std::list<uint64> m_lMushroomGUIDList;
+    GUIDList m_lMushroomGUIDList;
 
     void Reset()
     {
@@ -80,7 +80,7 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
     void despawnMushroom()
     {
         if (!m_lMushroomGUIDList.empty())
-            for(std::list<uint64>::iterator itr = m_lMushroomGUIDList.begin(); itr != m_lMushroomGUIDList.end(); ++itr)
+            for(GUIDList::iterator itr = m_lMushroomGUIDList.begin(); itr != m_lMushroomGUIDList.end(); ++itr)
                 if (Creature* pTemp = (Creature*)m_creature->GetMap()->GetUnit( *itr))
                     if (pTemp->isAlive())
                         pTemp->ForcedDespawn();
@@ -98,8 +98,8 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
                 posY = pTarget->GetPositionY() + (urand(0,1)? (posY) : (-posY));
                 float posZ = pTarget->GetTerrain()->GetWaterOrGroundLevel(posX,posY,pTarget->GetPositionZ()+3);
 
-                Creature* pMushroom = m_creature->SummonCreature(!urand(0, 4) ? NPC_HEALTHY_MUSHROOM : NPC_POISONOUS_MUSHROOM, posX, posY, posZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000);
-                m_lMushroomGUIDList.push_back(pMushroom->GetGUID());
+                Creature* pMushroom = m_creature->SummonCreature(roll_chance_i(75) ? NPC_POISONOUS_MUSHROOM : NPC_HEALTHY_MUSHROOM, posX, posY, posZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000);
+                m_lMushroomGUIDList.push_back(pMushroom->GetObjectGuid());
             }     
     }
     void RemoveMiniAura()

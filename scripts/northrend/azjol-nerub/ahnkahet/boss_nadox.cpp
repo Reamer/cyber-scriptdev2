@@ -69,23 +69,13 @@ struct MANGOS_DLL_DECL mob_ahnkahar_eggAI : public ScriptedAI
     instance_ahnkahet* m_pInstance;
 
     void Reset() {}
-    void MoveInLineOfSight(Unit* pWho) {}
-    void AttackStart(Unit* pWho) {}
 
     void JustSummoned(Creature* pSummoned)
     {
         if (pSummoned->GetEntry() == NPC_AHNKAHAR_GUARDIAN)
             DoScriptText(EMOTE_HATCH, m_creature);
 
-        if (m_pInstance)
-        {
-            if (Creature* pElderNadox = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_ELDER_NADOX)))
-            {
-                float fPosX, fPosY, fPosZ;
-                pElderNadox->GetPosition(fPosX, fPosY, fPosZ);
-                pSummoned->GetMotionMaster()->MovePoint(0, fPosX, fPosY, fPosZ);
-            }
-        }
+        pSummoned->SetInCombatWithZone();
     }
 };
 
