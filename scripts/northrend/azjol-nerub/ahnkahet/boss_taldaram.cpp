@@ -79,7 +79,6 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
     {
         m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        damageToInterrupt = m_bIsRegularMode ? 20000 : 40000;
         Reset();
     }
 
@@ -99,6 +98,7 @@ struct MANGOS_DLL_DECL boss_taldaramAI : public ScriptedAI
 
     void Reset()
     {
+        damageToInterrupt = m_bIsRegularMode ? 20000 : 40000;
         summonFlameOrbTimer = 12000;
         vanishTimer = 14000;
         bloodthirstTimer = 10000;

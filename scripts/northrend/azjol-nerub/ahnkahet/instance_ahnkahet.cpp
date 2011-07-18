@@ -27,10 +27,6 @@ EndScriptData */
 instance_ahnkahet::instance_ahnkahet(Map* pMap) : ScriptedInstance(pMap),
     m_bCriteriaVolunteerWork(false),
     m_bCriteriaRespectYourElders(false),
-    m_uiElderNadoxGUID(0),
-    m_uiJedogaShadowseekerGUID(0),
-    m_uiTaldaramDoorGUID(0),
-    m_uiTaldaramVortexGUID(0),
     m_uiDevicesActivated(0)
 {
     Initialize();
@@ -44,42 +40,48 @@ void instance_ahnkahet::OnCreatureCreate(Creature* pCreature)
 {
     switch(pCreature->GetEntry())
     {
-        case NPC_ELDER_NADOX:         m_uiElderNadoxGUID = pCreature->GetGUID();         break;
-        case NPC_JEDOGA_SHADOWSEEKER: m_uiJedogaShadowseekerGUID = pCreature->GetGUID(); break;
+        case NPC_ELDER_NADOX:
+        case NPC_JEDOGA_SHADOWSEEKER:
+            break;
+        case NPC_TWILIGHT_INITIATE:
+            m_lTwilightInitiate.push_back(pCreature->GetObjectGuid());
+            break;
+        default:
+            return;
     }
+    m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 void instance_ahnkahet::OnObjectCreate(GameObject* pGo)
 {
      switch(pGo->GetEntry())
     {
         case GO_DOOR_TALDARAM:
-            m_uiTaldaramDoorGUID = pGo->GetGUID();
-            if (m_auiEncounter[1] == DONE)
-                DoUseDoorOrButton(m_uiTaldaramDoorGUID);
+            if (m_auiEncounter[TYPE_TALDARAM] == DONE)
+                DoUseDoorOrButton(GO_DOOR_TALDARAM);
             break;
         case GO_ANCIENT_DEVICE_L:
-            if (m_auiEncounter[1] == NOT_STARTED)
+            if (m_auiEncounter[TYPE_TALDARAM] == NOT_STARTED)
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
         case GO_ANCIENT_DEVICE_R:
-            if (m_auiEncounter[1] == NOT_STARTED)
+            if (m_auiEncounter[TYPE_TALDARAM] == NOT_STARTED)
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
         case GO_VORTEX:
-            m_uiTaldaramVortexGUID = pGo->GetGUID();
-            if (m_auiEncounter[1] != NOT_STARTED)
-                DoUseDoorOrButton(m_uiTaldaramVortexGUID);
+            if (m_auiEncounter[TYPE_TALDARAM] != NOT_STARTED)
+                DoUseDoorOrButton(GO_VORTEX);
             break;
+        default:
+            return;
     }
+    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 void instance_ahnkahet::SetData(uint32 uiType, uint32 uiData)
 {
-    debug_log("SD2: Instance Ahn'Kahet: SetData received for type %u with data %u",uiType,uiData);
-
     switch(uiType)
     {
         case TYPE_NADOX:
-            m_auiEncounter[0] = uiData;
+            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_TALDARAM:
             if (uiData == SPECIAL)
@@ -89,24 +91,24 @@ void instance_ahnkahet::SetData(uint32 uiType, uint32 uiData)
 
                 if (m_uiDevicesActivated == 2)
                 {
-                    m_auiEncounter[1] = uiData;
-                    DoUseDoorOrButton(m_uiTaldaramVortexGUID);
+                    m_auiEncounter[uiType] = uiData;
+                    DoUseDoorOrButton(GO_VORTEX);
                 }
             }
             if (uiData == DONE)
             {
-                m_auiEncounter[1] = uiData;
-                DoUseDoorOrButton(m_uiTaldaramDoorGUID);
+                m_auiEncounter[uiType] = uiData;
+                DoUseDoorOrButton(GO_DOOR_TALDARAM);
             }
             break;
         case TYPE_JEDOGA:
-            m_auiEncounter[2] = uiData;
+            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_VOLAZJ:
-            m_auiEncounter[3] = uiData;
+            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_AMANITAR:
-            m_auiEncounter[4] = uiData;
+            m_auiEncounter[uiType] = uiData;
             break;
         default:
             error_log("SD2: Instance Ahn'Kahet: ERROR SetData = %u for type %u does not exist/not implemented.",uiType,uiData);
@@ -184,17 +186,6 @@ uint32 instance_ahnkahet::GetData(uint32 uiType)
             return m_auiEncounter[3];
         case TYPE_AMANITAR:
             return m_auiEncounter[4];
-    }
-    return 0;
-}
-uint64 instance_ahnkahet::GetData64(uint32 uiData)
-{
-    switch(uiData)
-    {
-        case NPC_ELDER_NADOX:
-            return m_uiElderNadoxGUID;
-        case NPC_JEDOGA_SHADOWSEEKER:
-            return m_uiJedogaShadowseekerGUID;
     }
     return 0;
 }

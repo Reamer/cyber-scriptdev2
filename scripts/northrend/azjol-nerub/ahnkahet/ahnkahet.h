@@ -29,6 +29,8 @@ enum
     NPC_ELDER_NADOX         = 29309,
     NPC_TALDARAM            = 29308,
     NPC_JEDOGA_SHADOWSEEKER = 29310,
+    NPC_TWILIGHT_INITIATE   = 30114,
+
 
     ACHIEV_CRITERIA_VOLUNTEER_WORK      = 7359,
     ACHIEV_CRITERIA_RESPECT_YOUR_ELDERS = 7317
@@ -48,12 +50,13 @@ class MANGOS_DLL_DECL instance_ahnkahet : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData);
         void SetAchiev(uint32 uiType, bool get);
         uint32 GetData(uint32 uiType);
-        uint64 GetData64(uint32 uiData);
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/);
 
         const char* Save() { return strInstData.c_str(); }
         void Load(const char* chrIn);
+
+        GUIDList m_lTwilightInitiate;
 
 
     protected:
@@ -63,10 +66,6 @@ class MANGOS_DLL_DECL instance_ahnkahet : public ScriptedInstance
         bool   m_bCriteriaVolunteerWork;
         bool   m_bCriteriaRespectYourElders;
 
-        uint64 m_uiElderNadoxGUID;
-        uint64 m_uiJedogaShadowseekerGUID;
-        uint64 m_uiTaldaramDoorGUID;
-        uint64 m_uiTaldaramVortexGUID;
         uint8  m_uiDevicesActivated;
 };
 

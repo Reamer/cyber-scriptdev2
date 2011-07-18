@@ -23,6 +23,7 @@ EndScriptData */
  
 #include "precompiled.h"
 #include "ahnkahet.h"
+#include "Item.h"
 
 
 enum 
@@ -56,6 +57,8 @@ enum
  
     SPELL_MIND_FLAY                 = 57941, 
     SPELL_MIND_FLAY_H               = 59974,
+
+    SPELL_CLONE                     = 60352,
 
     // FIXME: these are not the right clone NPCs!
     CLONE                           = 31627,
@@ -114,12 +117,12 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
     bool clone128;
     bool clone256;
  
-    std::list<uint64> cloneGUIDList; 
-    std::list<uint64> clone16GUIDList;
-    std::list<uint64> clone32GUIDList;
-    std::list<uint64> clone64GUIDList;
-    std::list<uint64> clone128GUIDList;
-    std::list<uint64> clone256GUIDList;
+    GUIDList p_lCloneGuid; 
+    GUIDList p_lClone16Guid;
+    GUIDList p_lClone32Guid;
+    GUIDList p_lClone64Guid;
+    GUIDList p_lClone128Guid;
+    GUIDList p_lClone256Guid;
  
     uint32 insanityEndTimer; 
     uint32 insanityTimer; 
@@ -138,12 +141,12 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         shadowBoltSalveTimer = 6000;
         shiverTimer = 13000;
         mindFlayTimer = 9000;
-        cloneGUIDList.clear();
-        clone16GUIDList.clear();
-        clone32GUIDList.clear();
-        clone64GUIDList.clear();
-        clone128GUIDList.clear();
-        clone256GUIDList.clear();
+        p_lCloneGuid.clear();
+        p_lClone16Guid.clear();
+        p_lClone32Guid.clear();
+        p_lClone64Guid.clear();
+        p_lClone128Guid.clear();
+        p_lClone256Guid.clear();
 
         isInInsanity = false;
         phase66 = false;
@@ -166,7 +169,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if (Unit *target = pMap->GetUnit(itr->getSource()->GetGUID())) 
+            if (Unit *target = pMap->GetUnit(itr->getSource()->GetObjectGuid())) 
                 DoScriptText(WHISPER_AGGRO,m_creature,target);
         
         if (m_pInstance)
@@ -189,7 +192,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
                 DoScriptText(textId-6,m_creature,target);
     } 
  
@@ -200,12 +203,13 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
             m_pInstance->SetData(TYPE_VOLAZJ, DONE);
         RemoveInsanity();
     }
+
     void RemoveInsanity(){
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
         { 
-            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
             { 
                 target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
                 target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
@@ -222,7 +226,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
-        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr, ++i)
         {
             if(Player* target = pMap->GetPlayer(itr->getSource()->GetGUID())) 
             {
@@ -256,7 +260,6 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                     default:
                         break;
                 }
-                i++;
             }
         }
     }
@@ -270,11 +273,11 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
             Map::PlayerList const &group2 = group1;
             for (Map::PlayerList::const_iterator ittr = group2.begin(); ittr != group2.end(); ++ittr)
             {
-                if (Player* pPlayer1 = pMap->GetPlayer(itr->getSource()->GetGUID()))
+                if (Player* pPlayer1 = pMap->GetPlayer(itr->getSource()->GetObjectGuid()))
                 {
-                    if (Player* pPlayer2 = pMap->GetPlayer(ittr->getSource()->GetGUID()))
+                    if (Player* pPlayer2 = pMap->GetPlayer(ittr->getSource()->GetObjectGuid()))
                     {
-                        if (pPlayer1->isAlive() && pPlayer2->isAlive() && (pPlayer1->GetGUID() != pPlayer2->GetGUID()) && !pPlayer1->isGameMaster() && !pPlayer2->isGameMaster())
+                        if (pPlayer1->isAlive() && pPlayer2->isAlive() && (pPlayer1->GetObjectGuid() != pPlayer2->GetObjectGuid()) && !pPlayer1->isGameMaster() && !pPlayer2->isGameMaster())
                         {
                             Creature* pClone = m_creature->SummonCreature(m_bIsRegularMode ? CLONE : CLONE_H, pPlayer2->GetPositionX(), pPlayer2->GetPositionY(), pPlayer2->GetPositionZ(), pPlayer2->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                             if (pClone) 
@@ -284,8 +287,15 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                                 pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_UNK_6);
 
-                                pClone->SetName(pPlayer2->GetName());
-                                pClone->SetDisplayId(pPlayer2->GetDisplayId());
+                                // Very cool CLONE!!!
+                                pPlayer2->CastSpell(pClone, SPELL_CLONE, true);
+                                if (Item* pMainhand = pPlayer2->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                                    pClone->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, pMainhand->GetEntry());
+                                if (Item* pOffhand = pPlayer2->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                                    pClone->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, pOffhand->GetEntry());
+                                if (Item* pRange = pPlayer2->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+                                    pClone->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, pRange->GetEntry());
+
                                 pClone->setFaction(FAC_HOSTILE);
 
                                 switch (pPlayer2->getClass()) 
@@ -375,33 +385,33 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                                 pClone->Attack(pPlayer1, true);
                                 pClone->AddThreat(pPlayer1, 10000.0f);
                                 pClone->SetInCombatWith(pPlayer1);
-                                cloneGUIDList.push_back(pClone->GetGUID()); 
+                                p_lCloneGuid.push_back(pClone->GetGUID()); 
                      
                     
                                 if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_16)) //Phase 16
                                 {
                                     pClone->SetPhaseMask(16, true);
-                                    clone16GUIDList.push_back(pClone->GetGUID());
+                                    p_lClone16Guid.push_back(pClone->GetGUID());
                                 }
                                 else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_32))//Phase 32
                                 {
                                     pClone->SetPhaseMask(32, true);
-                                    clone32GUIDList.push_back(pClone->GetGUID());                            
+                                    p_lClone32Guid.push_back(pClone->GetGUID());                            
                                 }
                                 else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_64))//Phase 64
                                 {
                                     pClone->SetPhaseMask(64, true);
-                                    clone64GUIDList.push_back(pClone->GetGUID());
+                                    p_lClone64Guid.push_back(pClone->GetGUID());
                                 }
                                 else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_128))//Phase 128
                                 {
                                     pClone->SetPhaseMask(128, true);
-                                    clone128GUIDList.push_back(pClone->GetGUID());
+                                    p_lClone128Guid.push_back(pClone->GetGUID());
                                 }
                                 else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_256))//Phase 256
                                 {
                                     pClone->SetPhaseMask(256, true);
-                                    clone256GUIDList.push_back(pClone->GetGUID());
+                                    p_lClone256Guid.push_back(pClone->GetGUID());
                                 }
                             }
                         }
@@ -413,9 +423,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
     bool cloneAlive()
     {
-        if (!cloneGUIDList.empty() && m_pInstance)
+        if (!p_lCloneGuid.empty() && m_pInstance)
         {
-            for (std::list<uint64>::iterator itr = cloneGUIDList.begin(); itr != cloneGUIDList.end(); ++itr)
+            for (GUIDList::iterator itr = p_lCloneGuid.begin(); itr != p_lCloneGuid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -430,9 +440,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
     bool clone16Alive()
     {
-        if (!clone16GUIDList.empty() && m_pInstance)
+        if (!p_lClone16Guid.empty() && m_pInstance)
         {
-            for (std::list<uint64>::iterator itr = clone16GUIDList.begin(); itr != clone16GUIDList.end(); ++itr)
+            for (GUIDList::iterator itr = p_lClone16Guid.begin(); itr != p_lClone16Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -447,9 +457,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
     bool clone32Alive()
     {
-        if (!clone32GUIDList.empty() && m_pInstance)
+        if (!p_lClone32Guid.empty() && m_pInstance)
         {
-            for (std::list<uint64>::iterator itr = clone32GUIDList.begin(); itr != clone32GUIDList.end(); ++itr)
+            for (GUIDList::iterator itr = p_lClone32Guid.begin(); itr != p_lClone32Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -464,9 +474,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
     bool clone64Alive()
     {
-        if (!clone64GUIDList.empty() && m_pInstance)
+        if (!p_lClone64Guid.empty() && m_pInstance)
         {
-            for (std::list<uint64>::iterator itr = clone64GUIDList.begin(); itr != clone64GUIDList.end(); ++itr)
+            for (GUIDList::iterator itr = p_lClone64Guid.begin(); itr != p_lClone64Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -481,9 +491,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
     bool clone128Alive()
     {
-        if (!clone128GUIDList.empty() && m_pInstance)
+        if (!p_lClone128Guid.empty() && m_pInstance)
         {
-            for (std::list<uint64>::iterator itr = clone128GUIDList.begin(); itr != clone128GUIDList.end(); ++itr)
+            for (GUIDList::iterator itr = p_lClone128Guid.begin(); itr != p_lClone128Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -498,9 +508,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
 
     bool clone256Alive()
     {
-        if (!clone256GUIDList.empty() && m_pInstance)
+        if (!p_lClone256Guid.empty() && m_pInstance)
         {
-            for (std::list<uint64>::iterator itr = clone256GUIDList.begin(); itr != clone256GUIDList.end(); ++itr)
+            for (GUIDList::iterator itr = p_lClone256Guid.begin(); itr != p_lClone256Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -814,29 +824,11 @@ struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI
     bool m_bIsRegularMode;
 
  
-    uint32 spellPriestTimer; 
-    uint32 spellRogueTimer; 
-    uint32 spellMageTimer; 
-    uint32 spellDeathKnightTimer; 
-    uint32 spellShamanTimer; 
-    uint32 spellWarlockTimer; 
-    uint32 spellDruidTimer; 
-    uint32 spellWarriorTimer; 
-    uint32 spellPaladinTimer; 
-    uint32 spellHunterTimer; 
+    uint32 m_uiSpellTimer;
         
     void Reset()
     {
-        spellPriestTimer       = 5000;    
-        spellRogueTimer        = 5000;
-        spellMageTimer         = 5000;
-        spellDeathKnightTimer  = 5000;
-        spellShamanTimer       = 5000;
-        spellWarlockTimer      = 5000;
-        spellDruidTimer        = 5000;
-        spellWarriorTimer      = 5000;
-        spellPaladinTimer      = 5000;
-        spellHunterTimer       = 5000;
+        m_uiSpellTimer       = 5000;    
     } 
 
     void UpdateAI(const uint32 uiDiff) 
@@ -844,222 +836,259 @@ struct MANGOS_DLL_DECL mob_volazj_cloneAI : public ScriptedAI
         if(!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_creature->GetMaxHealth() == CLONE_HEALTH_DRUID || m_creature->GetMaxHealth() == CLONE_HEALTH_DRUID_H) 
-        {
-            if (spellDruidTimer < uiDiff) 
+        switch (m_creature->GetMaxHealth())
+        { 
+            case CLONE_HEALTH_DRUID:
+            case CLONE_HEALTH_DRUID_H:
             {
-                int randomSpell = urand(0, 2); 
-                switch (randomSpell) 
+                if (m_uiSpellTimer < uiDiff) 
+                {
+                    int randomSpell = urand(0, 2); 
+                    switch (randomSpell) 
+                    { 
+                        case 0: 
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DRUID_1 : SPELL_DRUID_1_H) == CAST_OK) //Moon Fire
+                                m_uiSpellTimer = 5000;
+                            break; 
+                        case 1:
+                            if (!m_creature->HasAura(m_bIsRegularMode ? SPELL_DRUID_2 : SPELL_DRUID_2_H))
+                                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DRUID_2 : SPELL_DRUID_2_H) == CAST_OK) //Regrowth
+                                    m_uiSpellTimer = 5000;
+                            break; 
+                        case 2:
+                            if (!m_creature->HasAura(m_bIsRegularMode ? SPELL_DRUID_3 : SPELL_DRUID_3_H))
+                                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DRUID_3 : SPELL_DRUID_3_H) == CAST_OK) //Rejuvenation
+                                    m_uiSpellTimer = 5000;
+                            break; 
+                        default:
+                            break;
+                    }
+                } else
+                    m_uiSpellTimer -= uiDiff;
+
+                break;
+            }
+            case CLONE_HEALTH_MAGE:
+            case CLONE_HEALTH_MAGE_H:
+            {
+                if (m_uiSpellTimer < uiDiff) 
+                {
+                    int randomSpell = urand(0,1);
+                    switch (randomSpell)
+                    {
+                        case 0:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MAGE_1 : SPELL_MAGE_1_H) == CAST_OK) //Fireball
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        case 1:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MAGE_2 : SPELL_MAGE_2_H) == CAST_OK) //Frostbolt
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        default:
+                            break;                
+                    }
+                }else m_uiSpellTimer -= uiDiff;
+
+                break;
+            }
+            case CLONE_HEALTH_PALA:
+            case CLONE_HEALTH_PALA_H:
+            {
+                if (m_uiSpellTimer < uiDiff) 
+                {
+                    int randomSpell = urand(0,2);
+                    switch (randomSpell)
+                    {
+                        case 0:
+                            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PALA_1 : SPELL_PALA_1_H) == CAST_OK) // Consecration
+                                m_uiSpellTimer = urand(4000, 5000);
+                            break;
+                        case 1:
+                            if (m_creature->GetHealth() < (m_creature->GetMaxHealth() - 2000))
+                                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PALA_2 : SPELL_PALA_2_H) == CAST_OK) // Holy Light
+                                    m_uiSpellTimer = urand(4000, 5000);
+                            break;
+                        case 2:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PALA_3) == CAST_OK) // Divine Storm
+                                m_uiSpellTimer = urand(4000, 5000);
+                            break;
+                        default:
+                            break;
+                    } 
+                }else m_uiSpellTimer -= uiDiff;
+
+                break;
+            }
+            case CLONE_HEALTH_HUNT:
+            case CLONE_HEALTH_HUNT_H:
+            {
+                if (m_uiSpellTimer < uiDiff) 
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ?  SPELL_HUNTER_1 :  SPELL_HUNTER_1_H) == CAST_OK) //Shoot
+                        m_uiSpellTimer = urand(3000, 5000);
+                    if (m_creature->IsWithinDistInMap(m_creature->getVictim(), 3.0f))
+                    {
+                        DoCast(m_creature->getVictim(), SPELL_HUNTER_2, true); //Wing Clip
+                        m_uiSpellTimer = urand(5000, 7000);
+                    }
+                }else m_uiSpellTimer -= uiDiff;
+                
+                break;
+            }
+            case CLONE_HEALTH_WARLOCK:
+            case CLONE_HEALTH_WARLOCK_H:
+            {
+                if (m_uiSpellTimer < uiDiff) 
+                {
+                    int randomSpell = urand(0,2);
+                    switch (randomSpell)
+                    {
+                        case 0:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK_1 : SPELL_WARLOCK_1_H) == CAST_OK) //Shadow Bolt
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        case 1:
+                            if (!m_creature->getVictim()->HasAura(m_bIsRegularMode ? SPELL_WARLOCK_2 : SPELL_WARLOCK_2_H))
+                                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK_2 : SPELL_WARLOCK_2_H) == CAST_OK) //Corruption
+                                    m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        case 2:
+                            if (!m_creature->getVictim()->HasAura(m_bIsRegularMode ? SPELL_WARLOCK_3 : SPELL_WARLOCK_3_H))
+                                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK_3 : SPELL_WARLOCK_3_H) == CAST_OK) //Immolate
+                                    m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        default:
+                            break;
+                    }
+                }else m_uiSpellTimer -= uiDiff;
+
+                break;
+            }
+            case CLONE_HEALTH_DK:
+            case CLONE_HEALTH_DK_H:
+            {
+                if (m_uiSpellTimer < uiDiff) 
                 { 
-                    case 0: 
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DRUID_1 : SPELL_DRUID_1_H) == CAST_OK) //Moon Fire
-                            spellDruidTimer = 5000;
-                        break; 
-                    case 1:
-                        if (!m_creature->HasAura(m_bIsRegularMode ? SPELL_DRUID_2 : SPELL_DRUID_2_H))
-                            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DRUID_2 : SPELL_DRUID_2_H) == CAST_OK) //Regrowth
-                                spellDruidTimer = 5000;
-                        break; 
-                    case 2:
-                        if (!m_creature->HasAura(m_bIsRegularMode ? SPELL_DRUID_3 : SPELL_DRUID_3_H))
-                            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DRUID_3 : SPELL_DRUID_3_H) == CAST_OK) //Rejuvenation
-                                spellDruidTimer = 5000;
-                        break; 
-                    default:
-                        break;
-                }
-            } else
-                spellDruidTimer -= uiDiff;
-        } 
-        else if (m_creature->GetMaxHealth() == CLONE_HEALTH_MAGE || m_creature->GetMaxHealth() == CLONE_HEALTH_MAGE_H) 
-        {
-            if (spellMageTimer < uiDiff) 
+                    int randomSpell = urand(0,2);
+                    switch (randomSpell)
+                    {
+                        case 0:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DK_1) == CAST_OK) //Heart Strike
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        case 1:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DK_2 : SPELL_DK_2_H) == CAST_OK) //Plague Strike
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        case 2:
+                            if (!m_bIsRegularMode)
+                                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DK_3_H) == CAST_OK) //Icy Touch
+                                    m_uiSpellTimer = urand(4000, 6000);
+                            break;                               
+                        default:
+                            break;
+                    }
+                }else m_uiSpellTimer -= uiDiff;
+
+                break;
+            }
+            case CLONE_HEALTH_WARRIOR:
+            case CLONE_HEALTH_WARRIOR_H:
             {
-                int randomSpell = urand(0,1);
-                switch (randomSpell)
-                {
-                    case 0:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MAGE_1 : SPELL_MAGE_1_H) == CAST_OK) //Fireball
-                            spellMageTimer = urand(4000, 6000);
-                        break;
-                    case 1:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MAGE_2 : SPELL_MAGE_2_H) == CAST_OK) //Frostbolt
-                            spellMageTimer = urand(4000, 6000);
-                        break;
-                    default:
-                        break;
-                }
-            }else spellMageTimer -= uiDiff;
-        } 
-        else if (m_creature->GetMaxHealth() == CLONE_HEALTH_PALA || m_creature->GetMaxHealth() == CLONE_HEALTH_PALA_H) 
-        { 
-            if (spellPaladinTimer < uiDiff) 
+
+                if (m_uiSpellTimer < uiDiff) 
+                { 
+                    int randomSpell = urand(0,1);
+                    switch (randomSpell)
+                    {
+                        case 0:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARRIOR_1 : SPELL_WARRIOR_1_H) == CAST_OK) //Whirlwind
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        case 1:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARRIOR_2 : SPELL_WARRIOR_2_H) == CAST_OK) //Thunderclap
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        default:
+                            break;
+                    }
+                }else m_uiSpellTimer -= uiDiff; 
+
+                break;
+            }
+            case CLONE_HEALTH_PRIEST:
+            case CLONE_HEALTH_PRIEST_H:
             {
-                int randomSpell = urand(0,2);
-                switch (randomSpell)
+                if (m_uiSpellTimer < uiDiff) 
                 {
-                    case 0:
-                        if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PALA_1 : SPELL_PALA_1_H) == CAST_OK) // Consecration
-                            spellPaladinTimer = urand(4000, 5000);
-                        break;
-                    case 1:
-                        if (m_creature->GetHealth() < (m_creature->GetMaxHealth() - 2000))
-                            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PALA_2 : SPELL_PALA_2_H) == CAST_OK) // Holy Light
-                                spellPaladinTimer = urand(4000, 5000);
-                        break;
-                    case 2:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PALA_3) == CAST_OK) // Divine Storm
-                            spellPaladinTimer = urand(4000, 5000);
-                        break;
-                    default:
-                        break;
-                } 
-            }else spellPaladinTimer -= uiDiff; 
-        } 
-        else if (m_creature->GetMaxHealth() == CLONE_HEALTH_HUNT || m_creature->GetMaxHealth() == CLONE_HEALTH_HUNT_H) 
-        {
-            if (spellHunterTimer < uiDiff) 
+                    int randomSpell = urand(0,1);
+                    switch (randomSpell)
+                    {
+                        case 0:
+                            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PRIEST_1 : SPELL_PRIEST_1_H) == CAST_OK) //Renew
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        case 1:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PRIEST_2 : SPELL_PRIEST_2_H) == CAST_OK) //Shadow Word: Pain
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        default:
+                            break;
+                    }
+                }else m_uiSpellTimer -= uiDiff;
+
+                break;
+            }
+            case CLONE_HEALTH_SHAMAN:
+            case CLONE_HEALTH_SHAMAN_H:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ?  SPELL_HUNTER_1 :  SPELL_HUNTER_1_H) == CAST_OK) //Shoot
-                    spellHunterTimer = urand(3000, 5000);
-                if (m_creature->IsWithinDistInMap(m_creature->getVictim(), 3.0f))
+                if (m_uiSpellTimer < uiDiff) 
                 {
-                    DoCast(m_creature->getVictim(), SPELL_HUNTER_2, true); //Wing Clip
-                    spellHunterTimer = urand(5000, 7000);
-                }
-            }else spellHunterTimer -= uiDiff;
-        } 
-        else if (m_creature->GetMaxHealth() == CLONE_HEALTH_WARLOCK || m_creature->GetMaxHealth() == CLONE_HEALTH_WARLOCK_H) 
-        {
-            if (spellWarlockTimer < uiDiff) 
+                    int randomSpell = urand(0,1);
+                    switch (randomSpell)
+                    {
+                        case 0:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHAMAN_1 : SPELL_SHAMAN_1_H) == CAST_OK) //Lightnig Bolt
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        case 1:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHAMAN_2 : SPELL_SHAMAN_2_H) == CAST_OK) //Chain Lightning
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        default:
+                            break;
+                    }
+                }else m_uiSpellTimer -= uiDiff;
+
+                break;
+            }
+            case CLONE_HEALTH_ROGUE:
+            case CLONE_HEALTH_ROGUE_H:
             {
-                int randomSpell = urand(0,2);
-                switch (randomSpell)
+                if (m_uiSpellTimer < uiDiff) 
                 {
-                    case 0:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK_1 : SPELL_WARLOCK_1_H) == CAST_OK) //Shadow Bolt
-                            spellWarlockTimer = urand(4000, 6000);
-                        break;
-                    case 1:
-                        if (!m_creature->getVictim()->HasAura(m_bIsRegularMode ? SPELL_WARLOCK_2 : SPELL_WARLOCK_2_H))
-                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK_2 : SPELL_WARLOCK_2_H) == CAST_OK) //Corruption
-                                spellWarlockTimer = urand(4000, 6000);
-                        break;
-                    case 2:
-                        if (!m_creature->getVictim()->HasAura(m_bIsRegularMode ? SPELL_WARLOCK_3 : SPELL_WARLOCK_3_H))
-                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARLOCK_3 : SPELL_WARLOCK_3_H) == CAST_OK) //Immolate
-                                spellWarlockTimer = urand(4000, 6000);
-                        break;
-                    default:
-                        break;
-                }
-            }else spellWarlockTimer -= uiDiff;
-        } 
-        else if (m_creature->GetMaxHealth() == CLONE_HEALTH_DK || m_creature->GetMaxHealth() == CLONE_HEALTH_DK_H) 
-        { 
-            if (spellDeathKnightTimer < uiDiff) 
-            { 
-                int randomSpell = urand(0,2);
-                switch (randomSpell)
-                {
-                    case 0:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DK_1) == CAST_OK) //Heart Strike
-                            spellDeathKnightTimer = urand(4000, 6000);
-                        break;
-                    case 1:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DK_2 : SPELL_DK_2_H) == CAST_OK) //Plague Strike
-                            spellDeathKnightTimer = urand(4000, 6000);
-                        break;
-                    case 2:
-                        if (!m_bIsRegularMode)
-                            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DK_3_H) == CAST_OK) //Icy Touch
-                                spellDeathKnightTimer = urand(4000, 6000);
-                        break;                               
-                    default:
-                        break;
-                }
-            }else spellDeathKnightTimer -= uiDiff;  
-        } 
-        else if (m_creature->GetMaxHealth() == CLONE_HEALTH_WARRIOR || m_creature->GetMaxHealth() == CLONE_HEALTH_WARRIOR_H) 
-        { 
-            if (spellWarriorTimer < uiDiff) 
-            { 
-                int randomSpell = urand(0,1);
-                switch (randomSpell)
-                {
-                    case 0:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARRIOR_1 : SPELL_WARRIOR_1_H) == CAST_OK) //Whirlwind
-                            spellWarriorTimer = urand(4000, 6000);
-                        break;
-                    case 1:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WARRIOR_2 : SPELL_WARRIOR_2_H) == CAST_OK) //Thunderclap
-                            spellWarriorTimer = urand(4000, 6000);
-                        break;
-                    default:
-                        break;
-                }
-            }else spellWarriorTimer -= uiDiff; 
-        } 
-        else if (m_creature->GetMaxHealth() == CLONE_HEALTH_PRIEST || m_creature->GetMaxHealth() == CLONE_HEALTH_PRIEST_H) 
-        {
-            if (spellPriestTimer < uiDiff) 
-            {
-                int randomSpell = urand(0,1);
-                switch (randomSpell)
-                {
-                    case 0:
-                        if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PRIEST_1 : SPELL_PRIEST_1_H) == CAST_OK) //Renew
-                            spellPriestTimer = urand(4000, 6000);
-                        break;
-                    case 1:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PRIEST_2 : SPELL_PRIEST_2_H) == CAST_OK) //Shadow Word: Pain
-                            spellPriestTimer = urand(4000, 6000);
-                        break;
-                    default:
-                        break;
-                }
-            }else spellPriestTimer -= uiDiff;
-        } 
-        else if (m_creature->GetMaxHealth() == CLONE_HEALTH_SHAMAN || m_creature->GetMaxHealth() == CLONE_HEALTH_SHAMAN_H) 
-        {
-            if (spellShamanTimer < uiDiff) 
-            {
-                int randomSpell = urand(0,1);
-                switch (randomSpell)
-                {
-                    case 0:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHAMAN_1 : SPELL_SHAMAN_1_H) == CAST_OK) //Lightnig Bolt
-                            spellShamanTimer = urand(4000, 6000);
-                        break;
-                    case 1:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHAMAN_2 : SPELL_SHAMAN_2_H) == CAST_OK) //Chain Lightning
-                            spellShamanTimer = urand(4000, 6000);
-                        break;
-                    default:
-                        break;
-                }
-            }else spellShamanTimer -= uiDiff;
-        } 
-        else if (m_creature->GetMaxHealth() == CLONE_HEALTH_ROGUE || m_creature->GetMaxHealth() == CLONE_HEALTH_ROGUE_H) 
-        { 
-            if (spellRogueTimer < uiDiff) 
-            {
-                int randomSpell = urand(0,1);
-                switch (randomSpell)
-                {
-                    case 0:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ROGUE_1 : SPELL_ROGUE_1_H) == CAST_OK) //Hemorrhage
-                            spellRogueTimer = urand(4000, 6000);
-                        break;
-                    case 1:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ROGUE_2) == CAST_OK) //Sinister Strike
-                            spellRogueTimer = urand(4000, 6000);
-                        break;
-                    default:
-                        break;
-                }
-            }else spellRogueTimer -= uiDiff;
+                    int randomSpell = urand(0,1);
+                    switch (randomSpell)
+                    {
+                        case 0:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ROGUE_1 : SPELL_ROGUE_1_H) == CAST_OK) //Hemorrhage
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        case 1:
+                            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ROGUE_2) == CAST_OK) //Sinister Strike
+                                m_uiSpellTimer = urand(4000, 6000);
+                            break;
+                        default:
+                            break;
+                    }
+                }else m_uiSpellTimer -= uiDiff;
+
+                break;
+            }
+            default:
+                break;
         }
+
         DoMeleeAttackIfReady(); 
     } 
 }; 
