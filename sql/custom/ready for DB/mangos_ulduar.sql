@@ -1,4 +1,4 @@
--- GENERAL
+Ôªø-- GENERAL
 -- Teleporter
 UPDATE gameobject_template SET ScriptName = "go_ulduar_teleporter" WHERE entry = 194569;
 -- NPC respawnzeit
@@ -190,17 +190,17 @@ UPDATE creature_template SET armor=10673,mindmg=468, maxdmg=702,attackpower=175,
 UPDATE creature_template SET ScriptName = 'mob_saronite_vapor', movementType = 1  WHERE entry = 33488;
 
 -- **************Yogg Saron********************
-DELETE FROM spell_script_target WHERE entry = 64466 ;       	-- Unverg‰ngliche Wache spell auf yogg saron
+DELETE FROM spell_script_target WHERE entry = 64466 ;       	-- Unverg√§ngliche Wache spell auf yogg saron
 INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (64466 , 1, 33288);
 DELETE FROM spell_script_target WHERE entry = 64465 ;		-- yogg saron spell Machtvolle Schatten
 INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (64465 , 1, 33988);  
 DELETE FROM spell_script_target WHERE entry = 64172 ;		-- thorim spell zum killn
 INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (64172 , 1, 33988);
-DELETE FROM spell_script_target WHERE entry = 62714 ;		-- wachen AOE zum schw‰chen von sara - nonhero spell
+DELETE FROM spell_script_target WHERE entry = 62714 ;		-- wachen AOE zum schw√§chen von sara - nonhero spell
 INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (62714 , 1, 33134);  
-DELETE FROM spell_script_target WHERE entry = 65209 ;		-- wachen AOE zum schw‰chen von sara - hero spell
+DELETE FROM spell_script_target WHERE entry = 65209 ;		-- wachen AOE zum schw√§chen von sara - hero spell
 INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (65209 , 1, 33134);
-DELETE FROM spell_script_target WHERE entry = 62978;		-- Beschwˆrung von W‰chter aus den Wolken
+DELETE FROM spell_script_target WHERE entry = 62978;		-- Beschw√∂rung von W√§chter aus den Wolken
 INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (62978, 1, 33292);
 DELETE FROM spell_script_target WHERE entry = 64173;		-- Zerschmetternde Illusion START
 INSERT INTO spell_script_target (entry, type, targetEntry) VALUES (64173, 1, 33292);	-- auf Yogg Saron
@@ -303,27 +303,27 @@ VALUES (34057, 46029, 100,1,1);
 
 -- Freya
 DELETE FROM gameobject WHERE id IN (194324, 194327,194328,194331);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
-(800000, 194324, 603, 1, 65535, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1),
-(800001, 194327, 603, 1, 65535, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1),
-(800002, 194328, 603, 2, 65535, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1),
-(800003, 194331, 603, 2, 65535, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1);
+INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, `position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
+(800000, 194324, 603, 1, 1, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1),
+(800001, 194327, 603, 1, 1, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1),
+(800002, 194328, 603, 2, 1, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1),
+(800003, 194331, 603, 2, 1, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1);
 
 -- Mimiron
-DELETE FROM `gameobject` WHERE `id` IN (194789, 194956, 194957, 194958); 
-INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
-(800004, 194789, 603, 1, 65535, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
-(800005, 194956, 603, 1, 65535, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
-(800006, 194957, 603, 2, 65535, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
-(800007, 194958, 603, 2, 65535, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1);
+DELETE FROM gameobject WHERE id IN (194789, 194956, 194957, 194958); 
+INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, `position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
+(800004, 194789, 603, 1, 1, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
+(800005, 194956, 603, 2, 1, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
+(800006, 194957, 603, 1, 1, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
+(800007, 194958, 603, 2, 1, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1);
 
 -- Thorim
-DELETE FROM `gameobject` WHERE `id` IN (194312, 194313, 194314, 194315);
-INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
-(800008, 194312, 603, 1, 65535, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
-(800009, 194313, 603, 1, 65535, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
-(800010, 194315, 603, 2, 65535, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
-(800011, 194314, 603, 2, 65535, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1);
+DELETE FROM gameobject WHERE id IN (194312, 194313, 194314, 194315);
+INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, `position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
+(800008, 194312, 603, 1, 1, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
+(800009, 194313, 603, 1, 1, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
+(800010, 194315, 603, 2, 1, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
+(800011, 194314, 603, 2, 1, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1);
 
 -- Hodir
 UPDATE gameobject SET animprogress = 100 WHERE id IN ( 194307, 194308, 194200, 194201);

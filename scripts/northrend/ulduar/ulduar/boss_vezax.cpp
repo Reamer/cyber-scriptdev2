@@ -268,7 +268,7 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 1))
             {
-                if (m_creature->GetDistance(pTarget) < 30.0f)
+                if (m_creature->GetDistance(pTarget) < 20.0f)
                     DoCast(pTarget, SPELL_SHADOW_CRASH);
                 else 
                     DoCast(m_creature->getVictim(), SPELL_SHADOW_CRASH);
@@ -323,9 +323,6 @@ struct MANGOS_DLL_DECL mob_saronite_animusAI : public ScriptedAI
                 }
             }
         }
-        // used for hard mode loot
-        // REMOVE THIS FOR REVISION
-        //m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -352,6 +349,7 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
     mob_saronite_vaporAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
+        pCreature->SetRespawnTime(60000);
         Reset();
     }
 
