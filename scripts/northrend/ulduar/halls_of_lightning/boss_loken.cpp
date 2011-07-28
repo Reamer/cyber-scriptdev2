@@ -142,7 +142,7 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
                     {
                         float pDistance = m_creature->GetDistance(target);
                         Modifier* mod = pAura->GetModifier();
-                        mod->m_amount = int32(pAura->GetBasePoints() * pDistance); //25*distance
+                        mod->m_amount = int32(100 + pAura->GetBasePoints() * pDistance); //25*distance
                     }
                 }
             }

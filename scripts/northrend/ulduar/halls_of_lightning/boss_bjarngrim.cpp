@@ -58,7 +58,6 @@ enum
     //SPELL_CHARGE_UP                         = 52098,      // only used when starting walk from one platform to the other
     //SPELL_TEMPORARY_ELECTRICAL_CHARGE       = 52092,      // triggered part of above
 
-    NPC_STORMFORGED_LIEUTENANT              = 29240,
     SPELL_ARC_WELD                          = 59085,
     SPELL_RENEW_STEEL_N                     = 52774,
     SPELL_RENEW_STEEL_H                     = 59160,
@@ -128,15 +127,6 @@ struct MANGOS_DLL_DECL boss_bjarngrimAI : public ScriptedAI
         m_uiMortalStrike_Timer = 8000;
         m_uiSlam_Timer = 10000;
 
-        for(uint8 i = 0; i < 2; ++i)
-        {
-            if (Creature* pStormforgedLieutenant = m_creature->GetMap()->GetCreature(m_aStormforgedLieutenantGuid[i]))
-            {
-                if (!pStormforgedLieutenant->isAlive())
-                    pStormforgedLieutenant->Respawn();
-            }
-        }
-
         if (m_uiStance != STANCE_DEFENSIVE)
         {
             DoCastSpellIfCan(m_creature, SPELL_DEFENSIVE_STANCE);
@@ -144,7 +134,20 @@ struct MANGOS_DLL_DECL boss_bjarngrimAI : public ScriptedAI
         }
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_BJARNGRIM, NOT_STARTED);
+            for (GUIDList::iterator itr = m_pInstance->m_lStormforgedLieutenantGuids.begin(); itr != m_pInstance->m_lStormforgedLieutenantGuids.end(); itr++)
+            {
+                if (Creature *pTmp = m_pInstance->instance->GetCreature(*itr))
+                {
+                    if (!pTmp->isAlive())
+                    {
+                        pTmp->Respawn();
+                        pTmp->NearTeleportTo(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f);
+                    }
+                }
+            }
+        }
     }
 
     void Aggro(Unit* pWho)

@@ -49,6 +49,9 @@ void instance_halls_of_lightning::OnCreatureCreate(Creature* pCreature)
         case NPC_IONAR:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+        case NPC_STORMFORGED_LIEUTENANT:
+            m_lStormforgedLieutenantGuids.push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
