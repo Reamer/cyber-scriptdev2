@@ -67,7 +67,7 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
     case NPC_IGNIS:
         break;
     case NPC_IRON_CONSTRUCT:
-        m_lIronConstructsGUIDs.push_back(pCreature->GetGUID());
+        m_lIronConstructsGuids.push_back(pCreature->GetObjectGuid());
         return;
     case NPC_RAZORSCALE:
     case NPC_COMMANDER:
@@ -94,10 +94,10 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
     case NPC_RUNIC_COLOSSUS:
         break;
     case NPC_RIGHT_HAND_TRIGGER:
-        m_lRightHandTrigger.push_back(pCreature->GetGUID());
+        m_lRightHandTriggerGuids.push_back(pCreature->GetObjectGuid());
         return;
     case NPC_LEFT_HAND_TRIGGER:
-        m_lLeftHandTrigger.push_back(pCreature->GetGUID());
+        m_lLeftHandTriggerGuids.push_back(pCreature->GetObjectGuid());
         return;
     case NPC_RUNE_GIANT:
     case NPC_JORMUNGAR_BEHEMOTH:
@@ -113,9 +113,11 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
     case NPC_ALGALON:
         break;
     case NPC_OMINOUS_CLOUD:
-        m_lCLoudGUIDs.push_back(pCreature->GetGUID());
+        m_lCLoudGuids.push_back(pCreature->GetObjectGuid());
         return;
-
+    case NPC_SANCTUM_SENTRY:
+        m_lSanctumSentryGuids.push_back(pCreature->GetObjectGuid());
+        return;
 
         // used to handle the keepers images
         // set to invisible by default and only made visible if the encounter is done
@@ -294,7 +296,7 @@ void instance_ulduar::OnCreatureDeath(Creature * pCreature)
         || pCreature->GetEntry() == NPC_MERCENARY_ALY
         || pCreature->GetEntry() == NPC_MERCENARY_HORDE) 
     {
-        m_lThorimMobsGUIDs.push_back(pCreature->GetGUID());
+        m_lThorimMobsGuids.push_back(pCreature->GetObjectGuid());
     }
 }
 

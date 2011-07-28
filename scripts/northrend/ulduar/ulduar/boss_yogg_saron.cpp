@@ -504,7 +504,7 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
             m_pInstance->SetData(TYPE_VISION_PHASE, PHASE_VISION_RETURN);
 
             // respawn clouds
-            for(GUIDList::iterator iter = m_pInstance->m_lCLoudGUIDs.begin(); iter != m_pInstance->m_lCLoudGUIDs.end(); ++iter)
+            for(GUIDList::iterator iter = m_pInstance->m_lCLoudGuids.begin(); iter != m_pInstance->m_lCLoudGuids.end(); ++iter)
                 if (Creature *pTmp = m_pInstance->instance->GetCreature(*iter))
                     pTmp->Respawn();
         }
@@ -523,6 +523,7 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
         m_creature->SetInCombatWithZone();
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         DoCast(m_creature, SPELL_SANITY_TRIGG);
+        DoCast(m_creature, SPELL_INSANE_TRIGG);
 
         if(m_pInstance)
         {
@@ -664,7 +665,7 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
         if (m_pInstance)
         {
             //remove Clouds
-            for(GUIDList::iterator iter = m_pInstance->m_lCLoudGUIDs.begin(); iter != m_pInstance->m_lCLoudGUIDs.end(); ++iter)
+            for(GUIDList::iterator iter = m_pInstance->m_lCLoudGuids.begin(); iter != m_pInstance->m_lCLoudGuids.end(); ++iter)
                 if (Creature *pTmp = m_pInstance->instance->GetCreature(*iter))
                     pTmp->ForcedDespawn();
         }
