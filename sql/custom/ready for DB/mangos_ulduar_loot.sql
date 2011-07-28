@@ -1,4 +1,4 @@
-/*
+﻿/*
 
 TODO: Algalon (10 , 25), Flame Leviathan(10, 25), maybe plans and other boss stuff
 

@@ -507,6 +507,11 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
             for(GUIDList::iterator iter = m_pInstance->m_lCLoudGuids.begin(); iter != m_pInstance->m_lCLoudGuids.end(); ++iter)
                 if (Creature *pTmp = m_pInstance->instance->GetCreature(*iter))
                     pTmp->Respawn();
+            if(Creature* pSara = m_pInstance->GetSingleCreatureFromStorage(NPC_SARA))
+            {
+                if (!pSara->isAlive())
+                    pSara->Respawn()
+            }
         }
         for (GUIDList::iterator iter = m_lKeeperGUID.begin(); iter != m_lKeeperGUID.end(); ++iter)
         {
@@ -522,8 +527,8 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
     {
         m_creature->SetInCombatWithZone();
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        DoCast(m_creature, SPELL_SANITY_TRIGG);
-        DoCast(m_creature, SPELL_INSANE_TRIGG);
+        DoCast(m_creature, SPELL_SANITY_TRIGG, true);
+        DoCast(m_creature, SPELL_INSANE_TRIGG, true);
 
         if(m_pInstance)
         {

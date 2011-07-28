@@ -455,6 +455,18 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
         // achievs
         m_bCrazyCatLady = true;
         m_bNineLives    = false;
+        
+        for (GUIDList::iterator itr = m_pInstance->m_lSanctumSentryGuids.begin(); itr != m_pInstance->m_lSanctumSentryGuids.end(); ++itr)
+        {
+            if (Creature* pSanity = m_creature->GetMap()->GetCreature(*itr))
+            {
+                if (!pSanity->isAlive())
+                {
+                    pSanity->Respawn();
+                    pSanity->NearTeleportTo(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f);
+                }
+            }
+        }
     }
 
     void JustDied(Unit* pKiller)
@@ -505,18 +517,6 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_AURIAYA, FAIL);
-
-        for (GUIDList::iterator itr = m_pInstance->m_lSanctumSentryGuids.begin(); itr != m_pInstance->m_lSanctumSentryGuids.end(); ++itr)
-        {
-            if (Creature* pSanity = m_creature->GetMap()->GetCreature(*itr))
-            {
-                if (!pSanity->isAlive())
-                {
-                    pSanity->Respawn();
-                    pSanity->NearTeleportTo(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f);
-                }
-            }
-        }
     }
 
     void JustSummoned(Creature *pCreature)
