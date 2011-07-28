@@ -108,7 +108,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
     instance_ahnkahet* m_pInstance; 
     bool m_bIsRegularMode; 
  
-    bool isInInsanity; 
+    bool m_bIsInInsanity; 
     bool phase66; 
     bool phase33; 
     bool clone16;
@@ -126,17 +126,18 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
  
     uint32 insanityEndTimer; 
     uint32 insanityTimer; 
-    uint32 createMirrorTimer; 
     uint32 shadowBoltSalveTimer; 
     uint32 shiverTimer; 
     uint32 mindFlayTimer; 
     uint32 achievementTimer;
+
+    uint8  count;
+    float m_fHealthPercent;
  
     void Reset() 
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
-        insanityEndTimer = 9999999; 
-        createMirrorTimer = 9999999;
+        insanityEndTimer = 1000; 
         achievementTimer = 120000; // 2minutes
         shadowBoltSalveTimer = 6000;
         shiverTimer = 13000;
@@ -148,7 +149,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         p_lClone128Guid.clear();
         p_lClone256Guid.clear();
 
-        isInInsanity = false;
+        m_bIsInInsanity = false;
         phase66 = false;
         phase33 = false;
         clone16 = false;
@@ -156,6 +157,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         clone64 = false;
         clone128 = false;
         clone256 = false;
+
+        count   = 0;
+        m_fHealthPercent = 66.0f;
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, NOT_STARTED);
@@ -169,7 +173,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if (Unit *target = pMap->GetUnit(itr->getSource()->GetObjectGuid())) 
+            if (Player* target = itr->getSource()) 
                 DoScriptText(WHISPER_AGGRO,m_creature,target);
         
         if (m_pInstance)
@@ -192,7 +196,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
+            if (Player* target = itr->getSource()) 
                 DoScriptText(textId-6,m_creature,target);
     } 
  
@@ -209,7 +213,7 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
         { 
-            if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetObjectGuid())) 
+            if (Player* target = itr->getSource()) 
             { 
                 target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
                 target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
@@ -220,206 +224,199 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         }
     }
 
-    void setPlayersPhase()
+    void SpellHitTarget(Unit *target, const SpellEntry *spell)
     {
-        uint8 i = 1;
-
-        Map* pMap = m_creature->GetMap();
-        Map::PlayerList const &players = pMap->GetPlayers();
-        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr, ++i)
+        if (spell->Id == SPELL_INSANITY && target->GetTypeId() == TYPEID_PLAYER)
         {
-            if(Player* target = pMap->GetPlayer(itr->getSource()->GetGUID())) 
+            switch(count)
             {
-                switch(i)
+                case 0:
                 {
-                    case 1:
-                    {
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_16, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                        break;
-                    }
-                    case 2:
-                    {
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_32, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                        break;
-                    }
-                    case 3:
-                    {
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_64, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                        break;
-                    }
-                    case 4:
-                    {
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_128, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                        break;
-                    }
-                    case 5:
-                    {
-                        target->CastSpell(target, SPELL_INSANITY_PHASE_256, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                        break;
-                    }
-                    default:
-                        break;
+                    target->CastSpell(target, SPELL_INSANITY_PHASE_16, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)target, 16);
+                    break;
                 }
+                case 1:
+                {
+                    target->CastSpell(target, SPELL_INSANITY_PHASE_32, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)target, 32);
+                    break;
+                }
+                case 2:
+                {
+                    target->CastSpell(target, SPELL_INSANITY_PHASE_64, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)target, 64);
+                    break;
+                }
+                case 3:
+                {
+                    target->CastSpell(target, SPELL_INSANITY_PHASE_128, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)target, 128);
+                    break;
+                }
+                case 4:
+                {
+                    target->CastSpell(target, SPELL_INSANITY_PHASE_256, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)target, 256);
+                    break;
+                }
+                default:
+                    target->MonsterSay("Fehler",0);
             }
+            m_bIsInInsanity = true;
+            count++;
         }
     }
- 
-    void createClassMirrors() 
+
+    void CreateClonesForUnitInPhase(Player* pTargetPhase, int pPhase)
     {
-        Map* pMap = m_creature->GetMap();
-        Map::PlayerList const &group1 = pMap->GetPlayers();
-        for (Map::PlayerList::const_iterator itr = group1.begin(); itr != group1.end(); ++itr) 
+        if (Map* pMap = m_creature->GetMap())
         {
-            Map::PlayerList const &group2 = group1;
-            for (Map::PlayerList::const_iterator ittr = group2.begin(); ittr != group2.end(); ++ittr)
+            Map::PlayerList const &group = pMap->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = group.begin(); itr != group.end(); ++itr) 
             {
-                if (Player* pPlayer1 = pMap->GetPlayer(itr->getSource()->GetObjectGuid()))
+                if (Player* pPlayerToClone = itr->getSource())
                 {
-                    if (Player* pPlayer2 = pMap->GetPlayer(ittr->getSource()->GetObjectGuid()))
+                    if (!pPlayerToClone->isAlive())
+                        continue;
+                    if (pPlayerToClone->GetObjectGuid() == pTargetPhase->GetObjectGuid())
+                        continue;
+                    if (pPlayerToClone->isGameMaster())
+                        continue;
+
+                    Creature* pClone = m_creature->SummonCreature(m_bIsRegularMode ? CLONE : CLONE_H, pPlayerToClone->GetPositionX(), pPlayerToClone->GetPositionY(), pPlayerToClone->GetPositionZ(), pPlayerToClone->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                    if (pClone) 
                     {
-                        if (pPlayer1->isAlive() && pPlayer2->isAlive() && (pPlayer1->GetObjectGuid() != pPlayer2->GetObjectGuid()) && !pPlayer1->isGameMaster() && !pPlayer2->isGameMaster())
+                        pClone->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_UNK_6);
+                        // Very cool CLONE!!!
+                        pPlayerToClone->CastSpell(pClone, SPELL_CLONE, true);
+                        if (Item* pMainhand = pPlayerToClone->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                            pClone->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, pMainhand->GetEntry());
+                        if (Item* pOffhand = pPlayerToClone->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                            pClone->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, pOffhand->GetEntry());
+                        if (Item* pRange = pPlayerToClone->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+                            pClone->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, pRange->GetEntry());
+
+                        pClone->setFaction(FAC_HOSTILE);
+                        switch (pPlayerToClone->getClass()) 
+                        { 
+                            case CLASS_PRIEST:
+                                pClone->setPowerType(POWER_MANA);
+                                pClone->SetMaxPower(POWER_MANA,45000);
+                                pClone->SetPower(POWER_MANA,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PRIEST : CLONE_HEALTH_PRIEST_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase, 20.0f);
+                                break;
+                            case CLASS_PALADIN: 
+                                pClone->setPowerType(POWER_MANA);
+                                pClone->SetMaxPower(POWER_MANA,45000);
+                                pClone->SetPower(POWER_MANA,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PALA : CLONE_HEALTH_PALA_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase);
+                                break;
+                            case CLASS_WARLOCK: 
+                                pClone->setPowerType(POWER_MANA);
+                                pClone->SetMaxPower(POWER_MANA,45000);
+                                pClone->SetPower(POWER_MANA,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARLOCK : CLONE_HEALTH_WARLOCK_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase, 20.0f);
+                                break;
+                            case CLASS_MAGE:
+                                pClone->setPowerType(POWER_MANA);
+                                pClone->SetMaxPower(POWER_MANA,45000);
+                                pClone->SetPower(POWER_MANA,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_MAGE : CLONE_HEALTH_MAGE_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase, 20.0f);
+                                break;
+                            case CLASS_ROGUE: 
+                                pClone->setPowerType(POWER_ENERGY);
+                                pClone->SetMaxPower(POWER_ENERGY,45000);
+                                pClone->SetPower(POWER_ENERGY,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_ROGUE : CLONE_HEALTH_ROGUE_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase);
+                                break;
+                            case CLASS_WARRIOR:
+                                pClone->setPowerType(POWER_RAGE);
+                                pClone->SetMaxPower(POWER_RAGE,45000);
+                                pClone->SetPower(POWER_RAGE,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARRIOR : CLONE_HEALTH_WARRIOR_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase);
+                                break;
+                            case CLASS_DRUID:
+                                pClone->setPowerType(POWER_MANA);
+                                pClone->SetMaxPower(POWER_MANA,45000);
+                                pClone->SetPower(POWER_MANA,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DRUID : CLONE_HEALTH_DRUID_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase, 20.0f);
+                                break;
+                            case CLASS_SHAMAN:
+                                pClone->setPowerType(POWER_MANA);
+                                pClone->SetMaxPower(POWER_MANA,45000);
+                                pClone->SetPower(POWER_MANA,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_SHAMAN : CLONE_HEALTH_SHAMAN_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase, 20.0f);
+                                break;
+                            case CLASS_HUNTER:
+                                pClone->setPowerType(POWER_MANA);
+                                pClone->SetMaxPower(POWER_MANA,45000);
+                                pClone->SetPower(POWER_MANA,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_HUNT : CLONE_HEALTH_HUNT_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase, 20.0f);
+                                break;
+                            case CLASS_DEATH_KNIGHT:
+                                pClone->setPowerType(POWER_RUNIC_POWER);
+                                pClone->SetMaxPower(POWER_RUNIC_POWER,45000);
+                                pClone->SetPower(POWER_RUNIC_POWER,45000);
+                                pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DK : CLONE_HEALTH_DK_H);
+                                pClone->GetMotionMaster()->MoveChase(pTargetPhase);
+                                break;
+                            default: break;
+                        }
+                        if (m_bIsRegularMode)
                         {
-                            Creature* pClone = m_creature->SummonCreature(m_bIsRegularMode ? CLONE : CLONE_H, pPlayer2->GetPositionX(), pPlayer2->GetPositionY(), pPlayer2->GetPositionZ(), pPlayer2->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-                            if (pClone) 
-                            {
-                                pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_PASSIVE);
-                                pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
-                                pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_OOC_NOT_ATTACKABLE);
-                                pClone->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_UNK_6);
+                            pClone->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 400.0f );
+                            pClone->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 600.0f );
+                        } else {
+                            pClone->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 800.0f );
+                            pClone->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1100.0f );
+                        }
+                        pClone->SetLevel(pPlayerToClone->getLevel() + 2);
+                        pClone->SetHealth(pClone->GetMaxHealth()); 
+                        pClone->Attack(pTargetPhase, true);
+                        pClone->AddThreat(pTargetPhase, 10000.0f);
+                        pClone->SetInCombatWith(pTargetPhase);
+                        p_lCloneGuid.push_back(pClone->GetObjectGuid()); 
 
-                                // Very cool CLONE!!!
-                                pPlayer2->CastSpell(pClone, SPELL_CLONE, true);
-                                if (Item* pMainhand = pPlayer2->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
-                                    pClone->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, pMainhand->GetEntry());
-                                if (Item* pOffhand = pPlayer2->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-                                    pClone->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, pOffhand->GetEntry());
-                                if (Item* pRange = pPlayer2->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
-                                    pClone->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, pRange->GetEntry());
-
-                                pClone->setFaction(FAC_HOSTILE);
-
-                                switch (pPlayer2->getClass()) 
-                                { 
-                                    case CLASS_PRIEST:
-                                        pClone->setPowerType(POWER_MANA);
-                                        pClone->SetMaxPower(POWER_MANA,45000);
-                                        pClone->SetPower(POWER_MANA,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PRIEST : CLONE_HEALTH_PRIEST_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
-                                        break;
-                                    case CLASS_PALADIN: 
-                                        pClone->setPowerType(POWER_MANA);
-                                        pClone->SetMaxPower(POWER_MANA,45000);
-                                        pClone->SetPower(POWER_MANA,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_PALA : CLONE_HEALTH_PALA_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1);
-                                        break;
-                                    case CLASS_WARLOCK: 
-                                        pClone->setPowerType(POWER_MANA);
-                                        pClone->SetMaxPower(POWER_MANA,45000);
-                                        pClone->SetPower(POWER_MANA,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARLOCK : CLONE_HEALTH_WARLOCK_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
-                                        break;
-                                    case CLASS_MAGE:
-                                        pClone->setPowerType(POWER_MANA);
-                                        pClone->SetMaxPower(POWER_MANA,45000);
-                                        pClone->SetPower(POWER_MANA,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_MAGE : CLONE_HEALTH_MAGE_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
-                                        break;
-                                    case CLASS_ROGUE: 
-                                        pClone->setPowerType(POWER_ENERGY);
-                                        pClone->SetMaxPower(POWER_ENERGY,45000);
-                                        pClone->SetPower(POWER_ENERGY,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_ROGUE : CLONE_HEALTH_ROGUE_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1);
-                                        break;
-                                    case CLASS_WARRIOR:
-                                        pClone->setPowerType(POWER_RAGE);
-                                        pClone->SetMaxPower(POWER_RAGE,45000);
-                                        pClone->SetPower(POWER_RAGE,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_WARRIOR : CLONE_HEALTH_WARRIOR_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1);
-                                        break;
-                                    case CLASS_DRUID:
-                                        pClone->setPowerType(POWER_MANA);
-                                        pClone->SetMaxPower(POWER_MANA,45000);
-                                        pClone->SetPower(POWER_MANA,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DRUID : CLONE_HEALTH_DRUID_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
-                                        break;
-                                    case CLASS_SHAMAN:
-                                        pClone->setPowerType(POWER_MANA);
-                                        pClone->SetMaxPower(POWER_MANA,45000);
-                                        pClone->SetPower(POWER_MANA,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_SHAMAN : CLONE_HEALTH_SHAMAN_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
-                                        break;
-                                    case CLASS_HUNTER:
-                                        pClone->setPowerType(POWER_MANA);
-                                        pClone->SetMaxPower(POWER_MANA,45000);
-                                        pClone->SetPower(POWER_MANA,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_HUNT : CLONE_HEALTH_HUNT_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1, 20.0f);
-                                        break;
-                                    case CLASS_DEATH_KNIGHT:
-                                        pClone->setPowerType(POWER_RUNIC_POWER);
-                                        pClone->SetMaxPower(POWER_RUNIC_POWER,45000);
-                                        pClone->SetPower(POWER_RUNIC_POWER,45000);
-                                        pClone->SetMaxHealth(m_bIsRegularMode ? CLONE_HEALTH_DK : CLONE_HEALTH_DK_H);
-                                        pClone->GetMotionMaster()->MoveChase(pPlayer1);
-                                        break;
-                                    default: break;
-                                }
-                                if (m_bIsRegularMode)
-                                {
-                                    pClone->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 400.0f );
-                                    pClone->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 600.0f );
-                                } else {
-                                    pClone->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 800.0f );
-                                    pClone->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1100.0f );
-                                }
-                                pClone->SetLevel(pPlayer2->getLevel() + 2);
-                                pClone->SetHealth(pClone->GetMaxHealth()); 
-                                pClone->Attack(pPlayer1, true);
-                                pClone->AddThreat(pPlayer1, 10000.0f);
-                                pClone->SetInCombatWith(pPlayer1);
-                                p_lCloneGuid.push_back(pClone->GetGUID()); 
-                     
-                    
-                                if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_16)) //Phase 16
-                                {
-                                    pClone->SetPhaseMask(16, true);
-                                    p_lClone16Guid.push_back(pClone->GetGUID());
-                                }
-                                else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_32))//Phase 32
-                                {
-                                    pClone->SetPhaseMask(32, true);
-                                    p_lClone32Guid.push_back(pClone->GetGUID());                            
-                                }
-                                else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_64))//Phase 64
-                                {
-                                    pClone->SetPhaseMask(64, true);
-                                    p_lClone64Guid.push_back(pClone->GetGUID());
-                                }
-                                else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_128))//Phase 128
-                                {
-                                    pClone->SetPhaseMask(128, true);
-                                    p_lClone128Guid.push_back(pClone->GetGUID());
-                                }
-                                else if (pPlayer1->HasAura(SPELL_INSANITY_PHASE_256))//Phase 256
-                                {
-                                    pClone->SetPhaseMask(256, true);
-                                    p_lClone256Guid.push_back(pClone->GetGUID());
-                                }
-                            }
+                        switch (pPhase)
+                        {
+                            case 16:
+                                pClone->SetPhaseMask(16, true);
+                                p_lClone16Guid.push_back(pClone->GetObjectGuid());
+                                break;
+                            case 32:
+                                pClone->SetPhaseMask(32, true);
+                                p_lClone32Guid.push_back(pClone->GetObjectGuid());
+                                break;
+                            case 64:
+                                pClone->SetPhaseMask(64, true);
+                                p_lClone64Guid.push_back(pClone->GetObjectGuid());
+                                break;
+                            case 128:
+                                pClone->SetPhaseMask(128, true);
+                                p_lClone128Guid.push_back(pClone->GetObjectGuid());
+                                break;
+                            case 256:
+                                pClone->SetPhaseMask(256, true);
+                                p_lClone256Guid.push_back(pClone->GetObjectGuid());
+                                break;
+                            default:
+                                pTargetPhase->MonsterSay("Fehler in der Phasenzuweisung.", 0);
                         }
                     }
                 }
-            } 
-        } 
-    } 
+            }            
+        }
+    }
 
     bool cloneAlive()
     {
@@ -525,21 +522,20 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
  
     void UpdateAI(const uint32 uiDiff) 
     {
-        if (!isInInsanity)
+        if (!m_bIsInInsanity)
             if(!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                 return;
  
-        if (isInInsanity) 
+        if (m_bIsInInsanity) 
         { 
             if (insanityEndTimer < uiDiff) 
             { 
                 if (!cloneAlive()) 
                 {  
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
-                    isInInsanity = false; 
+                    m_bIsInInsanity = false; 
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim()); 
                     m_creature->Attack(m_creature->getVictim(), true); 
-                    insanityEndTimer = 9999999; 
+                    insanityEndTimer = 1000; 
                     clone16 = clone32 = clone64 = clone128 = clone256 = false;
                     return;
                 }else 
@@ -678,8 +674,9 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         } 
         else 
         { 
-            if (m_creature->GetHealth() < m_creature->GetMaxHealth() * 0.66 && !phase66) 
-            { 
+            if (m_creature->GetHealthPercent() < m_fHealthPercent && (!phase66 || !phase33)) 
+            {
+                m_fHealthPercent = m_fHealthPercent - 33.0f;
                 DoScriptText(SAY_INSANITY, m_creature);
 
                 Map* pMap = m_creature->GetMap();
@@ -689,43 +686,17 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                         DoScriptText(WHISPER_INSANITY,m_creature,target);
 
                 m_creature->InterruptNonMeleeSpells(true);
-                phase66 = true; 
+                
+                if (phase66)
+                    phase33 = true;
+                else
+                    phase66 = true;
+
                 DoCastSpellIfCan(m_creature, SPELL_INSANITY); 
-                createMirrorTimer = 5000; 
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
+                count = 0;
                 m_creature->GetMotionMaster()->Clear(); 
                 m_creature->GetMotionMaster()->MoveIdle(); 
             } 
- 
-            if (m_creature->GetHealth() < m_creature->GetMaxHealth() * 0.33 && !phase33) 
-            {
-                DoScriptText(SAY_INSANITY, m_creature);
-
-                Map* pMap = m_creature->GetMap();
-                Map::PlayerList const &players = pMap->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-                    if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
-                        DoScriptText(WHISPER_INSANITY,m_creature,target);
-
-                m_creature->InterruptNonMeleeSpells(true);
-                phase33 = true; 
-                DoCastSpellIfCan(m_creature, SPELL_INSANITY); 
-                createMirrorTimer = 5000; 
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
-                m_creature->GetMotionMaster()->Clear(); 
-                m_creature->GetMotionMaster()->MoveIdle(); 
-            } 
-            if (createMirrorTimer)
-            {
-                if (createMirrorTimer < uiDiff) 
-                { 
-                    isInInsanity = true; 
-                    setPlayersPhase();
-                    createClassMirrors();
-                    createMirrorTimer = 0; 
-                    insanityEndTimer = 5000;
-                }else createMirrorTimer -= uiDiff; 
-            }
  
             if (mindFlayTimer < uiDiff) 
             { 

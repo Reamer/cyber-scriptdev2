@@ -241,7 +241,7 @@ struct MANGOS_DLL_DECL mob_nadox_guardianAI : public ScriptedAI
     void Reset()
     {
         DoCast(m_creature, SPELL_GUARDIAN_SPRINT, true);
-        DoCast(m_creature, SPELL_GUARDIAN_AURA, true);
+        DoCast(m_creature, SPELL_GUARDIAN_AURA, false);
     }
     void JustDied(Unit* Killer) 
     {
