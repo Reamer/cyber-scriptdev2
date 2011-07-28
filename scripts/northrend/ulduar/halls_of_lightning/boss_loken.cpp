@@ -58,12 +58,12 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
 {
     boss_lokenAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_halls_of_lightning*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
 
     bool m_bIsRegularMode;
     bool m_bIsAura;
@@ -72,6 +72,7 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
     uint32 m_uiLightningNova_Timer;
     uint32 m_uiPulsingShockwave_Timer;
     uint32 m_uiResumePulsingShockwave_Timer;
+    uint32 m_uiPulsingShockwaveUpdate;
 
     uint32 m_uiHealthAmountModifier;
 
@@ -83,6 +84,7 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
         m_uiLightningNova_Timer = 20000;
         m_uiPulsingShockwave_Timer = 2000;
         m_uiResumePulsingShockwave_Timer = 15000;
+        m_uiPulsingShockwaveUpdate = 1000;
 
         m_uiHealthAmountModifier = 1;
 
@@ -93,6 +95,8 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
+        DoCast(m_creature, SPELL_PULSING_SHOCKWAVE_AURA, true);
+        DoCast(m_creature, m_bIsRegularMode ? SPELL_PULSING_SHOCKWAVE_N : SPELL_PULSING_SHOCKWAVE_H, true);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_LOKEN, IN_PROGRESS);
@@ -122,7 +126,32 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_bIsAura)
+        if (m_uiPulsingShockwaveUpdate < uiDiff)
+        {
+            Unit *target = NULL;
+            std::vector<Unit *> target_list;
+
+            ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+            for (ThreatList::const_iterator itr = tList.begin();itr != tList.end(); ++itr)
+            {
+                target = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid());
+
+                if (target->HasAura(SPELL_PULSING_SHOCKWAVE_AURA))
+                {
+                    if (Aura* pAura = target->GetAura(SPELL_PULSING_SHOCKWAVE_AURA, EFFECT_INDEX_0))
+                    {
+                        float pDistance = m_creature->GetDistance(target);
+                        Modifier* mod = pAura->GetModifier();
+                        mod->m_amount = int32(pAura->GetBasePoints() * pDistance); //25*distance
+                    }
+                }
+            }
+            m_uiPulsingShockwaveUpdate = 1000;
+        }
+        else
+            m_uiPulsingShockwaveUpdate -= uiDiff;
+
+        /*if (m_bIsAura)
         {
             // workaround for PULSING_SHOCKWAVE
             if (m_uiPulsingShockwave_Timer < uiDiff)
@@ -165,7 +194,7 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
             }
             else
                 m_uiResumePulsingShockwave_Timer -= uiDiff;
-        }
+        }*/ 
 
         if (m_uiArcLightning_Timer < uiDiff)
         {
@@ -188,8 +217,8 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
 
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_NOVA_N : SPELL_LIGHTNING_NOVA_H);
 
-            m_bIsAura = false;
-            m_uiResumePulsingShockwave_Timer = (m_bIsRegularMode ? 5000 : 4000); // Pause Pulsing Shockwave aura
+            //m_bIsAura = false;
+            //m_uiResumePulsingShockwave_Timer = (m_bIsRegularMode ? 5000 : 4000); // Pause Pulsing Shockwave aura
             m_uiLightningNova_Timer = urand(20000, 21000);
         }
         else
