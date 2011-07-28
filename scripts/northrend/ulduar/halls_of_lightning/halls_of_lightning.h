@@ -18,6 +18,7 @@ enum
     NPC_VOLKHAN             = 28587,
     NPC_IONAR               = 28546,
     NPC_LOKEN               = 28923,
+    NPC_STORMFORGED_LIEUTENANT= 29240,
 
     GO_VOLKHAN_DOOR         = 191325,                       //_doors07
     GO_IONAR_DOOR           = 191326,                       //_doors05
@@ -42,6 +43,8 @@ class MANGOS_DLL_DECL instance_halls_of_lightning : public ScriptedInstance
 
         const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);
+
+        GUIDList m_lStormforgedLieutenantGuids;
 
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];

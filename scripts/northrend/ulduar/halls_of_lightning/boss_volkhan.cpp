@@ -151,8 +151,7 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (pTemp->isAlive())
-                    pTemp->ForcedDespawn();
+                pTemp->ForcedDespawn();
             }
         }
         m_lGolemGUIDList.clear();
@@ -220,7 +219,7 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
                 m_uiMussShatterTimer -= uiDiff;
         }
 
-        if (m_creature->GetHealthPercent() < float(90 - 20*m_uiHealthAmountModifier))
+        if ((m_creature->GetHealthPercent() < float(90 - 20*m_uiHealthAmountModifier)) > 10.0f)
         {
         	if (DoCastSpellIfCan(m_creature,SPELL_TEMPER, false) == CAST_OK){
         		++m_uiHealthAmountModifier;
