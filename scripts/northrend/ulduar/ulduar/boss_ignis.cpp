@@ -244,7 +244,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         m_bIsSlagPot = false;
 
         if (m_pInstance)
-            for (GUIDList::iterator i = m_pInstance->m_lIronConstructsGUIDs.begin(); i != m_pInstance->m_lIronConstructsGUIDs.end(); i++)
+            for (GUIDList::iterator i = m_pInstance->m_lIronConstructsGuids.begin(); i != m_pInstance->m_lIronConstructsGuids.end(); i++)
                 if (Creature *pTmp = m_pInstance->instance->GetCreature(*i))
                     if (!pTmp->isAlive())
                         pTmp->Respawn();
@@ -280,7 +280,7 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         {
             m_pInstance->SetData(TYPE_IGNIS, DONE);
             // destroy constructs
-            for (GUIDList::iterator i = m_pInstance->m_lIronConstructsGUIDs.begin(); i != m_pInstance->m_lIronConstructsGUIDs.end(); i++)
+            for (GUIDList::iterator i = m_pInstance->m_lIronConstructsGuids.begin(); i != m_pInstance->m_lIronConstructsGuids.end(); i++)
                 if (Creature *pTmp = m_pInstance->instance->GetCreature(*i))
                     if (pTmp->isAlive())
                         pTmp->DealDamage(pTmp, pTmp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);

@@ -266,11 +266,12 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance
         void CheckKeepers();
         void SpawnFriendlyKeeper(uint32 uiWho);
 
-        GUIDList m_lIronConstructsGUIDs;
-        GUIDList m_lThorimMobsGUIDs;
-        GUIDList m_lLeftHandTrigger;
-        GUIDList m_lRightHandTrigger;
-        GUIDList m_lCLoudGUIDs;
+        GUIDList m_lIronConstructsGuids;
+        GUIDList m_lThorimMobsGuids;
+        GUIDList m_lLeftHandTriggerGuids;
+        GUIDList m_lRightHandTriggerGuids;
+        GUIDList m_lCLoudGuids;
+        GUIDList m_lSanctumSentryGuids;
 
         GUIDVector m_lBreakHarpoonGUID;
 

@@ -717,7 +717,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
         }
         if (m_pInstance)
         {
-            for (GUIDList::iterator itr = m_pInstance->m_lThorimMobsGUIDs.begin(); itr != m_pInstance->m_lThorimMobsGUIDs.end(); itr++)
+            for (GUIDList::iterator itr = m_pInstance->m_lThorimMobsGuids.begin(); itr != m_pInstance->m_lThorimMobsGuids.end(); itr++)
                 if (Creature *pTmp = m_pInstance->instance->GetCreature(*itr))
                     if (!pTmp->isAlive())
                         pTmp->Respawn();
@@ -1322,7 +1322,7 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
                 {
                     if (m_bIsLeft)
                     {
-                        for (GUIDList::iterator itr =   m_pInstance->m_lLeftHandTrigger.begin(); itr != m_pInstance->m_lLeftHandTrigger.end(); itr++)
+                        for (GUIDList::iterator itr =   m_pInstance->m_lLeftHandTriggerGuids.begin(); itr != m_pInstance->m_lLeftHandTriggerGuids.end(); itr++)
                         {
                             if (Unit* trigger = pMap->GetUnit(*itr))
                             {
@@ -1332,7 +1332,7 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
                     }
                     else
                     {
-                        for (GUIDList::iterator itr =   m_pInstance->m_lRightHandTrigger.begin(); itr != m_pInstance->m_lRightHandTrigger.end(); itr++)
+                        for (GUIDList::iterator itr =   m_pInstance->m_lRightHandTriggerGuids.begin(); itr != m_pInstance->m_lRightHandTriggerGuids.end(); itr++)
                         {
                             if (Unit* trigger = pMap->GetUnit(*itr))
                             {

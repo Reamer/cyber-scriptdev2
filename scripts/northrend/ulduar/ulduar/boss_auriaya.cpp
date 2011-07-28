@@ -135,27 +135,32 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
     uint32 m_uiRip_Flesh_Timer;
     uint32 m_uiJump_Timer;
 
-    std::list<Creature*> lSentrys;
-
     void Reset()
     {
         m_uiRip_Flesh_Timer = 13000;
         m_uiJump_Timer = 0;
         m_bIsFollowing = false;
-
-        lSentrys.clear();
     }
 
     void SpellHit(Unit *pCaster, const SpellEntry *spellInfo)
     {
         if (spellInfo->Id == SPELL_STRENGHT_OF_PACK_BUFF)
         {
-            std::list<Creature*> lPack;
-
-            GetCreatureListWithEntryInGrid(lPack, m_creature, NPC_SANCTUM_SENTRY, 10.0f);
+            uint32 stack = 0;
+            if (m_pInstance)
+            {
+                for (GUIDList::iterator itr = m_pInstance->m_lSanctumSentryGuids.begin(); itr != m_pInstance->m_lSanctumSentryGuids.end(); ++itr)
+                {
+                    if (Creature* pSanity = m_creature->GetMap()->GetCreature(*itr))
+                    {
+                        if (pSanity->isAlive() && (m_creature->GetDistance(pSanity) < 10.0f))
+                            ++stack;
+                    }
+                }
+            }
 
             if (SpellAuraHolder *holder = m_creature->GetSpellAuraHolder(SPELL_STRENGHT_OF_PACK_BUFF))
-                holder->SetStackAmount(lPack.size());
+                holder->SetStackAmount(stack);
         }
     }
 
@@ -168,17 +173,17 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
                 if (pTemp->isAlive())
                     pTemp->SetInCombatWithZone();
             }
-        }
 
-        GetCreatureListWithEntryInGrid(lSentrys, m_creature, NPC_SANCTUM_SENTRY, DEFAULT_VISIBILITY_INSTANCE);
-        if (!lSentrys.empty())
-        {
-            for(std::list<Creature*>::iterator iter = lSentrys.begin(); iter != lSentrys.end(); ++iter)
+            for (GUIDList::iterator itr = m_pInstance->m_lSanctumSentryGuids.begin(); itr != m_pInstance->m_lSanctumSentryGuids.end(); ++itr)
             {
-                if ((*iter) && (*iter)->isAlive())
-                    (*iter)->SetInCombatWithZone();
+                if (Creature* pSanity = m_creature->GetMap()->GetCreature(*itr))
+                {
+                    if (pSanity->isAlive())
+                        pSanity->SetInCombatWithZone();
+                }
             }
         }
+
 
         DoCast(m_creature, SPELL_STRENGHT_OF_PACK);
     }
@@ -245,7 +250,7 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
 
     bool m_bHasAura;
 
-    std::list<uint64> m_lVoidZones;
+    GUIDList m_lVoidZones;
 
     void Reset()
     {
@@ -260,7 +265,7 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
         {
             if (m_pInstance)
             {
-                for(std::list<uint64>::iterator itr = m_lVoidZones.begin(); itr != m_lVoidZones.end(); itr++)
+                for(GUIDList::iterator itr = m_lVoidZones.begin(); itr != m_lVoidZones.end(); itr++)
                 {
                     if (Creature *pTmp = m_pInstance->instance->GetCreature(*itr))
                         pTmp->ForcedDespawn();
@@ -324,7 +329,7 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
     
     void JustSummoned(Creature *pCreature)
     {
-        m_lVoidZones.push_back(pCreature->GetGUID());
+        m_lVoidZones.push_back(pCreature->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 diff)
@@ -431,8 +436,6 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
     uint32 m_uiSummon_Timer;
     uint8 m_uiSwarmcount;
 
-    std::list<Creature*> lSentrys;
-
     bool m_bHasBerserk;
     bool m_bIsDefender;
 
@@ -448,8 +451,6 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
         m_uiSwarmcount          = 10;
         m_bHasBerserk           = false;
         m_bIsDefender           = false;
-
-        lSentrys.clear();
 
         // achievs
         m_bCrazyCatLady = true;
@@ -483,13 +484,12 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_AURIAYA, IN_PROGRESS);
 
-        GetCreatureListWithEntryInGrid(lSentrys, m_creature, NPC_SANCTUM_SENTRY, DEFAULT_VISIBILITY_INSTANCE);
-        if (!lSentrys.empty())
+        for (GUIDList::iterator itr = m_pInstance->m_lSanctumSentryGuids.begin(); itr != m_pInstance->m_lSanctumSentryGuids.end(); ++itr)
         {
-            for(std::list<Creature*>::iterator iter = lSentrys.begin(); iter != lSentrys.end(); ++iter)
+            if (Creature* pSanity = m_creature->GetMap()->GetCreature(*itr))
             {
-                if ((*iter) && (*iter)->isAlive())
-                    (*iter)->SetInCombatWithZone();
+                if (pSanity->isAlive())
+                    pSanity->SetInCombatWithZone();
             }
         }
 
@@ -506,15 +506,14 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_AURIAYA, FAIL);
 
-        GetCreatureListWithEntryInGrid(lSentrys, m_creature, NPC_SANCTUM_SENTRY, DEFAULT_VISIBILITY_INSTANCE);
-        if (!lSentrys.empty())
+        for (GUIDList::iterator itr = m_pInstance->m_lSanctumSentryGuids.begin(); itr != m_pInstance->m_lSanctumSentryGuids.end(); ++itr)
         {
-            for(std::list<Creature*>::iterator iter = lSentrys.begin(); iter != lSentrys.end(); ++iter)
+            if (Creature* pSanity = m_creature->GetMap()->GetCreature(*itr))
             {
-                if ((*iter) && !(*iter)->isAlive())
+                if (!pSanity->isAlive())
                 {
-                    (*iter)->Respawn();
-                    (*iter)->NearTeleportTo(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f);
+                    pSanity->Respawn();
+                    pSanity->NearTeleportTo(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f);
                 }
             }
         }
