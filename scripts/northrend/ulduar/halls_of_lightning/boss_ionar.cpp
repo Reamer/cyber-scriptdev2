@@ -277,8 +277,32 @@ struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
 
         if (m_uiBallLightning_Timer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                m_creature->CastSpell(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_bIsRegularMode ? SPELL_BALL_LIGHTNING_N : SPELL_BALL_LIGHTNING_H, false, NULL, NULL, m_creature->GetObjectGuid());
+            Unit *target = NULL;
+            std::vector<Unit *> target_list;
+
+            ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+            for (ThreatList::const_iterator itr = tList.begin();itr != tList.end(); ++itr)
+            {
+                target = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid());
+
+                // exclude pets & totems
+                if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                    continue;
+
+                //10 yard radius minimum
+                if (target->IsWithinDist(m_creature, 10.0f, false))
+                    continue;
+
+                target_list.push_back(target);
+            }
+
+            if (target_list.size())
+                target = *(target_list.begin()+rand()%target_list.size());
+            else
+                target = m_creature->getVictim();
+
+            if (target)
+                DoCastSpellIfCan(target, m_bIsRegularMode ? SPELL_BALL_LIGHTNING_N : SPELL_BALL_LIGHTNING_H);
             m_uiBallLightning_Timer = urand(10000, 11000);
         }
         else
@@ -367,6 +391,10 @@ struct MANGOS_DLL_DECL mob_spark_of_ionarAI : public ScriptedAI
                 m_creature->ForcedDespawn();
         }
     }
+    // no Autohit
+    void UpdateAI(const uint32 uiDiff)
+    {
+    }    
 };
 
 CreatureAI* GetAI_mob_spark_of_ionar(Creature* pCreature)

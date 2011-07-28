@@ -76,13 +76,13 @@ struct MANGOS_DLL_DECL boss_bjarngrimAI : public ScriptedAI
 {
     boss_bjarngrimAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_halls_of_lightning*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_uiStance = STANCE_DEFENSIVE;
+        m_uiStance = STANCE_BATTLE;
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
 
     bool m_bIsRegularMode;
     bool m_bIsChangingStance;
@@ -322,12 +322,12 @@ struct MANGOS_DLL_DECL mob_stormforged_lieutenantAI : public ScriptedAI
 {
     mob_stormforged_lieutenantAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_halls_of_lightning*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiArcWeld_Timer;
@@ -355,7 +355,13 @@ struct MANGOS_DLL_DECL mob_stormforged_lieutenantAI : public ScriptedAI
     {
         //Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
+            if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
+                if (m_pInstance)
+                    if (Creature *pBjarngrim = m_pInstance->GetSingleCreatureFromStorage(NPC_BJARNGRIM))
+                        m_creature->GetMotionMaster()->MoveFollow(pBjarngrim, 5.0f, urand(60, 250)/100.0f);
             return;
+        }
 
         if (m_uiArcWeld_Timer < uiDiff)
         {
