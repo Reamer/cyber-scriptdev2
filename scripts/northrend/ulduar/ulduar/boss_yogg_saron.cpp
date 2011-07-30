@@ -510,7 +510,7 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
             if(Creature* pSara = m_pInstance->GetSingleCreatureFromStorage(NPC_SARA))
             {
                 if (!pSara->isAlive())
-                    pSara->Respawn()
+                    pSara->Respawn();
             }
         }
         for (GUIDList::iterator iter = m_lKeeperGUID.begin(); iter != m_lKeeperGUID.end(); ++iter)
