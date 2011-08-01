@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -7,13 +7,24 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 15,
+    MAX_ENCOUNTER               = 16,
 
+    // A few instance-script related texts
+    SAY_THADDIUS_GREET          = -1533029,
+
+    // Kel'Thuzad
+    SAY_KELTHUZAD_CAT_DIED      = -1533089,
     // Kel'Thuzad's taunts after killing Wing Bosses
     SAY_KELTHUZAD_TAUNT1        = -1533090,
     SAY_KELTHUZAD_TAUNT2        = -1533091,
     SAY_KELTHUZAD_TAUNT3        = -1533092,
     SAY_KELTHUZAD_TAUNT4        = -1533093,
+    // Dialogues with Lich King
+    SAY_SAPP_DIALOG1            = -1533084,
+    SAY_SAPP_DIALOG2_LICH       = -1533085,
+    SAY_SAPP_DIALOG3            = -1533086,
+    SAY_SAPP_DIALOG4_LICH       = -1533087,
+    SAY_SAPP_DIALOG5            = -1533088,
 
     TYPE_ANUB_REKHAN            = 0,
     TYPE_FAERLINA               = 1,
@@ -41,10 +52,19 @@ enum
     TYPE_SAPPHIRON              = 13,
     TYPE_KELTHUZAD              = 14,
 
+    TYPE_UNDYING_FAILED         = 15,                       // Achievements Undying and Immortal, needs to be saved to database
+
+    MAX_SPECIAL_ACHIEV_CRITS    = 6,
+
+    TYPE_ACHIEV_SAFETY_DANCE    = 0,
+    TYPE_ACHIEV_KNOCK_YOU_OUT   = 1,
+    TYPE_ACHIEV_HUNDRED_CLUB    = 2,
+    TYPE_ACHIEV_SHOCKING        = 3,
+    TYPE_ACHIEV_SPORE_LOSER     = 4,
+    TYPE_ACHIEV_GET_ENOUGH      = 5,
+
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
-    NPC_WORSHIPPER              = 16506,
-    NPC_FOLLOWER                = 16505,
     NPC_MAEXXNA                 = 15952,
 
     NPC_PATCHWERK               = 16028,
@@ -53,6 +73,7 @@ enum
     NPC_THADDIUS                = 15928,
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,
+    NPC_TESLA_COIL              = 16218,
 
     NPC_NOTH                    = 15954,
     NPC_HEIGAN                  = 15936,
@@ -69,6 +90,12 @@ enum
 
     NPC_SAPPHIRON               = 15989,
     NPC_KELTHUZAD               = 15990,
+    NPC_THE_LICHKING            = 16980,
+    NPC_MR_BIGGLESWORTH         = 16998,
+
+    // Faerlina
+    NPC_NAXXRAMAS_FOLLOWER      = 16505,
+    NPC_NAXXRAMAS_WORSHIPPER    = 16506,
 
     // Gothik
     NPC_GOTHIK                  = 16060,
@@ -77,11 +104,11 @@ enum
     NPC_UNREL_DEATH_KNIGHT      = 16125,
     NPC_UNREL_RIDER             = 16126,
     NPC_SPECT_TRAINEE           = 16127,
-    NPC_SPECT_DEATH_KNIGTH      = 16148,
+    NPC_SPECT_DEATH_KNIGHT      = 16148,
     NPC_SPECT_RIDER             = 16150,
     NPC_SPECT_HORSE             = 16149,
 
-    // End boss adds
+    // Kel'Thuzad
     NPC_SOLDIER_FROZEN          = 16427,
     NPC_UNSTOPPABLE_ABOM        = 16428,
     NPC_SOUL_WEAVER             = 16429,
@@ -121,6 +148,8 @@ enum
     GO_CONS_PATH_EXIT_DOOR      = 181123,
     GO_CONS_GLUT_EXIT_DOOR      = 181120,
     GO_CONS_THAD_DOOR           = 181121,                   // Thaddius enc door
+    GO_CONS_NOX_TESLA_FEUGEN    = 181477,
+    GO_CONS_NOX_TESLA_STALAGG   = 181478,
 
     // Frostwyrm Lair
     GO_KELTHUZAD_WATERFALL_DOOR = 181225,                   // exit, open after sapphiron is dead
@@ -138,38 +167,40 @@ enum
     GO_MILI_PORTAL              = 181578,
     GO_CONS_PORTAL              = 181576,
 
-    AREATRIGGER_FROSTWYRM       = 4120,                    //not needed here, but AT to be scripted
+    AREATRIGGER_FROSTWYRM       = 4120,                     // not needed here, but AT to be scripted
     AREATRIGGER_KELTHUZAD       = 4112,
     AREATRIGGER_GOTHIK          = 4116,
+    AREATRIGGER_THADDIUS_DOOR   = 4113,
 
-    //Achievements
-    ACHIEV_CRITERIA_THE_SAFETY_DANCE            = 7264,
-    ACHIEV_CRITERIA_THE_SAFETY_DANCE_H          = 7548,
-    ACHIEV_CRITERIA_MOMMA_SAID_KNOCK_YOU_OUT    = 7265,
-    ACHIEV_CRITERIA_MOMMA_SAID_KNOCK_YOU_OUT_H  = 7549,
-    ACHIEV_CRITERIA_SPORE_LOSER                 = 7612,
-    ACHIEV_CRITERIA_SPORE_LOSER_H               = 7613,
-    ACHIEV_CRITERIA_SHOCKING                    = 7604,
-    ACHIEV_CRITERIA_SHOCKING_H                  = 7605,
-    ACHIEV_CRITERIA_THE_HUNDRED_CLUB            = 7567,
-    ACHIEV_CRITERIA_THE_HUNDRED_CLUB_H          = 7568,
-    ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH        = 7614,
-    ACHIEV_CRITERIA_JUST_CANT_GET_ENOUGH_H      = 7615,
+    // Achievement related
+    ACHIEV_CRIT_SAFETY_DANCE_N  = 7264,                     // Heigan, achievs 1996, 2139
+    ACHIEV_CRIT_SAFETY_DANCE_H  = 7548,
+    ACHIEV_CRIT_KNOCK_YOU_OUT_N = 7265,                     // Faerlina, achievs 1997, 2140
+    ACHIEV_CRIT_KNOCK_YOU_OUT_H = 7549,
+    ACHIEV_CRIT_HUNDRED_CLUB_N  = 7567,                     // Sapphiron, achievs 2146, 2147
+    ACHIEV_CRIT_HUNDRED_CLUB_H  = 7568,
+    ACHIEV_CRIT_SHOCKING_N      = 7604,                     // Thaddius, achievs 2178, 2179
+    ACHIEV_CRIT_SHOCKING_H      = 7605,
+    ACHIEV_CRIT_SPORE_LOSER_N   = 7612,                     // Loatheb, achievs 2182, 2183
+    ACHIEV_CRIT_SPORE_LOSER_H   = 7613,
+    ACHIEV_CRIT_GET_ENOUGH_N    = 7614,                     // Kel'Thuzad, achievs 2184, 2185
+    ACHIEV_CRIT_GET_ENOUGH_H    = 7615,
 
-    ACHIEV_CRITERIA_THE_IMMORTAL_1              = 13235,
-    ACHIEV_CRITERIA_THE_IMMORTAL_2              = 13234,
-    ACHIEV_CRITERIA_THE_IMMORTAL_3              = 7616,
-    ACHIEV_CRITERIA_THE_IMMORTAL_4              = 13236,
-    ACHIEV_CRITERIA_THE_IMMORTAL_5              = 13233,
+    // 'The Immortal'(25m) or 'Undying'(10m) - (achievs 2186, 2187)
+    ACHIEV_CRIT_IMMORTAL_KEL    = 7616,
+    ACHIEV_CRIT_IMMOORTAL_LOA   = 13236,
+    ACHIEV_CRIT_IMMOORTAL_THAD  = 13235,
+    ACHIEV_CRIT_IMMOORTAL_MAEX  = 13234,
+    ACHIEV_CRIT_IMMOORTAL_HORSE = 13233,
+    ACHIEV_CRIT_UNDYING_KEL     = 7617,
+    ACHIEV_CRIT_UNDYING_HORSE   = 13237,
+    ACHIEV_CRIT_UNDYING_MAEX    = 13238,
+    ACHIEV_CRIT_UNDYING_LOA     = 13239,
+    ACHIEV_CRIT_UNDYING_THAD    = 13240,
 
-    ACHIEV_CRITERIA_THE_UNDYING_1               = 13240,
-    ACHIEV_CRITERIA_THE_UNDYING_2               = 13239,
-    ACHIEV_CRITERIA_THE_UNDYING_3               = 7617,
-    ACHIEV_CRITERIA_THE_UNDYING_4               = 13238,
-    ACHIEV_CRITERIA_THE_UNDYING_5               = 13237,
-
-    ACHIEV_CRITERIA_ARCHNOPHOBIA                = 7128,
-    ACHIEV_CRITERIA_ARCHNOPHOBIA_H              = 7129,
+    // Timed achievement criterias
+    ACHIEV_START_PATCHWERK_ID   = 10286,
+    ACHIEV_START_MAEXXNA_ID     = 9891,
 };
 
 struct GothTrigger
@@ -187,28 +218,33 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         void Initialize();
 
         bool IsEncounterInProgress() const;
-        bool IsAllEncounterDone();
 
         void OnCreatureCreate(Creature* pCreature);
         void OnObjectCreate(GameObject* pGo);
 
-        void SetData(uint32 uiType, uint32 uiData);
         void SetAchiev(uint32 uiType, bool get);
         void OnPlayerDeath(Player* pPlayer);
-        void OnPlayerLeave(Player* pPlayer);
+        void OnCreatureDeath(Creature* pCreature);
 
+        void SetData(uint32 uiType, uint32 uiData);
         uint32 GetData(uint32 uiType);
 
-        const char* Save() { return strInstData.c_str(); }
+        void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
+        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/);
+
+        const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);
 
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/);
+        void Update(uint32 uiDiff);
 
         // goth
         void SetGothTriggers();
         Creature* GetClosestAnchorForGoth(Creature* pSource, bool bRightSide);
         void GetGothSummonPointCreatures(std::list<Creature*> &lList, bool bRightSide);
         bool IsInRightSideGothArea(Unit* pUnit);
+
+        // thaddius
+        void GetThadTeslaCreatures(GUIDList &lList){ lList = m_lThadTeslaCoilList; };
 
         // kel
         void SetChamberCenterCoords(float fX, float fY, float fZ);
@@ -221,20 +257,19 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         GUIDList m_lEruptionObjectThreeGUIDs;
         GUIDList m_lEruptionObjectFourGUIDs;
 
-        // Gothik
-        GUIDList m_lGothTriggerList;
-        UNORDERED_MAP<uint64, GothTrigger> m_mGothTriggerMap;
-        // Faerlina
-        GUIDList m_lFaerlinaAddsGUID;
-        // Razuvious
-        GUIDVector m_lDeathKnightUnderstudyGUID;
-
-        time_t m_uiArachnophobiaTimer;
-        
+        GUIDVector m_lDeathKnightUnderstudyGUIDs;
+       
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string strInstData;
+        bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
+        std::string m_strInstData;
 
+        GUIDList m_lThadTeslaCoilList;
+
+        GUIDList m_lFaerlinaAddGUIDs;
+
+        GUIDList m_lGothTriggerList;
+        UNORDERED_MAP<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         bool m_bBlaumeuxDead;
         bool m_bRivendareDead;
         bool m_bZeliekDead;
@@ -244,14 +279,9 @@ class MANGOS_DLL_DECL instance_naxxramas : public ScriptedInstance
         float m_fChamberCenterY;
         float m_fChamberCenterZ;
 
-        //Achievements
-        bool m_bTheSafetyDance;
-        bool m_bMommaSaidKnockYouOut;
-        bool m_bSporeLoser;
-        bool m_bShocking;
-        bool m_bTheHundredClub;
-        bool m_bJustCantGetEnough;
-        bool m_bMonsterRun;
+        uint32 m_uiTauntTimer;
+
+        DialogueHelper m_dialogueHelper;
 };
 
 #endif

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Gluth
-SD%Complete: 80
+SD%Complete: 70
 SDComment:
 SDCategory: Naxxramas
 EndScriptData */
@@ -26,7 +26,9 @@ EndScriptData */
 
 enum
 {
-    EMOTE_ZOMBIE                = -1533119,
+    EMOTE_ZOMBIE                    = -1533119,
+    EMOTE_BOSS_GENERIC_ENRAGED      = -1000006,             // NYI
+    EMOTE_DECIMATE                  = -1533152,             // NYI
 
     SPELL_MORTALWOUND           = 25646,
     SPELL_DECIMATE              = 28374,
@@ -135,9 +137,11 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         {
             DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND);
             m_uiMortalWoundTimer = 10000;
-        }else m_uiMortalWoundTimer -= uiDiff;
+        }
+        else
+            m_uiMortalWoundTimer -= uiDiff;
 
-        //Decimate_Timer
+        // Decimate
         if (m_uiDecimateTimer < uiDiff)
         {
             DoCast(m_creature, 28375 , true); // only for DBM, this is the script effect spell for Decimate
