@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Razuvious
-SD%Complete: 75%
-SDComment: TODO: Timers and sounds need confirmation, implement spell Hopeless
+SD%Complete: 85%
+SDComment: TODO: Timers and sounds need confirmation - orb handling for normal-mode is missing
 SDCategory: Naxxramas
 EndScriptData */
 
@@ -37,7 +37,7 @@ enum
     SAY_COMMAND4             = -1533128,
     SAY_DEATH                = -1533129,
 
-    SPELL_UNBALANCING_STRIKE = 26613,
+    SPELL_UNBALANCING_STRIKE = 55470,
     SPELL_DISRUPTING_SHOUT   = 55543,
     SPELL_DISRUPTING_SHOUT_H = 29107,
     SPELL_JAGGED_KNIFE       = 55550,
@@ -86,10 +86,10 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        DoCast(m_creature, SPELL_HOPELESS, true);
+        DoCastSpellIfCan(m_creature, SPELL_HOPELESS, CAST_TRIGGERED);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);     
+            m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
     }
 
     void Aggro(Unit* pWho)
@@ -100,7 +100,7 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
             case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
         }
-        m_creature->CallForHelp(40.0f);
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
     }
@@ -108,16 +108,7 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
     void JustReachedHome()
     {
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
-            for (GUIDVector::iterator iter = m_pInstance->m_lDeathKnightUnderstudyGUID.begin();iter != m_pInstance->m_lDeathKnightUnderstudyGUID.end(); iter++)
-            {
-                if(Creature* pHelper = m_creature->GetMap()->GetCreature(*iter))
-                {
-                    pHelper->Respawn();
-                }
-            }
-        }
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -129,23 +120,31 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
         if (m_uiUnbalancingStrikeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
-                m_uiUnbalancingStrikeTimer = 20000;
-        }else m_uiUnbalancingStrikeTimer -= uiDiff;
+                m_uiUnbalancingStrikeTimer = 30000;
+        }
+        else
+            m_uiUnbalancingStrikeTimer -= uiDiff;
 
         // Disrupting Shout
         if (m_uiDisruptingShoutTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H) == CAST_OK)
                 m_uiDisruptingShoutTimer = 25000;
-        }else m_uiDisruptingShoutTimer -= uiDiff;
+        }
+        else
+            m_uiDisruptingShoutTimer -= uiDiff;
 
         // Jagged Knife
         if (m_uiJaggedKnifeTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
                 if (DoCastSpellIfCan(pTarget, SPELL_JAGGED_KNIFE) == CAST_OK)
                     m_uiJaggedKnifeTimer = 10000;
-        }else m_uiJaggedKnifeTimer -= uiDiff;
+            }
+        }
+        else
+            m_uiJaggedKnifeTimer -= uiDiff;
 
         // Random say
         if (m_uiCommandSoundTimer < uiDiff)
@@ -159,7 +158,9 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
             }
 
             m_uiCommandSoundTimer = 40000;
-        }else m_uiCommandSoundTimer -= uiDiff;
+        }
+        else
+            m_uiCommandSoundTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -175,8 +176,10 @@ bool GossipHello_obedience_crystal(Player* pPlayer, Creature* pCreature)
     {
         for(int i=0;i<2;i++)
         {
-            if (Creature* pUnderstudy = pCreature->GetMap()->GetCreature(m_pInstance->m_lDeathKnightUnderstudyGUID.at(i)))
+            if (Creature* pUnderstudy = pCreature->GetMap()->GetCreature(m_pInstance->m_lDeathKnightUnderstudyGUIDs.at(i)))
             {
+                if (pUnderstudy->HasAura(SPELL_FORCE_OBEDIENCE))
+                    continue;
                 pPlayer->CastSpell(pUnderstudy,SPELL_FORCE_OBEDIENCE,true);
                 return true;
             }

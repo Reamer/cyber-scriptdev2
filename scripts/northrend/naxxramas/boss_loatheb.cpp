@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -29,7 +29,7 @@ enum
     EMOTE_AURA_BLOCKING     = -1533143,
     EMOTE_AURA_WANE         = -1533144,
     EMOTE_AURA_FADING       = -1533145,
-    //spells Loatheb
+
     SPELL_DEATHBLOOM        = 29865,
     SPELL_DEATHBLOOM_H      = 55053,
     SPELL_INEVITABLE_DOOM   = 29204,
@@ -37,8 +37,6 @@ enum
     SPELL_NECROTIC_AURA     = 55593,
     SPELL_SUMMON_SPORE      = 29234,
     SPELL_BERSERK           = 26662,
-    //spells Spore
-    SPELL_FUNGAL_CREEP      = 29232,
 
     NPC_SPORE               = 16286
 };
@@ -70,17 +68,12 @@ struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
         m_uiSummonTimer = urand(10000, 15000);              // first seen in vid after approx 12s
         m_uiBerserkTimer = MINUTE*12*IN_MILLISECONDS;       // only in heroic, after 12min
         m_uiNecroticAuraCount = 0;
-        if (m_pInstance)
-            m_pInstance->SetAchiev(TYPE_LOATHEB, false);
     }
 
     void Aggro(Unit* pWho)
     {
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_LOATHEB, IN_PROGRESS);
-            m_pInstance->SetAchiev(TYPE_LOATHEB, true);
-        }
     }
 
     void JustDied(Unit* pKiller)
@@ -95,6 +88,21 @@ struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
             m_pInstance->SetData(TYPE_LOATHEB, NOT_STARTED);
     }
 
+    void JustSummoned(Creature* pSummoned)
+    {
+        if (pSummoned->GetEntry() != NPC_SPORE)
+            return;
+
+        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            pSummoned->AddThreat(pTarget);
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned)
+    {
+        if (pSummoned->GetEntry() == NPC_SPORE && m_pInstance)
+            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPORE_LOSER, false);
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -105,17 +113,21 @@ struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
         {
             if (m_uiBerserkTimer < uiDiff)
             {
-                DoCast(m_creature, SPELL_BERSERK);
+                DoCastSpellIfCan(m_creature, SPELL_BERSERK);
                 m_uiBerserkTimer = 300000;
-            }else  m_uiBerserkTimer -= uiDiff;
+            }
+            else
+                m_uiBerserkTimer -= uiDiff;
         }
-        
+
         // Inevitable Doom
         if (m_uiInevitableDoomTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
             m_uiInevitableDoomTimer = (m_uiNecroticAuraCount <= 40) ? 30000 : 15000;
-        }else m_uiInevitableDoomTimer -= uiDiff;
+        }
+        else
+            m_uiInevitableDoomTimer -= uiDiff;
 
         // Necrotic Aura
         if (m_uiNecroticAuraTimer < uiDiff)
@@ -136,23 +148,29 @@ struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
                     m_uiNecroticAuraTimer = 3000;
                     break;
             }
-            m_uiNecroticAuraCount++;
-        }else m_uiNecroticAuraTimer -= uiDiff;
+            ++m_uiNecroticAuraCount;
+        }
+        else
+            m_uiNecroticAuraTimer -= uiDiff;
 
         // Summon
         if (m_uiSummonTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE);
             m_uiSummonTimer = m_bIsRegularMode ? 36000 : 18000;
-        }else m_uiSummonTimer -= uiDiff;
+        }
+        else
+            m_uiSummonTimer -= uiDiff;
 
         // Deathbloom
         if (m_uiDeathbloomTimer < uiDiff)
         {
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DEATHBLOOM : SPELL_DEATHBLOOM_H);
             m_uiDeathbloomTimer = 30000;
-        }else m_uiDeathbloomTimer -= uiDiff;
-            
+        }
+        else
+            m_uiDeathbloomTimer -= uiDiff;
+
         DoMeleeAttackIfReady();
     }
 };
@@ -162,57 +180,11 @@ CreatureAI* GetAI_boss_loatheb(Creature* pCreature)
     return new boss_loathebAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL mob_sporeAI : public ScriptedAI
-{
-    mob_sporeAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
-    void Reset()
-    {
-        if (Creature* loatheb = m_creature->GetMap()->GetCreature(m_pInstance->GetData64(NPC_LOATHEB)))
-            if (Unit* pTarget = loatheb->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                m_creature->AddThreat(pTarget, 0);
-
-    }
-
-    void UpdateAI(const uint32 uiDiff)
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        DoMeleeAttackIfReady();
-    }
-    
-    void JustDied(Unit* pKiller)
-    {
-        if (m_pInstance)
-            m_pInstance->SetAchiev(TYPE_LOATHEB, false);
-        m_creature->CastSpell(m_creature, SPELL_FUNGAL_CREEP, true);
-    }
-
-};
-
-
-CreatureAI* GetAI_mob_spore(Creature* pCreature)
-{
-    return new mob_sporeAI(pCreature);
-}
-
 void AddSC_boss_loatheb()
 {
     Script* NewScript;
     NewScript = new Script;
     NewScript->Name = "boss_loatheb";
     NewScript->GetAI = &GetAI_boss_loatheb;
-    NewScript->RegisterSelf();
-
-    NewScript = new Script;
-    NewScript->Name = "mob_spore";
-    NewScript->GetAI = &GetAI_mob_spore;
     NewScript->RegisterSelf();
 }

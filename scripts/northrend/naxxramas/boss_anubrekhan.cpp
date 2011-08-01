@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Anubrekhan
-SD%Complete: 95
+SD%Complete: 70
 SDComment:
 SDCategory: Naxxramas
 EndScriptData */
@@ -35,6 +35,10 @@ enum
     SAY_TAUNT3                  = -1533006,
     SAY_TAUNT4                  = -1533007,
     SAY_SLAY                    = -1533008,
+
+    EMOTE_CRYPT_GUARD           = -1533153,                 // NYI
+    EMOTE_INSECT_SWARM          = -1533154,                 // NYI
+    EMOTE_CORPSE_SCARABS        = -1533155,                 // NYI
 
     SPELL_IMPALE                = 28783,                    //May be wrong spell id. Causes more dmg than I expect
     SPELL_IMPALE_H              = 56090,
@@ -70,14 +74,14 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
 
     uint32 m_uiImpaleTimer;
     uint32 m_uiLocustSwarmTimer;
-    uint32 m_uiCryptGuardTimer;
+    uint32 m_uiSummonTimer;
     bool   m_bHasTaunted;
 
     void Reset()
     {
         m_uiImpaleTimer = 15000;                            // 15 seconds
         m_uiLocustSwarmTimer = urand(80000, 120000);        // Random time between 80 seconds and 2 minutes for initial cast
-        m_uiCryptGuardTimer = 0;                       
+        m_uiSummonTimer = 0;                       
     }
 
     void KilledUnit(Unit* pVictim)
@@ -105,23 +109,19 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
             m_pInstance->SetData(TYPE_ANUB_REKHAN, IN_PROGRESS);
 
         if (m_bIsRegularMode)
-            m_uiCryptGuardTimer = 20000;
+            m_uiSummonTimer = 20000;
         else
         {
             SummonGuard();
             SummonGuard();
-            m_uiCryptGuardTimer = 30000;
+            m_uiSummonTimer = 30000;
         }
     }
 
     void JustDied(Unit* pKiller)
     {
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_ANUB_REKHAN, DONE);
-            m_pInstance->m_uiArachnophobiaTimer = time(0);
-        }
-
     }
 
     void JustReachedHome()
@@ -156,6 +156,12 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
                                                    TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
     }
 
+    void SummonedCreatureJustDied(Creature* pSummoned)
+    {
+        if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
+            DoCastSpellIfCan(pSummoned, SPELL_SELF_SPAWN_10, CAST_TRIGGERED);
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -164,108 +170,37 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
         // Impale
         if (m_uiImpaleTimer < uiDiff)
         {
-            //Cast Impale on a random target
-            //Do NOT cast it when we are afflicted by locust swarm
+            // Cast Impale on a random target
+            // Do NOT cast it when we are afflicted by locust swarm
             if (!m_creature->HasAura(SPELL_LOCUSTSWARM) || !m_creature->HasAura(SPELL_LOCUSTSWARM_H))
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,1))
-                    DoCastSpellIfCan(target, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H);
-                    m_uiImpaleTimer = 15000;
-            }         
-        }else m_uiImpaleTimer -= uiDiff;
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H);
+            }
+
+            m_uiImpaleTimer = 15000;
+        }
+        else
+            m_uiImpaleTimer -= uiDiff;
 
         // Locust Swarm
         if (m_uiLocustSwarmTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LOCUSTSWARM :SPELL_LOCUSTSWARM_H) == CAST_OK)
                 m_uiLocustSwarmTimer = 80000;
-            //spawn crypt guards with swarm due boss will bug through floor
-            m_uiCryptGuardTimer = 2000;
+            m_uiSummonTimer = 2000;
         }else m_uiLocustSwarmTimer -= uiDiff;
 
         // Summon crypt guard
-        if (m_uiCryptGuardTimer < uiDiff)
+        if (m_uiSummonTimer < uiDiff)
         {
             SummonGuard();
             if (!m_bIsRegularMode)
                 SummonGuard();
 
             //DoCastSpellIfCan(m_creature, SPELL_SUMMONGUARD);
-            m_uiCryptGuardTimer =  m_bIsRegularMode ? 30000 : 45000;
-        }else m_uiCryptGuardTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-struct MANGOS_DLL_DECL mob_crypt_guardAI : public ScriptedAI
-{
-    mob_crypt_guardAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 AcidSpit_Timer;
-    uint32 Cleave_Timer;
-    uint32 Berserk_Timer;
-
-    void Reset()
-    {
-        AcidSpit_Timer = 10000 + rand()%1000;
-        Cleave_Timer = 5000 + rand()%5000;
-        Berserk_Timer = 120000;
-    }
-
-    void KilledUnit(Unit* pVictim)
-    {
-        //Force the player to spawn corpse scarabs via spell
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, true);
-    }
-
-    void JustDied(Unit* Killer)
-    {
-        m_creature->CastSpell(m_creature, SPELL_SELF_SPAWN_10, true);
-    }
-
-    void Aggro(Unit *who)
-    {
-        if (m_pInstance)
-        {
-            if (Creature* pAnubRekhan = ((Creature*)m_creature->GetMap()->GetUnit( m_pInstance->GetData64(NPC_ANUB_REKHAN))))
-                if (pAnubRekhan->isAlive() && !pAnubRekhan->getVictim())
-                    pAnubRekhan->AI()->AttackStart(who);
-        }
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (Berserk_Timer)
-            if (Berserk_Timer < diff)
-            {
-                DoCast(m_creature, SPELL_FRENZY);
-                Berserk_Timer = 0;
-            }else Berserk_Timer -= diff;
-
-        if (AcidSpit_Timer < diff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ACID_SPIT : SPELL_ACID_SPIT_H);
-            AcidSpit_Timer = 10000 + rand()%1000;
-        }else AcidSpit_Timer -= diff;
-
-        if (Cleave_Timer < diff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE);
-            Cleave_Timer = 5000 + rand()%5000;
-        }else Cleave_Timer -= diff;
+            m_uiSummonTimer =  m_bIsRegularMode ? 30000 : 45000;
+        }else m_uiSummonTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -276,21 +211,11 @@ CreatureAI* GetAI_boss_anubrekhan(Creature* pCreature)
     return new boss_anubrekhanAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_crypt_guard(Creature* pCreature)
-{
-    return new mob_crypt_guardAI(pCreature);
-}
-
 void AddSC_boss_anubrekhan()
 {
     Script* NewScript;
     NewScript = new Script;
     NewScript->Name = "boss_anubrekhan";
     NewScript->GetAI = &GetAI_boss_anubrekhan;
-    NewScript->RegisterSelf();
-
-    NewScript = new Script;
-    NewScript->Name = "mob_crypt_guard";
-    NewScript->GetAI = &GetAI_mob_crypt_guard;
     NewScript->RegisterSelf();
 }

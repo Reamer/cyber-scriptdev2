@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -31,12 +31,12 @@ enum
     SAY_SLAY              = -1533019,
     SAY_DEATH             = -1533020,
 
-    EMOTE_BERSERK         = -1533021,
-    EMOTE_ENRAGE          = -1533022,
+    EMOTE_GENERIC_BERSERK   = -1000004,
+    EMOTE_GENERIC_ENRAGED   = -1000003,
 
-    SPELL_HATEFULSTRIKE   = 41926,
+    SPELL_HATEFULSTRIKE   = 28308,
     SPELL_HATEFULSTRIKE_H = 59192,
-    SPELL_FRENZY          = 28131,
+    SPELL_ENRAGE          = 28131,
     SPELL_BERSERK         = 26662,
     SPELL_SLIMEBOLT       = 32309
 };
@@ -54,7 +54,6 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
     bool m_bIsRegularMode;
 
     uint32 m_uiHatefulStrikeTimer;
-    uint64 m_uiDeathTimer;
     uint32 m_uiBerserkTimer;
     uint32 m_uiSlimeboltTimer;
     bool   m_bEnraged;
@@ -65,7 +64,6 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
         m_uiHatefulStrikeTimer = 1000;                      //1 second
         m_uiBerserkTimer = MINUTE*6*IN_MILLISECONDS;         //6 minutes
         m_uiSlimeboltTimer = 10000;
-        m_uiDeathTimer = 0;
         m_bEnraged = false;
         m_bBerserk = false;
     }
@@ -83,12 +81,7 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_PATCHWERK, DONE);
-            if (m_uiDeathTimer < 180000)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? 1856 : 1857);
-        }
-
     }
 
     void Aggro(Unit* pWho)
@@ -120,7 +113,7 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
 
             if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
             {
-                if (pTempTarget->GetHealth() > uiHighestHP && m_creature->IsWithinDistInMap(pTempTarget, ATTACK_DISTANCE))
+                if (pTempTarget->GetHealth() > uiHighestHP && m_creature->CanReachWithMeleeAttack(pTempTarget))
                 {
                     uiHighestHP = pTempTarget->GetHealth();
                     pTarget = pTempTarget;
@@ -139,16 +132,25 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        m_uiDeathTimer += uiDiff;
+        // Hateful Strike
+        if (m_uiHatefulStrikeTimer < uiDiff)
+        {
+            DoHatefulStrike();
+            m_uiHatefulStrikeTimer = 1000;
+        }
+        else
+            m_uiHatefulStrikeTimer -= uiDiff;
 
         // Soft Enrage at 5%
         if (!m_bEnraged)
         {
             if (m_creature->GetHealthPercent() < 5.0f)
             {
-                DoCast(m_creature, SPELL_FRENZY);
-                DoScriptText(EMOTE_ENRAGE, m_creature);
-                m_bEnraged = true;
+                if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
+                    m_bEnraged = true;
+                }
             }
         }
 
@@ -157,10 +159,14 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
         {
             if (m_uiBerserkTimer < uiDiff)
             {
-                DoCast(m_creature, SPELL_BERSERK);
-                DoScriptText(EMOTE_BERSERK, m_creature);
-                m_bBerserk = true;
-            }else m_uiBerserkTimer -= uiDiff;
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_GENERIC_BERSERK, m_creature);
+                    m_bBerserk = true;
+                }
+            }
+            else
+                m_uiBerserkTimer -= uiDiff;
         }
         else
         {
@@ -169,15 +175,10 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
             {
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_SLIMEBOLT);
                 m_uiSlimeboltTimer = 5000;
-            }else m_uiSlimeboltTimer -= uiDiff;
+            }
+            else
+                m_uiSlimeboltTimer -= uiDiff;
         }
-
-        // Hateful Strike
-        if (m_uiHatefulStrikeTimer < uiDiff)
-        {
-            DoHatefulStrike();
-            m_uiHatefulStrikeTimer = 1000;
-        }else m_uiHatefulStrikeTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
