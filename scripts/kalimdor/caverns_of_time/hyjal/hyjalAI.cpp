@@ -188,7 +188,7 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
     }
 
     if (pSpawn)
-        if (Creature* pTemp = m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120000))
+        if (Creature* pTemp = m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
              pTemp->SetRespawnTime(360000);
 }
 
