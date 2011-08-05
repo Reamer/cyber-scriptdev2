@@ -41,7 +41,7 @@ void instance_pinnacle::OnObjectCreate(GameObject* pGo)
         case GO_DOOR_SKADI:
             if (m_auiEncounter[TYPE_SKADI] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
-            m_mGoEntryGuidStore[GO_DOOR_SKADI] = pGo->GetObjectGuid();
+            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
     }
 }

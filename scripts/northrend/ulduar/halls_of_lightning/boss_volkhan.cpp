@@ -219,7 +219,7 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
                 m_uiMussShatterTimer -= uiDiff;
         }
 
-        if ((m_creature->GetHealthPercent() < float(90 - 20*m_uiHealthAmountModifier)) > 10.0f)
+        if (m_creature->GetHealthPercent() < float(90 - 20*m_uiHealthAmountModifier))
         {
         	if (DoCastSpellIfCan(m_creature,SPELL_TEMPER, false) == CAST_OK){
         		++m_uiHealthAmountModifier;
