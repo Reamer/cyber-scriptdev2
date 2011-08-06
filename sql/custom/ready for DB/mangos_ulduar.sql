@@ -303,7 +303,7 @@ VALUES (34057, 46029, 100,1,1);
 
 -- Freya
 DELETE FROM gameobject WHERE id IN (194324, 194327,194328,194331);
-INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, `position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
+INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
 (800000, 194324, 603, 1, 1, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1),
 (800001, 194327, 603, 1, 1, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1),
 (800002, 194328, 603, 2, 1, 2374.876221, -78.512665, 425.073608, 3.260976, 0, 0, 0.706026, 0.708186, -604800, 100, 1),
@@ -311,7 +311,7 @@ INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, positio
 
 -- Mimiron
 DELETE FROM gameobject WHERE id IN (194789, 194956, 194957, 194958); 
-INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, `position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
+INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
 (800004, 194789, 603, 1, 1, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
 (800005, 194956, 603, 2, 1, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
 (800006, 194957, 603, 1, 1, 2734.73, 2568.98, 364.314, 0.0139475, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
@@ -319,7 +319,7 @@ INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, positio
 
 -- Thorim
 DELETE FROM gameobject WHERE id IN (194312, 194313, 194314, 194315);
-INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, `position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
+INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
 (800008, 194312, 603, 1, 1, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
 (800009, 194313, 603, 1, 1, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
 (800010, 194315, 603, 2, 1, 2134.95, -286.436, 419.505, 1.58825, 0, 0, 0.00697369, 0.999976, -604800, 100, 1),
@@ -330,4 +330,3 @@ UPDATE gameobject SET animprogress = 100 WHERE id IN ( 194307, 194308, 194200, 1
 UPDATE gameobject SET spawntimesecs = -604800 WHERE id IN ( 194307, 194308, 194200, 194201);
 
 UPDATE gameobject_template SET faction = 0, flags = 0, size = 2  WHERE entry IN ( 194307, 194308, 194200, 194201, 194312, 194313, 194314, 194315, 194789, 194956, 194957, 194958,194324, 194327,194328,194331);
-
