@@ -526,7 +526,6 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
     uint32 m_uiEnrageTimer;
 
     bool m_bIsHardMode;
-    bool m_bHasAura;
     
     uint32 m_uiNatureBombTimer;
     uint32 m_uiLifebindersGiftTimer;
@@ -544,9 +543,9 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
     uint32 m_uiThreeWaveRespawnTimer;
     bool m_bThreeWaveCheckTimerStarted;
     bool m_bWaveCheck;
-    uint64 m_uiWaterSpiritGUID;
-    uint64 m_uiStormLasherGUID;
-    uint64 m_uiSnapLasherGUID;
+    ObjectGuid m_uiWaterSpiritGUID;
+    ObjectGuid m_uiStormLasherGUID;
+    ObjectGuid m_uiSnapLasherGUID;
 
     bool m_bIsBrightleafAlive;
     bool m_bIsIronbranchAlive;
@@ -583,7 +582,6 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
 
         m_uiAchievProgress              = 0;
         m_bNature                       = false;
-        m_bHasAura                        = false;
 
         if(m_pInstance) 
         {
@@ -608,7 +606,6 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
 
     void Aggro(Unit *who) 
     {
-        // aura should stack up to 150 when casted, need core support
         DoCast(m_creature, SPELL_ATTUNED_TO_NATURE);
 
         if(m_pInstance) 
@@ -673,7 +670,6 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
             m_pInstance->SetData(TYPE_FREYA, FAIL);
             m_pInstance->SetData(TYPE_FREYA_HARD, FAIL);
         }
-
     }
 
     void DoOutro()
@@ -778,7 +774,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         if(Creature* pSpirit = DoSpawnCreature(NPC_WATER_SPIRIT, 0, 0, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7*DAY*IN_MILLISECONDS))
         {
             pSpirit->setFaction(m_creature->getFaction());
-            m_uiWaterSpiritGUID = pSpirit->GetGUID();
+            m_uiWaterSpiritGUID = pSpirit->GetObjectGuid();
             if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSpirit->AddThreat(pTarget, 1.0f);
         }
@@ -786,7 +782,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         if(Creature* pStormLasher = DoSpawnCreature(NPC_STORM_LASHER, 0, 0, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7*DAY*IN_MILLISECONDS))
         {
             pStormLasher->setFaction(m_creature->getFaction());
-            m_uiStormLasherGUID = pStormLasher->GetGUID();
+            m_uiStormLasherGUID = pStormLasher->GetObjectGuid();
             if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pStormLasher->AddThreat(pTarget, 1.0f);
         }
@@ -794,7 +790,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         if(Creature* pSnapLasher = DoSpawnCreature(NPC_SNAPLASHER, 0, 0, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7*DAY*IN_MILLISECONDS))
         {
             pSnapLasher->setFaction(m_creature->getFaction());
-            m_uiSnapLasherGUID = pSnapLasher->GetGUID();
+            m_uiSnapLasherGUID = pSnapLasher->GetObjectGuid();
             if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSnapLasher->AddThreat(pTarget, 1.0f);
         }
@@ -806,16 +802,6 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                 return;
-
-            // hacky way of stacking aura. Please remove when fixed in core!
-            if(SpellAuraHolder* natureAura = m_creature->GetSpellAuraHolder(SPELL_ATTUNED_TO_NATURE))
-            {
-                if(natureAura->GetStackAmount() < 150 && !m_bHasAura)
-                {
-                    m_bHasAura = true;
-                    natureAura->SetStackAmount(150);
-                }
-            }
 
             if(!m_creature->HasAura(m_bIsRegularMode ? SPELL_TOUCH_OF_EONAR : SPELL_TOUCH_OF_EONAR_H))
                 DoCast(m_creature, m_bIsRegularMode ? SPELL_TOUCH_OF_EONAR : SPELL_TOUCH_OF_EONAR_H);
@@ -950,7 +936,6 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
             // Phase 2
             else
             {
-                // nature bomb. Should be done by spell, not by summon.
                 if(m_uiNatureBombTimer < uiDiff)
                 {
                     DoCast(m_creature, SPELL_NATURE_BOMB);
@@ -993,9 +978,9 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
             switch(m_uiStep)
             {
             case 1:
-                if(m_creature->HasAura(SPELL_ATTUNED_TO_NATURE, EFFECT_INDEX_0))
+                if(SpellAuraHolder* pTempHolder = m_creature->GetSpellAuraHolder(SPELL_ATTUNED_TO_NATURE))
                 {
-                    if(m_creature->GetAura(SPELL_ATTUNED_TO_NATURE, EFFECT_INDEX_0)->GetStackAmount() >= 25)
+                    if(pTempHolder->GetStackAmount() >= 25)
                         m_bNature = true;
                 }
                 m_creature->setFaction(35);
