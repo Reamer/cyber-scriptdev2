@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: boss_kologarn
-SD%Complete: TODO Eyebeam
+SD%Complete: achievment Wenn Blicke töten könnten
 SDComment: eye beam
 SDCategory: Ulduar
 EndScriptData */
@@ -179,8 +179,8 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
     bool m_bIsRightDead;
     bool m_bIsLeftDead;
 
-    uint64 m_uiRightArmGuid;
-    uint64 m_uiLeftArmGuid;
+    ObjectGuid m_uiRightArmGuid;
+    ObjectGuid m_uiLeftArmGuid;
 
     void Reset()
     {
@@ -204,9 +204,6 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
         m_bOpenArms         = true;
         m_uiDisarmedTimer   = 0;
 
-        m_uiRightArmGuid     = 0;
-        m_uiLeftArmGuid      = 0;
-
         if (Unit* pRightArm = vehicle->GetPassenger(RIGHT_ARM_SLOT))
         {
             pRightArm->SetVisibility(VISIBILITY_OFF);
@@ -225,28 +222,6 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        // hacky way to complete achievements; use only if you have this function
-        // Rubble and roll
-        if (m_uiRubbleNo >= 25)
-        {
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_RUBBLE_AND_ROLL : ACHIEV_RUBBLE_AND_ROLL_H);
-        }
-
-        // With open arms
-        if (m_bOpenArms)
-        {
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_WITH_OPEN_ARMS : ACHIEV_WITH_OPEN_ARMS_H);
-        }
-
-        // Disarmed
-        if (m_bHasLeftDied && m_bHasRightDied && m_uiDisarmedTimer <= 12000)
-        {
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_DISARMED : ACHIEV_DISARMED_H);
-        }
-
         if (m_pInstance)
             m_pInstance->SetData(TYPE_KOLOGARN, DONE);
 
@@ -257,12 +232,22 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
         DoScriptText(SAY_LEFT_ARM_LOST, m_creature);
         m_uiRespawnLeftTimer = 48000;
         m_bIsLeftDead = true;
-        m_bOpenArms = false;
         for(uint8 i = 0; i < 5; i ++)
         {
             if(Creature* pRubble = m_creature->SummonCreature(MOB_RUBBLE, LeftArm[0] - urand(0, 5), LeftArm[1] + urand(0, 10), LeftArm[2], 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     pRubble->AddThreat(pTarget,0.0f);
+        }
+        m_uiRubbleNo = m_uiRubbleNo +5;
+        if (m_pInstance)
+        {
+            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
+            if (m_uiRubbleNo >= 25)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_RUBBLE_AND_ROLL, true);
+            if (m_bIsRightDead)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, true);
+            else
+                m_uiDisarmedTimer = 0;
         }
     }
 
@@ -278,18 +263,19 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     pRubble->AddThreat(pTarget,0.0f);
         }
-
-    }
-
-    void SummonedCreatureDespawn(Creature* m_pCreature)
-    {
-        switch(m_pCreature->GetEntry())
+        m_uiRubbleNo = m_uiRubbleNo +5;
+        if (m_pInstance)
         {
-            case MOB_RUBBLE:
-                m_uiRubbleNo ++;
-                break;
+            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
+            if (m_uiRubbleNo >= 25)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_RUBBLE_AND_ROLL, true);
+            if (m_bIsLeftDead)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, true);
+            else
+                m_uiDisarmedTimer = 0;
         }
     }
+
     void Aggro(Unit* pWho)
     {
         if (m_pInstance)
@@ -308,9 +294,7 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
     void JustReachedHome()
     {
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_KOLOGARN, FAIL);
-        }
     }
 
     void InstallRightArm()
@@ -322,13 +306,12 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
                 pRightArm->SetCreatorGuid(m_creature->GetObjectGuid());
                 pRightArm->EnterVehicle(vehicle, RIGHT_ARM_SLOT);
                 pRightArm->SendHeartBeat(false);
-                m_uiRightArmGuid = pRightArm->GetGUID();
+                m_uiRightArmGuid = pRightArm->GetObjectGuid();
             }
         }
         DoScriptText(EMOTE_RIGHT_ARM, m_creature);
         m_uiRespawnRightTimer = 48000;
         m_bIsRightDead = false;
-        m_uiDisarmedTimer = 0;
     }
     
     void InstallLeftArm()
@@ -340,18 +323,17 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
                 pLeftArm->SetCreatorGuid(m_creature->GetObjectGuid());
                 pLeftArm->EnterVehicle(vehicle, LEFT_ARM_SLOT);
                 pLeftArm->SendHeartBeat(false);
-                m_uiLeftArmGuid = pLeftArm->GetGUID();
+                m_uiLeftArmGuid = pLeftArm->GetObjectGuid();
             }
         }
         DoScriptText(EMOTE_LEFT_ARM, m_creature);
         m_uiRespawnLeftTimer = 48000;
         m_bIsLeftDead = false;
-        m_uiDisarmedTimer = 0;
     }
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
     {
-        if (pDoneBy->GetGUID() == m_creature->GetGUID())
+        if (pDoneBy->GetObjectGuid() == m_creature->GetObjectGuid())
             uiDamage = 0;
     }
 
@@ -360,6 +342,16 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
+
+        // disarmed achiev check
+        if (m_bHasLeftDied || m_bHasRightDied)
+            m_uiDisarmedTimer += uiDiff;
+
+        if (m_uiDisarmedTimer > 12 * IN_MILLISECONDS)
+        {
+            if (m_pInstance)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, false);
+        }
 
         if (m_uiRange_Timer < uiDiff)
         {
@@ -420,7 +412,8 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
                 DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ONE_ARMED_SMASH : SPELL_ONE_ARMED_SMASH_H);
                 m_uiSpell_Timer = 20000;
             }
-        }else m_uiSpell_Timer -= uiDiff;   
+        }else
+            m_uiSpell_Timer -= uiDiff;   
 
         if (m_uiEyebeam_Timer < uiDiff)
         {
@@ -450,7 +443,8 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
                     m_uiEyebeam_Timer = 10000 + urand(1000, 5000);
                 }
             }
-        }else m_uiEyebeam_Timer -= uiDiff;
+        }else
+            m_uiEyebeam_Timer -= uiDiff;
 
 		// respawn arms
         if (m_bIsLeftDead)
@@ -458,23 +452,21 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
             if (m_uiRespawnLeftTimer < uiDiff && m_bIsLeftDead)
             {
                 InstallLeftArm();
-            }else m_uiRespawnLeftTimer -= uiDiff;
+            }else
+                m_uiRespawnLeftTimer -= uiDiff;
         }
         if (m_bIsRightDead)
         {
             if (m_uiRespawnRightTimer < uiDiff)
             {
                 InstallRightArm();
-            }else m_uiRespawnRightTimer -= uiDiff; 
+            }else
+                m_uiRespawnRightTimer -= uiDiff; 
         }
         
         //Petrifying breath
         if (m_creature->GetCombatDistance(m_creature->getVictim()) >= ATTACK_DISTANCE)
             DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PETRIFYING_BREATH : SPELL_PETRIFYING_BREATH_H);
-
-        // disarmed achiev check
-        if (m_bHasLeftDied || m_bHasRightDied)
-            m_uiDisarmedTimer += uiDiff;
 
         if(m_uiEnrageTimer < uiDiff)
         {
@@ -482,7 +474,8 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
             DoCast(m_creature, SPELL_ENRAGE);
             m_uiEnrageTimer = 30000;
         }
-        else m_uiEnrageTimer -= uiDiff;
+        else
+            m_uiEnrageTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

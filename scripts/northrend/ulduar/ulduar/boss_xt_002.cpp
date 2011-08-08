@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: boss_xt002
 SD%Complete:
-SDComment: correct number of adds in 25man missing; Void Zone Damage; Heart Life;
+SDComment: correct number of adds in 25man missing; Void Zone Damage; Heart Life; Achievment Nerf Gravity Bombs
 SDCategory: Ulduar
 EndScriptData */
 
@@ -87,18 +87,6 @@ enum
     NPC_PUMMELER			= 33344,
     NPC_VOIDZONE            = 34001,
     NPC_LIFESPARK           = 34004,
-
-    // Achievs
-    ACHIEV_HEARTBREAKER         = 3058,
-    ACHIEV_HEARTBREAKER_H       = 3059,
-    ACHIEV_DECONSTRUCT_FAST     = 2937,
-    ACHIEV_DECONSTRUCT_FAST_H   = 2938,
-    ACHIEV_NERF_ENGINEERING     = 2931,
-    ACHIEV_NERF_ENGINEERING_H   = 2932,
-    ACHIEV_NERF_GRAVITY_BOMBS   = 2934,
-    ACHIEV_NERF_GRAVITY_BOMBS_H = 2936,
-    ACHIEV_NERF_SCRAPBOTS       = 2933,
-    ACHIEV_NERF_SCRAPBOTS_H     = 2935,
 };
 
 enum XT002Phase
@@ -218,7 +206,6 @@ struct MANGOS_DLL_DECL mob_pummelerAI : public ScriptedAI
 
     void Reset()
     {        
-        m_creature->SetInCombatWithZone();
         Spell_Timer = urand(5000, 10000);
     }
     
@@ -266,7 +253,6 @@ struct MANGOS_DLL_DECL mob_boombotAI : public ScriptedAI
 
     void Reset()
     {        
-        m_creature->SetInCombatWithZone();
     }
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
@@ -400,9 +386,6 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
 
     bool m_bIsHardMode;
 
-    uint32 uiEncounterTimer;
-    bool m_bIsEngineer;
-
     void Reset()
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
@@ -430,9 +413,6 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
 
         m_bIsEnrage             = false;
         m_bIsHardMode           = false;
-
-        uiEncounterTimer        = 0;
-        m_bIsEngineer           = true;
     }
 
     void JustDied(Unit* pKiller)
@@ -466,28 +446,6 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
                 if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
                     pTemp->ForcedDespawn();
         }
-
-        // hacky way to complete achievements; use only if you have this function
-        // Deconstruct Fast
-        if (uiEncounterTimer < 205000)
-        {
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_DECONSTRUCT_FAST : ACHIEV_DECONSTRUCT_FAST_H);
-        }
-
-        // Heartbreaker
-        if (m_bIsHardMode)
-        {
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_HEARTBREAKER : ACHIEV_HEARTBREAKER_H);
-        }
-
-        // Nerf Engineer
-        if(m_bIsEngineer)
-        {
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_NERF_ENGINEERING : ACHIEV_NERF_ENGINEERING_H);
-        }
     }
 
     void Aggro(Unit* pWho)
@@ -510,9 +468,7 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
             m_pInstance->SetData(TYPE_XT002_HARD, NOT_STARTED);
         }
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
 
         if (!m_lScrapbotsGUIDList.empty())
@@ -561,13 +517,13 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
                 default:addentry = NPC_SCRAPBOT;
             }
             uint8 i = urand(0, 3);
-            if (Creature* pTemp = m_creature->SummonCreature(addentry, SummonLoc[i].x + urand(0, 10), SummonLoc[i].y + urand(0, 10), SummonLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000))
+            if (Creature* pTemp = m_creature->SummonCreature(addentry, SummonLoc[i].x + urand(0, 10), SummonLoc[i].y + urand(0, 10), SummonLoc[i].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000))
             {
                 DoCast(pTemp, SPELL_ENERGY_ORB, true);
+                pTemp->SetInCombatWithZone();
                 switch (addentry)
                 {
                     case NPC_SCRAPBOT:
-                        pTemp->GetMotionMaster()->MoveChase(m_creature);
                         m_lScrapbotsGUIDList.push_back(pTemp->GetObjectGuid());
                         break;
                     case NPC_BOOMBOT:
@@ -627,17 +583,16 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
                         {
                             DoCast(pTemp, SPELL_SCRAP_REPAIR, true);
                             pTemp->DealDamage(pTemp, pTemp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                            m_bIsEngineer = false;
                             DoScriptText(EMOTE_REPAIR, m_creature);
+                            if (m_pInstance)
+                                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_NERF_ENGINEERING, false);
                         }
                     }
                 }
             }
             m_uiRangeCheckTimer = 1000;
-        }else m_uiRangeCheckTimer -= uiDiff;
-
-        // Achiev timer
-        uiEncounterTimer += uiDiff;
+        }else 
+            m_uiRangeCheckTimer -= uiDiff;
 
         switch (m_uiPhase)
         {
@@ -718,6 +673,8 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
                 {
                     SwitchIntoPhaseOne();
                     DoCast(m_creature, m_bIsRegularMode ? SPELL_HEARTBREAK : SPELL_HEARTBREAK_H);
+                    if (m_pInstance)
+                        m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_HEARTBREAKER, true);
                     m_bIsHardMode = true;
                 }
 

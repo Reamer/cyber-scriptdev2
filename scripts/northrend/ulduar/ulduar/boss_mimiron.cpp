@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: boss_mimiron
 SD%Complete: 
-SDComment: needs vehicles
+SDComment: TODO Achievments: Set Up Us the Bomb;Not-So-Friendly Fire
 SDCategory: Ulduar
 EndScriptData */
 
@@ -1206,8 +1206,6 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI
             if(m_bIsHardMode)
             {
                 m_pInstance->SetData(TYPE_MIMIRON_HARD, DONE);
-                // hacky way to complete achievements; use only if you have this function
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_FIREFIGHTER : ACHIEV_FIREFIGHTER_H);
             }
             m_pInstance->SetData(TYPE_MIMIRON, DONE);
         }
@@ -2035,6 +2033,7 @@ bool GOHello_go_red_button(Player* pPlayer, GameObject* pGo)
     if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
     {
         m_pInstance->SetData(TYPE_MIMIRON_HARD, IN_PROGRESS);
+        m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_FIREFIGHTER, true);
         pMimiron->SetInCombatWithZone();
         pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT); 
         pPlayer->CastSpell(pPlayer, SPELL_FLAMES_SUMMON, false);

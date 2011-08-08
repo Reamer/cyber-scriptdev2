@@ -73,17 +73,11 @@ enum
 
     
     //NPC ids
-
     SPELL_SUMMON_SCORCH_TRIGGER = 62551,
     SPELL_SLAG_IMBUED           = 62836,
     SPELL_SLAG_IMBUED2          = 63536,
     SPELL_MOLTEN_STUN           = 65208, // couldn't find proper spell, so using this one
     SCORCH_DESPAWN_TIME         = 40000,
-
-    ACHIEV_STOKIN_THE_FURNACE   = 2930,
-    ACHIEV_STOKIN_THE_FURNACE_H = 2929,
-    ACHIEV_SHATTERED            = 2925,
-    ACHIEV_SHATTERED_H          = 2926,
 };
 
 // iron construct
@@ -228,7 +222,6 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
     uint32 m_uiFlameJetsTimer;
     uint32 m_uiActivateConstructTimer;
 
-    uint32 m_uiEncounterTimer;
     uint32 m_uiBerserkerTimer;
 
     void Reset()
@@ -237,17 +230,10 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         m_uiSlagPotTimer = 19000;
         m_uiFlameJetsTimer = 21000;
         m_uiActivateConstructTimer = 25000;
-        m_uiEncounterTimer = 0;
 
         m_uiBerserkerTimer = 600000; // 10 Minutes
 
         m_bIsSlagPot = false;
-
-        if (m_pInstance)
-            for (GUIDList::iterator i = m_pInstance->m_lIronConstructsGuids.begin(); i != m_pInstance->m_lIronConstructsGuids.end(); i++)
-                if (Creature *pTmp = m_pInstance->instance->GetCreature(*i))
-                    if (!pTmp->isAlive())
-                        pTmp->Respawn();
     }
 
     void Aggro(Unit* pWho)
@@ -277,22 +263,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_IGNIS, DONE);
-            // destroy constructs
-            for (GUIDList::iterator i = m_pInstance->m_lIronConstructsGuids.begin(); i != m_pInstance->m_lIronConstructsGuids.end(); i++)
-                if (Creature *pTmp = m_pInstance->instance->GetCreature(*i))
-                    if (pTmp->isAlive())
-                        pTmp->DealDamage(pTmp, pTmp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
-        }    
-
-        if (m_uiEncounterTimer < 240000)
-        {
-        // hacky way to complete achievements; use only if you have this function
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_STOKIN_THE_FURNACE : ACHIEV_STOKIN_THE_FURNACE_H);
-        }
-    }
+      }
 
     void JustSummoned(Creature* pCreature)
     {
@@ -319,8 +291,6 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        m_uiEncounterTimer += uiDiff;
-
         if (m_uiScorchTimer <= uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SCORCH_TRIGGER, CAST_TRIGGERED) == CAST_OK)
@@ -329,7 +299,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                 m_uiScorchTimer = urand(20000, 25000);
             }
         }
-        else m_uiScorchTimer -= uiDiff;
+        else
+            m_uiScorchTimer -= uiDiff;
 
         if (m_uiSlagPotTimer <= uiDiff)
         {
@@ -347,7 +318,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                         m_uiSlagPotTimer = urand(15000, 25000);
                     }
         }
-        else m_uiSlagPotTimer -= uiDiff;
+        else
+            m_uiSlagPotTimer -= uiDiff;
 
         if (m_bIsSlagPot)
         {
@@ -362,7 +334,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                 m_uiSlagPotSwitchTimer = 10000;
                 m_uiSlagPotDmgTimer = 500;
             }
-            else m_uiSlagPotSwitchTimer -= uiDiff;
+            else
+                m_uiSlagPotSwitchTimer -= uiDiff;
 
             if (m_uiSlagPotDmgTimer <= uiDiff)
             {
@@ -373,7 +346,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                     }
                 m_uiSlagPotDmgTimer = 3000;
             }
-            else m_uiSlagPotDmgTimer -= uiDiff;
+            else
+                m_uiSlagPotDmgTimer -= uiDiff;
 
             if (m_uiSlagPotExitTimer <= uiDiff)
             {
@@ -382,7 +356,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                 m_uiSlagPotExitTimer = 10000;
                 m_bIsSlagPot = false;
             }
-            else m_uiSlagPotExitTimer -= uiDiff;
+            else
+                m_uiSlagPotExitTimer -= uiDiff;
         }
 
         if (m_uiFlameJetsTimer <= uiDiff)
@@ -393,7 +368,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                 m_uiFlameJetsTimer = urand(20000, 25000);
             }
         }
-        else m_uiFlameJetsTimer -= uiDiff;
+        else
+            m_uiFlameJetsTimer -= uiDiff;
 
         if (m_uiActivateConstructTimer <= uiDiff)
         {
@@ -403,7 +379,8 @@ struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
                 m_uiActivateConstructTimer = m_bIsRegularMode ? 30000 : 40000;
             }
         }
-        else m_uiActivateConstructTimer -= uiDiff;
+        else
+            m_uiActivateConstructTimer -= uiDiff;
 
         if (m_uiBerserkerTimer <= uiDiff)
         {

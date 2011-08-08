@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: boss_yogg_saron
 SD%Complete: 
-SDComment: Implement sanity, some other spells need core support. If the topaggro target is teleported into a vision, the boss resets -> needs fixing!
+SDComment: TODO: Achievments: Drive Me Crazy, In His House He Waits Dreaming
 SDCategory: Ulduar
 EndScriptData */
 
@@ -259,20 +259,6 @@ enum phases
     PHASE_VISION_RETURN         = 4,    // used to set the portals to return to main chamber = idle
 };
 
-enum achievs
-{
-    ACHIEV_ALONE                = 3159,
-    ACHIEV_ALONE_H              = 3164,
-    ACHIEV_ONE_LIGHT            = 3158,
-    ACHIEV_ONE_LIGHT_H          = 3163,
-    ACHIEV_TWO_LIGHTS           = 3141,
-    ACHIEV_TWO_LIGHTS_H         = 3162,
-    ACHIEV_THREE_LIGHTS         = 3157,
-    ACHIEV_THREE_LIGHTS_H       = 3161,
-    ACHIEV_NOT_GETTING_OLDER    = 3012,
-    ACHIEV_NOT_GETTING_OLDER_H  = 3013,
-};
-
 //Positional defines 
 struct LocationsXY
 {
@@ -466,8 +452,6 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
 
     GUIDList m_lKeeperGUID;
 
-    uint32 m_uiAchievTimer;
-
     void Reset()
     {
         DoCast(m_creature, SPELL_CLEAR_INSANE, true);
@@ -488,7 +472,6 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
         m_uiSummonConstrictorTentacleTimer = urand(7000, 13000);
 
         m_uiDeafeningRoarTimer      = 30000;
-        m_uiAchievTimer             = 0;
         m_uiBerserkTimer            = 900000;   // 15 min
 
         m_creature->SetVisibility(VISIBILITY_OFF);
@@ -502,16 +485,7 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
         {
             m_pInstance->SetData(TYPE_YOGG_PHASE, PHASE_IDLE);
             m_pInstance->SetData(TYPE_VISION_PHASE, PHASE_VISION_RETURN);
-
-            // respawn clouds
-            for(GUIDList::iterator iter = m_pInstance->m_lCLoudGuids.begin(); iter != m_pInstance->m_lCLoudGuids.end(); ++iter)
-                if (Creature *pTmp = m_pInstance->instance->GetCreature(*iter))
-                    pTmp->Respawn();
-            if(Creature* pSara = m_pInstance->GetSingleCreatureFromStorage(NPC_SARA))
-            {
-                if (!pSara->isAlive())
-                    pSara->Respawn();
-            }
+            m_pInstance->SetData(TYPE_YOGGSARON, FAIL);
         }
         for (GUIDList::iterator iter = m_lKeeperGUID.begin(); iter != m_lKeeperGUID.end(); ++iter)
         {
@@ -574,6 +548,17 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
                     m_uiKeepersActive += 1;
                 }
             }
+            switch (m_uiKeepersActive)
+            {
+                case 0:
+                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_ALONE, true);
+                case 1:
+                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_ONE_LIGHT, true);
+                case 2:
+                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_TWO_LIGHTS, true);
+                case 3:
+                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_THREE_LIGHTS, true);
+            }
 
             if(Creature* pSara = m_pInstance->GetSingleCreatureFromStorage(NPC_SARA))
                 DoScriptText(SAY_AGGRO, pSara);
@@ -583,25 +568,7 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
     void JustReachedHome()
     {
         if (m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_YOGGSARON, NOT_STARTED);
-
-            if(Creature* pSara = m_pInstance->GetSingleCreatureFromStorage(NPC_SARA))
-            {
-                if(!pSara->isAlive())
-                    pSara->Respawn();
-                else
-                    pSara->AI()->EnterEvadeMode();
-            }
-
-            if (Creature* pYoggBrain = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
-            {
-                if(!pYoggBrain->isAlive())
-                    pYoggBrain->Respawn();
-                else
-                    pYoggBrain->AI()->EnterEvadeMode();
-            }
-        }
+            m_pInstance->SetData(TYPE_YOGGSARON, FAIL);
     }
 
     void KilledUnit(Unit* pVictim)
@@ -619,33 +586,23 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
             m_pInstance->SetData(TYPE_YOGGSARON_HARD, FAIL);
             m_pInstance->SetData(TYPE_YOGGSARON_HARD_4, FAIL);
 
-            // hacky way to complete achievements; use only if you have this function
             if(m_uiKeepersActive == 0)
             {
                 m_pInstance->SetData(TYPE_YOGGSARON_HARD_4, DONE);
                 m_pInstance->SetData(TYPE_YOGGSARON_HARD, DONE);
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_ALONE : ACHIEV_ALONE_H);
             }
             else if (m_uiKeepersActive == 1)
             {
                 m_pInstance->SetData(TYPE_YOGGSARON_HARD, DONE);
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_ONE_LIGHT : ACHIEV_ONE_LIGHT_H);
             }
             else if (m_uiKeepersActive == 2)
             {
                 m_pInstance->SetData(TYPE_YOGGSARON_HARD, FAIL);
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_TWO_LIGHTS : ACHIEV_TWO_LIGHTS_H);
             }
             else if (m_uiKeepersActive == 3)
             {
                 m_pInstance->SetData(TYPE_YOGGSARON_HARD, FAIL);
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_THREE_LIGHTS : ACHIEV_THREE_LIGHTS_H);
             }
-
-            // under 7 min
-            if(m_uiAchievTimer < 420000)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_NOT_GETTING_OLDER : ACHIEV_NOT_GETTING_OLDER_H);
-
         }
 
         if(Creature* pSara = m_pInstance->GetSingleCreatureFromStorage(NPC_SARA))
@@ -712,9 +669,6 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-
-        // achiev timer
-        m_uiAchievTimer += uiDiff;
 
         switch(m_pInstance->GetData(TYPE_YOGG_PHASE))
         {

@@ -23,6 +23,7 @@ SDComment: Encounter overview: Hodir casts regular Icicles all the time (as trig
            When the spell is cast, there is a spell triggered that targets all regular Icicles.
            They spawn Snowpacked Icicles that spawn Snowdrifts and have area aura marking targets to be safe from Flash Freeze.
            All above fixed in core, so refer to commit history of instance_Ulduar file.
+           Achievment: Getting Cold in Here, Staying Buffed All Winter
 SDCategory: Ulduar
 EndScriptData */
 
@@ -44,6 +45,7 @@ enum
     EMOTE_SPEEDKILL             = -1603130,
 
     SPELL_ENRAGE                = 26662,
+    SPELL_HODIR_CREDIT          = 64899,    // custom spell in spell_dbc.sql
 
     SPELL_FROZEN_BLOWS          = 62478,
     SPELL_FROZEN_BLOWS_H        = 63512,
@@ -265,6 +267,7 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
             else
                 m_pInstance->SetData(TYPE_HODIR, DONE);
         }
+        DoCast(m_creature, SPELL_HODIR_CREDIT, true);
         m_creature->ForcedDespawn();
     }
 
@@ -273,10 +276,15 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
     {
         if(m_pInstance)
         {
-            if(m_uiSpeedKillTimer < 180000)
+            if(m_bhardmode)
+            {
                 m_pInstance->SetData(TYPE_HODIR_HARD, DONE);
-            m_pInstance->SetData(TYPE_HODIR, DONE);
+                m_pInstance->SetData(TYPE_HODIR, DONE);
+            }
+            else
+                m_pInstance->SetData(TYPE_HODIR, DONE);
         }
+        DoCast(m_creature, SPELL_HODIR_CREDIT, true);
     }
 
     void DamageTaken(Unit *done_by, uint32 &uiDamage)
@@ -301,6 +309,8 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
             {
                 if (pTarget->GetTypeId() == TYPEID_PLAYER)
                 {
+                    if (m_pInstance)
+                        m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_CHEESE_FREEZE, false);
                     if (pTarget->HasAura(SPELL_FLASH_FREEZE_DEBUFF, EFFECT_INDEX_0))
                         DoCastSpellIfCan(pTarget, SPELL_FLASH_FREEZE_KILL, true);
                     else
@@ -330,6 +340,8 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
                 {
                     m_bhardmode = false;
                     DoScriptText(EMOTE_SPEEDKILL, m_creature);
+                    if (m_pInstance)
+                        m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_RARE_CACHE, false);
                 }
             }
 
@@ -452,11 +464,7 @@ struct MANGOS_DLL_DECL mob_icicleAI : public ScriptedAI
     uint32 m_uiSpellId;
     float x, y, z;
 
-    void Reset()
-    {
-
-
-    }
+    void Reset() {}
     void AttackStart(Unit* pWho) {}
 
     void UpdateAI(const uint32 uiDiff)
@@ -575,6 +583,12 @@ struct MANGOS_DLL_DECL npc_hodir_helperAI : public ScriptedAI
     {
         if (m_creature->HasAura(SPELL_FLASH_FREEZE_NPC_STUN))
             uiDamage = 0;
+    }
+
+    void JustDied( Unit* pKiller)
+    {
+        if (m_pInstance)
+            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_COOLEST_FRIEND, false);
     }
 
     void UpdateAI(const uint32 uiDiff)
