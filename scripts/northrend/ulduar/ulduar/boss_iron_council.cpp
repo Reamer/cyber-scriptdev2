@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: boss_iron_council
 SD%Complete: 
-SDComment: Supercharge is bugged
+SDComment: Achievment(Can't Do That While Stunned, 
 SDCategory: Ulduar
 EndScriptData */
 
@@ -55,8 +55,9 @@ enum
 
 	//all
 	SPELL_BERSERK				= 47008,
-	SPELL_SUPERCHARGE			= 61920,	// spell is bugged. Should be cast on other bosses not on players!!!
-	
+	SPELL_SUPERCHARGE			= 61920,
+    SPELL_IRON_COUNCIL_CREDIT   = 65195,    // custom spell in spell_dbc.sql
+
     //steelbreaker
 	SPELL_HIGH_VOLTAGE			= 61890,
 	SPELL_HIGH_VOLTAGE_H		= 63498,
@@ -95,17 +96,6 @@ enum
 	LIGHTNING_TENDRILS_VISUAL	= 61883,
 	//NPC ids
 	MOB_LIGHTNING_ELEMENTAL		= 32958, 
-
-    ACHIEV_ON_YOUR_SIDE         = 2945,
-    ACHIEV_ON_YOUR_SIDE_H       = 2946,
-    SPELL_IRON_BOOT_AURA        = 58501,
-
-    ACHIEV_CHOOSE_BRUNDIR       = 2940,
-    ACHIEV_CHOOSE_BRUNDIR_H     = 2943,
-    ACHIEV_CHOOSE_MOLGEIM       = 2939,
-    ACHIEV_CHOOSE_MOLGEIM_H     = 2942,
-    ACHIEV_CHOOSE_STEELBREAKER  = 2941,
-    ACHIEV_CHOOSE_STEELBREAKER_H= 2944,
 };
 
 // Rune of Power
@@ -268,7 +258,6 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 	bool m_bHasSupercharge1;
 	bool m_bHasSupercharge2;
 	bool m_bIsTendrils;
-    bool m_bHasStormshield;
 	bool m_bIsEnrage;
 
     void Reset()
@@ -280,33 +269,7 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 		m_bIsEnrage             = false;
 		m_bHasSupercharge1      = false;
 		m_bHasSupercharge2      = false;
-        m_bHasStormshield       = false;
 		m_bIsTendrils           = false;
-		if (m_creature->HasAura(SPELL_SUPERCHARGE))
-			m_creature->RemoveAurasDueToSpell(SPELL_SUPERCHARGE);
-    }
-
-    void OnYourSide()
-    {
-		/* hacky way to complete achievements; use only if you have this function
-        Map* pMap = m_creature->GetMap();
-        AchievementEntry const *AchievYourSide = GetAchievementStore()->LookupEntry(m_bIsRegularMode ? ACHIEV_ON_YOUR_SIDE : ACHIEV_ON_YOUR_SIDE_H);
-        if(AchievYourSide && pMap)
-        {
-            Map::PlayerList const &lPlayers = pMap->GetPlayers();
-            if (!lPlayers.isEmpty())
-            {
-                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                {
-                    if (Player* pPlayer = itr->getSource())
-                    {
-                        if(pPlayer->HasAura(SPELL_IRON_BOOT_AURA, EFFECT_INDEX_0))
-                            pPlayer->CompletedAchievement(AchievYourSide);
-                    }
-                }
-            }
-        }
-		*/
     }
 
     void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -318,8 +281,6 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
             {
                 m_bHasSupercharge2 = true;
                 m_uiTendrils_start_Timer = 40000;
-                if (SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(SPELL_SUPERCHARGE))
-                    holder->ModStackAmount(1);
             }
             else
             {
@@ -331,35 +292,19 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 
 	void JustDied(Unit* pKiller)
     {
-        DoCast(m_creature, SPELL_SUPERCHARGE, true);
-        m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-        // if all of them are dead
-        if (m_pInstance)
+        if (m_bHasSupercharge2)
         {
-            // if the others are dead then give loot
-            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
-            {
-                if (!pTemp->isAlive())
-                {
-                    if (Creature* p2Temp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
-                    {
-                        if (!p2Temp->isAlive())
-                        {
-                            m_pInstance->SetData(TYPE_ASSEMBLY, DONE);
-                            // only the current one has loot, because loot modes are implemented in sql
-                            m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-
-                            // I'm on your side
-                            OnYourSide();
-
-                            // ChooseBrundir
-                            // hacky way to complete achievements; use only if you have this function
-                            m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_CHOOSE_BRUNDIR : ACHIEV_CHOOSE_BRUNDIR_H);
-                        }
-                    }
-                }
-            }
+            m_pInstance->SetData(TYPE_ASSEMBLY, DONE);  
+            DoCast(m_creature, SPELL_IRON_COUNCIL_CREDIT, true);
         }
+        else
+        {
+            if (m_pInstance)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_YOU_BRUNDIR, false);
+            m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            DoCast(m_creature, SPELL_SUPERCHARGE, true);
+        }
+
         DoScriptText(urand(0,1) ? SAY_BRUNDIR_DEATH1 : SAY_BRUNDIR_DEATH2 , m_creature);
     }
 
@@ -386,16 +331,6 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 
 	void JustReachedHome()
     {
-		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
-        {
-			if (!pTemp->isAlive())
-				pTemp->Respawn();
-        }
-		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
-        {
-			if (!pTemp->isAlive())
-				pTemp->Respawn();
-        }
         if (m_pInstance)
         {
             if(m_pInstance->GetData(TYPE_ASSEMBLY) != FAIL)
@@ -417,12 +352,14 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
         {
             if (m_uiTendrils_Change < uiDiff && m_bIsTendrils)
             {
-			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
 			    {
                     m_creature->GetMotionMaster()->MoveChase(pTarget);
 			    }
 			    m_uiTendrils_Change = 4000;
-            }else m_uiTendrils_Change -= uiDiff;
+            }
+            else
+                m_uiTendrils_Change -= uiDiff;
 
             if (m_uiTendrils_end_Timer < uiDiff && m_bIsTendrils)
             {
@@ -433,6 +370,9 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 		        if (m_creature->HasAura(LIGHTNING_TENDRILS_VISUAL))
 			        m_creature->RemoveAurasDueToSpell(LIGHTNING_TENDRILS_VISUAL);
                 m_uiTendrils_start_Timer = 90000;
+                SetCombatMovement(true);
+                m_creature->GetMotionMaster()->Clear(false);
+                m_creature->SetHover(false);
 		        m_creature->SetSpeedRate(MOVE_RUN, 1.8f);
 		        m_bIsTendrils = false;
 		        m_uiChain_Lightning_Timer = 5000;
@@ -446,27 +386,33 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 		    if (m_uiChain_Lightning_Timer < uiDiff)
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-			        DoCast(target, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H);
-                m_uiChain_Lightning_Timer = 2000;
-            }else m_uiChain_Lightning_Timer -= uiDiff;   
+                    if (DoCastSpellIfCan(target, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
+                        m_uiChain_Lightning_Timer = 2000;
+            }
+            else
+                m_uiChain_Lightning_Timer -= uiDiff;   
 
 		    if (m_uiOverload_Timer < uiDiff)
             {
-			    m_creature->CastStop();
-			    DoCast(m_creature, SPELL_OVERLOAD);
-                m_uiOverload_Timer = 40000;
-            }else m_uiOverload_Timer -= uiDiff;  
+                if (DoCastSpellIfCan(m_creature, SPELL_OVERLOAD) == CAST_OK)
+                    m_uiOverload_Timer = 40000;
+            }
+            else
+                m_uiOverload_Timer -= uiDiff;  
 
             // level 2 spells
             if (m_bHasSupercharge1)
             {
 		        if (m_uiWhirl_Timer < uiDiff)
 		        {
-                    m_creature->CastStop();
-                    DoScriptText(SAY_BRUNDIR_WHIRL, m_creature);
-                    DoCast(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_WHIRL : SPELL_LIGHTNING_WHIRL_H);
-			        m_uiWhirl_Timer = 15000;
-		        }else m_uiWhirl_Timer -= uiDiff;
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_WHIRL : SPELL_LIGHTNING_WHIRL_H) == CAST_OK)
+                    {
+                        DoScriptText(SAY_BRUNDIR_WHIRL, m_creature);
+                        m_uiWhirl_Timer = 15000;
+                    }
+		        }
+                else
+                    m_uiWhirl_Timer -= uiDiff;
                 
                 // level 3 spells
                 if (m_bHasSupercharge2)
@@ -475,24 +421,21 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
     		        if (m_uiTendrils_start_Timer < uiDiff)
                     {
 				        DoScriptText(SAY_BRUNDIR_FLY, m_creature);
-				        m_creature->CastStop();
+
 				        DoCast(m_creature, LIGHTNING_TENDRILS_VISUAL,true);
                         DoCast(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_TENDRILS : SPELL_LIGHTNING_TENDRILS_H,true);
-				        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-				        {
+                        SetCombatMovement(false);
+                        m_creature->GetMotionMaster()->Clear(false);
+                        m_creature->SetHover(true);
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
                             m_creature->GetMotionMaster()->MoveChase(pTarget);
-				        }
 				        m_bIsTendrils = true;
 				        m_creature->SetSpeedRate(MOVE_RUN, 0.8f);
 				        m_uiTendrils_end_Timer = 40000;
 				        m_uiTendrils_Change = 4000;
 			        }else m_uiTendrils_start_Timer -= uiDiff;
                     
-                    if (!m_bHasStormshield && m_bHasSupercharge2)
-                    {
-                        DoCast(m_creature, SPELL_STORMSHIELD, true);
-                        m_bHasStormshield = true;
-                    }
+                    DoCastSpellIfCan(m_creature, SPELL_STORMSHIELD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                 }
             }
             DoMeleeAttackIfReady();
@@ -500,11 +443,14 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 
 		if (m_uiEnrage_Timer < uiDiff && !m_bIsEnrage)
 		{
-            DoScriptText(SAY_BRUNDIR_BERSERK, m_creature);
-			m_creature->CastStop();
-			DoCast(m_creature, SPELL_BERSERK);
-			m_bIsEnrage = true;
-		}else m_uiEnrage_Timer -= uiDiff;	
+            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+            {
+                m_bIsEnrage = true;
+                DoScriptText(SAY_BRUNDIR_BERSERK, m_creature);
+            }
+		}
+        else
+            m_uiEnrage_Timer -= uiDiff;	
 	}
 };
 
@@ -545,31 +491,6 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
 		m_bEnrage           = false;
 		m_bHasSupercharge1  = false;
 		m_bHasSupercharge2  = false;
-		if (m_creature->HasAura(SPELL_SUPERCHARGE))
-			m_creature->RemoveAurasDueToSpell(SPELL_SUPERCHARGE);
-    }
-
-    void OnYourSide()
-    {
-		/* hacky way to complete achievements; use only if you have this function
-        Map* pMap = m_creature->GetMap();
-        AchievementEntry const *AchievYourSide = GetAchievementStore()->LookupEntry(m_bIsRegularMode ? ACHIEV_ON_YOUR_SIDE : ACHIEV_ON_YOUR_SIDE_H);
-        if(AchievYourSide && pMap)
-        {
-            Map::PlayerList const &lPlayers = pMap->GetPlayers();
-            if (!lPlayers.isEmpty())
-            {
-                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                {
-                    if (Player* pPlayer = itr->getSource())
-                    {
-                        if(pPlayer->HasAura(SPELL_IRON_BOOT_AURA, EFFECT_INDEX_0))
-                            pPlayer->CompletedAchievement(AchievYourSide);
-                    }
-                }
-            }
-        }
-		*/
     }
 
     void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -581,8 +502,6 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
             {
                 m_bHasSupercharge2 = true;                
                 m_uiRune_Summon_Timer = 20000;
-                if (SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(SPELL_SUPERCHARGE))
-                    holder->ModStackAmount(1);
             }
             else
             {
@@ -594,35 +513,18 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
 
 	void JustDied(Unit* pKiller)
     {
-        DoCast(m_creature, SPELL_SUPERCHARGE, true);
-		//death yell
-		m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-        if (m_pInstance)
-		{
-            // if the others are dead then give loot
-			if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
-            {
-				if (!pTemp->isAlive())
-                {
-					if (Creature* p2Temp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
-                    {
-						if (!p2Temp->isAlive())
-						{
-							m_pInstance->SetData(TYPE_ASSEMBLY, DONE);
-                            // only the current one has loot, because loot modes are implemented in sql
-							m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-
-                            // I'm on your side
-                            OnYourSide();
-
-                            // ChooseMolgeim
-                            // hacky way to complete achievements; use only if you have this function
-                            m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_CHOOSE_MOLGEIM : ACHIEV_CHOOSE_MOLGEIM_H);
-                            }
-                    }
-                }
-            }
-		}
+        if (m_bHasSupercharge2)
+        {
+            m_pInstance->SetData(TYPE_ASSEMBLY, DONE);
+            DoCast(m_creature, SPELL_IRON_COUNCIL_CREDIT, true);
+        }
+        else
+        {
+            if (m_pInstance)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_YOU_MOLGEIM, false);
+            m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            DoCast(m_creature, SPELL_SUPERCHARGE, true);
+        }
 
         DoScriptText(urand(0,1) ? SAY_MOLGEIM_DEATH1 : SAY_MOLGEIM_DEATH2, m_creature);
     }
@@ -650,16 +552,6 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
 
 	void JustReachedHome()
     {
-		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_STEELBREAKER))
-        {
-			if (!pTemp->isAlive())
-				pTemp->Respawn();
-        }
-		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
-        {
-			if (!pTemp->isAlive())
-				pTemp->Respawn();
-        }
         if (m_pInstance)
         {
             if(m_pInstance->GetData(TYPE_ASSEMBLY) != FAIL)
@@ -680,9 +572,11 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
         // level 1 spells
 		if (m_uiShield_Timer < uiDiff)
         {
-			DoCast(m_creature, m_bIsRegularMode ? SPELL_SHIELD : SPELL_SHIELD_H);
-            m_uiShield_Timer = 50000;
-        }else m_uiShield_Timer -= uiDiff;   
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHIELD : SPELL_SHIELD_H) == CAST_OK)
+                m_uiShield_Timer = 50000;
+        }
+        else
+            m_uiShield_Timer -= uiDiff;   
 
 		if (m_uiRune_Power_Timer < uiDiff)
 		{
@@ -711,23 +605,26 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
                     break;
             }
 			m_uiRune_Power_Timer = 30000;
-		}else m_uiRune_Power_Timer -= uiDiff;
+		}
+        else
+            m_uiRune_Power_Timer -= uiDiff;
 
         // level2 spells
         if (m_bHasSupercharge1)
         {
             if (m_uiRune_Death_Timer < uiDiff)
 		    {
-			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
                 {
-                    if (pTarget->GetTypeId() == TYPEID_PLAYER)
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_RUNE_OF_DEATH : SPELL_RUNE_OF_DEATH_H) == CAST_OK)
                     {
                         DoScriptText(SAY_MOLGEIM_DEATH_RUNE, m_creature);
-				        DoCast(pTarget, m_bIsRegularMode ? SPELL_RUNE_OF_DEATH : SPELL_RUNE_OF_DEATH_H);
 			            m_uiRune_Death_Timer = 30000;
                     }
                 }
-		    }else m_uiRune_Death_Timer -= uiDiff;
+		    }
+            else
+                m_uiRune_Death_Timer -= uiDiff;
             
             // level 3 spells
             if (m_bHasSupercharge2)
@@ -735,26 +632,30 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
 		        if (m_uiRune_Summon_Timer < uiDiff)
 		        {
 			        m_creature->CastStop();
-			        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+			        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
                     {
-                        if (pTarget->GetTypeId() == TYPEID_PLAYER)
+                        if (DoCastSpellIfCan(pTarget, SPELL_RUNE_OF_SUMMONING) == CAST_OK)
                         {
                             DoScriptText(SAY_MOLGEIM_SUMMON, m_creature);
-				            DoCast(pTarget, SPELL_RUNE_OF_SUMMONING);
 			                m_uiRune_Summon_Timer = 30000;
                         }
                     }
-		        }else m_uiRune_Summon_Timer -= uiDiff;
+		        }
+                else
+                    m_uiRune_Summon_Timer -= uiDiff;
             }
         }
 
         if (m_uiEnrage_Timer < uiDiff && !m_bEnrage)
-		{
-            DoScriptText(SAY_MOLGEIM_BERSERK, m_creature);
-			m_creature->CastStop();
-			DoCast(m_creature, SPELL_BERSERK);
-			m_bEnrage = true;
-		}else m_uiEnrage_Timer -= uiDiff;
+		{            
+            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+            {
+                m_bEnrage = true;
+                DoScriptText(SAY_MOLGEIM_BERSERK, m_creature);
+            }
+		}
+        else
+            m_uiEnrage_Timer -= uiDiff;
 		
 		DoMeleeAttackIfReady();
 	}
@@ -787,7 +688,6 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 	bool m_bMolgeimDead;
 	bool m_bHasSupercharge1;
 	bool m_bHasSupercharge2;
-	bool m_bMustDie;
 	bool m_bEnrage;
 
     void Reset()
@@ -800,15 +700,6 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 		m_bMolgeimDead      = false;
 		m_bHasSupercharge1  = false;
 		m_bHasSupercharge2  = false;
-		m_bMustDie          = false;
-		if (m_creature->HasAura(SPELL_SUPERCHARGE))
-			m_creature->RemoveAurasDueToSpell(SPELL_SUPERCHARGE);
-		if (m_creature->HasAura(SPELL_ELECTRICAL_CHARGE))
-			m_creature->RemoveAurasDueToSpell(SPELL_ELECTRICAL_CHARGE);
-		if (m_creature->HasAura(SPELL_HIGH_VOLTAGE))
-			m_creature->RemoveAurasDueToSpell(SPELL_HIGH_VOLTAGE);
-		if (m_creature->HasAura(SPELL_HIGH_VOLTAGE_H))
-			m_creature->RemoveAurasDueToSpell(SPELL_HIGH_VOLTAGE_H);
     }
 
 	void KilledUnit(Unit* pVictim)
@@ -817,29 +708,6 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 			DoCast(m_creature, SPELL_ELECTRICAL_CHARGE);
 
         DoScriptText(urand(0,1) ? SAY_STEEL_SLAY1 : SAY_STEEL_SLAY2, m_creature);
-    }
-
-    void OnYourSide()
-    {
-		/* hacky way to complete achievements; use only if you have this function
-        Map* pMap = m_creature->GetMap();
-        AchievementEntry const *AchievYourSide = GetAchievementStore()->LookupEntry(m_bIsRegularMode ? ACHIEV_ON_YOUR_SIDE : ACHIEV_ON_YOUR_SIDE_H);
-        if(AchievYourSide && pMap)
-        {
-            Map::PlayerList const &lPlayers = pMap->GetPlayers();
-            if (!lPlayers.isEmpty())
-            {
-                for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                {
-                    if (Player* pPlayer = itr->getSource())
-                    {
-                        if(pPlayer->HasAura(SPELL_IRON_BOOT_AURA, EFFECT_INDEX_0))
-                            pPlayer->CompletedAchievement(AchievYourSide);
-                    }
-                }
-            }
-        }
-		*/
     }
 
     void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -851,8 +719,6 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
             {
                 m_bHasSupercharge2 = true;                
                 m_uiPower_Timer = 5000;
-                if (SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(SPELL_SUPERCHARGE))
-                    holder->ModStackAmount(1);
             }
             else
             {
@@ -865,35 +731,18 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 
 	void JustDied(Unit* pKiller)
     {
-        DoCast(m_creature, SPELL_SUPERCHARGE, true);
-		m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-        if (m_pInstance)
-		{
-            // if the others are dead then give loot
-			if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
-            {
-				if (!pTemp->isAlive())
-                {
-					if (Creature* p2Temp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
-                    {
-						if (!p2Temp->isAlive())
-						{
-							m_pInstance->SetData(TYPE_ASSEMBLY, DONE);
-                            m_pInstance->SetData(TYPE_ASSEMBLY_HARD, DONE);
-                            // only the current one has loot, because loot modes are implemented in sql
-							m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-
-                            // I'm on your side
-                            OnYourSide();
-
-                            // ChooseSteelbreaker
-                            // hacky way to complete achievements; use only if you have this function
-                            m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_CHOOSE_STEELBREAKER : ACHIEV_CHOOSE_STEELBREAKER_H);
-                            }
-                    }
-                }
-            }
-		}
+        if (m_bHasSupercharge2)
+        {
+            m_pInstance->SetData(TYPE_ASSEMBLY, DONE);
+            DoCast(m_creature, SPELL_IRON_COUNCIL_CREDIT, true);
+        }
+        else
+        {
+            if (m_pInstance)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_YOU_STEELBREAKER, false);
+            m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            DoCast(m_creature, SPELL_SUPERCHARGE, true);
+        }
         DoScriptText(urand(0,1) ? SAY_STEEL_DEATH1 : SAY_STEEL_DEATH2, m_creature);
     }
 
@@ -909,7 +758,7 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 			if (pTemp->isAlive())
 				pTemp->SetInCombatWithZone();
         }
-		DoCast(m_creature, m_bIsRegularMode ? SPELL_HIGH_VOLTAGE : SPELL_HIGH_VOLTAGE_H);
+		DoCast(m_creature, m_bIsRegularMode ? SPELL_HIGH_VOLTAGE : SPELL_HIGH_VOLTAGE_H, true);
         if (m_pInstance)
         {
             if(m_pInstance->GetData(TYPE_ASSEMBLY) != IN_PROGRESS)
@@ -921,16 +770,6 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
 
 	void JustReachedHome()
     {
-		if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_MOLGEIM))
-        {
-			if (!pTemp->isAlive())
-				pTemp->Respawn();
-        }
-        if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_BRUNDIR))
-        {
-			if (!pTemp->isAlive())
-				pTemp->Respawn();
-        }
         if (m_pInstance)
         {
             if(m_pInstance->GetData(TYPE_ASSEMBLY) != FAIL)
@@ -946,41 +785,54 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
         // level 1 spells
 		if (m_uiFusion_Punch_Timer < uiDiff)
         {
-			DoCast(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FUSION_PUNCH : SPELL_FUSION_PUNCH_H);
-            m_uiFusion_Punch_Timer = 20000;
-        }else m_uiFusion_Punch_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FUSION_PUNCH : SPELL_FUSION_PUNCH_H))
+                m_uiFusion_Punch_Timer = urand(17000,22000);
+        }
+        else
+            m_uiFusion_Punch_Timer -= uiDiff;
         
         // level 2 spells
         if (m_bHasSupercharge1)
         {
             if (m_uiStatic_Disruption_Timer < uiDiff)
 		    {
-			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-				    DoCast(pTarget, m_bIsRegularMode ? SPELL_STATIC_DISRUPTION : SPELL_STATIC_DISRUPTION_H);
-			    m_uiStatic_Disruption_Timer = 60000;
-		    }else m_uiStatic_Disruption_Timer -= uiDiff;
+			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 1))
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_STATIC_DISRUPTION : SPELL_STATIC_DISRUPTION_H) == CAST_OK)
+                        m_uiStatic_Disruption_Timer = 60000;
+		    }
+            else
+                m_uiStatic_Disruption_Timer -= uiDiff;
 
             // level 3 spells
             if (m_bHasSupercharge2)
             {
 		        if (m_uiPower_Timer < uiDiff)
 		        {
-			        m_creature->CastStop();
-                    DoScriptText(SAY_STEEL_OVERWHELMING, m_creature);
+
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
-                        DoCast(pTarget, m_bIsRegularMode ? SPELL_POWER : SPELL_POWER_H);
-			        m_uiPower_Timer = m_bIsRegularMode ? 65000 : 35000;
-		        }else m_uiPower_Timer -= uiDiff;
+                    {
+                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POWER : SPELL_POWER_H) == CAST_OK)
+                        {
+                            DoScriptText(SAY_STEEL_OVERWHELMING, m_creature);
+                            m_uiPower_Timer = m_bIsRegularMode ? 65000 : 35000;
+                        }
+                    }
+		        }
+                else
+                    m_uiPower_Timer -= uiDiff;
             }
         }
 
 		if (m_uiEnrage_Timer < uiDiff && !m_bEnrage)
 		{
-            DoScriptText(SAY_STEEL_BERSERK, m_creature);
-			m_creature->CastStop();
-			DoCast(m_creature, SPELL_BERSERK);
-			m_bEnrage = true;
-		}else m_uiEnrage_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+            {
+                m_bEnrage = true;
+                DoScriptText(SAY_STEEL_BERSERK, m_creature);
+            }
+		}
+        else
+            m_uiEnrage_Timer -= uiDiff;
 
 		DoMeleeAttackIfReady();
 	}

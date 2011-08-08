@@ -92,11 +92,6 @@ enum
 	MOB_DARK_RUNE_GUARDIAN		= 33388, 
  
     NPC_EXP_ENGINEER            = 33287,
-
-    ACHIEV_QUICK_SHAVE          = 2919,
-    ACHIEV_QUICK_SHAVE_H        = 2921,
-    ACHIEV_MEDIUM_RARE          = 2923,
-    ACHIEV_MEDIUM_RARE_H        = 2924,
 };
 
 //Positional defines 
@@ -519,6 +514,7 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
     uint8 m_uiMaxHarpoons;
     uint8 m_uiHarpoonsUsed;
     uint8 m_uiFlyNo;
+    uint8 m_uiScorchedDwarves;
 
     GUIDList m_lRepairHarpoonsGUID;
     GUIDList m_lHarpoonsDummyGUID;
@@ -542,6 +538,7 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
         m_uiRazorscalePhase = PHASE_AIR;
         m_uiFlyNo           = 0;
         m_uiHarpoonsUsed    = 0;
+        m_uiScorchedDwarves = 0;
 
         if(m_creature->GetPositionZ() < 435.0f)
         {
@@ -563,12 +560,6 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
             m_pInstance->SetData(TYPE_RAZORSCALE, DONE);
 
         BreakHarpoons();
-        if (m_uiFlyNo < 2)
-        {
-            // hacky way to complete achievements; use only if you have this function
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_QUICK_SHAVE : ACHIEV_QUICK_SHAVE_H);
-        }
     }
 
 	void Aggro(Unit* pWho)
@@ -580,6 +571,23 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
 		m_creature->GetMotionMaster()->MoveIdle();
         m_creature->GetMap()->CreatureRelocation(m_creature, PositionLoc[4].x, PositionLoc[4].y, PositionLoc[4].z, 0.0f);
 		m_creature->SendMonsterMove(PositionLoc[4].x, PositionLoc[4].y, PositionLoc[4].z, SPLINETYPE_NORMAL, m_creature->GetSplineFlags(), 1);
+    }
+
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
+    {
+        if (pSpell->Id == SPELL_FLAME_BREATH || pSpell->Id == SPELL_FLAME_BREATH_H)
+        {
+            if (pTarget->GetEntry() == MOB_DARK_RUNE_GUARDIAN) // only this one
+            {
+                 ++m_uiScorchedDwarves;
+                 if (m_uiScorchedDwarves > 25)
+                 {
+                     if (m_pInstance)
+                         m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_IRON_DWARF_MEDIUM_RARE, true);
+                 }
+                 m_creature->DealDamage(pTarget, pTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            }
+        }
     }
 
 	void JustReachedHome()
@@ -694,7 +702,12 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
         m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 50331648);
         m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 50331648);
         // achiev counter
-        m_uiFlyNo += 1;
+        m_uiFlyNo++;
+        if (m_uiFlyNo > 1)
+        {
+            if (m_pInstance)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_QUICK_SHAVE, false);
+        }
     }
 
     void SetToPermGroundedPhase()

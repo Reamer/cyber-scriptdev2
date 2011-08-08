@@ -39,6 +39,9 @@ void instance_ulduar::Initialize()
     for(uint8 i = 0; i < 6; i++)
         m_auiMiniBoss[i] = NOT_STARTED;
 
+    for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
+        m_abAchievCriteria[i] = false;
+
     m_uiMimironPhase        = 0;
     m_uiYoggPhase           = 0;
     m_uiVisionPhase         = 0;
@@ -88,7 +91,6 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
     case NPC_HELPER_MAGE:
     case NPC_HELPER_SHAMAN:
     case NPC_HELPER_PRIEST:
-
     //Thorim
     case NPC_THORIM:
     case NPC_RUNIC_COLOSSUS:
@@ -289,6 +291,22 @@ void instance_ulduar::OnObjectCreate(GameObject *pGo)
 
 void instance_ulduar::OnCreatureDeath(Creature * pCreature)
 {
+    if (GetData(TYPE_IGNIS) == IN_PROGRESS && pCreature->GetEntry() == NPC_IRON_CONSTRUCT)
+    {
+        if (m_bOneIsDeath)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_SHATTERED, true);
+        }
+        else
+        {
+            m_bOneIsDeath = true;
+            m_uiShatterTimer = 5 * IN_MILLISECONDS;
+        }
+    }
+    if (GetData(TYPE_AURIAYA) == IN_PROGRESS && pCreature->GetEntry() == NPC_SANCTUM_SENTRY)
+    {
+        SetSpecialAchievementCriteria(TYPE_ACHIEV_CRAZY_CAT_LADY, false);
+    }
     if (GetData(TYPE_THORIM) == IN_PROGRESS // Thorim
         || pCreature->GetEntry() == NPC_JORMUNGAR_BEHEMOTH // Preadds
         || pCreature->GetEntry() == NPC_CAPTAIN_ALY               
@@ -342,16 +360,50 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         break;
     case TYPE_IGNIS:
         m_auiEncounter[uiType] = uiData;
+        if (uiData == IN_PROGRESS)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_SHATTERED, false);
+            DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_IGNIS_ID);
+        }
+        // Add respawn and kill
+        if (uiData == FAIL)
+        {
+            for (GUIDList::iterator itr = m_lIronConstructsGuids.begin(); itr != m_lIronConstructsGuids.end(); ++itr)
+            {
+                if (Creature *pAdd = instance->GetCreature(*itr))
+                    if (!pAdd->isAlive())
+                        pAdd->Respawn();
+            }
+        }
+        if (uiData == DONE)
+        {
+            for (GUIDList::iterator itr = m_lIronConstructsGuids.begin(); itr != m_lIronConstructsGuids.end(); ++itr)
+            {
+                if (Creature *pAdd = instance->GetCreature(*itr))
+                    if (pAdd->isAlive())
+                        pAdd->DealDamage(pAdd, pAdd->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+            }
+        }
         break;
     case TYPE_RAZORSCALE:
         m_auiEncounter[uiType] = uiData;
+        if (uiData == IN_PROGRESS)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_QUICK_SHAVE, true);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_IRON_DWARF_MEDIUM_RARE, false);
+        }
         break;
     case TYPE_XT002:
         m_auiEncounter[uiType] = uiData;
         if (uiData == DONE || uiData == FAIL)
             OpenDoor(GO_XT002_GATE);
         else if (uiData == IN_PROGRESS)
+        {
             CloseDoor(GO_XT002_GATE);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_NERF_ENGINEERING, true);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_HEARTBREAKER, false);
+            DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_XT_002_ID);
+        }
         break;
     case TYPE_ASSEMBLY:
         m_auiEncounter[uiType] = uiData;
@@ -362,9 +414,31 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             OpenDoor(GO_SHATTERED_DOOR);
         }
         else if (uiData == IN_PROGRESS)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_YOU_BRUNDIR, true);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_YOU_MOLGEIM, true);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_YOU_STEELBREAKER, true);
             CloseDoor(GO_IRON_ENTRANCE_DOOR);
+        }
         else if (uiData == FAIL)
+        {
+            if (Creature* pBrundir = GetSingleCreatureFromStorage(NPC_BRUNDIR))
+            {
+                if (!pBrundir->isAlive())
+                    pBrundir->Respawn();
+            }
+            if (Creature* pMolgeim = GetSingleCreatureFromStorage(NPC_MOLGEIM))
+            {
+                if (!pMolgeim->isAlive())
+                    pMolgeim->Respawn();
+            }
+            if (Creature* pSteelbreaker = GetSingleCreatureFromStorage(NPC_STEELBREAKER))
+            {
+                if (!pSteelbreaker->isAlive())
+                    pSteelbreaker->Respawn();
+            }
             OpenDoor(GO_IRON_ENTRANCE_DOOR);
+        }
         break;
     case TYPE_KOLOGARN:
         m_auiEncounter[uiType] = uiData;
@@ -384,6 +458,12 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 pGo->SetGoState(GO_STATE_READY);
             }
         }
+        if (uiData == IN_PROGRESS)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, false);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, true);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_RUBBLE_AND_ROLL, false);
+        }
         break;
     case TYPE_AURIAYA:
         m_auiEncounter[uiType] = uiData;
@@ -395,8 +475,12 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 pGO->SetGoState(GO_STATE_READY);
             }
         }
+        if (uiData == IN_PROGRESS)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_NINE_LIVES, false);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_CRAZY_CAT_LADY, true);
+        }
         break;
-
         // Keepers
     case TYPE_MIMIRON:
         m_auiEncounter[uiType] = uiData;
@@ -421,6 +505,8 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 pImage->SetVisibility(VISIBILITY_ON);
             DoOpenMadnessDoorIfCan();
         }
+        if (uiData == IN_PROGRESS)
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_FIREFIGHTER, false);
         break;
     case TYPE_HODIR:
         m_auiEncounter[uiType] = uiData;
@@ -444,15 +530,24 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             DoOpenMadnessDoorIfCan();
         }
         else if (uiData == IN_PROGRESS)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_CHEESE_FREEZE, true);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_COOLEST_FRIEND, true);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_RARE_CACHE, true);
             CloseDoor(GO_HODIR_ENTER);
+        }
         else if (uiData == FAIL)
             OpenDoor(GO_HODIR_ENTER);
         break;
     case TYPE_THORIM:
         m_auiEncounter[uiType] = uiData;
-        DoUseDoorOrButton(GO_LIGHTNING_DOOR);
+        DoUseDoorOrButton(GO_LIGHTNING_FIELD);
         if (uiData == IN_PROGRESS)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_SIFFED, false);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_LOSE_YOUR_ILLUSION, false);
             DoUseDoorOrButton(GO_DARK_IRON_PORTCULIS);
+        }
         if (uiData == DONE)
         {
             if(m_auiHardBoss[5] != DONE)
@@ -494,16 +589,57 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 pImage->SetVisibility(VISIBILITY_ON);
             DoOpenMadnessDoorIfCan();
         }
+        if (uiData == IN_PROGRESS)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_BACK_TO_NATURE, false);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_KNOCK_WOOD, false);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_KNOCK_KNOCK_WOOD, false);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_KNOCK_KNOCK_KNOCK_WOOD, false);
+        }
         break;
         // Prison
     case TYPE_VEZAX:
         m_auiEncounter[uiType] = uiData;
         if (uiData == DONE)
             DoUseDoorOrButton(GO_VEZAX_GATE);
+        if (uiData == IN_PROGRESS)
+        {
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_MORNING_SARONITE, false);
+        }
         break;
     case TYPE_YOGGSARON:
         m_auiEncounter[uiType] = uiData;
         DoUseDoorOrButton(GO_YOGG_GATE);
+        if (uiData == IN_PROGRESS)
+        {
+            DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_YOGG_SARON_ID);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_THREE_LIGHTS, false);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_TWO_LIGHTS, false);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_ONE_LIGHT, false);
+            SetSpecialAchievementCriteria(TYPE_ACHIEV_ALONE, false);
+        }
+        if (uiData == FAIL)
+        {
+            // respawn clouds
+            for(GUIDList::iterator iter = m_lCLoudGuids.begin(); iter != m_lCLoudGuids.end(); ++iter)
+                if (Creature *pTmp = instance->GetCreature(*iter))
+                    pTmp->Respawn();
+            // respawn Sara
+            if(Creature* pSara = GetSingleCreatureFromStorage(NPC_SARA))
+            {
+                if (!pSara->isAlive())
+                    pSara->Respawn();
+                else
+                    pSara->AI()->EnterEvadeMode();
+            }
+            if (Creature* pYoggBrain = GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
+            {
+                if(!pYoggBrain->isAlive())
+                    pYoggBrain->Respawn();
+                else
+                    pYoggBrain->AI()->EnterEvadeMode();
+            }
+        }
         break;
 
         // Celestial Planetarium
@@ -681,14 +817,113 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         OUT_SAVE_INST_DATA_COMPLETE;
     }
 }
-
-// TODO: implement all achievs here!
-bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 criteria_id, const Player *source)
+void instance_ulduar::SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet)
 {
-    switch(criteria_id)
+    if (uiType < MAX_SPECIAL_ACHIEV_CRITS)
+        m_abAchievCriteria[uiType] = bIsMet;
+}
+
+bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/)
+{
+    switch (uiCriteriaId)
     {
-    case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
-        break;
+        case ACHIEV_CRIT_SHATTERED:
+        case ACHIEV_CRIT_SHATTERED_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_SHATTERED];
+        case ACHIEV_CRIT_QUICK_SHAVE:
+        case ACHIEV_CRIT_QUICK_SHAVE_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_QUICK_SHAVE];
+        case ACHIEV_CRIT_IRON_DWARF_MEDIUM_RARE:
+        case ACHIEV_CRIT_IRON_DWARF_MEDIUM_RARE_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_IRON_DWARF_MEDIUM_RARE];
+        case ACHIEV_CRIT_NERF_ENGINEERING:
+        case ACHIEV_CRIT_NERF_ENGINEERING_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_NERF_ENGINEERING];
+        case ACHIEV_CRIT_HEARTBREAKER:
+        case ACHIEV_CRIT_HEARTBREAKER_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_HEARTBREAKER];
+        case ACHIEV_CRIT_YOU_BRUNDIR:
+        case ACHIEV_CRIT_YOU_BRUNDIR_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_YOU_BRUNDIR];
+        case ACHIEV_CRIT_YOU_MOLGEIM:
+        case ACHIEV_CRIT_YOU_MOLGEIM_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_YOU_MOLGEIM];
+        case ACHIEV_CRIT_YOU_STEELBREAKER:
+        case ACHIEV_CRIT_YOU_STEELBREAKER_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_YOU_STEELBREAKER];
+        case ACHIEV_CRIT_BUT_I_AM_ON_YOUR_SIDE_BRUNDIR:
+        case ACHIEV_CRIT_BUT_I_AM_ON_YOUR_SIDE_BRUNDIR_H:
+        case ACHIEV_CRIT_BUT_I_AM_ON_YOUR_SIDE_MOLGEIM:
+        case ACHIEV_CRIT_BUT_I_AM_ON_YOUR_SIDE_MOLGEIM_H:
+        case ACHIEV_CRIT_BUT_I_AM_ON_YOUR_SIDE_STEELBREAKER:
+        case ACHIEV_CRIT_BUT_I_AM_ON_YOUR_SIDE_STEELBREAKER_H:
+        {
+            if (GetData(TYPE_ASSEMBLY) == DONE)
+            {
+                if (pSource->HasAura(SPELL_IRON_BOOT_AURA))
+                    return true;
+            }
+        }
+        case ACHIEV_CRIT_DISARMED:
+        case ACHIEV_CRIT_DISARMED_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_DISARMED];
+        case ACHIEV_CRIT_OPEN_ARMS:
+        case ACHIEV_CRIT_OPEN_ARMS_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_OPEN_ARMS];
+        case ACHIEV_CRIT_RUBBLE_AND_ROLL:
+        case ACHIEV_CRIT_RUBBLE_AND_ROLL_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_RUBBLE_AND_ROLL];
+        case ACHIEV_CRIT_NINE_LIVES:
+        case ACHIEV_CRIT_NINE_LIVES_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_NINE_LIVES];
+        case ACHIEV_CRIT_CRAZY_CAT_LADY:
+        case ACHIEV_CRIT_CRAZY_CAT_LADY_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_CRAZY_CAT_LADY];
+        case ACHIEV_CRIT_CHEESE_FREEZE:
+        case ACHIEV_CRIT_CHEESE_FREEZE_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_CHEESE_FREEZE];
+        case ACHIEV_CRIT_COOLEST_FRIEND:
+        case ACHIEV_CRIT_COOLEST_FRIEND_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_COOLEST_FRIEND];
+        case ACHIEV_CRIT_RARE_CACHE:
+        case ACHIEV_CRIT_RARE_CACHE_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_RARE_CACHE];
+        case ACHIEV_CRIT_SIFFED:
+        case ACHIEV_CRIT_SIFFED_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_SIFFED];
+        case ACHIEV_CRIT_LOSE_YOUR_ILLUSION:
+        case ACHIEV_CRIT_LOSE_YOUR_ILLUSION_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_LOSE_YOUR_ILLUSION];
+        case ACHIEV_CRIT_BACK_TO_NATURE:
+        case ACHIEV_CRIT_BACK_TO_NATURE_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_BACK_TO_NATURE];
+        case ACHIEV_CRIT_KNOCK_WOOD:
+        case ACHIEV_CRIT_KNOCK_WOOD_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_KNOCK_WOOD];
+        case ACHIEV_CRIT_KNOCK_KNOCK_WOOD:
+        case ACHIEV_CRIT_KNOCK_KNOCK_WOOD_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_KNOCK_KNOCK_WOOD];
+        case ACHIEV_CRIT_KNOCK_KNOCK_KNOCK_WOOD:
+        case ACHIEV_CRIT_KNOCK_KNOCK_KNOCK_WOOD_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_KNOCK_KNOCK_KNOCK_WOOD];
+        case ACHIEV_CRIT_FIREFIGHTER:
+        case ACHIEV_CRIT_FIREFIGHTER_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_FIREFIGHTER];
+        case ACHIEV_CRIT_MORNING_SARONITE:
+        case ACHIEV_CRIT_MORNING_SARONITE_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_MORNING_SARONITE];
+        case ACHIEV_CRIT_THREE_LIGHTS:
+        case ACHIEV_CRIT_THREE_LIGHTS_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_THREE_LIGHTS];
+        case ACHIEV_CRIT_TWO_LIGHTS:
+        case ACHIEV_CRIT_TWO_LIGHTS_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_TWO_LIGHTS];
+        case ACHIEV_CRIT_ONE_LIGHT:
+        case ACHIEV_CRIT_ONE_LIGHT_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_ONE_LIGHT];
+        case ACHIEV_CRIT_ALONE:
+        case ACHIEV_CRIT_ALONE_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_ALONE];
     }
     return false;
 }
@@ -702,6 +937,19 @@ bool instance_ulduar::CheckConditionCriteriaMeet(Player const* source, uint32 ma
         return true;
 
     return false;
+}
+
+void instance_ulduar::Update(uint32 uiDiff)
+{
+    if (m_bOneIsDeath)
+    {
+        if (m_uiShatterTimer < uiDiff)
+        {
+            m_bOneIsDeath = false;
+        }
+        else
+            m_uiShatterTimer -= uiDiff;
+    }
 }
 
 uint32 instance_ulduar::GetData(uint32 uiType)

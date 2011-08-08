@@ -20,6 +20,7 @@ SD%Complete:
 SDComment:  better solution for teleport into arena
             Implement lightning orbs, summon Sit on the platform in the first 3 min.
             Runic Smash from Runic Colossus need core support, unknow trigger spell 62406 and 62403
+            Achievments: Don't Stand in the Lightning, Who Needs Bloodlust?
 SDCategory: Ulduar
 EndScriptData */
 
@@ -51,6 +52,8 @@ enum
     SAY_SIF_INTRO           = -1603210,
     SAY_SIF_EVENT           = -1603211,
     SAY_SIF_DESPAWN         = -1603212,
+
+    SPELL_THORIM_CREDIT     = 64985,        // custom spell in spell_dbc.sql
 
     // spells
     // phase1
@@ -609,7 +612,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
     bool m_bIsHardMode;
     uint32 m_uiPreAddsKilled;
 
-    uint64 m_uiSifGUID;
+    ObjectGuid m_uiSifGUID;
 
     //Arena Door
     uint32 m_uiDoorArenaTimer;
@@ -658,7 +661,6 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
         m_uiIntroTimer          = 10000;
         m_uiIntroStep           = 1;
         m_bIsOutro              = false;
-        m_uiSifGUID             = 0;
         lIronDwarfes.clear();
         m_lOrbsGUIDList.clear();
 
@@ -755,32 +757,36 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
             if(m_bIsHardMode)
             {
                 m_pInstance->SetData(TYPE_THORIM_HARD, DONE);
-                // hacky way to complete achievements; use only if you have this function
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_LOSE_ILLUSION : ACHIEV_LOSE_ILLUSION_H);
             }
             m_pInstance->SetData(TYPE_THORIM, DONE);
         }
-
+        DoCast(m_creature, SPELL_THORIM_CREDIT, true);
         m_creature->ForcedDespawn();
     }
 
     // for debug only
     void JustDied(Unit* pKiller)
     {
-       if(m_pInstance) 
+        if(m_pInstance) 
         {
             if(m_bIsHardMode)
                 m_pInstance->SetData(TYPE_THORIM_HARD, DONE);
             m_pInstance->SetData(TYPE_THORIM, DONE);
         }
+        DoCast(m_creature, SPELL_THORIM_CREDIT, true);
     }
 
-    // start phase 2 and outro
+    // start outro
     void DamageTaken(Unit *done_by, uint32 &uiDamage)
     {
         // outro
         if((m_creature->GetHealthPercent() < 1.0f || m_creature->GetHealth() <= uiDamage) && m_uiPhase == PHASE_ARENA)
         {
+            if (m_bIsHardMode)
+            {
+                if (m_pInstance)
+                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_LOSE_YOUR_ILLUSION, true);
+            }
             uiDamage = 0;
             m_uiPhase = PHASE_OUTRO;
         }
@@ -865,7 +871,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                             if(Creature* pSif = m_creature->SummonCreature(NPC_SIF, m_creature->GetPositionX() + 10, m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000))
                             {
                                 pSif->setFaction(35);
-                                m_uiSifGUID = pSif->GetGUID();
+                                m_uiSifGUID = pSif->GetObjectGuid();
                             }
                             ++m_uiIntroStep;
                             m_uiIntroTimer = 9000;
@@ -919,8 +925,8 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                                     DoScriptText(SAY_SIF_EVENT, Sif);
                                     Sif->SetInCombatWithZone();
                                     Sif->MonsterJump(2134.719f, -263.148f, 419.846f, 0, 30, 30);
-                                    // hacky way to complete achievements; use only if you have this function
-                                    //m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_SIFFED : ACHIEV_SIFFED_H);
+                                    if (m_pInstance)
+                                        m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SIFFED, true);
                                 }
                             }
                             else

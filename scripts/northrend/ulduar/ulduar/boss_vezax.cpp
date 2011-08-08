@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: boss_vezax
 SD%Complete:
-SDComment: mark of the faceless needs core support. Searing flames needs fixing, cannot be interrupted
+SDComment: TODO Achievments: Shadowdodger
 SDCategory: Ulduar
 EndScriptData */
 
@@ -134,13 +134,6 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
             if(m_bIsHardMode)
             {
                 m_pInstance->SetData(TYPE_VEZAX_HARD, DONE);
-
-                // hacky way to complete achievements; use only if you have this function
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_MORNING_SARONITE : ACHIEV_MORNING_SARONITE_H);
-				// hack used when the hard mode loot is within the Animus corpse
-				// PLEASE REMOVE FOR REVISION
-                if(Creature* pAnimus = m_pInstance->instance->GetCreature(m_uiAnimusGUID))
-                    pAnimus->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
         }
 
@@ -161,6 +154,8 @@ struct MANGOS_DLL_DECL boss_vezaxAI : public ScriptedAI
 
         if (!lVapors.empty())
         {
+            if (m_pInstance)
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_MORNING_SARONITE, true);
 			// vapors need more speed
             for(std::list<Creature*>::iterator iter = lVapors.begin(); iter != lVapors.end(); ++iter)
             {

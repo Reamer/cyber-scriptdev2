@@ -80,9 +80,6 @@ enum
     ACHIEV_NINE_LIVES_H         = 3077,
 };
 
-bool m_bCrazyCatLady;
-bool m_bNineLives;
-
 // Seeping Feral Essence
 struct MANGOS_DLL_DECL mob_seeping_feral_essenceAI : public ScriptedAI
 {
@@ -142,36 +139,14 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
         m_bIsFollowing = false;
     }
 
-    void SpellHit(Unit *pCaster, const SpellEntry *spellInfo)
-    {
-        if (spellInfo->Id == SPELL_STRENGHT_OF_PACK_BUFF)
-        {
-            uint32 stack = 0;
-            if (m_pInstance)
-            {
-                for (GUIDList::iterator itr = m_pInstance->m_lSanctumSentryGuids.begin(); itr != m_pInstance->m_lSanctumSentryGuids.end(); ++itr)
-                {
-                    if (Creature* pSanity = m_creature->GetMap()->GetCreature(*itr))
-                    {
-                        if (pSanity->isAlive() && (m_creature->GetDistance(pSanity) < 10.0f))
-                            ++stack;
-                    }
-                }
-            }
-
-            if (SpellAuraHolder *holder = m_creature->GetSpellAuraHolder(SPELL_STRENGHT_OF_PACK_BUFF))
-                holder->SetStackAmount(stack);
-        }
-    }
-
     void Aggro(Unit* pWho)
     {
         if (m_pInstance)
         {
-            if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_AURIAYA))
+            if (Creature* pAuriaya = m_pInstance->GetSingleCreatureFromStorage(NPC_AURIAYA))
             {
-                if (pTemp->isAlive())
-                    pTemp->SetInCombatWithZone();
+                if (pAuriaya->isAlive())
+                    pAuriaya->SetInCombatWithZone();
             }
 
             for (GUIDList::iterator itr = m_pInstance->m_lSanctumSentryGuids.begin(); itr != m_pInstance->m_lSanctumSentryGuids.end(); ++itr)
@@ -183,14 +158,7 @@ struct MANGOS_DLL_DECL mob_sanctum_sentryAI : public ScriptedAI
                 }
             }
         }
-
-
         DoCast(m_creature, SPELL_STRENGHT_OF_PACK);
-    }
-
-    void JustDied(Unit* pKiller)
-    {
-        m_bCrazyCatLady = false;
     }
 
     void UpdateAI(const uint32 diff)
@@ -248,8 +216,6 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
     bool m_bIsRush;
     bool m_bIsDead;
 
-    bool m_bHasAura;
-
     GUIDList m_lVoidZones;
 
     void Reset()
@@ -258,7 +224,6 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
         m_uiRush_Start_Timer    = 9000;
         m_bIsRush               = false;
         m_bIsDead               = false;
-        m_bHasAura              = false;
         m_creature->SetRespawnDelay(DAY);
 
         if (!m_lVoidZones.empty())
@@ -282,7 +247,8 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
 
     void JustDied(Unit* pKiller)
     {
-        m_bNineLives = true;
+        if (m_pInstance)
+            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_NINE_LIVES, true);
     }
 
     // feign death
@@ -299,16 +265,16 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
         }
         if (uiDamage > m_creature->GetHealth())
         {
-            uiDamage = 0;
-            m_creature->CastStop();
-            m_creature->RemoveArenaAuras(true);
-            //DoSpawnCreature(MOB_VOID_ZONE, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
-            DoCast(m_creature, SPELL_SUMMON_SEEPING_ESSENCE, true);
-            DoCast(m_creature, SPELL_FEIGN_DEATH, true);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             if (m_creature->HasAura(SPELL_FERAL_ESSENCE))
             {
+                uiDamage = 0;
+                m_creature->CastStop();
+                m_creature->RemoveArenaAuras(true);
+                //DoSpawnCreature(MOB_VOID_ZONE, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                DoCast(m_creature, SPELL_SUMMON_SEEPING_ESSENCE, true);
+                DoCast(m_creature, SPELL_FEIGN_DEATH, true);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);            
                 // remove 1 stack of the aura
                 if(SpellAuraHolder* strenght = m_creature->GetSpellAuraHolder(SPELL_FERAL_ESSENCE))
                 {
@@ -345,26 +311,15 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
                 m_bIsDead = false;
                 m_uiPounce_Timer = 0;
                 m_uiRush_Start_Timer = 9000;
-            }else m_uiRevive_Delay -= diff;
+            }
+            else
+                m_uiRevive_Delay -= diff;
 
             return;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-
-        // hacky way of stacking aura, needs fixing
-        if (!m_bHasAura)
-        {
-            if(SpellAuraHolder* essence = m_creature->GetSpellAuraHolder(SPELL_FERAL_ESSENCE))
-            {
-                if(essence->GetStackAmount() < 9)
-                {
-                    m_bHasAura = true;
-                    essence->SetStackAmount(9);
-                }
-            }
-        }
 
         if (m_uiPounce_Timer < diff)
         {
@@ -374,7 +329,9 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
                 m_creature->AI()->AttackStart(target);
             }
             m_uiPounce_Timer = 5000;
-        }else m_uiPounce_Timer -= diff;
+        }
+        else
+            m_uiPounce_Timer -= diff;
 
         if (m_uiRush_Start_Timer < diff)
         {
@@ -387,7 +344,9 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
             m_uiRush_Finish_Timer   = m_bIsRegularMode ? 2500 : 5000;
             m_uiRush_Delay          = 500;
             m_bIsRush               = true;
-        }else m_uiRush_Start_Timer -= diff;
+        }
+        else
+            m_uiRush_Start_Timer -= diff;
 
         if (m_bIsRush)
         {
@@ -399,12 +358,15 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
                     m_creature->AI()->AttackStart(target);
                 }
                 m_uiRush_Delay = 500;
-            }else m_uiRush_Delay -= diff;
+            }
+            else
+                m_uiRush_Delay -= diff;
         }
 
         if (m_uiRush_Finish_Timer < diff)
             m_bIsRush = false;
-        else m_uiRush_Finish_Timer -= diff;
+        else
+            m_uiRush_Finish_Timer -= diff;
 
         DoMeleeAttackIfReady();
     }
@@ -452,10 +414,6 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
         m_bHasBerserk           = false;
         m_bIsDefender           = false;
 
-        // achievs
-        m_bCrazyCatLady = true;
-        m_bNineLives    = false;
-        
         for (GUIDList::iterator itr = m_pInstance->m_lSanctumSentryGuids.begin(); itr != m_pInstance->m_lSanctumSentryGuids.end(); ++itr)
         {
             if (Creature* pSanity = m_creature->GetMap()->GetCreature(*itr))
@@ -476,19 +434,6 @@ struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_AURIAYA, DONE);
-
-        // hacky way to complete achievements; use only if you have this function
-        if (m_bCrazyCatLady)
-        {
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_CRAZY_CAT_LADY : ACHIEV_CRAZY_CAT_LADY_H);
-        }
-
-        if (m_bNineLives)
-        {
-            if(m_pInstance)
-                m_pInstance->DoCompleteAchievement(m_bIsRegularMode ? ACHIEV_NINE_LIVES : ACHIEV_NINE_LIVES_H);
-        }
     }
 
     void Aggro(Unit* pWho)
