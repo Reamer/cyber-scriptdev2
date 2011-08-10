@@ -345,6 +345,8 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
     {
         m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         pCreature->SetRespawnTime(60000);
+        pCreature->SetCorpseDelay(60000);
+        m_creature->SetRespawnDelay(60000);
         Reset();
     }
 
@@ -354,8 +356,7 @@ struct MANGOS_DLL_DECL mob_saronite_vaporAI : public ScriptedAI
 
     void Reset()
     {
-        m_uiDieTimer = 600000;
-        m_creature->SetRespawnDelay(DAY);
+        m_uiDieTimer = 600000;        
     }
 
     void AttackStart(Unit *pWho)
