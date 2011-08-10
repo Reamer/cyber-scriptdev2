@@ -681,6 +681,7 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
         m_uiGrounded_Timer  = 90000;
         m_uiGround_Cast     = 90000;
 		m_uiStun_Timer      = 2000;
+        m_uiGround_Knockback= 90000;
         // make boss land
         m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 0);
         m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
