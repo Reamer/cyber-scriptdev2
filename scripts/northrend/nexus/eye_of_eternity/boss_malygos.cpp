@@ -1,18 +1,18 @@
 /* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 
 /* ScriptData
 SDName: Boss_Malygos
@@ -29,144 +29,144 @@ EndScriptData */
 enum
 {
     // ******************************** SPELLS ******************************** //
-    SPELL_BERSERK                   = 64238,
+    SPELL_BERSERK = 64238,
 
     //////////////// PHASE 0 ////////////////
-    SPELL_PORTAL_BEAM               = 56046,
+    SPELL_PORTAL_BEAM = 56046,
 
     //////////////// PHASE 1 ////////////////
-    SPELL_ARCANE_BREATH             = 56272,
-    SPELL_ARCANE_BREATH_H           = 60072,
-    SPELL_ARCANE_STORM              = 61693,
-    SPELL_ARCANE_STORM_H            = 61694,
-    SPELL_VORTEX                    = 56105,
-    SPELL_VORTEX_DMG_AURA           = 56266, // on 10 sec, deal 2000 damage all player around caster
-    SPELL_VORTEX_VISUAL             = 55873, // visual effect around platform. summon trigger
-    SPELL_VORTEX_CHANNEL            = 56237, // Malygos Channel Effect
-    SPELL_POWER_SPARK               = 56152, // if spark reach malygos then buff him
-    SPELL_POWER_SPARK_PLAYERS       = 55852, // if spark is killed - buff players in area
-    SPELL_POWER_SPARK_VISUAL        = 55845,
+    SPELL_ARCANE_BREATH = 56272,
+    SPELL_ARCANE_BREATH_H = 60072,
+    SPELL_ARCANE_STORM = 61693,
+    SPELL_ARCANE_STORM_H = 61694,
+    SPELL_VORTEX = 56105,
+    SPELL_VORTEX_DMG_AURA = 56266, // on 10 sec, deal 2000 damage all player around caster
+    SPELL_VORTEX_VISUAL = 55873, // visual effect around platform. summon trigger
+    SPELL_VORTEX_CHANNEL = 56237, // Malygos Channel Effect
+    SPELL_POWER_SPARK = 56152, // if spark reach malygos then buff him
+    SPELL_POWER_SPARK_PLAYERS = 55852, // if spark is killed - buff players in area
+    SPELL_POWER_SPARK_VISUAL = 55845,
 
     //////////////// PHASE 2 ////////////////
-    SPELL_ARCANE_BOMB_MISSILE       = 56430,
-    SPELL_ARCANE_BOMB_DAMAGE        = 56431, // cast by arcane overload
-    SPELL_ARCANE_OVERLOAD           = 56432, // cast this on arcane overload NPCs
-    SPELL_SURGE_OF_POWER_BREATH     = 56505, // omfg, they say deep breath, but its this!
-    SPELL_DESTROY_PLATFORM_PRE      = 58842, // lights all over the platform
-    SPELL_DESTROY_PLATFORM_BOOM     = 59084, // Big Blue boom
+    SPELL_ARCANE_BOMB_MISSILE = 56430,
+    SPELL_ARCANE_BOMB_DAMAGE = 56431, // cast by arcane overload
+    SPELL_ARCANE_OVERLOAD = 56432, // cast this on arcane overload NPCs
+    SPELL_SURGE_OF_POWER_BREATH = 56505, // omfg, they say deep breath, but its this!
+    SPELL_DESTROY_PLATFORM_PRE = 58842, // lights all over the platform
+    SPELL_DESTROY_PLATFORM_BOOM = 59084, // Big Blue boom
     //NPCs spells
-    SPELL_ARCANE_SHOCK              = 57058,
-    SPELL_ARCANE_SHOCK_H            = 60073,
-    SPELL_HASTE                     = 57060,
-    SPELL_ARCANE_BARRAGE            = 50804, // hack, right spell is 56397
+    SPELL_ARCANE_SHOCK = 57058,
+    SPELL_ARCANE_SHOCK_H = 60073,
+    SPELL_HASTE = 57060,
+    SPELL_ARCANE_BARRAGE = 50804, // hack, right spell is 56397
 
     //////////////// PHASE 3 ////////////////
-    SPELL_STATIC_FIELD_MISSILE      = 57430,
-    SPELL_STATIC_FIELD              = 57428,
-    SPELL_SURGE_OF_POWER            = 57407, // this is on one target
-    SPELL_SURGE_OF_POWER_H          = 60936, // this is on unlimited tagets, must limit it in mangos
-    SPELL_ARCANE_PULSE              = 57432,
+    SPELL_STATIC_FIELD_MISSILE = 57430,
+    SPELL_STATIC_FIELD = 57428,
+    SPELL_SURGE_OF_POWER = 57407, // this is on one target
+    SPELL_SURGE_OF_POWER_H = 60936, // this is on unlimited tagets, must limit it in mangos
+    SPELL_ARCANE_PULSE = 57432,
 
-    SPELL_ALEXSTRASZAS_GIFT_BEAM    = 61028,
-    SPELL_ALEXSTRASZAS_GIFT_VISUAL  = 61023,
+    SPELL_ALEXSTRASZAS_GIFT_BEAM = 61028,
+    SPELL_ALEXSTRASZAS_GIFT_VISUAL = 61023,
 
     // ******************************** Items, NPCs & GameObjects ******************************** //
 
-    ITEM_KEY_TO_FOCUSING_IRIS       = 44582,
-    ITEM_KEY_TO_FOCUSING_IRIS_H     = 44581,
+    ITEM_KEY_TO_FOCUSING_IRIS = 44582,
+    ITEM_KEY_TO_FOCUSING_IRIS_H = 44581,
 
     //////////////// PHASE 1 ////////////////
-    NPC_VORTEX                      = 30090,
-    NPC_POWER_SPARK                 = 30084,
-    NPC_SPARK_PORTAL                = 30118, // for power sparks
-    VEHICLE_VORTEX                  = 168,
+    NPC_VORTEX = 30090,
+    NPC_POWER_SPARK = 30084,
+    NPC_SPARK_PORTAL = 30118, // for power sparks
+    VEHICLE_VORTEX = 168,
 
     //////////////// PHASE 2 ////////////////
-    NPC_HOVER_DISK                  = 30248,
-    NPC_NEXUS_LORD                  = 30245, // 2 (normal) and 4 (heroic) of them are spawned on beginning of phase 2
-    NPC_SCION_OF_ETERNITY           = 30249, // 4 (normal) and 8 (heroic) of them are spawned on beginning of phase 2
-    NPC_ARCANE_OVERLOAD             = 30282,
-    NPC_SURGE_OF_POWER              = 30334,
+    NPC_HOVER_DISK = 30248,
+    NPC_NEXUS_LORD = 30245, // 2 (normal) and 4 (heroic) of them are spawned on beginning of phase 2
+    NPC_SCION_OF_ETERNITY = 30249, // 4 (normal) and 8 (heroic) of them are spawned on beginning of phase 2
+    NPC_ARCANE_OVERLOAD = 30282,
+    NPC_SURGE_OF_POWER = 30334,
 
     //////////////// PHASE 3 ////////////////
-    NPC_STATIC_FIELD                = 30592, // trigger for that spell
-    NPC_WYRMREST_SKYTALON           = 30161, // dragon vehicle in 3-d Phase
-    NPC_ALEXSTRASZA                 = 32295,
-    NPC_ALEXSTRASZAS_GIFT           = 32448,
+    NPC_STATIC_FIELD = 30592, // trigger for that spell
+    NPC_WYRMREST_SKYTALON = 30161, // dragon vehicle in 3-d Phase
+    NPC_ALEXSTRASZA = 32295,
+    NPC_ALEXSTRASZAS_GIFT = 32448,
 
-    SPELL_CALL_SKYTALON             = 58846,
-    SPELL_CALL_SKYTALON_0           = 56070,
-    SPELL_VEHICLE_HARDCODED         = 46598,
+    SPELL_CALL_SKYTALON = 58846,
+    SPELL_CALL_SKYTALON_0 = 56070,
+    SPELL_VEHICLE_HARDCODED = 46598,
 
-    SAY_INTRO1                      = -1616000,
-    SAY_INTRO2                      = -1616001,
-    SAY_INTRO3                      = -1616002,
-    SAY_INTRO4                      = -1616003,
-    SAY_INTRO5                      = -1616004,
-    SAY_INTRO_PHASE3                = -1616018,
-    SAY_AGGRO1                      = -1616005,
-    SAY_AGGRO2                      = -1616013,
-    SAY_AGGRO3                      = -1616019,
-    SAY_VORTEX                      = -1616006,
-    SAY_POWER_SPARK                 = -1616035,
-    SAY_POWER_SPARK_BUFF            = -1616007,
-    SAY_KILL1_1                     = -1616008,
-    SAY_KILL1_2                     = -1616009,
-    SAY_KILL1_3                     = -1616010,
-    SAY_KILL2_1                     = -1616020,
-    SAY_KILL2_2                     = -1616021,
-    SAY_KILL2_3                     = -1616022,
-    SAY_KILL3_1                     = -1616023,
-    SAY_KILL3_2                     = -1616024,
-    SAY_KILL3_3                     = -1616025,
-    SAY_END_PHASE1                  = -1616012,
-    SAY_END_PHASE2                  = -1616017,
-    SAY_ARCANE_PULSE                = -1616014,
-    SAY_ARCANE_PULSE_WARN           = -1616015,
-    SAY_ARCANE_OVERLOAD             = -1616016,
-    SAY_SURGE_OF_POWER              = -1616026,
-    SAY_CAST_SPELL1                 = -1616027,
-    SAY_CAST_SPELL2                 = -1616028,
-    SAY_CAST_SPELL3                 = -1616029,
-    SAY_DEATH                       = -1616030,
+    SAY_INTRO1 = -1616000,
+    SAY_INTRO2 = -1616001,
+    SAY_INTRO3 = -1616002,
+    SAY_INTRO4 = -1616003,
+    SAY_INTRO5 = -1616004,
+    SAY_INTRO_PHASE3 = -1616018,
+    SAY_AGGRO1 = -1616005,
+    SAY_AGGRO2 = -1616013,
+    SAY_AGGRO3 = -1616019,
+    SAY_VORTEX = -1616006,
+    SAY_POWER_SPARK = -1616035,
+    SAY_POWER_SPARK_BUFF = -1616007,
+    SAY_KILL1_1 = -1616008,
+    SAY_KILL1_2 = -1616009,
+    SAY_KILL1_3 = -1616010,
+    SAY_KILL2_1 = -1616020,
+    SAY_KILL2_2 = -1616021,
+    SAY_KILL2_3 = -1616022,
+    SAY_KILL3_1 = -1616023,
+    SAY_KILL3_2 = -1616024,
+    SAY_KILL3_3 = -1616025,
+    SAY_END_PHASE1 = -1616012,
+    SAY_END_PHASE2 = -1616017,
+    SAY_ARCANE_PULSE = -1616014,
+    SAY_ARCANE_PULSE_WARN = -1616015,
+    SAY_ARCANE_OVERLOAD = -1616016,
+    SAY_SURGE_OF_POWER = -1616026,
+    SAY_CAST_SPELL1 = -1616027,
+    SAY_CAST_SPELL2 = -1616028,
+    SAY_CAST_SPELL3 = -1616029,
+    SAY_DEATH = -1616030,
     // Alexstrasza
-    SAY_OUTRO1                      = -1616031,
-    SAY_OUTRO2                      = -1616032,
-    SAY_OUTRO3                      = -1616033,
-    SAY_OUTRO4                      = -1616034,
+    SAY_OUTRO1 = -1616031,
+    SAY_OUTRO2 = -1616032,
+    SAY_OUTRO3 = -1616033,
+    SAY_OUTRO4 = -1616034,
 
-    PLATFORM_MIN_X                  = 722,
-    PLATFORM_MAX_X                  = 768,
-    PLATFORM_MIN_Y                  = 1290,
-    PLATFORM_MAX_Y                  = 1339,
+    PLATFORM_MIN_X = 722,
+    PLATFORM_MAX_X = 768,
+    PLATFORM_MIN_Y = 1290,
+    PLATFORM_MAX_Y = 1339,
 
-    NEXUS_LORD_COUNT                = 2,
-    NEXUS_LORD_COUNT_H              = 4,
-    SCION_OF_ETERNITY_COUNT         = 4,
-    SCION_OF_ETERNITY_COUNT_H       = 8,
+    NEXUS_LORD_COUNT = 2,
+    NEXUS_LORD_COUNT_H = 4,
+    SCION_OF_ETERNITY_COUNT = 4,
+    SCION_OF_ETERNITY_COUNT_H = 8,
 
-    PHASE_INTRO                     = 0,
-    PHASE_FLOOR                     = 1,
-        SUBPHASE_VORTEX             = 11,
-    PHASE_ADDS                      = 2,
-        SUBPHASE_TALK               = 21,
-        SUBPHASE_DEEP_BREATH        = 22,
-    PHASE_DRAGONS                   = 3,
+    PHASE_INTRO = 0,
+    PHASE_FLOOR = 1,
+        SUBPHASE_VORTEX = 11,
+    PHASE_ADDS = 2,
+        SUBPHASE_TALK = 21,
+        SUBPHASE_DEEP_BREATH = 22,
+    PHASE_DRAGONS = 3,
         SUBPHASE_DESTROY_PLATFORM_1 = 31,
         SUBPHASE_DESTROY_PLATFORM_2 = 32,
         SUBPHASE_DESTROY_PLATFORM_3 = 33,
         SUBPHASE_DESTROY_PLATFORM_4 = 34,
-        SUBPHASE_SURGE_OF_POWER     = 35,
+        SUBPHASE_SURGE_OF_POWER = 35,
 
-    POINT_ID_WAYPOINT               = 1,
-    POINT_ID_LAND                   = 2,
-    POINT_ID_VORTEX_AIR             = 3,
-    POINT_ID_PHASE_2_WP             = 4,
-    POINT_ID_DEEP_BREATH            = 5,
+    POINT_ID_WAYPOINT = 1,
+    POINT_ID_LAND = 2,
+    POINT_ID_VORTEX_AIR = 3,
+    POINT_ID_PHASE_2_WP = 4,
+    POINT_ID_DEEP_BREATH = 5,
 
     //hacks
-    SPELL_FLIGHT                    = 59553,
-    MODEL_ID_INVISIBLE              = 11686
+    SPELL_FLIGHT = 59553,
+    MODEL_ID_INVISIBLE = 11686
 };
 
 struct LocationsXY
@@ -208,16 +208,16 @@ static LocationsXY VortexLoc[]=
     {728, 1312},
 };
 
-#define MAX_VORTEX              21
+#define MAX_VORTEX 21
 
-#define CENTER_X                754.50f
-#define CENTER_Y                1301.76f
-#define FLOOR_Z                 266.17f
-#define AIR_Z                   296.17f
-#define VORTEX_FARSIGHT_X       749.00f
-#define VORTEX_FARSIGHT_Y       1244.00f
-#define VORTEX_FARSIGHT_Z       332.00f
-#define VORTEX_FARSIGHT_O       1.54f
+#define CENTER_X 754.50f
+#define CENTER_Y 1301.76f
+#define FLOOR_Z 266.17f
+#define AIR_Z 296.17f
+#define VORTEX_FARSIGHT_X 749.00f
+#define VORTEX_FARSIGHT_Y 1244.00f
+#define VORTEX_FARSIGHT_Z 332.00f
+#define VORTEX_FARSIGHT_O 1.54f
 
 /*######
 ## boss_malygos
@@ -296,7 +296,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
         m_creature->SetSpeedRate(MOVE_FLIGHT, 2.0f);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
-        m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+        m_creature->SetLevitate(true);
         m_creature->GetMotionMaster()->Clear();
 
         DespawnCreatures(NPC_POWER_SPARK);
@@ -337,7 +337,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
         DespawnCreatures(NPC_STATIC_FIELD);
         m_creature->SummonCreature(NPC_ALEXSTRASZA, CENTER_X+20.0f, CENTER_Y+20.0f, AIR_Z, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
         m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), FLOOR_Z-500.0f, 0);
-        m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), FLOOR_Z-400.0f, SPLINETYPE_NORMAL , m_creature->GetSplineFlags(), 10000);
+        m_creature->MonsterMoveWithSpeed(m_creature->GetPositionX(), m_creature->GetPositionY(), FLOOR_Z-400.0f, 26);
     }
 
     void KilledUnit(Unit* pVictim)
@@ -395,7 +395,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
         {
             if (Creature* pDisk = pSummoned->SummonCreature(NPC_HOVER_DISK, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0))
             {
-                pDisk->SetSplineFlags(SPLINEFLAG_FLYING);
+                pDisk->SetLevitate(true);
                 pDisk->CastSpell(pDisk, SPELL_FLIGHT, true);
                 if (uiEntry == NPC_NEXUS_LORD)
                     pDisk->SetSpeedRate(MOVE_WALK, 1.5f);
@@ -472,7 +472,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
                 pTargetSparkPortal->Respawn();
 
             m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
-            m_creature->RemoveSplineFlag(SPLINEFLAG_FLYING);
+            m_creature->SetLevitate(false);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             m_uiPhase = PHASE_FLOOR;
             m_creature->SetInCombatWithZone();
@@ -698,7 +698,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
                     else if (m_uiVortexPhase == MAX_VORTEX+9)
                     {
                         m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
-                        m_creature->RemoveSplineFlag(SPLINEFLAG_FLYING);
+                        m_creature->SetLevitate(false);
                         m_uiSubPhase = 0;
                         m_creature->GetMotionMaster()->Clear();
                         if (Unit* pTarget = m_creature->getVictim())
@@ -753,7 +753,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
             if (m_uiVortexTimer <= uiDiff)
             {
                 m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
-                m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+                m_creature->SetLevitate(true);
                 SetCombatMovement(false);
                 m_creature->GetMotionMaster()->Clear();
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_VORTEX_AIR, CENTER_X, CENTER_Y, AIR_Z);
@@ -778,7 +778,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
                     m_uiPhase = PHASE_ADDS;
                     m_uiSubPhase = SUBPHASE_TALK;
                     m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
-                    m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+                    m_creature->SetLevitate(true);
                     SetCombatMovement(false);
                     m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MovePoint(0, CENTER_X, CENTER_Y, AIR_Z);
@@ -789,7 +789,7 @@ struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI
                 m_uiTimer = 2000;
             }
             else
-                m_uiTimer -= uiDiff;  
+                m_uiTimer -= uiDiff;
         }
         else if (m_uiPhase == PHASE_ADDS)
         {
@@ -1066,7 +1066,7 @@ struct MANGOS_DLL_DECL npc_power_sparkAI : public ScriptedAI
         m_uiCheckTimer = 0;
 
         SetCombatMovement(false);
-        m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+        m_creature->SetLevitate(true);
         m_creature->CastSpell(m_creature, SPELL_POWER_SPARK_VISUAL, false);
     }
 
@@ -1092,7 +1092,7 @@ struct MANGOS_DLL_DECL npc_power_sparkAI : public ScriptedAI
             m_creature->CastSpell(m_creature, SPELL_POWER_SPARK_PLAYERS, true);
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), FLOOR_Z+1.5f, 0);
-            m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), FLOOR_Z+1.5f, SPLINETYPE_NORMAL , m_creature->GetSplineFlags(), 1000);
+            m_creature->MonsterMoveWithSpeed(m_creature->GetPositionX(), m_creature->GetPositionY(), FLOOR_Z+1.5f,26);
             m_creature->ForcedDespawn(60000);
         }
     }
@@ -1227,7 +1227,7 @@ struct MANGOS_DLL_DECL npc_nexus_lordAI : public ScriptedAI
 
         DoMeleeAttackIfReady();
     }
-}; 
+};
 
 /*######
 ## npc_scion_of_eternity
@@ -1271,7 +1271,7 @@ struct MANGOS_DLL_DECL npc_scion_of_eternityAI : public ScriptedAI
 
         DoMeleeAttackIfReady();
     }
-}; 
+};
 
 /*######
 ## npc_hover_disk
@@ -1296,7 +1296,7 @@ struct MANGOS_DLL_DECL npc_hover_diskAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->setFaction(35);
         m_creature->CastSpell(m_creature, SPELL_FLIGHT, true);
-        m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+        m_creature->SetLevitate(true);
     }
 
     void AttackStart(Unit *pWho)
@@ -1320,7 +1320,7 @@ struct MANGOS_DLL_DECL npc_hover_diskAI : public ScriptedAI
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), FLOOR_Z+1.5f, 0);
-                    m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), FLOOR_Z+1.5f, SPLINETYPE_NORMAL , m_creature->GetSplineFlags(), 4000);
+                    m_creature->MonsterMoveWithSpeed(m_creature->GetPositionX(), m_creature->GetPositionY(), FLOOR_Z+1.5f, 26);
                     m_bMoved = true;
                     m_bPassengerHere = false;
                 }
@@ -1351,7 +1351,7 @@ struct MANGOS_DLL_DECL npc_alexstraszaAI : public ScriptedAI
         m_uiTimer = 9500;
         m_uiCount = 0;
         m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
-        m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+        m_creature->SetLevitate(true);
         if (m_pInstance)
             if (Creature* pMalygos = m_pInstance->GetSingleCreatureFromStorage(NPC_MALYGOS))
                 m_creature->SetFacingToObject(pMalygos);
@@ -1444,17 +1444,17 @@ CreatureAI* GetAI_npc_power_spark(Creature* pCreature)
 CreatureAI* GetAI_npc_nexus_lord(Creature* pCreature)
 {
     return new npc_nexus_lordAI(pCreature);
-} 
+}
 
 CreatureAI* GetAI_npc_scion_of_eternity(Creature* pCreature)
 {
     return new npc_scion_of_eternityAI(pCreature);
-} 
+}
 
 CreatureAI* GetAI_npc_hover_disk(Creature* pCreature)
 {
     return new npc_hover_diskAI(pCreature);
-} 
+}
 
 CreatureAI* GetAI_npc_alexstrasza(Creature* pCreature)
 {
@@ -1485,7 +1485,7 @@ struct MANGOS_DLL_DECL npc_whyrmrest_skytalonAI : public ScriptedAI
         SeatTimer = 2000;
         ownerGUID = m_creature->GetCreatorGuid();
         m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
-        m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+        m_creature->SetLevitate(true);
     }
 
     void AttackStart(Unit *) {}

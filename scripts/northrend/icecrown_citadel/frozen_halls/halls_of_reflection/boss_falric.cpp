@@ -64,18 +64,18 @@ struct MANGOS_DLL_DECL boss_falricAI : public BSWScriptedAI
 
     void Reset()
     {
-      SummonCount = 0;
-      m_bIsCall = false;
-      m_uiSummonTimer = 11000;
-      m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-      m_creature->SetVisibility(VISIBILITY_OFF);
+        SummonCount = 0;
+        m_bIsCall = false;
+        m_uiSummonTimer = 11000;
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetVisibility(VISIBILITY_OFF);
     }
 
     void Aggro(Unit* pVictim)
     {
-      m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
-      DoScriptText(SAY_FALRIC_AGGRO, m_creature);
-      DoCast(m_creature, SPELL_HOPELESSNESS);
+        m_creature->SetWalk(false);
+        DoScriptText(SAY_FALRIC_AGGRO, m_creature);
+        DoCast(m_creature, SPELL_HOPELESSNESS);
     }
 
     void KilledUnit(Unit* pVictim)

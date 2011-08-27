@@ -426,14 +426,16 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
                         DoCast(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_TENDRILS : SPELL_LIGHTNING_TENDRILS_H,true);
                         SetCombatMovement(false);
                         m_creature->GetMotionMaster()->Clear(false);
-                        m_creature->SetHover(true);
+                        m_creature->SetLevitate(true);
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
                             m_creature->GetMotionMaster()->MoveChase(pTarget);
 				        m_bIsTendrils = true;
 				        m_creature->SetSpeedRate(MOVE_RUN, 0.8f);
 				        m_uiTendrils_end_Timer = 40000;
 				        m_uiTendrils_Change = 4000;
-			        }else m_uiTendrils_start_Timer -= uiDiff;
+			        }
+                    else
+                        m_uiTendrils_start_Timer -= uiDiff;
                     
                     DoCastSpellIfCan(m_creature, SPELL_STORMSHIELD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                 }

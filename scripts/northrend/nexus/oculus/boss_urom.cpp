@@ -151,7 +151,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
     void TeleportBoss(float X, float Y, float Z, float O)
     {
         m_creature->GetMap()->CreatureRelocation(m_creature, X, Y, Z, O);
-        m_creature->SendMonsterMove(X, Y, Z, SPLINETYPE_NORMAL, SPLINEFLAG_DONE, 0);
+        m_creature->MonsterMoveWithSpeed(X, Y, Z, 44, false ,true);
         m_creature->Relocate(X, Y, Z, O);
     }
 
@@ -332,7 +332,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
            if(m_uiRelocateTimer < uiDiff)
            {
                m_bIsTeleported = true;
-               m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+               m_creature->SetLevitate(true);
                m_creature->GetMotionMaster()->Clear(false);
                m_creature->GetMotionMaster()->MoveIdle();
                m_creature->StopMoving();
@@ -354,7 +354,7 @@ struct MANGOS_DLL_DECL boss_uromAI : public BSWScriptedAI
            if(m_uiBackTimer < uiDiff)
            {
                TeleportBoss((m_creature->getVictim())->GetPositionX(),(m_creature->getVictim())->GetPositionY(),(m_creature->getVictim())->GetPositionZ(),(m_creature->getVictim())->GetOrientation());
-               m_creature->RemoveSplineFlag(SPLINEFLAG_FLYING);
+               m_creature->SetLevitate(false);
                if(m_creature->getVictim())
                   m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                m_uiBackTimer = m_bIsRegularMode ? 9500 : 7500;

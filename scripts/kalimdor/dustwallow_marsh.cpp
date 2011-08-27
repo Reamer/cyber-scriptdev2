@@ -31,6 +31,7 @@ npc_nat_pagle
 npc_ogron
 npc_private_hendel
 npc_cassa_crimsonwing
+Lady Jaina Proudmoore
 EndContentData */
 
 #include "precompiled.h"
@@ -215,41 +216,6 @@ bool GossipHello_npc_deserter_agitator(Player* pPlayer, Creature* pCreature)
     else
         pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
 
-    return true;
-}
-
-/*######
-## npc_lady_jaina_proudmoore
-######*/
-
-enum
-{
-    QUEST_JAINAS_AUTOGRAPH = 558,
-    SPELL_JAINAS_AUTOGRAPH = 23122
-};
-
-#define GOSSIP_ITEM_JAINA "I know this is rather silly but i have a young ward who is a bit shy and would like your autograph."
-
-bool GossipHello_npc_lady_jaina_proudmoore(Player* pPlayer, Creature* pCreature)
-{
-    if (pCreature->isQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
-
-    if (pPlayer->GetQuestStatus(QUEST_JAINAS_AUTOGRAPH) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_JAINA, GOSSIP_SENDER_MAIN, GOSSIP_SENDER_INFO);
-
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
-
-    return true;
-}
-
-bool GossipSelect_npc_lady_jaina_proudmoore(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_SENDER_INFO)
-    {
-        pPlayer->SEND_GOSSIP_MENU(7012, pCreature->GetObjectGuid());
-        pPlayer->CastSpell(pPlayer, SPELL_JAINAS_AUTOGRAPH, false);
-    }
     return true;
 }
 
@@ -833,6 +799,124 @@ bool AreaTrigger_at_nats_landing(Player* pPlayer, const AreaTriggerEntry* pAt)
     return true;
 }
 
+/*######
+## Lady Jaina Proudmoore
+######*/
+
+enum
+{
+    SPELL_BLIZZARD                  = 20680,
+    SPELL_FIRE_BLAST                = 20679,
+    SPELL_FIREBALL                  = 20692,
+    SPELL_SUMMON_WATER_ELEMENT      = 20681,
+    SPELL_TELEPORT                  = 20682,
+
+    QUEST_JAINAS_AUTOGRAPH = 558,
+    SPELL_JAINAS_AUTOGRAPH = 23122
+};
+
+struct MANGOS_DLL_DECL boss_lady_jaina_proudmooreAI : public ScriptedAI
+{
+    boss_lady_jaina_proudmooreAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+
+    uint32 m_uiBlizzardTimer;
+    uint32 m_uiFireBlastTimer;
+    uint32 m_uiFireballTimer;
+    uint32 m_uiTeleportTimer;
+    uint32 m_uiWaterElementTimer;
+
+    void Reset()
+    {
+        m_uiBlizzardTimer   = 15000;
+        m_uiFireBlastTimer  = 5000;
+        m_uiFireballTimer   = 7000;
+        m_uiTeleportTimer   = 17000;
+        m_uiWaterElementTimer = 20000;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiBlizzardTimer < uiDiff)
+        {
+            if (Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                DoCast(pTarget, SPELL_BLIZZARD);
+            m_uiBlizzardTimer = urand(15000, 18000);
+        }
+        else
+            m_uiBlizzardTimer -= uiDiff;
+
+        if (m_uiFireBlastTimer < uiDiff)
+        {
+            if (Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                DoCast(pTarget, SPELL_FIRE_BLAST);
+            m_uiFireBlastTimer = urand(5000, 8000);
+        }
+        else
+            m_uiFireBlastTimer -= uiDiff;
+
+        if (m_uiFireballTimer < uiDiff)
+        {
+            if (Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                DoCast(pTarget, SPELL_FIREBALL);
+            m_uiFireballTimer = urand(7000, 10000);
+        }
+        else
+            m_uiFireballTimer -= uiDiff;
+
+        if (m_uiTeleportTimer < uiDiff)
+        {
+            if (Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                DoCast(pTarget, SPELL_TELEPORT);
+            m_uiTeleportTimer = urand(17000, 25000);
+        }
+        else
+            m_uiTeleportTimer -= uiDiff;
+
+        if (m_uiWaterElementTimer < uiDiff)
+        {
+            DoCast(m_creature, SPELL_SUMMON_WATER_ELEMENT);
+            m_uiWaterElementTimer = urand(20000, 30000);
+        }
+        else
+            m_uiWaterElementTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+#define GOSSIP_ITEM_JAINA "I know this is rather silly but i have a young ward who is a bit shy and would like your autograph."
+
+bool GossipHello_boss_lady_jaina_proudmoore(Player* pPlayer, Creature* pCreature)
+{
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+
+    if (pPlayer->GetQuestStatus(QUEST_JAINAS_AUTOGRAPH) == QUEST_STATUS_INCOMPLETE)
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_JAINA, GOSSIP_SENDER_MAIN, GOSSIP_SENDER_INFO);
+
+    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+
+    return true;
+}
+
+bool GossipSelect_boss_lady_jaina_proudmoore(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+{
+    if (uiAction == GOSSIP_SENDER_INFO)
+    {
+        pPlayer->SEND_GOSSIP_MENU(7012, pCreature->GetObjectGuid());
+        pPlayer->CastSpell(pPlayer, SPELL_JAINAS_AUTOGRAPH, false);
+    }
+    return true;
+}
+
+CreatureAI* GetAI_boss_lady_jaina_proudmoore(Creature* pCreature)
+{
+    return new boss_lady_jaina_proudmooreAI(pCreature);
+}
+
 void AddSC_dustwallow_marsh()
 {
     Script* pNewScript;
@@ -851,12 +935,6 @@ void AddSC_dustwallow_marsh()
     pNewScript->Name = "npc_deserter_agitator";
     pNewScript->GetAI = &GetAI_npc_deserter_agitator;
     pNewScript->pGossipHello = &GossipHello_npc_deserter_agitator;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_lady_jaina_proudmoore";
-    pNewScript->pGossipHello = &GossipHello_npc_lady_jaina_proudmoore;
-    pNewScript->pGossipSelect = &GossipSelect_npc_lady_jaina_proudmoore;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -892,5 +970,12 @@ void AddSC_dustwallow_marsh()
     pNewScript = new Script;
     pNewScript->Name = "at_nats_landing";
     pNewScript->pAreaTrigger = &AreaTrigger_at_nats_landing;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "boss_lady_jaina_proudmoore";
+    pNewScript->GetAI = &GetAI_boss_lady_jaina_proudmoore;
+    pNewScript->pGossipHello = &GossipHello_boss_lady_jaina_proudmoore;
+    pNewScript->pGossipSelect = &GossipSelect_boss_lady_jaina_proudmoore;
     pNewScript->RegisterSelf();
 }

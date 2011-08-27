@@ -101,28 +101,36 @@ struct MANGOS_DLL_DECL boss_dredAI : public ScriptedAI
         {    
             DoCast(m_creature->getVictim(), SPELL_PIERCING_SLASH, true);
             PiercingSlash_Timer = urand(20000, 25000);
-        }else PiercingSlash_Timer -= uiDiff;
+        }
+        else
+        	PiercingSlash_Timer -= uiDiff;
 
         //Mangling Slash
         if (ManglingSlash_Timer < uiDiff)
         {    
             DoCast(m_creature->getVictim(), SPELL_MANGLING_SLASH, true);
             ManglingSlash_Timer = urand(20000, 25000);
-        }else ManglingSlash_Timer -= uiDiff;
+        }
+        else
+        	ManglingSlash_Timer -= uiDiff;
 
         //Grievous Bite
         if (GrievousBite_Timer < uiDiff)
         {    
             DoCast(m_creature->getVictim(), SPELL_GRIEVOUS_BITE, true);
             GrievousBite_Timer = urand(20000, 25000);
-        }else GrievousBite_Timer -= uiDiff;
-
+        }
+        else
+        	GrievousBite_Timer -= uiDiff;
+        
         //Bellowing Roar
         if (BellowingRoar_Timer < uiDiff)
         {    
             DoCast(m_creature, SPELL_BELLOWING_ROAR);
             BellowingRoar_Timer = 60000;
-        }else BellowingRoar_Timer -= uiDiff;
+        }
+        else
+        	BellowingRoar_Timer -= uiDiff;
 
         //Call For Raptor - spell
         if (CallForRaptor_Timer < uiDiff)
@@ -131,7 +139,9 @@ struct MANGOS_DLL_DECL boss_dredAI : public ScriptedAI
             m_creature->CastSpell(m_creature, SAY_CALL_FOR_RAPTOR, true);
             CallForRaptor_Timer = 25000;
             CallForRaptorSpawnCheck();
-        }else CallForRaptor_Timer -= uiDiff;
+        }
+        else
+        	CallForRaptor_Timer -= uiDiff;
 
         //Call For Raptor - spawn
         if (CallForRaptorSpawn_Timer < uiDiff && CallForRaptorSpawn_Check == 1)
@@ -150,7 +160,9 @@ struct MANGOS_DLL_DECL boss_dredAI : public ScriptedAI
                 }
             }
             CallForRaptorSpawn_Check = 0;
-        }else CallForRaptorSpawn_Timer -= uiDiff;
+        }
+        else
+        	CallForRaptorSpawn_Timer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -163,10 +175,10 @@ CreatureAI* GetAI_boss_dred(Creature* pCreature)
 
 void AddSC_boss_dred()
 {
-    Script *newscript;
+    Script *pNewscript;
 
-    newscript = new Script;
-    newscript->Name = "boss_dred";
-    newscript->GetAI = &GetAI_boss_dred;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "boss_dred";
+    pNewscript->GetAI = &GetAI_boss_dred;
+    pNewscript->RegisterSelf();
 }

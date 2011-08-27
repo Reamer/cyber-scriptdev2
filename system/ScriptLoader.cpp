@@ -6,6 +6,7 @@
 
 // battlegrounds
 extern void AddSC_battleground();
+extern void AddSC_battlegroundSA();
 
 // custom
 extern void AddSC_custom_cybernetic();
@@ -537,6 +538,7 @@ void AddScripts()
 {
     // battlegrounds
     AddSC_battleground();
+    AddSC_battlegroundSA();
 
     // custom
     AddSC_custom_cybernetic();

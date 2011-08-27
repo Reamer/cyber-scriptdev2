@@ -196,7 +196,7 @@ struct MANGOS_DLL_DECL mob_vh_dragonsAI : public ScriptedAI
         }
 
         WayPoint = WayPointList.begin();
-        m_creature->AddSplineFlag(SPLINEFLAG_WALKMODE);
+        m_creature->SetWalk(true);
         IsWalking = true;
         MovementStarted = true;
     }
@@ -299,7 +299,7 @@ struct MANGOS_DLL_DECL mob_vh_dragonsAI : public ScriptedAI
                 IsWalking = false;
                 WayPointList.clear();
                 m_creature->GetMotionMaster()->Clear(false);
-                m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+                m_creature->SetWalk(false);
                 DoCast(pDoorSeal2, SPELL_CORRUPT);
                 m_pInstance->SetData(TYPE_DOOR,SPECIAL);
             }
@@ -962,7 +962,7 @@ struct MANGOS_DLL_DECL npc_azure_saboteurAI : public ScriptedAI
         m_bIsActiving = false;
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+        m_creature->SetWalk(false);
         m_uiDisruptionCounter = 0;
         m_uiDisruptionsCount = 0;
         m_uiDisruption_Timer = 1000;

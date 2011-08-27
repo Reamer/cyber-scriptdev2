@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -50,7 +50,7 @@ enum
     SPELL_GIFT_OF_THARONJA          = 52509,
 
     SPELL_LIGHTNING_BREATH          = 49537,
-    H_SPELL_LIGHTNING_BREATH        = 59963,
+    H_SPELL_LIGHTNING_BREATH        = 59936,
     SPELL_EYE_BEAM                  = 49544,
     H_SPELL_EYE_BEAM                = 59965,
 
@@ -58,6 +58,8 @@ enum
     H_SPELL_POSION_CLOUD            = 59969,
     
     SPELL_RETURN_FLESH              = 53463,                //not working
+
+    SPELL_ACHIEV_CHECK              = 61863,
 
     //achie hacks
     ACHIEVEMENT_NORMAL              = 482,
@@ -68,18 +70,19 @@ enum
 //Phasses
 enum Phase
 {
-    PHASE_SKELETON                  =   0,
-    PHASE_INTOFLESH                 =   1,
-    PHASE_FLESH                     =   2,
-    PHASE_INTOSKELETON              =   3
+    PHASE_SKELETON                  = 0,
+    PHASE_INTOFLESH                 = 1,
+    PHASE_FLESH                     = 2,
+    PHASE_INTOSKELETON              = 3
 };
 
 enum PhaseChangeTimer
 {
     PHASE_CHANGE_SKELETON           = 12000,
-    PHASE_CHANGE_REAL               = 4000,
-    PHASE_CHANGE_FLESH              = 20000
+    PHASE_CHANGE_REAL               = 6000,
+    PHASE_CHANGE_FLESH               = 20000
 };
+
 /*######
 ## boss_tharonja
 ######*/
@@ -104,7 +107,6 @@ struct MANGOS_DLL_DECL boss_tharonjaAI : public ScriptedAI
 
     void Reset()
     {
-        m_creature->SetDisplayId(27072);
         PhaseChangeTimer = PHASE_CHANGE_SKELETON;
         Phase = PHASE_SKELETON;
         SkeletonSpells_Timer = urand (5000, 10000);
@@ -127,11 +129,15 @@ struct MANGOS_DLL_DECL boss_tharonjaAI : public ScriptedAI
     void JustDied(Unit* pKiller)
     {
         DoScriptText(SAY_DEATH, m_creature);
+        DoCastSpellIfCan(pKiller, SPELL_ACHIEV_CHECK, CAST_TRIGGERED);
 
         if (m_pInstance)
         {
             m_pInstance->SetData(TYPE_THARONJA, DONE);
-            m_bIsRegularMode ? m_pInstance->DoCompleteAchievement(ACHIEVEMENT_NORMAL) : m_pInstance->DoCompleteAchievement(ACHIEVEMENT_HEROIC);
+            if (m_bIsRegularMode)
+                m_pInstance->DoCompleteAchievement(ACHIEVEMENT_NORMAL);
+            else
+                m_pInstance->DoCompleteAchievement(ACHIEVEMENT_HEROIC);
         }
     }
 

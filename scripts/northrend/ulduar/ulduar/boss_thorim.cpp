@@ -924,7 +924,7 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                                     Sif->setFaction(14);
                                     DoScriptText(SAY_SIF_EVENT, Sif);
                                     Sif->SetInCombatWithZone();
-                                    Sif->MonsterJump(2134.719f, -263.148f, 419.846f, 0, 30, 30);
+                                    Sif->MonsterMoveJump(2134.719f, -263.148f, 419.846f, 0, 30, 30);
                                     if (m_pInstance)
                                         m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SIFFED, true);
                                 }
@@ -942,7 +942,6 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
                     if(m_uiJumpTimer < uiDiff && m_bIsPhaseOneEnd)
                     {
                         m_creature->GetMap()->CreatureRelocation(m_creature, 2134.719f, -263.148f, 419.846f, 0);
-                        m_creature->SendMonsterMove(2134.719f, -263.148f, 419.846f, SPLINETYPE_NORMAL, SPLINEFLAG_DONE, 0);
                         m_creature->Relocate(2134.719f, -263.148f, 419.846f, 0);
                         m_creature->GetMotionMaster()->MovePoint(0, 2134.719f, -263.148f, 419.846f, false);
                         m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());

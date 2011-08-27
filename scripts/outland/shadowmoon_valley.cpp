@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Shadowmoon_Valley
 SD%Complete: 100
-SDComment: Quest support: 10519, 10583, 10601, 10781, 10814, 10804, 10854, 11082, 10458, 10480, 10481. Vendor Drake Dealer Hurlunk.
+SDComment: Quest support: 10519, 10583, 10601, 10781, 10814, 10804, 10854, 11082, 10458, 10480, 10481, 11020. Vendor Drake Dealer Hurlunk.
 SDCategory: Shadowmoon Valley
 EndScriptData */
 
@@ -386,7 +386,7 @@ struct MANGOS_DLL_DECL npc_dragonmaw_peonAI : public ScriptedAI
                         float fX, fY, fZ;
                         pMutton->GetContactPoint(m_creature, fX, fY, fZ, CONTACT_DISTANCE);
 
-                        m_creature->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+                        m_creature->SetWalk(false);
                         m_creature->GetMotionMaster()->MovePoint(POINT_DEST, fX, fY, fZ);
                     }
                 }
