@@ -305,7 +305,8 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
             {
                 pRightArm->SetCreatorGuid(m_creature->GetObjectGuid());
                 pRightArm->EnterVehicle(vehicle, RIGHT_ARM_SLOT);
-                pRightArm->SendHeartBeat(false);
+                pRightArm->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                pRightArm->SendHeartBeat();
                 m_uiRightArmGuid = pRightArm->GetObjectGuid();
             }
         }
@@ -322,7 +323,8 @@ struct MANGOS_DLL_DECL boss_kologarnAI : public ScriptedAI
             {
                 pLeftArm->SetCreatorGuid(m_creature->GetObjectGuid());
                 pLeftArm->EnterVehicle(vehicle, LEFT_ARM_SLOT);
-                pLeftArm->SendHeartBeat(false);
+                pLeftArm->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                pLeftArm->SendHeartBeat();
                 m_uiLeftArmGuid = pLeftArm->GetObjectGuid();
             }
         }

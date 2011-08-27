@@ -35,7 +35,7 @@ EndContentData */
 #define SAY_DEATH                       -1540047
 
 #define SPELL_BLADE_DANCE               30739
-#define H_SPELL_CHARGE                  25821
+#define SPELL_CHARGE_H                  25821
 
 #define TARGET_NUM                      5
 
@@ -131,6 +131,11 @@ struct MANGOS_DLL_DECL boss_warchief_kargath_bladefistAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
         removeAdds();
+
+        if (Creature * Executioner = m_creature->GetClosestCreatureWithEntry(m_creature, 17301, 60.0f))
+        {
+            Executioner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE + UNIT_FLAG_PASSIVE);
+        }
     }
 
     void MovementInform(uint32 type, uint32 id)
@@ -238,7 +243,7 @@ struct MANGOS_DLL_DECL boss_warchief_kargath_bladefistAI : public ScriptedAI
                 if (Charge_timer <= diff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
-                        DoCastSpellIfCan(pTarget, H_SPELL_CHARGE);
+                        DoCastSpellIfCan(pTarget, SPELL_CHARGE_H);
 
                     Charge_timer = 0;
                 }else Charge_timer -= diff;

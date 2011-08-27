@@ -286,7 +286,7 @@ struct MANGOS_DLL_DECL mob_taldaram_flame_orbAI : public ScriptedAI
         m_bIsFlying = false;
         //hack to set model invisible
         m_creature->SetDisplayId(10045);
-        m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+        m_creature->SetLevitate(true);
         DoCast(m_creature, SPELL_FLAME_ORB_VISUAL);
         DoCast(m_creature, SPELL_FLAME_ORB_SPAWN_EFFECT);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);

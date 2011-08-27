@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11692, 11676, 11708, 11919, 11940, 11961. Taxi vendors. 
+SDComment: Quest support: 11570, 11590, 11608, 11676, 11692, 11708, 11919, 11940, 11961. Taxi vendors.
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -34,6 +34,7 @@ npc_lurgglbr
 npc_nexus_drake
 go_scourge_cage
 npc_beryl_sorcerer
+npc_seaforium_depth_charge
 EndContentData */
 
 #include "precompiled.h"
@@ -377,7 +378,7 @@ bool EffectDummyCreature_npc_oil_stained_wolf(Unit* pCaster, uint32 uiSpellId, S
         if (uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->getFaction() != FACTION_MONSTER && !pCreatureTarget->HasAura(SPELL_HAS_EATEN))
         {
             pCreatureTarget->SetFactionTemporary(FACTION_MONSTER);
-            pCreatureTarget->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+            pCreatureTarget->SetWalk(false);
 
             pCreatureTarget->GetMotionMaster()->MoveIdle();
 
@@ -763,6 +764,9 @@ enum
     NPC_RAELORASZ                   = 26117,
     DRAKE_HUNT_KILL_CREDIT          = 26175,
 
+    SPELL_INTANGIBLE_PRESENCE     = 36513,
+    SPELL_NETHERBREATH            = 36631,
+
     QUEST_DRAKE_HUNT                = 11919,
     QUEST_DRAKE_HUNT_D              = 11940
 
@@ -771,22 +775,26 @@ enum
 struct MANGOS_DLL_DECL npc_nexus_drakeAI : public FollowerAI
 {
     npc_nexus_drakeAI(Creature* pCreature) : FollowerAI(pCreature) { Reset(); }
-    
+
      uint64 uiHarpoonerGUID;
      bool bWithRedDragonBlood;
      bool bIsFollowing;
+     uint32 SPELL_INTANGIBLE_PRESENCE_Timer;
+     uint32 SPELL_NETHERBREATH_Timer;
 
      void Reset()
      {
          bWithRedDragonBlood = false;
          bIsFollowing = false;
+         SPELL_INTANGIBLE_PRESENCE_Timer = 16600;
+         SPELL_NETHERBREATH_Timer = 4600;
      }
 
      void EnterCombat(Unit* pWho)
      {
          AttackStart(pWho);
      }
-     
+
      void SpellHit(Unit* pCaster, SpellEntry const* pSpell)
      {
             if (pSpell->Id == SPELL_DRAKE_HARPOON && pCaster->GetTypeId() == TYPEID_PLAYER)
@@ -807,17 +815,17 @@ struct MANGOS_DLL_DECL npc_nexus_drakeAI : public FollowerAI
          {
            if (Player *pHarpooner = m_creature->GetMap()->GetPlayer(uiHarpoonerGUID))
                  {
-                    
+
                      pHarpooner->KilledMonsterCredit(DRAKE_HUNT_KILL_CREDIT,m_creature->GetGUID());
                      pHarpooner->RemoveAurasByCasterSpell(SPELL_DRAKE_HATCHLING_SUBDUED,uiHarpoonerGUID);
                      SetFollowComplete();
                      uiHarpoonerGUID = 0;
                      m_creature->ForcedDespawn(1000);
                  }
-              
+
           }
       }
-     
+
      void UpdateAI(const uint32 uidiff)
         {
             if (bWithRedDragonBlood && uiHarpoonerGUID && !m_creature->HasAura(SPELL_RED_DRAGONBLOOD))
@@ -840,8 +848,24 @@ struct MANGOS_DLL_DECL npc_nexus_drakeAI : public FollowerAI
                 m_creature->ForcedDespawn(1000);
             }
 
-            if (!m_creature->getVictim())
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                 return;
+
+            if (SPELL_NETHERBREATH_Timer < uidiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(),SPELL_NETHERBREATH);
+                SPELL_NETHERBREATH_Timer = 4600;
+            }
+            else
+                SPELL_NETHERBREATH_Timer -= uidiff;
+
+            if (SPELL_INTANGIBLE_PRESENCE_Timer < uidiff)
+            {
+                DoCastSpellIfCan(m_creature,SPELL_INTANGIBLE_PRESENCE);
+                SPELL_INTANGIBLE_PRESENCE_Timer = 16600;
+             }
+             else
+                 SPELL_INTANGIBLE_PRESENCE_Timer -= uidiff;
 
             DoMeleeAttackIfReady();
         }
@@ -885,6 +909,9 @@ enum eBerylSorcerer
     NPC_CAPTURED_BERLY_SORCERER         = 25474,
     NPC_LIBRARIAN_DONATHAN              = 25262,
 
+    SPELL_FROST_BOLT                     = 9672,
+    SPELL_BLINK                          = 50648,
+
     SPELL_ARCANE_CHAINS                 = 45611,
     SPELL_COSMETIC_CHAINS               = 54324,
     SPELL_COSMETIC_ENSLAVE_CHAINS_SELF  = 45631
@@ -892,19 +919,24 @@ enum eBerylSorcerer
 
 struct MANGOS_DLL_DECL npc_beryl_sorcererAI : public FollowerAI
 {
-    npc_beryl_sorcererAI(Creature* pCreature) : FollowerAI(pCreature) { 
+    npc_beryl_sorcererAI(Creature* pCreature) : FollowerAI(pCreature) {
         m_uiNormalFaction = pCreature->getFaction();
-        Reset(); 
+        Reset();
     }
 
     bool bEnslaved;
     uint64 uiChainerGUID;
     uint32 m_uiNormalFaction;
 
+    uint32 SPELL_FROST_BOLT_Timer;
+    uint32 SPELL_BLINK_Timer;
+
     void Reset()
     {
          m_creature->setFaction(m_uiNormalFaction);
          bEnslaved = false;
+         SPELL_FROST_BOLT_Timer = 5400;
+         SPELL_BLINK_Timer = 15000;
     }
     void EnterCombat(Unit* pWho)
     {
@@ -923,7 +955,6 @@ struct MANGOS_DLL_DECL npc_beryl_sorcererAI : public FollowerAI
                 StartFollow(pChainer, 35, NULL);
                 m_creature->UpdateEntry(NPC_CAPTURED_BERLY_SORCERER);
                 DoCast(m_creature, SPELL_COSMETIC_ENSLAVE_CHAINS_SELF, true);
- 
                 bEnslaved = true;
                 }
             }
@@ -945,8 +976,21 @@ struct MANGOS_DLL_DECL npc_beryl_sorcererAI : public FollowerAI
      }
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!m_creature->getVictim())
-                return;
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        /// Frost_bolt needs to be casted more after blink
+        if (SPELL_FROST_BOLT_Timer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BOLT);
+            SPELL_FROST_BOLT_Timer = 5400 + rand()%1400;
+        }else SPELL_FROST_BOLT_Timer -= uiDiff;
+
+        if (SPELL_BLINK_Timer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature, SPELL_BLINK);
+            SPELL_BLINK_Timer = 15000 + rand()%3000;
+        }else SPELL_BLINK_Timer -= uiDiff;
 
             DoMeleeAttackIfReady();
     }
@@ -956,6 +1000,51 @@ struct MANGOS_DLL_DECL npc_beryl_sorcererAI : public FollowerAI
 CreatureAI* GetAI_npc_beryl_sorcerer(Creature* pCreature)
 {
     return new npc_beryl_sorcererAI(pCreature);
+}
+
+/*######
+##Bury Those Cockroaches!
+######*/
+enum
+{
+    QUEST_BURY_THOSE_COCKROACHES            = 11608,
+    SPELL_SEAFORIUM_DEPTH_CHARGE_EXPLOSION  = 45502
+
+
+};
+struct npc_seaforium_depth_chargeAI : public ScriptedAI
+{
+    npc_seaforium_depth_chargeAI(Creature *pCreature) : ScriptedAI(pCreature) {}
+
+    uint32 uiExplosionTimer;
+    void Reset()
+    {
+        uiExplosionTimer = urand(5000,10000);
+    }
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (uiExplosionTimer < uiDiff)
+        {
+            DoCast(m_creature, SPELL_SEAFORIUM_DEPTH_CHARGE_EXPLOSION);          
+            for(uint8 i = 0; i < 4; ++i)
+            {
+                if(Creature* cCredit = GetClosestCreatureWithEntry(m_creature, 25402 + i, 10.0f))//25402-25405 credit markers
+                {
+                    if(Player *pPlayer = m_creature->GetMap()->GetPlayer(m_creature->GetCreatorGuid()))
+                    {
+                        if(pPlayer->GetQuestStatus(QUEST_BURY_THOSE_COCKROACHES) == QUEST_STATUS_INCOMPLETE)
+                            pPlayer->KilledMonsterCredit(cCredit->GetEntry(),cCredit->GetObjectGuid());
+                    }                    
+                }
+            }
+            m_creature->ForcedDespawn(1000);
+        } else uiExplosionTimer -= uiDiff;
+    }
+};
+
+CreatureAI* GetAI_npc_seaforium_depth_charge(Creature* pCreature)
+{
+    return new npc_seaforium_depth_chargeAI(pCreature);
 }
 
 void AddSC_borean_tundra()
@@ -1033,5 +1122,10 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_beryl_sorcerer";
     pNewScript->GetAI = &GetAI_npc_beryl_sorcerer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_seaforium_depth_charge";
+    pNewScript->GetAI = &GetAI_npc_seaforium_depth_charge;
     pNewScript->RegisterSelf();
 }

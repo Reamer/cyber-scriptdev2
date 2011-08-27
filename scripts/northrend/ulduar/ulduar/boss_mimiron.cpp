@@ -869,8 +869,8 @@ struct MANGOS_DLL_DECL boss_aerial_command_unitAI : public ScriptedAI
 
         m_bMustRepair           = false;
 
-        m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 0);
-        m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+        // m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 0);
+        // m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         if(m_pInstance) 
@@ -897,12 +897,14 @@ struct MANGOS_DLL_DECL boss_aerial_command_unitAI : public ScriptedAI
     {
         if(m_pInstance->GetData(TYPE_MIMIRON_PHASE) == PHASE_AERIAL)
         {
-            m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 50331648);
-            m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 50331648);
-            m_creature->GetMotionMaster()->MoveIdle();
-            SetCombatMovement(false);
-            m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() +  7, 0.0f);
-            m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() +  7, SPLINETYPE_NORMAL, m_creature->GetSplineFlags(), 1);
+            // m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 50331648);
+            // m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 50331648);
+            // m_creature->GetMotionMaster()->MoveIdle();
+            // SetCombatMovement(false);
+            m_creature->SetLevitate(true);
+
+            //m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() +  7, 0.0f);
+            //m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() +  7, SPLINETYPE_NORMAL, m_creature->GetSplineFlags(), 1);
         }
     }
 
@@ -963,12 +965,13 @@ struct MANGOS_DLL_DECL boss_aerial_command_unitAI : public ScriptedAI
     // get the boss down by the magnetic core
     void SetToGround()
     {
-        m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), CENTER_Z, 0);
-        m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), CENTER_Z, SPLINETYPE_NORMAL, m_creature->GetSplineFlags(), 1);
+        //m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), CENTER_Z, 0);
+        //m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), CENTER_Z, SPLINETYPE_NORMAL, m_creature->GetSplineFlags(), 1);
         m_bIsGrounded = true;
+        m_creature->SetLevitate(false);
         // make boss land
-        m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 0);
-        m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+        //m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 0);
+        //m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
         m_uiGroundTimer = 20000;
     }
 
@@ -999,12 +1002,13 @@ struct MANGOS_DLL_DECL boss_aerial_command_unitAI : public ScriptedAI
 
         if (m_uiGroundTimer < uiDiff && m_bIsGrounded)
         {
-            m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() +  7, 0.0f);
-            m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() +  7, SPLINETYPE_NORMAL, m_creature->GetSplineFlags(), 1);
+            //m_creature->GetMap()->CreatureRelocation(m_creature, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() +  7, 0.0f);
+            //m_creature->SendMonsterMove(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() +  7, SPLINETYPE_NORMAL, m_creature->GetSplineFlags(), 1);
             m_bIsGrounded = false;
+            m_creature->SetLevitate(true);
             // make boss fly
-            m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 50331648);
-            m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 50331648);
+            //m_creature->SetUInt32Value(UNIT_FIELD_BYTES_0, 50331648);
+            //m_creature->SetUInt32Value(UNIT_FIELD_BYTES_1, 50331648);
             m_creature->InterruptNonMeleeSpells(true);
             DoCast(m_creature, SPELL_BOMB_BOT_SUMMON);
         }else m_uiGroundTimer -= uiDiff;

@@ -364,8 +364,8 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
         {
             ++uiCountFetchableDragons;
             pTene->CastSpell(pTene, SPELL_POWER_OF_TENEBRON, false);
-            pTene->AddSplineFlag(SPLINEFLAG_FLYING);
-            pTene->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+            pTene->SetLevitate(true);
+            pTene->SetWalk(false);
             pTene->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
 
             if (!pTene->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -376,8 +376,8 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
         {
             ++uiCountFetchableDragons;
             pShad->CastSpell(pShad, SPELL_POWER_OF_SHADRON, false);
-            pShad->AddSplineFlag(SPLINEFLAG_FLYING);
-            pShad->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+            pShad->SetLevitate(true);
+            pShad->SetWalk(false);
             pShad->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
 
             if (!pShad->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -388,8 +388,8 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
         {
             ++uiCountFetchableDragons;
             pVesp->CastSpell(pVesp, SPELL_POWER_OF_VESPERON, false);
-            pVesp->AddSplineFlag(SPLINEFLAG_FLYING);
-            pVesp->RemoveSplineFlag(SPLINEFLAG_WALKMODE);
+            pVesp->SetLevitate(true);
+            pVesp->SetWalk(false);
             pVesp->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
 
             if (!pVesp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -811,7 +811,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
 
     void JustReachedHome()
     {
-        m_creature->RemoveSplineFlag(SPLINEFLAG_FLYING);
+        m_creature->SetLevitate(false);
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId)
@@ -833,7 +833,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
         {
             m_creature->GetMotionMaster()->Clear();
             m_bCanMoveFree = false;
-            m_creature->RemoveSplineFlag(SPLINEFLAG_FLYING);
+            m_creature->SetLevitate(false);
             m_creature->SetInCombatWithZone();
             return;
         }
@@ -1790,7 +1790,7 @@ struct MANGOS_DLL_DECL mob_flame_tsunamiAI : public ScriptedAI
         m_creature->SetDisplayId(11686);
         DoCast(m_creature, SPELL_FLAME_TSUNAMI_DMG_AURA,true);
         m_creature->setFaction(19);
-        m_creature->AddSplineFlag(SPLINEFLAG_FLYING);
+        m_creature->SetLevitate(true);
         m_uiMovementStartTimer = 4000;
     }
 
