@@ -525,6 +525,7 @@ struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
                 {
                     case NPC_SCRAPBOT:
                         m_lScrapbotsGUIDList.push_back(pTemp->GetObjectGuid());
+						pTemp->GetMotionMaster()->MoveChase(m_creature);
                         break;
                     case NPC_BOOMBOT:
                         m_lBoombotsGUIDList.push_back(pTemp->GetObjectGuid());

@@ -667,49 +667,6 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI
         // exploit check
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
 
-        /*
-        // respawn adds
-        GetCreatureListWithEntryInGrid(lIronDwarfes, m_creature, MOB_IRON_RING_GUARD, DEFAULT_VISIBILITY_INSTANCE);
-        GetCreatureListWithEntryInGrid(lIronDwarfes, m_creature, MOB_DARK_RUNE_ACOLYTE, DEFAULT_VISIBILITY_INSTANCE);
-        GetCreatureListWithEntryInGrid(lIronDwarfes, m_creature, MOB_IRON_HOHOR_GUARD, DEFAULT_VISIBILITY_INSTANCE);
-        // preadds
-        GetCreatureListWithEntryInGrid(lIronDwarfes, m_creature, NPC_MERCENARY_ALY, DEFAULT_VISIBILITY_INSTANCE);
-        GetCreatureListWithEntryInGrid(lIronDwarfes, m_creature, NPC_MERCENARY_HORDE, DEFAULT_VISIBILITY_INSTANCE);
-        GetCreatureListWithEntryInGrid(lIronDwarfes, m_creature, NPC_CAPTAIN_ALY, DEFAULT_VISIBILITY_INSTANCE);
-        GetCreatureListWithEntryInGrid(lIronDwarfes, m_creature, NPC_CAPTAIN_HORDE, DEFAULT_VISIBILITY_INSTANCE);
-        if (!lIronDwarfes.empty())
-        {
-            for(std::list<Creature*>::iterator iter = lIronDwarfes.begin(); iter != lIronDwarfes.end(); ++iter)
-            {
-                if ((*iter) && !(*iter)->isAlive())
-                    (*iter)->Respawn();
-            }
-        }
-
-        if(m_pInstance) 
-        {
-            // respawn runic colossus
-            if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_RUNIC_COLOSSUS))
-            {
-                if (!pColossus->isAlive())
-                    pColossus->Respawn();
-            }
-
-            // respawn ancient rune giant
-            if (Creature* pRuneGiant = m_pInstance->GetSingleCreatureFromStorage(NPC_RUNE_GIANT))
-            {
-                if (!pRuneGiant->isAlive())
-                    pRuneGiant->Respawn();
-            }
-
-            // respawn jormungar
-            if (Creature* pJormungar = m_pInstance->GetSingleCreatureFromStorage(NPC_JORMUNGAR_BEHEMOTH))
-            {
-                if (!pJormungar->isAlive())
-                    pJormungar->Respawn();
-            }
-        }*/
-        // Respawn all Adds
         for (GUIDList::iterator itr = m_lArenaSummonGUID.begin(); itr != m_lArenaSummonGUID.end(); itr++)
         {
             if (Creature *pTmp = m_creature->GetMap()->GetCreature(*itr))
@@ -1293,7 +1250,8 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
     {
         if (m_bIsSmash && pWho->GetTypeId() == TYPEID_PLAYER)
         {
-            m_creature->SetInCombatWith(pWho);
+            m_creature->SetInCombatWithZone();
+            m_creature->InterruptNonMeleeSpells(false);
             m_bIsSmash = false;
         }
     }
@@ -1305,11 +1263,11 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
             switch(urand(0,1))
             {
                 case 0:
-                    DoCast(m_creature, SPELL_RUNIC_SMASH_L, false);
+                    DoCast(m_creature, SPELL_RUNIC_SMASH_L);
                     m_bIsLeft = true;
                     break;
                 case 1:
-                    DoCast(m_creature, SPELL_RUNIC_SMASH_R, false);
+                    DoCast(m_creature, SPELL_RUNIC_SMASH_R);
                     m_bIsLeft = false;
                     break;
             }
@@ -1317,7 +1275,8 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
             m_uiTriggerSmashTimer = 5000;
 
         }
-        else m_uiSmashTimer -= uiDiff;
+        else
+            m_uiSmashTimer -= uiDiff;
 
         if (m_uiTriggerSmashTimer < uiDiff && m_bIsSmash)
         {
@@ -1327,7 +1286,7 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
                 {
                     if (m_bIsLeft)
                     {
-                        for (GUIDList::iterator itr =   m_pInstance->m_lLeftHandTriggerGuids.begin(); itr != m_pInstance->m_lLeftHandTriggerGuids.end(); itr++)
+                        for (GUIDList::iterator itr =   m_pInstance->m_lLeftHandTriggerGuids.begin(); itr != m_pInstance->m_lLeftHandTriggerGuids.end(); ++itr)
                         {
                             if (Unit* trigger = pMap->GetUnit(*itr))
                             {
@@ -1337,7 +1296,7 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
                     }
                     else
                     {
-                        for (GUIDList::iterator itr =   m_pInstance->m_lRightHandTriggerGuids.begin(); itr != m_pInstance->m_lRightHandTriggerGuids.end(); itr++)
+                        for (GUIDList::iterator itr =   m_pInstance->m_lRightHandTriggerGuids.begin(); itr != m_pInstance->m_lRightHandTriggerGuids.end(); ++itr)
                         {
                             if (Unit* trigger = pMap->GetUnit(*itr))
                             {
@@ -1348,7 +1307,9 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
                 }
             }
             m_uiTriggerSmashTimer = 20000;
-        }else m_uiTriggerSmashTimer -= uiDiff;
+        }
+        else
+            m_uiTriggerSmashTimer -= uiDiff;
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -1366,13 +1327,17 @@ struct MANGOS_DLL_DECL boss_runic_colossusAI : public ScriptedAI
                     break;
             }
             m_uiSpellTimer = urand(5000, 10000);
-        }else m_uiSpellTimer -= uiDiff;
+        }
+        else
+            m_uiSpellTimer -= uiDiff;
 
         if (m_uiRunicBarrierTimer < uiDiff)
         {
-            DoCast(m_creature, SPELL_RUNIC_BARRIER);
-            m_uiRunicBarrierTimer = urand(25000, 30000);
-        }else m_uiRunicBarrierTimer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature, SPELL_RUNIC_BARRIER) == CAST_OK)
+                m_uiRunicBarrierTimer = urand(25000, 30000);
+        }
+        else
+            m_uiRunicBarrierTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

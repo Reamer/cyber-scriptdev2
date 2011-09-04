@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -80,11 +80,10 @@ class MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData);
         void SetAchiev(uint32 uiType, bool get);
         uint32 GetData(uint32 uiType);
-        uint64 GetData64(uint32 uiData);
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/);
 
-        const char* Save() { return strInstData.c_str(); }
+        const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);
 
         void Update(uint32 uiDiff);
@@ -92,34 +91,15 @@ class MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
     protected:
         void DoAltarVisualEffect(uint8 uiType);
         uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string strInstData;
-
-        uint64 m_uiEckDoorGUID;
-        uint64 m_uiEckUnderwaterDoorGUID;
-        uint64 m_uiGaldarahDoorGUID;
-        uint64 m_uiExitDoorLeftGUID;
-        uint64 m_uiExitDoorRightGUID;
-        uint64 m_uiSnakeKeyGUID;
-        uint64 m_uiMammothKeyGUID;
-        uint64 m_uiTrollKeyGUID;
-        uint64 m_uiRhinoKeyGUID;
-        uint64 m_uiAltarOfSladranGUID;
-        uint64 m_uiAltarOfMoorabiGUID;
-        uint64 m_uiAltarOfColossusGUID;
-        uint64 m_uiBridgeGUID;
-        uint64 m_uiCollisionGUID;
-
-        uint64 m_uiSladranGUID;
-        uint64 m_uiElementalGUID;
-        uint64 m_uiColossusGUID;
+        std::string m_strInstData;
 
         TypeTimerMap m_mAltarInProgress;
         TypeTimerMap m_mBeamInProgress;
         TypeTimerMap m_mKeyInProgress;
 
-        std::list<uint64> m_luiStalkerGUIDs;
-        std::list<uint64> m_luiStalkerCasterGUIDs;
-        std::list<uint64> m_luiStalkerTargetGUIDs;
+        GUIDList m_luiStalkerGUIDs;
+        GUIDVector m_vStalkerCasterGuids;
+        GUIDVector m_vStalkerTargetGuids;
 
         uint32 m_uiBridgeCounter;
         bool   m_bGuardSpawnt;
