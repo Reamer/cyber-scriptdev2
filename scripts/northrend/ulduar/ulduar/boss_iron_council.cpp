@@ -98,6 +98,14 @@ enum
 	MOB_LIGHTNING_ELEMENTAL		= 32958, 
 };
 
+enum BrundirPhase
+{
+    PHASE_NORMAL        = 1,
+    PHASE_UP            = 2,
+    PHASE_TENDRILS      = 3,
+    PHASE_DOWN          = 4,
+};
+
 // Rune of Power
 struct MANGOS_DLL_DECL mob_rune_of_powerAI : public ScriptedAI
 {
@@ -250,26 +258,27 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 	uint32 m_uiChain_Lightning_Timer;
 	uint32 m_uiOverload_Timer;
 	uint32 m_uiWhirl_Timer;
-	uint32 m_uiTendrils_start_Timer;
-	uint32 m_uiTendrils_Change;
-	uint32 m_uiTendrils_end_Timer;
+    uint32 m_uiTendrilsTimer;
+	uint32 m_uiTendrilsEndTimer;
 	uint32 m_uiEnrage_Timer;
 
 	bool m_bHasSupercharge1;
 	bool m_bHasSupercharge2;
-	bool m_bIsTendrils;
 	bool m_bIsEnrage;
+
+    uint8 m_uiBrundirPhase;
 
     void Reset()
     {
+        m_creature->SetLevitate(false);
 		m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
 		m_uiChain_Lightning_Timer = 0;
+        m_uiBrundirPhase        = PHASE_NORMAL;
 		m_uiOverload_Timer      = 35000;
 		m_uiEnrage_Timer        = 900000;
 		m_bIsEnrage             = false;
 		m_bHasSupercharge1      = false;
 		m_bHasSupercharge2      = false;
-		m_bIsTendrils           = false;
     }
 
     void SpellHit(Unit* caster, const SpellEntry* spell)
@@ -280,7 +289,7 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
             if (m_bHasSupercharge1)
             {
                 m_bHasSupercharge2 = true;
-                m_uiTendrils_start_Timer = 40000;
+                m_uiTendrilsTimer = 40000;
             }
             else
             {
@@ -327,7 +336,7 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
         }
 
         DoScriptText(SAY_BRUNDIR_AGGR0, m_creature);
-    }
+    }   
 
 	void JustReachedHome()
     {
@@ -338,7 +347,7 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
         }
     }
 
-    void KilledUnit(Unit *who)
+    void KilledUnit(Unit *pWho)
     {
         DoScriptText(urand(0,1) ? SAY_BRUNDIR_SLAY1 : SAY_BRUNDIR_SLAY2 , m_creature);
     }
@@ -348,102 +357,7 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_bIsTendrils)
-        {
-            if (m_uiTendrils_Change < uiDiff && m_bIsTendrils)
-            {
-			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
-			    {
-                    m_creature->GetMotionMaster()->MoveChase(pTarget);
-			    }
-			    m_uiTendrils_Change = 4000;
-            }
-            else
-                m_uiTendrils_Change -= uiDiff;
-
-            if (m_uiTendrils_end_Timer < uiDiff && m_bIsTendrils)
-            {
-		        if (m_creature->HasAura(SPELL_LIGHTNING_TENDRILS))
-			        m_creature->RemoveAurasDueToSpell(SPELL_LIGHTNING_TENDRILS);
-		        if (m_creature->HasAura(SPELL_LIGHTNING_TENDRILS_H))
-			        m_creature->RemoveAurasDueToSpell(SPELL_LIGHTNING_TENDRILS_H);
-		        if (m_creature->HasAura(LIGHTNING_TENDRILS_VISUAL))
-			        m_creature->RemoveAurasDueToSpell(LIGHTNING_TENDRILS_VISUAL);
-                m_uiTendrils_start_Timer = 90000;
-                SetCombatMovement(true);
-                m_creature->GetMotionMaster()->Clear(false);
-                m_creature->SetHover(false);
-		        m_creature->SetSpeedRate(MOVE_RUN, 1.8f);
-		        m_bIsTendrils = false;
-		        m_uiChain_Lightning_Timer = 5000;
-		        m_uiOverload_Timer = 35000;
-		        m_uiWhirl_Timer = 10000;
-            }else m_uiTendrils_end_Timer -= uiDiff;        
-        }
-        else if (!m_bIsTendrils)
-        {
-            // level 1 spells
-		    if (m_uiChain_Lightning_Timer < uiDiff)
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    if (DoCastSpellIfCan(target, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
-                        m_uiChain_Lightning_Timer = 2000;
-            }
-            else
-                m_uiChain_Lightning_Timer -= uiDiff;   
-
-		    if (m_uiOverload_Timer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_OVERLOAD) == CAST_OK)
-                    m_uiOverload_Timer = 40000;
-            }
-            else
-                m_uiOverload_Timer -= uiDiff;  
-
-            // level 2 spells
-            if (m_bHasSupercharge1)
-            {
-		        if (m_uiWhirl_Timer < uiDiff)
-		        {
-                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_WHIRL : SPELL_LIGHTNING_WHIRL_H) == CAST_OK)
-                    {
-                        DoScriptText(SAY_BRUNDIR_WHIRL, m_creature);
-                        m_uiWhirl_Timer = 15000;
-                    }
-		        }
-                else
-                    m_uiWhirl_Timer -= uiDiff;
-                
-                // level 3 spells
-                if (m_bHasSupercharge2)
-                {
-    		        // boss doesn't fly during tendrils, needs fixing!
-    		        if (m_uiTendrils_start_Timer < uiDiff)
-                    {
-				        DoScriptText(SAY_BRUNDIR_FLY, m_creature);
-
-				        DoCast(m_creature, LIGHTNING_TENDRILS_VISUAL,true);
-                        DoCast(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_TENDRILS : SPELL_LIGHTNING_TENDRILS_H,true);
-                        SetCombatMovement(false);
-                        m_creature->GetMotionMaster()->Clear(false);
-                        m_creature->SetLevitate(true);
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
-                            m_creature->GetMotionMaster()->MoveChase(pTarget);
-				        m_bIsTendrils = true;
-				        m_creature->SetSpeedRate(MOVE_RUN, 0.8f);
-				        m_uiTendrils_end_Timer = 40000;
-				        m_uiTendrils_Change = 4000;
-			        }
-                    else
-                        m_uiTendrils_start_Timer -= uiDiff;
-                    
-                    DoCastSpellIfCan(m_creature, SPELL_STORMSHIELD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-                }
-            }
-            DoMeleeAttackIfReady();
-        }
-
-		if (m_uiEnrage_Timer < uiDiff && !m_bIsEnrage)
+        if (m_uiEnrage_Timer < uiDiff && !m_bIsEnrage)
 		{
             if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
             {
@@ -452,7 +366,128 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
             }
 		}
         else
-            m_uiEnrage_Timer -= uiDiff;	
+            m_uiEnrage_Timer -= uiDiff;
+
+        switch (m_uiBrundirPhase)
+        {
+            case PHASE_NORMAL:
+            {
+                // level 1 spells
+		        if (m_uiChain_Lightning_Timer < uiDiff)
+                {
+                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                        if (DoCastSpellIfCan(target, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
+                            m_uiChain_Lightning_Timer = 2000;
+                }
+                else
+                    m_uiChain_Lightning_Timer -= uiDiff;   
+
+		        if (m_uiOverload_Timer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_OVERLOAD) == CAST_OK)
+                        m_uiOverload_Timer = 40000;
+                }
+                else
+                    m_uiOverload_Timer -= uiDiff;  
+
+                // level 2 spells
+                if (m_bHasSupercharge1)
+                {
+		            if (m_uiWhirl_Timer < uiDiff)
+		            {
+                        if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_WHIRL : SPELL_LIGHTNING_WHIRL_H) == CAST_OK)
+                        {
+                            DoScriptText(SAY_BRUNDIR_WHIRL, m_creature);
+                            m_uiWhirl_Timer = 15000;
+                        }
+		            }
+                    else
+                        m_uiWhirl_Timer -= uiDiff;
+                    
+                    // level 3 spells
+                    if (m_bHasSupercharge2)
+                    {
+    		            // boss doesn't fly during tendrils, needs fixing!
+    		            if (m_uiTendrilsTimer < uiDiff)
+                        {
+                            m_uiBrundirPhase = PHASE_UP;
+				            DoScriptText(SAY_BRUNDIR_FLY, m_creature);
+
+                            m_creature->SetLevitate(true);
+							m_creature->SetWalk(false);
+                            m_creature->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 5, false);
+				            m_creature->SetSpeedRate(MOVE_RUN, 0.8f);
+				            m_uiTendrilsTimer = 4000;
+			            }
+                        else
+                            m_uiTendrilsTimer -= uiDiff;
+                        
+                        DoCastSpellIfCan(m_creature, SPELL_STORMSHIELD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                    }
+                }
+                break;
+
+            }
+            case PHASE_UP:
+                if (m_uiTendrilsTimer < uiDiff)
+                {
+                    m_uiBrundirPhase = PHASE_TENDRILS;
+                    DoCast(m_creature, LIGHTNING_TENDRILS_VISUAL, true);
+                    DoCast(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_TENDRILS : SPELL_LIGHTNING_TENDRILS_H,true);
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
+                        m_creature->GetMotionMaster()->MovePoint(1, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ() + 5, false);
+		            m_uiTendrilsTimer = 4000;
+                    m_uiTendrilsEndTimer = 40000;
+	            }
+                else
+                    m_uiTendrilsTimer -= uiDiff;
+
+                break;
+            case PHASE_TENDRILS:
+                if (m_uiTendrilsTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
+                        m_creature->GetMotionMaster()->MovePoint(1, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ() + 5, false);
+		            m_uiTendrilsTimer = 4000;
+                }
+                else 
+                    m_uiTendrilsTimer -= uiDiff;
+
+                if (m_uiTendrilsEndTimer < uiDiff)
+                {
+                    m_uiBrundirPhase = PHASE_DOWN;
+
+                    m_uiTendrilsTimer = 2000;
+                    m_creature->SetLevitate(false);
+					m_creature->SetWalk(true);
+					float x = m_creature->GetPositionX();
+					float y = m_creature->GetPositionY();
+					float z = m_creature->GetTerrain()->GetWaterOrGroundLevel(x,y,m_creature->GetPositionZ());
+					m_creature->GetMotionMaster()->MovePoint(1, x, y, z, false);
+		            m_creature->SetSpeedRate(MOVE_RUN, 1.8f);
+		            m_uiChain_Lightning_Timer = 5000;
+		            m_uiOverload_Timer = 35000;
+		            m_uiWhirl_Timer = 10000;
+                }
+                else
+                    m_uiTendrilsEndTimer -= uiDiff;
+                break;
+            case PHASE_DOWN:
+                if (m_uiTendrilsTimer < uiDiff)
+                {
+                    m_uiBrundirPhase = PHASE_NORMAL;
+                    m_uiTendrilsTimer = 90000;
+                    if (m_creature->HasAura(SPELL_LIGHTNING_TENDRILS))
+		                m_creature->RemoveAurasDueToSpell(SPELL_LIGHTNING_TENDRILS);
+	                if (m_creature->HasAura(SPELL_LIGHTNING_TENDRILS_H))
+		                m_creature->RemoveAurasDueToSpell(SPELL_LIGHTNING_TENDRILS_H);
+	                if (m_creature->HasAura(LIGHTNING_TENDRILS_VISUAL))
+		                m_creature->RemoveAurasDueToSpell(LIGHTNING_TENDRILS_VISUAL);
+                }
+                else
+                    m_uiTendrilsTimer -= uiDiff;
+                break;                
+        }
 	}
 };
 
