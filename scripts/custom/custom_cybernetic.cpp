@@ -1,7 +1,7 @@
 #include "precompiled.h"
 #include "Chat.h"
 
-enum
+enum Integer
 {
     AUCHENAIKRYPTA          = 1,
     MANAGRUFT               = 2,
@@ -9,7 +9,7 @@ enum
     SETHEKKHALLEN           = 4,
     TIEFENSUMPF             = 5,
     DAMPFKAMMER             = 6,
-    SKLAVENUNTERKÜNFTE      = 7,
+    SKLAVENUNTERKUENFTE     = 7,
     ARKATRAZ                = 8,
     BOTANIKA                = 9,
     MECHANAR                = 10,
@@ -30,7 +30,7 @@ enum
     SETHEKKHALLEN_BOSS          = 20706,
     TIEFENSUMPF_BOSS            = 20184,
     DAMPFKAMMER_BOSS            = 20633,
-    SKLAVENUNTERKÜNFTE_BOSS     = 19894,
+    SKLAVENUNTERKUENFTE_BOSS    = 19894,
     ARKATRAZ_BOSS               = 21601,
     BOTANIKA_BOSS               = 21582,
     MECHANAR_BOSS               = 21537,
@@ -41,7 +41,7 @@ enum
     STRATHOLME_BOSS             = 10440,
     BURG_UTGARDE_BOSS           = 31673,
     AZJOL_NERUB_BOSS            = 31610,
-    ALTE_KÖNIGREICH_BOSS        = 31464,
+    ALTE_KOENIGREICH_BOSS       = 31464,
     NEXUS_BOSS                  = 30540,
     DRAKTARON_BOSS              = 31360,
 
@@ -164,7 +164,7 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
 				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Sethekkhallen", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SETHEKKHALLEN));
 				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Der Tiefensumpf", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(TIEFENSUMPF));
 				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Dampfkammer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(DAMPFKAMMER));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Sklavenunterkünfte", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SKLAVENUNTERKÜNFTE));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Sklavenunterkünfte", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SKLAVENUNTERKUENFTE));
 				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Arkatraz", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(ARKATRAZ));
 				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Botanika", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(BOTANIKA));
 				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Mechanar", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(MECHANAR));
