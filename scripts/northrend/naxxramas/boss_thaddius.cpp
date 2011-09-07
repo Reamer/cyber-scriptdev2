@@ -578,6 +578,7 @@ struct MANGOS_DLL_DECL boss_stalaggAI : public ScriptedAI
         }
         else
             m_uiPowerSurgeTimer -= uiDiff;
+        DoMeleeAttackIfReady();
     }
 };
 
@@ -689,6 +690,7 @@ struct MANGOS_DLL_DECL boss_feugenAI : public ScriptedAI
         }
         else
             m_uiStaticFieldTimer -= uiDiff;
+        DoMeleeAttackIfReady();
     }
 };
 

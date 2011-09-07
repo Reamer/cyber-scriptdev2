@@ -39,7 +39,11 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_dialogueHelper(aNaxxDialogue),
     m_fChamberCenterX(0.0f),
     m_fChamberCenterY(0.0f),
-    m_fChamberCenterZ(0.0f)
+    m_fChamberCenterZ(0.0f),
+    m_bBlaumeuxDead(false),
+    m_bRivendareDead(false),
+    m_bZeliekDead(false),
+    m_bKorthazzDead(false)
 {
     Initialize();
 }
