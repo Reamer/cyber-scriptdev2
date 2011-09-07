@@ -3,7 +3,7 @@
 //#include "World.h"
 //#include "Database/DatabaseEnv.h"
 //#include "Util.h"
-#include "LootMgr.h"
+//#include "LootMgr.h"
 #include "Chat.h"
 
 enum Instanzen
@@ -25,7 +25,7 @@ enum Instanzen
     STRATHOLME              = 15,
     BURG_UTGARDE            = 16,
     AZJOL_NERUB             = 17,
-    ALTE_KÖNIGREICH         = 18,
+    ALTE_KOENIGREICH         = 18,
     NEXUS                   = 19,
     DRAKTARON               = 20
 };
@@ -138,43 +138,54 @@ bool GossipHello_custum_cybernetic_2(Player* pPlayer, Creature* pCreature)
     return true;
 }
 
-QueryResult * result;
+bool addItem(Player* pPlayer, uint32 anzahl)
+{
+    ItemPosCountVec dest;
+    InventoryResult msg = pPlayer->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, ITEM_SCHNELLSTES_DUNGEON, 1 );
+    if (msg == EQUIP_ERR_OK)
+    {
+        Item* item = pPlayer->StoreNewItem( dest, ITEM_SCHNELLSTES_DUNGEON, true);
+        pPlayer->SendNewItem(item,anzahl,false,true);
+        return true;
+    }
+    return false;
+}
+
 void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, uint32 action )
 {
-
+    QueryResult* result;
 	if (action <= GOSSIP_ACTION_INFO_DEF)
 	{
 		switch(action)
 		{
 			case GOSSIP_ACTION_INFO_DEF:
-                QueryResult * result = SD2Database.Query("SELECT * FROM schnellstesdungeon WHERE AmLaufen = 1;");
+                result = SD2Database.Query("SELECT * FROM schnellstesdungeon WHERE AmLaufen = 1;");
                 if (result)
                 {
                     pCreature->MonsterSay("Es läuft bereits ein schnellstes Dungeon - Abbruch", LANG_UNIVERSAL);
-
                 }
                 else
                 {
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Auchenaikrypta", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + AUCHENAIKRYPTA);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Managruft", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + MANAGRUFT);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Schattenlabyrinth", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + SCHATTENLABYRINTH);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Sethekkhallen", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + SETHEKKHALLEN);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Der Tiefensumpf", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + TIEFENSUMPF);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Dampfkammer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + DAMPFKAMMER);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Sklavenunterkünfte", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + SKLAVENUNTERKÜNFTE);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Arkatraz", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + ARKATRAZ);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Botanika", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + BOTANIKA);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Mechanar", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + MECHANAR);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Höllenfeuerzitadelle: Die Zerschmetterten Hallen", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + ZERSCHMETTERTENHALLEN);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Terrasse der Magister", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + TERRASSEDERMAGISTER);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Maraudon", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + MARAUDON);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Scholomance", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + SCHOLOMANCE);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Stratholme", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + STRATHOLME);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Burg Utgarde: Burg Utgarde", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + BURG_UTGARDE);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Azjol-Nerub", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + AZJOL_NERUB);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Ahn'kahet: Das Alte Königreich", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + ALTE_KÖNIGREICH);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Nexus: Der Nexus", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + NEXUS);
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Feste Drak'Tharon", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + DRAKTARON);
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Auchenaikrypta", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(AUCHENAIKRYPTA));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Managruft", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(MANAGRUFT));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Schattenlabyrinth", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SCHATTENLABYRINTH));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Sethekkhallen", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SETHEKKHALLEN));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Der Tiefensumpf", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(TIEFENSUMPF));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Dampfkammer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(DAMPFKAMMER));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Sklavenunterkünfte", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SKLAVENUNTERKÜNFTE));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Arkatraz", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(ARKATRAZ));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Botanika", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(BOTANIKA));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Mechanar", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(MECHANAR));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Höllenfeuerzitadelle: Die Zerschmetterten Hallen", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(ZERSCHMETTERTENHALLEN));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Terrasse der Magister", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(TERRASSEDERMAGISTER));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Maraudon", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(MARAUDON));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Scholomance", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SCHOLOMANCE));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Stratholme", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(STRATHOLME));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Burg Utgarde: Burg Utgarde", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(BURG_UTGARDE));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Azjol-Nerub", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(AZJOL_NERUB));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Ahn'kahet: Das Alte Königreich", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(ALTE_KOENIGREICH));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Nexus: Der Nexus", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(NEXUS));
+				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Feste Drak'Tharon", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(DRAKTARON));
 				    pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE,pCreature->GetObjectGuid());
                 }
 				break;
@@ -184,12 +195,11 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
                 break;
             case FERTIG:
                 uint32 anzahlmarken = 1;
-                //                                                  1       2           3           4             5
-                QueryResult * result = SD2Database.Query("SELECT Instanz, Startzeit, Endzeit, GruppeEinsFertig, Rekord FROM schnellstesdungeon WHERE AmLaufen = 1;");
+                //                                                 1       2           3           4             5
+                result = SD2Database.Query("SELECT Instanz, Startzeit, Endzeit, GruppeEinsFertig, Rekord FROM schnellstesdungeon WHERE AmLaufen = 1;");
                 if (result)
                 {
                     Field *fields = result->Fetch();
-                    ScriptInfo tmp;
                     uint32 instanz          = fields[0].GetUInt32();
                     uint64 start            = fields[1].GetUInt64();
                     uint64 end              = fields[2].GetUInt64();
@@ -221,7 +231,7 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
                             if (pPlayer->GetDistance(member) < 100)
                                 continue;
 
-                            if (!additem(member,anzahlmarken))
+                            if (!addItem(member,anzahlmarken))
                                 member->MonsterSay("Ich habe nichts bekommen.", LANG_UNIVERSAL);
 
                         }
@@ -238,19 +248,6 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
 		SetFastDungeon(action - GOSSIP_ACTION_INFO_DEF);
         SD2Database.PExecute("UPDATE schnellstesdungeon SET Startzeit = '"UI64FMTD"', Endzeit = '"UI64FMTD"', GruppeEinsFertig = 0, AmLaufen = 1 WHERE Instanz = '%u');", uint64(time_t(sWorld.GetGameTime())), uint64(time_t(sWorld.GetGameTime() + 4*HOUR*IN_MILLISECONDS)), action - GOSSIP_ACTION_INFO_DEF);
     }
-}
-
-bool additem(Player* pPlayer, uint32 anzahl)
-{
-    ItemPosCountVec dest;
-    InventoryResult msg = pPlayer->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, ITEM_SCHNELLSTES_DUNGEON, 1 );
-    if (msg == EQUIP_ERR_OK)
-    {
-        Item* item = pPlayer->StoreNewItem( dest, ITEM_SCHNELLSTES_DUNGEON, true);
-        pPlayer->SendNewItem(item,anzahl,false,true);
-        return true;
-    }
-    return false;
 }
 
 bool GossipSelect_custum_cybernetic_2(Player *pPlayer, Creature *pCreature, uint32 sender, uint32 action )
