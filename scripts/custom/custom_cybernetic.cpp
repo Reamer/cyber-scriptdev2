@@ -1,12 +1,7 @@
 #include "precompiled.h"
-//#include "Chat.h"
-//#include "World.h"
-//#include "Database/DatabaseEnv.h"
-//#include "Util.h"
-//#include "LootMgr.h"
 #include "Chat.h"
 
-enum Instanzen
+enum
 {
     AUCHENAIKRYPTA          = 1,
     MANAGRUFT               = 2,
@@ -25,12 +20,10 @@ enum Instanzen
     STRATHOLME              = 15,
     BURG_UTGARDE            = 16,
     AZJOL_NERUB             = 17,
-    ALTE_KOENIGREICH         = 18,
+    ALTE_KOENIGREICH        = 18,
     NEXUS                   = 19,
-    DRAKTARON               = 20
-};
-enum InstanzEndbosse
-{
+    DRAKTARON               = 20,
+
     AUCHENAIKRYPTA_BOSS         = 20306,
     MANAGRUFT_BOSS              = 20266,
     SCHATTENLABYRINTH_BOSS      = 20657,
@@ -50,9 +43,8 @@ enum InstanzEndbosse
     AZJOL_NERUB_BOSS            = 31610,
     ALTE_KÖNIGREICH_BOSS        = 31464,
     NEXUS_BOSS                  = 30540,
-    DRAKTARON_BOSS              = 31360
-};
-enum Sonstiges{
+    DRAKTARON_BOSS              = 31360,
+
     ITEM_SCHNELLSTES_DUNGEON    = 17894,
     RESET                       = 100,
     FERTIG                      = 101
