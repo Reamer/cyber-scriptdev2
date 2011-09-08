@@ -46,11 +46,11 @@ enum Integer
     DRAKTARON_BOSS              = 31360,
 
     ITEM_SCHNELLSTES_DUNGEON    = 17894,
+    ITEM_CYBER_CREDIT           = 54822,
     RESET                       = 100,
     FERTIG                      = 101
 };
 
-extern DatabaseMysql SD2Database;
 struct MANGOS_DLL_DECL custom_cyberneticAI : public ScriptedAI
 {
 	custom_cyberneticAI(Creature *c) : ScriptedAI(c) {Reset();}
@@ -116,14 +116,24 @@ bool GossipHello_custum_cybernetic_2(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->isGameMaster())
     {
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Dungeon auf Zeit soll gestartet werden. Zeig mir mögliche Instanzen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Dungeon auf Zeit soll gestartet werden. Zeig mir moegliche Instanzen!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Dungeon auf Zeit soll resetet werden!", GOSSIP_SENDER_MAIN, RESET);
     }
-    QueryResult * result = SD2Database.Query("SELECT * FROM schnellstesdungeon WHERE AmLaufen = 1;");
+    QueryResult * result = strSD2Pquery("SELECT Endzeit FROM schnellstesdungeon WHERE AmLaufen = 1;");
     if (result)
     {
-        if (pPlayer->HasItemCount(ITEM_SCHNELLSTES_DUNGEON, 1, false))
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Dungeon auf Zeit: Meine Gruppe ist fertig, wir möchten abgeben", GOSSIP_SENDER_MAIN, FERTIG);
+        Field *fields = result->Fetch();
+        uint64 endzeit            = fields[0].GetUInt64();
+        if (endzeit > uint64(time(NULL)))
+        {
+            if (pPlayer->HasItemCount(ITEM_SCHNELLSTES_DUNGEON, 1, false))
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Dungeon auf Zeit: Meine Gruppe ist fertig, wir moechten abgeben", GOSSIP_SENDER_MAIN, FERTIG);
+        }
+        else
+        {
+            strSD2Pquery("UPDATE schnellstesdungeon SET AmLaufen = 0;");
+            SetFastDungeon(RESET);
+        }
     }
     delete result;
     pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE,pCreature->GetObjectGuid());
@@ -133,10 +143,10 @@ bool GossipHello_custum_cybernetic_2(Player* pPlayer, Creature* pCreature)
 bool addItem(Player* pPlayer, uint32 anzahl)
 {
     ItemPosCountVec dest;
-    InventoryResult msg = pPlayer->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, ITEM_SCHNELLSTES_DUNGEON, 1 );
+    InventoryResult msg = pPlayer->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, ITEM_CYBER_CREDIT, 1 );
     if (msg == EQUIP_ERR_OK)
     {
-        Item* item = pPlayer->StoreNewItem( dest, ITEM_SCHNELLSTES_DUNGEON, true);
+        Item* item = pPlayer->StoreNewItem( dest, ITEM_CYBER_CREDIT, true);
         pPlayer->SendNewItem(item,anzahl,false,true);
         return true;
     }
@@ -146,99 +156,120 @@ bool addItem(Player* pPlayer, uint32 anzahl)
 void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, uint32 action )
 {
     QueryResult* result;
-	if (action <= GOSSIP_ACTION_INFO_DEF)
+    uint32 anzahlmarken = 0;
+    char query[MAX_QUERY_LEN];
+	switch(action)
 	{
-		switch(action)
-		{
-			case GOSSIP_ACTION_INFO_DEF:
-                result = SD2Database.Query("SELECT * FROM schnellstesdungeon WHERE AmLaufen = 1;");
-                if (result)
+		case GOSSIP_ACTION_INFO_DEF:
+            result = strSD2Pquery("SELECT * FROM schnellstesdungeon WHERE AmLaufen = 1;");
+            if (result)
+            {
+                pPlayer->CLOSE_GOSSIP_MENU();
+                pCreature->MonsterSay("Es laeuft bereits ein schnellstes Dungeon - Abbruch", LANG_UNIVERSAL);
+            }
+            else
+            {
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Auchenaikrypta", GOSSIP_SENDER_MAIN, AUCHENAIKRYPTA);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Managruft", GOSSIP_SENDER_MAIN, MANAGRUFT);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Schattenlabyrinth", GOSSIP_SENDER_MAIN, SCHATTENLABYRINTH);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Sethekkhallen", GOSSIP_SENDER_MAIN, SETHEKKHALLEN);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Der Tiefensumpf", GOSSIP_SENDER_MAIN, TIEFENSUMPF);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Dampfkammer", GOSSIP_SENDER_MAIN, DAMPFKAMMER);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Sklavenunterkuenfte", GOSSIP_SENDER_MAIN, SKLAVENUNTERKUENFTE);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stuerme: Die Arkatraz", GOSSIP_SENDER_MAIN, ARKATRAZ);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stuerme: Die Botanika", GOSSIP_SENDER_MAIN, BOTANIKA);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stuerme: Die Mechanar", GOSSIP_SENDER_MAIN, MECHANAR);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Hoellenfeuerzitadelle: Die Zerschmetterten Hallen", GOSSIP_SENDER_MAIN, ZERSCHMETTERTENHALLEN);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Terrasse der Magister", GOSSIP_SENDER_MAIN, TERRASSEDERMAGISTER);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Maraudon", GOSSIP_SENDER_MAIN, MARAUDON);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Scholomance", GOSSIP_SENDER_MAIN, SCHOLOMANCE);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Stratholme", GOSSIP_SENDER_MAIN, STRATHOLME);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Burg Utgarde: Burg Utgarde", GOSSIP_SENDER_MAIN, BURG_UTGARDE);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Azjol-Nerub", GOSSIP_SENDER_MAIN, AZJOL_NERUB);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Ahn'kahet: Das Alte Koenigreich", GOSSIP_SENDER_MAIN, ALTE_KOENIGREICH);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Nexus: Der Nexus", GOSSIP_SENDER_MAIN, NEXUS);
+				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Feste Drak'Tharon", GOSSIP_SENDER_MAIN, DRAKTARON);
+				pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE,pCreature->GetObjectGuid());
+            }
+            delete result;
+			break;
+        case RESET:
+            pPlayer->CLOSE_GOSSIP_MENU();
+            strSD2Pquery("UPDATE schnellstesdungeon SET AmLaufen = 0;");
+            SetFastDungeon(RESET);
+            break;
+        case FERTIG:
+            pPlayer->CLOSE_GOSSIP_MENU();
+            anzahlmarken = 1;
+            //                              1       2           3           4             5
+            result = strSD2Pquery("SELECT Instanz, Startzeit, Endzeit, GruppeEinsFertig, Rekord FROM schnellstesdungeon WHERE AmLaufen = 1;");
+            if (result)
+            {
+                Field *fields = result->Fetch();
+                uint32 instanz          = fields[0].GetUInt32();
+                uint64 start            = fields[1].GetUInt64();
+                uint64 end              = fields[2].GetUInt64();
+                uint32 fertig           = fields[3].GetUInt32();
+                uint64 rekord           = fields[4].GetUInt64();
+                if ((uint64(time(NULL)) - start) < rekord)
                 {
-                    pCreature->MonsterSay("Es läuft bereits ein schnellstes Dungeon - Abbruch", LANG_UNIVERSAL);
+                    SendServerMessage("Es wurde ein neuer Rekord aufgestellt im schnellsten Dungeon. Herzlichen Glueckwunsch.");
+                    sprintf(query, "UPDATE schnellstesdungeon SET rekord = '"UI64FMTD"' WHERE AmLaufen = 1;", (uint64(time(NULL)) - start));
+                    strSD2Pquery(query);
+                    ++anzahlmarken;
                 }
-                else
+                if (fertig != 1)
                 {
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Auchenaikrypta", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(AUCHENAIKRYPTA));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Managruft", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(MANAGRUFT));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Schattenlabyrinth", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SCHATTENLABYRINTH));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Sethekkhallen", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SETHEKKHALLEN));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Der Tiefensumpf", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(TIEFENSUMPF));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Dampfkammer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(DAMPFKAMMER));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Sklavenunterkünfte", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SKLAVENUNTERKUENFTE));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Arkatraz", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(ARKATRAZ));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Botanika", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(BOTANIKA));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stürme: Die Mechanar", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(MECHANAR));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Höllenfeuerzitadelle: Die Zerschmetterten Hallen", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(ZERSCHMETTERTENHALLEN));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Terrasse der Magister", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(TERRASSEDERMAGISTER));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Maraudon", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(MARAUDON));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Scholomance", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(SCHOLOMANCE));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Stratholme", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(STRATHOLME));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Burg Utgarde: Burg Utgarde", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(BURG_UTGARDE));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Azjol-Nerub", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(AZJOL_NERUB));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Ahn'kahet: Das Alte Königreich", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(ALTE_KOENIGREICH));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Nexus: Der Nexus", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(NEXUS));
-				    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Feste Drak'Tharon", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + int(DRAKTARON));
-				    pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE,pCreature->GetObjectGuid());
+                    pCreature->MonsterSay("Ihr seid die Ersten. Herzlichen Glueckwunsch.", LANG_UNIVERSAL);
+                    strSD2Pquery("UPDATE schnellstesdungeon SET GruppeEinsFertig = 1  WHERE AmLaufen = 1;");
+                    ++anzahlmarken;
                 }
-				break;
-            case RESET:
-                SD2Database.PExecute("UPDATE schnellstesdungeon SET AmLaufen = 0;");
-                SetFastDungeon(RESET);
-                break;
-            case FERTIG:
-                uint32 anzahlmarken = 1;
-                //                                                 1       2           3           4             5
-                result = SD2Database.Query("SELECT Instanz, Startzeit, Endzeit, GruppeEinsFertig, Rekord FROM schnellstesdungeon WHERE AmLaufen = 1;");
-                if (result)
+                if (Group* grp = pPlayer->GetGroup())
                 {
-                    Field *fields = result->Fetch();
-                    uint32 instanz          = fields[0].GetUInt32();
-                    uint64 start            = fields[1].GetUInt64();
-                    uint64 end              = fields[2].GetUInt64();
-                    uint32 fertig           = fields[3].GetUInt32();
-                    uint64 rekord           = fields[4].GetUInt64();
-                    if ((start - end) < rekord)
+                    for(GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
                     {
-                        SendServerMessage("Es wurde ein neuer Rekord aufgestellt im schnellsten Dungeon. Herzlichen Glückwunsch.");
-                        SD2Database.PExecute("UPDATE schnellstesdungeon SET rekord = '"UI64FMTD"' WHERE AmLaufen = 1;", uint32(start  -end));
-                        ++anzahlmarken;
-                    }
-                    if (fertig != 1)
-                    {
-                        pCreature->MonsterSay("Ihr seid die Ersten. Herzlichen Glückwunsch.", LANG_UNIVERSAL);
-                        SD2Database.PExecute("UPDATE schnellstesdungeon SET GruppeEinsFertig = 1  WHERE AmLaufen = 1;");
-                        ++anzahlmarken;
-                    }
-                    pPlayer->RemoveMItem(ITEM_SCHNELLSTES_DUNGEON);
-                    
-                    if (Group* grp = pPlayer->GetGroup())
-                    {
-                        for(GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+                        Player* member = itr->getSource();
+                        if (!member)
+                            continue;
+                        if (member->HasItemCount(ITEM_SCHNELLSTES_DUNGEON, 1, false))
                         {
-                            Player* member = itr->getSource();
-
-                            if (!member || !member->isAlive())
-                                continue;
-
-                            if (pPlayer->GetDistance(member) < 100)
-                                continue;
+                            member->DestroyItemCount(ITEM_SCHNELLSTES_DUNGEON, 1, true, false);
 
                             if (!addItem(member,anzahlmarken))
                                 member->MonsterSay("Ich habe nichts bekommen.", LANG_UNIVERSAL);
-
                         }
                     }
-
                 }
-                delete result;
-                break;
-		}
-	}
-	else
-	{
-		pPlayer->CLOSE_GOSSIP_MENU();
-		SetFastDungeon(action - GOSSIP_ACTION_INFO_DEF);
-        SD2Database.PExecute("UPDATE schnellstesdungeon SET Startzeit = '"UI64FMTD"', Endzeit = '"UI64FMTD"', GruppeEinsFertig = 0, AmLaufen = 1 WHERE Instanz = '%u');", uint64(time_t(sWorld.GetGameTime())), uint64(time_t(sWorld.GetGameTime() + 4*HOUR*IN_MILLISECONDS)), action - GOSSIP_ACTION_INFO_DEF);
+            }
+            delete result;
+            break;
+        case AUCHENAIKRYPTA:
+        case MANAGRUFT:
+        case SCHATTENLABYRINTH:
+        case SETHEKKHALLEN:
+        case TIEFENSUMPF:
+        case DAMPFKAMMER:
+        case SKLAVENUNTERKUENFTE:
+        case ARKATRAZ:
+        case BOTANIKA:
+        case MECHANAR:
+        case ZERSCHMETTERTENHALLEN:
+        case TERRASSEDERMAGISTER:
+        case MARAUDON:
+        case SCHOLOMANCE:
+        case STRATHOLME:
+        case BURG_UTGARDE:
+        case AZJOL_NERUB:
+        case ALTE_KOENIGREICH:
+        case NEXUS:
+        case DRAKTARON:
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+		    SetFastDungeon(action);
+            sprintf(query, "UPDATE schnellstesdungeon SET Startzeit = '"UI64FMTD"', Endzeit = '"UI64FMTD"', GruppeEinsFertig = 0, AmLaufen = 1 WHERE Instanz = %u;", uint64(time(NULL)), (uint64(time(NULL)) + 4*HOUR), action);
+            strSD2Pquery(query);
+            break;
+	    }
     }
 }
 
@@ -248,7 +279,7 @@ bool GossipSelect_custum_cybernetic_2(Player *pPlayer, Creature *pCreature, uint
     if (sender == GOSSIP_SENDER_MAIN)
     {
         pPlayer->PlayerTalkClass->ClearMenus();
-        SendDefaultMenu_custom_cybernetic_2(pPlayer, pCreature, action   );
+        SendDefaultMenu_custom_cybernetic_2(pPlayer, pCreature, action);
     }
     return true;
 }
