@@ -155,13 +155,11 @@ bool addItem(Player* pPlayer, uint32 anzahl)
 
 void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, uint32 action )
 {
-    QueryResult* result;
-    uint32 anzahlmarken = 0;
-    char query[MAX_QUERY_LEN];
 	switch(action)
 	{
 		case GOSSIP_ACTION_INFO_DEF:
-            result = strSD2Pquery("SELECT * FROM schnellstesdungeon WHERE AmLaufen = 1;");
+        {
+            QueryResult* result = strSD2Pquery("SELECT * FROM schnellstesdungeon WHERE AmLaufen = 1;");
             if (result)
             {
                 pPlayer->CLOSE_GOSSIP_MENU();
@@ -193,16 +191,20 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
             }
             delete result;
 			break;
+        }
         case RESET:
+        {
             pPlayer->CLOSE_GOSSIP_MENU();
             strSD2Pquery("UPDATE schnellstesdungeon SET AmLaufen = 0;");
             SetFastDungeon(RESET);
             break;
+        }
         case FERTIG:
+        {
             pPlayer->CLOSE_GOSSIP_MENU();
-            anzahlmarken = 1;
+            uint32 anzahlmarken = 1;
             //                              1       2           3           4             5
-            result = strSD2Pquery("SELECT Instanz, Startzeit, Endzeit, GruppeEinsFertig, Rekord FROM schnellstesdungeon WHERE AmLaufen = 1;");
+            QueryResult* result = strSD2Pquery("SELECT Instanz, Startzeit, Endzeit, GruppeEinsFertig, Rekord FROM schnellstesdungeon WHERE AmLaufen = 1;");
             if (result)
             {
                 Field *fields = result->Fetch();
@@ -213,6 +215,7 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
                 uint64 rekord           = fields[4].GetUInt64();
                 if ((uint64(time(NULL)) - start) < rekord)
                 {
+                    char query[MAX_QUERY_LEN];
                     SendServerMessage("Es wurde ein neuer Rekord aufgestellt im schnellsten Dungeon. Herzlichen Glueckwunsch.");
                     sprintf(query, "UPDATE schnellstesdungeon SET rekord = '"UI64FMTD"' WHERE AmLaufen = 1;", (uint64(time(NULL)) - start));
                     strSD2Pquery(query);
@@ -231,18 +234,15 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
                         Player* member = itr->getSource();
                         if (!member)
                             continue;
-                        if (member->HasItemCount(ITEM_SCHNELLSTES_DUNGEON, 1, false))
-                        {
-                            member->DestroyItemCount(ITEM_SCHNELLSTES_DUNGEON, 1, true, false);
 
-                            if (!addItem(member,anzahlmarken))
-                                member->MonsterSay("Ich habe nichts bekommen.", LANG_UNIVERSAL);
-                        }
+                        if (!addItem(member,anzahlmarken))
+                            member->MonsterSay("Ich habe nichts bekommen.", LANG_UNIVERSAL);
                     }
                 }
             }
             delete result;
             break;
+        }
         case AUCHENAIKRYPTA:
         case MANAGRUFT:
         case SCHATTENLABYRINTH:
@@ -266,6 +266,7 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
         {
             pPlayer->CLOSE_GOSSIP_MENU();
 		    SetFastDungeon(action);
+            char query[MAX_QUERY_LEN];
             sprintf(query, "UPDATE schnellstesdungeon SET Startzeit = '"UI64FMTD"', Endzeit = '"UI64FMTD"', GruppeEinsFertig = 0, AmLaufen = 1 WHERE Instanz = %u;", uint64(time(NULL)), (uint64(time(NULL)) + 4*HOUR), action);
             strSD2Pquery(query);
             break;
