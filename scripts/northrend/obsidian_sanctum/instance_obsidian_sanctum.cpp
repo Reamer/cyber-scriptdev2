@@ -50,9 +50,22 @@ void instance_obsidian_sanctum::OnCreatureCreate(Creature* pCreature)
         case NPC_VESPERON:
             pCreature->SetActiveObjectState(true);
         case NPC_SARTHARION:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+        case NPC_ACOLYTE_OF_SHADRON:
+        case NPC_ACOLYTE_OF_VESPERON:
+            pCreature->SetPhaseMask(16, true);
+            break;
+        case NPC_FIRE_CYCLONE:
+            m_lFireCyclones.push_back(pCreature->GetObjectGuid());
+            return;
+        case NPC_TWILIGHT_EGG:
+            m_lEggsGUIDList.push_back(pCreature->GetObjectGuid());
+            pCreature->SetPhaseMask(16, true);
+            return;
+        default:
+            return;
     }
+    m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
 void instance_obsidian_sanctum::SetData(uint32 uiType, uint32 uiData)
@@ -89,6 +102,17 @@ bool instance_obsidian_sanctum::CheckAchievementCriteriaMeet(uint32 uiCriteriaId
         default:
             return false;
     }
+}
+
+bool instance_obsidian_sanctum::CheckConditionCriteriaMeet(Player const* source, uint32 map_id, uint32 instance_condition_id)
+{
+    if (map_id != instance->GetId())
+        return false;
+
+    if (m_uiAliveDragons >= instance_condition_id)
+        return true;
+
+    return false;
 }
 
 InstanceData* GetInstanceData_instance_obsidian_sanctum(Map* pMap)

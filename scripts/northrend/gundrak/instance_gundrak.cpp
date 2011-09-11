@@ -82,6 +82,10 @@ void instance_gundrak::OnCreatureCreate(Creature* pCreature)
         case NPC_INVISIBLE_STALKER:
             m_luiStalkerGUIDs.push_back(pCreature->GetObjectGuid());
             break;
+        case NPC_LIVING_MOJO:
+            m_lLivingMojoGUIDList.push_back(pCreature->GetObjectGuid());
+            break;
+
     }
 }
 
@@ -245,6 +249,19 @@ void instance_gundrak::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_COLOSSUS:
             m_auiEncounter[TYPE_COLOSSUS] = uiData;
+            if (uiData == FAIL)
+            {
+                for (GUIDList::iterator itr = m_lLivingMojoGUIDList.begin(); itr != m_lLivingMojoGUIDList.end(); ++itr)
+                {
+                    if (Creature* mojo = instance->GetCreature(*itr))
+                    {
+                        if (mojo->isAlive())
+                            mojo->AI()->EnterEvadeMode();
+                        else
+                            mojo->Respawn();
+                    }
+                }
+            }
             if (uiData == DONE)
                 if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_ALTAR_OF_COLOSSUS))
                     pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
