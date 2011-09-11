@@ -25,7 +25,7 @@ enum
     NPC_MOORABI            = 29305,
     NPC_COLOSSUS           = 29307,
     NPC_ELEMENTAL          = 29573,
-    NPC_LIVIN_MOJO         = 29830,
+    NPC_LIVING_MOJO        = 29830,
     NPC_GALDARAH           = 29306,
     NPC_ECK                = 29932,
     NPC_INVISIBLE_STALKER  = 30298,                         // Caster and Target for visual spells on altar use
@@ -87,6 +87,8 @@ class MANGOS_DLL_DECL instance_gundrak : public ScriptedInstance
         void Load(const char* chrIn);
 
         void Update(uint32 uiDiff);
+
+        GUIDList m_lLivingMojoGUIDList;
 
     protected:
         void DoAltarVisualEffect(uint8 uiType);

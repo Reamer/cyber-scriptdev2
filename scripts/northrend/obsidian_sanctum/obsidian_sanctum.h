@@ -17,6 +17,10 @@ enum
     NPC_TENEBRON                = 30452,
     NPC_SHADRON                 = 30451,
     NPC_VESPERON                = 30449,
+    NPC_FIRE_CYCLONE            = 30648,
+    NPC_TWILIGHT_EGG            = 30882,
+    NPC_ACOLYTE_OF_SHADRON      = 31218,    // Acolyte of Shadron
+    NPC_ACOLYTE_OF_VESPERON     = 31219,    // Acolyte of Vesperon
 
     GO_TWILIGHT_PORTAL          = 193988,
 
@@ -44,7 +48,12 @@ class MANGOS_DLL_DECL instance_obsidian_sanctum : public ScriptedInstance
         uint32 GetData(uint32 uiType);
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/);
+        bool CheckConditionCriteriaMeet(Player const* source, uint32 map_id, uint32 instance_condition_id);
 
+        GUIDList m_lFireCyclones;
+        ObjectGuid m_uiAcolyteShadronGUID;
+        ObjectGuid m_uiAcolyteVesperonGUID;
+        GUIDList m_lEggsGUIDList;
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
 
