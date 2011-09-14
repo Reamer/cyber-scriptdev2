@@ -77,6 +77,7 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
 
     void Reset()
     {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
         SetCombatMovement(false);
         m_uiPhase = PHASE_START;
         m_uiEmergeTimer = 12000;
