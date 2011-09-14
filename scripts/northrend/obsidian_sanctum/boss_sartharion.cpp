@@ -610,7 +610,7 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
                         if (!PlayerList.isEmpty())
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
-                                if (i->getSource()->isAlive())
+                                if (i->getSource()->isAlive() && i->getSource()->GetPhaseMask() != 1)
                                     i->getSource()->CastSpell(i->getSource(), SPELL_TWILIGHT_SHIFT_REMOVAL, true);
                             }
                     }
@@ -797,7 +797,7 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
             if (!PlayerList.isEmpty())
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 {
-                    if (i->getSource()->isAlive())
+                    if (i->getSource()->isAlive() && i->getSource()->GetPhaseMask() != 1)
                         i->getSource()->CastSpell(i->getSource(), SPELL_TWILIGHT_SHIFT_REMOVAL, true);
                 }
         }
@@ -885,14 +885,12 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                         iTextId = WHISPER_OPEN_PORTAL;
                         if (m_pInstance)
                         {
-                            if (Creature* pAcolyte = m_pInstance->GetSingleCreatureFromStorage(NPC_ACOLYTE_OF_SHADRON))
+                            Creature* pAcolyte = m_pInstance->GetSingleCreatureFromStorage(NPC_ACOLYTE_OF_SHADRON);
+                            if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
                             {
-                                if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
-                                {                                    
-                                    if (Creature* pAcolyte2 = m_creature->SummonCreature(NPC_ACOLYTE_OF_SHADRON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 90000))
-                                    {
-                                        pAcolyte2->CastSpell(m_creature, m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS ? SPELL_GIFT_OF_TWILIGTH_SAR : SPELL_GIFT_OF_TWILIGTH_SHA, true);
-                                    }
+                                if (Creature* pAcolyte2 = m_creature->SummonCreature(NPC_ACOLYTE_OF_SHADRON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 90000))
+                                {
+                                    pAcolyte2->CastSpell(m_creature, m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS ? SPELL_GIFT_OF_TWILIGTH_SAR : SPELL_GIFT_OF_TWILIGTH_SHA, true);
                                 }
                             }
                         }
@@ -921,12 +919,10 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                                 m_creature->CastSpell(m_creature, pTempSpell, true);
                             }
 
-                            if (Creature* pAcolyte = m_pInstance->GetSingleCreatureFromStorage(NPC_ACOLYTE_OF_VESPERON))
+                            Creature* pAcolyte = m_pInstance->GetSingleCreatureFromStorage(NPC_ACOLYTE_OF_VESPERON);
+                            if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
                             {
-                                if (!pAcolyte || (pAcolyte && pAcolyte->isDead()))
-                                {
-                                    pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_VESPERON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 90000);
-                                }
+                                pAcolyte = m_creature->SummonCreature(NPC_ACOLYTE_OF_VESPERON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 90000);
                             }
                         }
                     }
