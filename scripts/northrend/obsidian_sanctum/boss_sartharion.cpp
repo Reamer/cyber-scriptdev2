@@ -890,7 +890,16 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                             {
                                 if (Creature* pAcolyte2 = m_creature->SummonCreature(NPC_ACOLYTE_OF_SHADRON, pPortal->GetPositionX()-10+urand(0, 20), pPortal->GetPositionY()-10+urand(0, 20), pPortal->GetPositionZ()+1.0f, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 90000))
                                 {
-                                    pAcolyte2->CastSpell(m_creature, m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS ? SPELL_GIFT_OF_TWILIGTH_SAR : SPELL_GIFT_OF_TWILIGTH_SHA, true);
+                                    if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS) 
+                                    {
+                                        if (Creature* pSarth = m_pInstance->GetSingleCreatureFromStorage(NPC_SARTHARION))
+                                            pSarth->CastSpell(pSarth, SPELL_GIFT_OF_TWILIGTH_SAR, true);
+                                    }
+                                    else
+                                    {
+                                        if (Creature* pShad = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON))
+                                            pShad->CastSpell(pShad, SPELL_GIFT_OF_TWILIGTH_SHA, true);
+                                    }
                                 }
                             }
                         }
@@ -982,6 +991,18 @@ struct MANGOS_DLL_DECL dummy_dragonAI : public ScriptedAI
                 iTextId = SAY_SHADRON_DEATH;
                 if (Creature* pAcolyte = m_pInstance->GetSingleCreatureFromStorage(NPC_ACOLYTE_OF_SHADRON))
                     pAcolyte->DealDamage(pAcolyte, pAcolyte->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                //not solo fight, so main boss has deduff
+                if (Creature* pSartharion = m_pInstance->GetSingleCreatureFromStorage(NPC_SARTHARION))
+                {
+                    if (pSartharion->isAlive() && pSartharion->HasAura(SPELL_GIFT_OF_TWILIGTH_SAR))
+                        pSartharion->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SAR);
+                }
+                //event not in progress, then solo fight and must remove debuff mini-boss
+                if (Creature* pShadron = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON))
+                {
+                    if (pShadron->isAlive() && pShadron->HasAura(SPELL_GIFT_OF_TWILIGTH_SHA))
+                        pShadron->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SHA);
+                }
                 break;
             }
             case NPC_VESPERON:
@@ -1368,6 +1389,24 @@ struct MANGOS_DLL_DECL mob_acolyte_of_shadronAI : public ScriptedAI
 
     void Reset()
     {
+    }
+    void JustDied(Unit* killer)
+    {
+        if (m_pInstance)
+        {            
+            //not solo fight, so main boss has deduff
+            if (Creature* pSartharion = m_pInstance->GetSingleCreatureFromStorage(NPC_SARTHARION))
+            {
+                if (pSartharion->isAlive() && pSartharion->HasAura(SPELL_GIFT_OF_TWILIGTH_SAR))
+                    pSartharion->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SAR);
+            }
+            //event not in progress, then solo fight and must remove debuff mini-boss
+            if (Creature* pShadron = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON))
+            {
+                if (pShadron->isAlive() && pShadron->HasAura(SPELL_GIFT_OF_TWILIGTH_SHA))
+                    pShadron->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SHA);
+            }
+        }
     }
 
     void UpdateAI(const uint32 uiDiff)
