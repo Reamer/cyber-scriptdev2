@@ -248,9 +248,13 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
 
 bool instance_naxxramas::IsEncounterInProgress() const
 {
-    for (uint8 i = 0; i < TYPE_KELTHUZAD; ++i)
-        if (m_auiEncounter[i] == IN_PROGRESS || m_auiEncounter[i] == SPECIAL)
+    for (uint8 i = 0; i <= TYPE_KELTHUZAD; ++i)
+    {
+        if (m_auiEncounter[i] == IN_PROGRESS)
             return true;
+    }
+    if (m_auiEncounter[TYPE_GOTHIK] == SPECIAL)
+        return true;
 
     return false;
 }
