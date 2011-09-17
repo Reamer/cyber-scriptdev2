@@ -18,6 +18,7 @@
 SDName: Boss Sartharion
 SD%Complete: 100%
 SDComment: It's alive! ;) Now this is script is alive realy! (c) MaxXx2021 and PSZ
+TODO: Will of sartharoion to all dragons
 SDCategory: Obsidian Sanctum
 EndScriptData */
 
@@ -327,7 +328,6 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
             pTene->SetLevitate(true);
             pTene->SetWalk(false);
             pTene->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
-            pTene->SetInCombatWithZone();
 
             if (!pTene->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                 pTene->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -340,7 +340,6 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
             pShad->SetLevitate(true);
             pShad->SetWalk(false);
             pShad->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
-            pShad->SetInCombatWithZone();
 
             if (!pShad->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                 pShad->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -353,7 +352,6 @@ struct MANGOS_DLL_DECL boss_sartharionAI : public ScriptedAI
             pVesp->SetLevitate(true);
             pVesp->SetWalk(false);
             pVesp->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
-            pVesp->SetInCombatWithZone();
 
             if (!pVesp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                 pVesp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
