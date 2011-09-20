@@ -39,7 +39,7 @@ enum
 
     // elemental's abilities
     SPELL_MERGE                 = 54269,
-    SPELL_SURGE                 = 54801,    // TESTING: sometimes under map
+    SPELL_SURGE                 = 54801,
     SPELL_MOJO_VOLLEY           = 59453,
     SPELL_MOJO_VOLLEY_H         = 54849
 };

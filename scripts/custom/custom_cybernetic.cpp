@@ -143,7 +143,7 @@ bool GossipHello_custum_cybernetic_2(Player* pPlayer, Creature* pCreature)
 bool addItem(Player* pPlayer, uint32 anzahl)
 {
     ItemPosCountVec dest;
-    InventoryResult msg = pPlayer->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, ITEM_CYBER_CREDIT, 1 );
+    InventoryResult msg = pPlayer->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, ITEM_CYBER_CREDIT, anzahl);
     if (msg == EQUIP_ERR_OK)
     {
         Item* item = pPlayer->StoreNewItem( dest, ITEM_CYBER_CREDIT, true);
@@ -234,6 +234,8 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
                         Player* member = itr->getSource();
                         if (!member)
                             continue;
+                        int32 subtract = 5;
+                        member->DestroyItemCount(ITEM_SCHNELLSTES_DUNGEON, -subtract, true, false);
 
                         if (!addItem(member,anzahlmarken))
                             member->MonsterSay("Ich habe nichts bekommen.", LANG_UNIVERSAL);
