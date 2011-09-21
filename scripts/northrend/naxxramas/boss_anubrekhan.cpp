@@ -188,7 +188,6 @@ struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LOCUSTSWARM :SPELL_LOCUSTSWARM_H) == CAST_OK)
                 m_uiLocustSwarmTimer = 80000;
-            m_uiSummonTimer = 2000;
         }else m_uiLocustSwarmTimer -= uiDiff;
 
         // Summon crypt guard
