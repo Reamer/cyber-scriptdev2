@@ -47,6 +47,7 @@ enum Integer
 
     ITEM_SCHNELLSTES_DUNGEON    = 17894,
     ITEM_CYBER_CREDIT           = 54822,
+    ITEM_RING                   = 27257,
     RESET                       = 100,
     FERTIG                      = 101
 };
@@ -140,13 +141,13 @@ bool GossipHello_custum_cybernetic_2(Player* pPlayer, Creature* pCreature)
     return true;
 }
 
-bool addItem(Player* pPlayer, uint32 anzahl)
+bool addItem(Player* pPlayer, uint32 anzahl, uint32 itemId)
 {
     ItemPosCountVec dest;
-    InventoryResult msg = pPlayer->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, ITEM_CYBER_CREDIT, anzahl);
+    InventoryResult msg = pPlayer->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId , anzahl);
     if (msg == EQUIP_ERR_OK)
     {
-        Item* item = pPlayer->StoreNewItem( dest, ITEM_CYBER_CREDIT, true);
+        Item* item = pPlayer->StoreNewItem( dest, itemId, true);
         pPlayer->SendNewItem(item,anzahl,false,true);
         return true;
     }
@@ -237,7 +238,7 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
                         int32 subtract = 5;
                         member->DestroyItemCount(ITEM_SCHNELLSTES_DUNGEON, -subtract, true, false);
 
-                        if (!addItem(member,anzahlmarken))
+                        if (!addItem(member,anzahlmarken, ITEM_CYBER_CREDIT))
                             member->MonsterSay("Ich habe nichts bekommen.", LANG_UNIVERSAL);
                     }
                 }
@@ -287,6 +288,34 @@ bool GossipSelect_custum_cybernetic_2(Player *pPlayer, Creature *pCreature, uint
     return true;
 }
 
+bool GossipHello_custum_cybernetic_3(Player* pPlayer, Creature* pCreature)
+{
+    
+    pPlayer->PrepareGossipMenu(pCreature, pCreature->GetCreatureInfo()->GossipMenuId);
+    pPlayer->SendPreparedGossip(pCreature);
+    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Ich will meinen Super Tollen Ring haben.", GOSSIP_SENDER_MAIN, 555);
+    pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE,pCreature->GetObjectGuid());
+    return true;
+}
+
+bool GossipSelect_custum_cybernetic_3(Player *pPlayer, Creature *pCreature, uint32 sender, uint32 action )
+{
+    if (action == 555)
+    {
+        uint32 charCount = GetCharCountWithAccountId(pPlayer->GetSession()->GetAccountId());
+        if (charCount > 1 || pPlayer->GetItemCount(ITEM_RING, true) >= 1)
+        {
+            pCreature->MonsterSay("Den Ring des Meister bekommt man nur einmal mit seinen ERSTEN Charakter", LANG_UNIVERSAL);
+        }
+        else
+        {
+            addItem(pPlayer, 1, ITEM_RING);
+        }
+    }
+    pPlayer->CLOSE_GOSSIP_MENU();
+    return true;
+}
+
 void AddSC_custom_cybernetic()
 {
     Script *newscript;
@@ -302,6 +331,12 @@ void AddSC_custom_cybernetic()
     newscript->Name = "custom_cybernetic_2";
     newscript->pGossipHello = &GossipHello_custum_cybernetic_2;
     newscript->pGossipSelect = &GossipSelect_custum_cybernetic_2;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "custom_cybernetic_3";
+    newscript->pGossipHello = &GossipHello_custum_cybernetic_3;
+    newscript->pGossipSelect = &GossipSelect_custum_cybernetic_3;
     newscript->RegisterSelf();
 }
 
