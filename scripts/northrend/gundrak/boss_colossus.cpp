@@ -36,6 +36,7 @@ enum
     SPELL_MIGHTY_BLOW           = 54719,
     SPELL_MORTAL_STRIKES        = 54715,
     SPELL_MORTAL_STRIKES_H      = 59454,
+    SPELL_STUN                  = 54852,
 
     // elemental's abilities
     SPELL_MERGE                 = 54269,
@@ -74,17 +75,20 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
 
     uint32 m_uiMightyBlowTimer;
     uint32 m_uiEmergeTimer;
+    uint32 m_uiElementarTimer;
 
     void Reset()
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE | UNIT_FLAG_UNK_6 | UNIT_FLAG_UNK_15);
         SetCombatMovement(false);
         m_uiPhase = PHASE_START;
         m_uiEmergeTimer = 12000;
         m_uiMightyBlowTimer = 3000;
+        m_creature->SetWalk(true);
         
         m_uiMojoDieTimer = 4000;
         m_bElementsHasMoved = false;
+        m_uiElementarTimer = 26000;
     }
 
     void Aggro(Unit* pWho)
@@ -103,7 +107,7 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_COLOSSUS, DONE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
     void KillElementals()
@@ -116,7 +120,9 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
                 {
                     if (pMojo->isAlive())
                     {
-                        m_creature->DealDamage(pMojo, pMojo->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false); 
+                        pMojo->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_NON_ATTACKABLE);
+                        m_creature->DealDamage(pMojo, pMojo->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        m_creature->RemoveAurasDueToSpell(16245);
                     }
                 }
             }
@@ -127,9 +133,12 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
     {
         if (pSpell->Id == SPELL_MERGE)
         {
-            m_uiPhase = PHASE_NORMAL;
+            if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             SetCombatMovement(true);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            m_uiPhase = PHASE_NORMAL;
+            m_uiElementarTimer = 26000;
         }
     }
 
@@ -165,6 +174,7 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
                     {
                         KillElementals();
                         SetCombatMovement(true);
+                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                         m_uiPhase = PHASE_NORMAL;
                     }
                     else
@@ -187,8 +197,7 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_EMERGE) == CAST_OK)
                     {
-                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        SetCombatMovement(false);
+                        //SetCombatMovement(false);
                         m_uiPhase = PHASE_ELEMENTAR;
                         m_uiEmergeTimer = 15000;
                         return;
@@ -202,7 +211,16 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
             }            
             case PHASE_ELEMENTAR:
             {
-                // Do nothing
+                
+                if (m_uiElementarTimer < uiDiff)
+                {
+                    //SetCombatMovement(true);
+                    //m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_uiPhase = PHASE_NORMAL;
+                    m_uiElementarTimer = 26000;
+                }
+                else
+                    m_uiElementarTimer -= uiDiff;
                 break;
             }
             
@@ -247,16 +265,7 @@ struct MANGOS_DLL_DECL mob_colossus_elementalAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_MERGE) == CAST_OK)
             {
-                if (Creature * pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
-                {
-                    if (boss_colossusAI * pColossusAI = (boss_colossusAI*)pColossus->AI())
-                    {
-                        pColossusAI->m_uiPhase = PHASE_NORMAL;
-                        pColossusAI->SetCombatMovement(true);
-                        pColossus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                         m_uiMergeTimer = 25000;
-                    }
-                }               
+                m_uiMergeTimer = 5000;
             }
         }
         else

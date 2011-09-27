@@ -1843,7 +1843,6 @@
     <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_northrend.cpp" />
     <ClCompile Include="..\scripts\outdoor_pvp\outdoor_pvp_outland.cpp" />
     <ClCompile Include="..\ScriptMgr.cpp" />
-    <ClCompile Include="..\scripts\battlegrounds\battlegroundSA.cpp" />
     <ClCompile Include="..\scripts\world\pet_scripts.cpp" />
     <ClCompile Include="..\scripts\northrend\ulduar\ulduar\boss_iron_council.cpp">
       <Filter>scripts\northrend\ulduar\ulduar</Filter>
@@ -1856,6 +1855,9 @@
     </ClCompile>
     <ClCompile Include="..\scripts\custom\custom_cybernetic.cpp">
       <Filter>scripts\custom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\scripts\battlegrounds\battlegroundSA.cpp">
+      <Filter>scripts\battlegrounds</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
