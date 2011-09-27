@@ -27,4 +27,26 @@ enum
     NPC_TEMPEST_MINION          = 33998,
 };
 
+class MANGOS_DLL_DECL instance_vault_of_archavon : public ScriptedInstance
+{
+    public:
+        instance_vault_of_archavon(Map* pMap);
+
+        void Initialize();
+
+        void OnCreatureCreate(Creature* pCreature);
+
+        uint32 GetData(uint32 uiType);
+        void SetData(uint32 uiType, uint32 uiData);
+
+        void Load(const char* chrIn);
+
+        bool IsEncounterInProgress() const;
+       
+        GUIDList m_lTempestMinion;
+    private:
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        std::string m_strInstData;
+};
+
 #endif
