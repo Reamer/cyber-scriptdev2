@@ -24,134 +24,123 @@ EndScriptData */
 #include "precompiled.h"
 #include "vault_of_archavon.h"
 
-struct MANGOS_DLL_DECL instance_vault_of_archavon : public ScriptedInstance
+
+instance_vault_of_archavon::instance_vault_of_archavon(Map* pMap) : ScriptedInstance(pMap)
 {
-    instance_vault_of_archavon(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
+        Initialize();
+}
 
-    uint32 m_auiEncounter[MAX_ENCOUNTER];
-    std::string strInstData;
+void instance_vault_of_archavon::Initialize()
+{
+    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+}
 
-    uint8 m_uiMinion;
-
-    void Initialize()
+void instance_vault_of_archavon::OnCreatureCreate(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
     {
-        memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-        m_uiMinion = 0;
+        case NPC_TORAVON:
+        case NPC_ARCHAVON:
+        case NPC_EMALON:
+        case NPC_KORALON:
+            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        case NPC_TEMPEST_MINION:
+            m_lTempestMinion.push_back(pCreature->GetObjectGuid());
+            break;
     }
+}
 
-    void OnCreatureCreate(Creature* pCreature)
+void instance_vault_of_archavon::SetData(uint32 uiType, uint32 uiData)
+{
+    m_auiEncounter[uiType] = uiData;
+    switch (uiType)
     {
-        switch (pCreature->GetEntry())
+        case TYPE_EMALON:
         {
-            case NPC_TORAVON:
-            case NPC_ARCHAVON:
-            case NPC_EMALON:
-            case NPC_KORALON:
-                m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-                break;
-            case NPC_TEMPEST_MINION:
-                switch (m_uiMinion)
+            if (uiData == DONE)
+            {
+                for (GUIDList::iterator itr = m_lTempestMinion.begin(); itr !=m_lTempestMinion.end(); ++itr)
                 {
-                    case 0:
-                    case 1:
-                    case 2:
-                    case 3:
-                        m_mNpcEntryGuidStore[m_uiMinion + DATA_TEMPEST_MINION_1] = pCreature->GetObjectGuid();
-                        ++m_uiMinion;
-                        break;
-                    case 4:
-                    default:
-                        m_uiMinion = 0;
-                        break;
+                    if (Creature* pMinion = instance->GetCreature(*itr))
+                    {
+                        pMinion->DealDamage(pMinion, pMinion->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    }
                 }
-                break;
+            }
+            else if (uiData == FAIL)
+            {
+                for (GUIDList::iterator itr = m_lTempestMinion.begin(); itr !=m_lTempestMinion.end(); ++itr)
+                {
+                    if (Creature* pMinion = instance->GetCreature(*itr))
+                    {
+                        pMinion->Respawn();
+                    }
+                }
+            }
         }
     }
 
-    void SetData(uint32 uiType, uint32 uiData)
+    if (uiData == DONE)
     {
-        switch (uiType)
-        {
-            case TYPE_ARCHAVON:
-                m_auiEncounter[0] = uiData;
-                break;
-            case TYPE_EMALON:
-                m_auiEncounter[1] = uiData;
-                break;
-            case TYPE_KORALON:
-                m_auiEncounter[2] = uiData;
-                break;
-            case TYPE_TORAVON:
-                m_auiEncounter[3] = uiData;
-                break;
-        }
+        OUT_SAVE_INST_DATA;
 
-        if (uiData == DONE)
-        {
-            OUT_SAVE_INST_DATA;
+        std::ostringstream saveStream;
+        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
 
-            std::ostringstream saveStream;
-            saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
+        m_strInstData = saveStream.str();
 
-            strInstData = saveStream.str();
-
-            SaveToDB();
-            OUT_SAVE_INST_DATA_COMPLETE;
-        }
+        SaveToDB();
+        OUT_SAVE_INST_DATA_COMPLETE;
     }
+}
 
-    uint32 GetData(uint32 uiType)
+uint32 instance_vault_of_archavon::GetData(uint32 uiType)
+{
+    switch (uiType)
     {
-        switch (uiType)
-        {
-            case TYPE_ARCHAVON:
-                return m_auiEncounter[0];
-            case TYPE_EMALON:
-                return m_auiEncounter[1];
-            case TYPE_KORALON:
-                return m_auiEncounter[2];
-            case TYPE_TORAVON:
-                return m_auiEncounter[3];
-        }
-        return 0;
+        case TYPE_ARCHAVON:
+            return m_auiEncounter[0];
+        case TYPE_EMALON:
+            return m_auiEncounter[1];
+        case TYPE_KORALON:
+            return m_auiEncounter[2];
+        case TYPE_TORAVON:
+            return m_auiEncounter[3];
     }
+    return 0;
+}
 
-
-    const char* Save()
+void instance_vault_of_archavon::Load(const char* chrIn)
+{
+    if (!chrIn)
     {
-        return strInstData.c_str();
+        OUT_LOAD_INST_DATA_FAIL;
+        return;
     }
 
-    void Load(const char* in)
+    OUT_LOAD_INST_DATA(chrIn);
+
+    std::istringstream loadStream(chrIn);
+    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
+
+    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
-        if (!in)
-        {
-            OUT_LOAD_INST_DATA_FAIL;
-            return;
-        }
-
-        OUT_LOAD_INST_DATA(in);
-
-        std::istringstream loadStream(in);
-        loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
-
-        for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-        {
-            if (m_auiEncounter[i] == IN_PROGRESS)
-                m_auiEncounter[i] = NOT_STARTED;
-        }
-
-        OUT_LOAD_INST_DATA_COMPLETE;
+        if (m_auiEncounter[i] == IN_PROGRESS)
+            m_auiEncounter[i] = NOT_STARTED;
     }
 
-    bool IsEncounterInProgress() const
-    {
-        for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-            if (m_auiEncounter[i] == IN_PROGRESS)
-                return true;
-        return false;
-    }
-};
+    OUT_LOAD_INST_DATA_COMPLETE;
+}
+
+bool instance_vault_of_archavon::IsEncounterInProgress() const
+{
+    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+        if (m_auiEncounter[i] == IN_PROGRESS)
+            return true;
+    return false;
+}
+
 
 InstanceData* GetInstanceData_instance_vault_of_archavon(Map* pMap)
 {
