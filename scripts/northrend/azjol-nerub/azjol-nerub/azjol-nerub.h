@@ -27,44 +27,42 @@ enum
     GO_DOOR_KRIKTHIR   = 192395,
     GO_DOOR_ANUBARAK_1 = 192396,
     GO_DOOR_ANUBARAK_2 = 192397,
-    GO_DOOR_ANUBARAK_3 = 192398
+    GO_DOOR_ANUBARAK_3 = 192398,
+
+    ACHIEV_START_ANUB_ID        = 20381,
 };
+
+static const uint32 aWatchers[] = {NPC_GASHRA, NPC_NARJIL, NPC_SILTHIK};
 
 struct MANGOS_DLL_DECL instance_azjol_nerub : public ScriptedInstance
 {
     public:
         instance_azjol_nerub(Map* pMap);
-        ~instance_azjol_nerub() {};
 
         void Initialize();
+
         void OnObjectCreate(GameObject* pGo);
         void OnCreatureCreate(Creature* pCreature);
-        void OnCreatureEvade(Creature* pCreature);
+
         void OnCreatureEnterCombat(Creature* pCreature);
+        void OnCreatureEvade(Creature* pCreature);
         void OnCreatureDeath(Creature* pCreature);
+
         void SetData(uint32 uiType, uint32 uiData);
-        const char* Save() { return strInstData.c_str(); }
+
+        const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);
+
         void Update(uint32 uiDiff);
+
+    private:
         void DoSendWatcherOrKrikthir();
 
-    protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string strInstData;
+        std::string m_strInstData;
 
-        uint64 m_uiDoorKrikthirGUID;
-        uint64 m_uiDoorAnubarak1GUID;
-        uint64 m_uiDoorAnubarak2GUID;
-        uint64 m_uiDoorAnubarak3GUID;
+        ObjectGuid m_playerGuid;
 
-        uint64 m_uiKrikthirGUID;
-        uint64 m_uiGashraGUID;
-        uint64 m_uiNarjilGUID;
-        uint64 m_uiSilthikGUID;
-
-        uint64 m_uiPlayerGUID;
-
-        uint64 m_auiWatcherGUIDS[3];
         uint32 m_uiWatcherTimer;
 };
 #endif

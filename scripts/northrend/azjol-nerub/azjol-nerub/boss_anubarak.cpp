@@ -62,6 +62,13 @@ enum
 
 };
 
+enum Phasen{
+    PHASE_NORMAL    = 0,
+    PHASE_ADDS      = 1,
+};
+
+static const float aPercentOfLife[4] = {66.6f, 33.3f, 15.0f, 0.0f};
+
 #define MIDDLE_CORD_X                   552.927734f
 #define MIDDLE_CORD_Y                   248.950851f
 #define MIDDLE_CORD_Z                   223.912796f
@@ -89,66 +96,37 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
 
     instance_azjol_nerub* m_pInstance;
     bool m_bIsRegularMode;
+    uint8 m_uiPhase;
 
-        bool m_bIsInTimeForAchiev;
-        uint32 SpeedKillTimer;
+    uint32 m_uiSummonCreatureTimer;
+    uint32 m_uiLeechingSwarmTimer;
+    uint32 m_uiImpaleTimer;
+    uint32 m_uiPoundTimer;
+    uint32 m_uiCarrionSwarmTimer;
+    
+    uint32 m_uiWaveStepCount;
+    uint32 countInvisiblePhases;
+    uint32 m_uiBurrowStepCount;
+    uint32 m_uiBurronStepTimer;
 
-    bool phase66;
-    bool phase66Over;
-    bool phase33;
-    bool phase33Over;
-    bool phase15;
-    bool phase15Over;
-
-    uint32 BurrowTimer;
-    uint32 VisComeBackTimer;
-    uint32 BurComeBackTimer;
-    uint32 IsBackTimer;
-    uint32 SummonCreatureTimer;
-    uint32 LeechingSwarmTimer;
-    uint32 CloseDoorTimer;
-    uint32 ImpaleTimer;
-    uint32 PoundTimer;
-    uint32 CarrionSwarmTimer;
-    uint32 ImpaleTriggerTimer;
-
-    Unit* pTriggerTarget;
-    std::list<uint64> m_lBettleGUIDList;
-
-    int i;
+    GUIDList m_lBettleGUIDList;
 
     void Reset()
     {
-        phase66         = false;
-        phase66Over     = false;
-        phase33         = false;
-        phase33Over     = false;
-        phase15         = false;
-        phase15Over     = false;
-
-        BurrowTimer             = 9999999;
-        VisComeBackTimer        = 9999999;
-        BurComeBackTimer        = 9999999;
-        IsBackTimer             = 9999999;
-        SummonCreatureTimer     = 9999999;
-        LeechingSwarmTimer      = 4000;
-        CloseDoorTimer          = 4000;
-        ImpaleTimer             = 5000;
-        ImpaleTriggerTimer      = 9999999;
-        PoundTimer              = 12000;
-        CarrionSwarmTimer       = 13000;
-
-        m_bIsInTimeForAchiev = true;
-        SpeedKillTimer = 240000;
+        m_uiPhase               = PHASE_NORMAL;
+        countInvisiblePhases    = 0;
+        m_uiBurrowStepCount     = 0;
+        m_uiBurronStepTimer     = 0;
+        m_uiWaveStepCount       = 0;
+        m_uiSummonCreatureTimer = 2000;
+        m_uiLeechingSwarmTimer  = 4000;
+        m_uiImpaleTimer         = 5000;
+        m_uiPoundTimer          = 12000;
+        m_uiCarrionSwarmTimer   = 13000;
 
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetVisibility(VISIBILITY_ON);
-
-        pTriggerTarget = NULL;
-
-        i = 0;
-
-        m_pInstance->SetData(TYPE_ANUBARAK, NOT_STARTED);
+        
         RemoveAllBettles();
 
     }
@@ -156,14 +134,18 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
+        if (m_pInstance)
+        {
+            m_pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
+        }
     }
 
     void RemoveAllBettles()
     {
         if (!m_lBettleGUIDList.empty())
         {
-            for(std::list<uint64>::iterator itr = m_lBettleGUIDList.begin(); itr != m_lBettleGUIDList.end(); ++itr)
-                if (Creature* pTemp = (Creature*)m_creature->GetMap()->GetUnit( *itr))
+            for(GUIDList::iterator itr = m_lBettleGUIDList.begin(); itr != m_lBettleGUIDList.end(); ++itr)
+                if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
                         pTemp->ForcedDespawn();
         }
         m_lBettleGUIDList.clear();
@@ -179,6 +161,12 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
         }
     }
 
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_ANUBARAK, FAIL);
+    }
+
     void JustDied(Unit* pKiller)
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -186,13 +174,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
         RemoveAllBettles();
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_ANUBARAK, DONE);
-            if (m_bIsInTimeForAchiev && !m_bIsRegularMode)
-            {
-                m_pInstance->DoCompleteAchievement(ACHIEV_SPEEDKILL_H);
-            }
-        }
     }
 
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
@@ -215,222 +197,230 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // Small hack to prevent a precocious close of the battlefield
-        if (CloseDoorTimer < uiDiff)
+        switch (m_uiPhase)
         {
-            m_pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
-            CloseDoorTimer = 9999999;
-        }else CloseDoorTimer -= uiDiff;
-
-        if (SpeedKillTimer < uiDiff)
-        {
-            m_bIsInTimeForAchiev = false;
-        }
-        else
-            SpeedKillTimer -= uiDiff;
-
-        if (phase66 || phase33 || phase15)
-        {
-            // TODO: Impale
-            if (ImpaleTimer < uiDiff)
+            case PHASE_NORMAL:
             {
-                if (Unit* pImpaleVictim = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    if (pImpaleVictim->GetTypeId() == TYPEID_PLAYER)
+                if (m_creature->GetHealthPercent() < aPercentOfLife[countInvisiblePhases])
+                {
+                    ++countInvisiblePhases;
+                    m_uiPhase = PHASE_ADDS;
+                    DoCastSpellIfCan(m_creature, SPELL_BURROW);
+                    m_uiSummonCreatureTimer = 2000;
+                    m_uiBurronStepTimer = 2000;
+                    m_uiBurrowStepCount = 0;
+                    m_uiWaveStepCount = 0;
+                }
+
+                if (m_uiPoundTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_POUND : SPELL_POUND_H) == CAST_OK)
+                        m_uiPoundTimer = urand(15000, 18000);
+                }
+                else
+                    m_uiPoundTimer -= uiDiff;
+            
+                if (m_uiLeechingSwarmTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LEECHING_SWARM : SPELL_LEECHING_SWARM_H) == CAST_OK)
+                        m_uiLeechingSwarmTimer = 15000;  
+                }
+                else
+                    m_uiLeechingSwarmTimer -= uiDiff;
+
+                if (m_uiCarrionSwarmTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_CARRION_SWARM) == CAST_OK)
+                        m_uiCarrionSwarmTimer = urand(23000, 31000);
+                }
+                else
+                    m_uiCarrionSwarmTimer -= uiDiff;
+                
+                DoMeleeAttackIfReady();
+                break;
+            }
+            case PHASE_ADDS:
+            {
+                if (m_uiImpaleTimer < uiDiff)
+                {
+                    if (Unit* pImpaleVictim = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
                     {
                         m_creature->SummonCreature(NPC_IMPALE_TRIGGER, pImpaleVictim->GetPositionX(), pImpaleVictim->GetPositionY(), pImpaleVictim->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 4000);
-                        ImpaleTimer = 8000;
+                        m_uiImpaleTimer = 8000;
                     }
-            }else ImpaleTimer -= uiDiff;
-        }
-        else 
-        {
-            if (PoundTimer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_POUND : SPELL_POUND_H);
-                PoundTimer = urand(15000, 18000);
-            }else PoundTimer -= uiDiff;
-            
-            if (LeechingSwarmTimer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LEECHING_SWARM : SPELL_LEECHING_SWARM_H);  
-                LeechingSwarmTimer = 15000;  
-            }else LeechingSwarmTimer -= uiDiff;
+                }
+                else
+                    m_uiImpaleTimer -= uiDiff;
 
-            if (CarrionSwarmTimer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature, SPELL_CARRION_SWARM); 
-                CarrionSwarmTimer = urand(23000, 31000);
-            }else CarrionSwarmTimer -= uiDiff;
-        }
-
-        if (m_creature->GetHealth() < m_creature->GetMaxHealth() * 0.66 && !phase66Over)
-        {
-            phase66 = true;
-            phase66Over = true;
-            DoCastSpellIfCan(m_creature, SPELL_BURROW);
-            BurrowTimer = 1700;
-            SummonCreatureTimer = 2000;
-        }
-        else if (m_creature->GetHealth() < m_creature->GetMaxHealth() * 0.33 && !phase33Over)
-        {
-            phase33 = true;
-            phase33Over = true;
-            DoCastSpellIfCan(m_creature, SPELL_BURROW);
-            BurrowTimer = 1700;
-            SummonCreatureTimer = 2000;
-        }
-        else if (m_creature->GetHealth() < m_creature->GetMaxHealth() * 0.15 && !phase15Over)
-        {
-            phase15 = true;
-            phase15Over = true;
-            DoCastSpellIfCan(m_creature, SPELL_BURROW);
-            BurrowTimer = 1700;
-            SummonCreatureTimer = 2000;
-        }
-
-        if (BurrowTimer < uiDiff)
-        {
-            m_creature->SetVisibility(VISIBILITY_OFF);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            m_creature->GetMotionMaster()->MoveIdle();
-            if (phase66)
-                BurComeBackTimer = 7000;
-            else if (phase33)
-                BurComeBackTimer = 15000;
-            else if (phase15)
-                BurComeBackTimer = 25000;
-
-            BurrowTimer = 9999999;
-        }else BurrowTimer -= uiDiff;
-
-        if (BurComeBackTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_BURROW);
-            VisComeBackTimer = 8000;
-
-            BurComeBackTimer = 9999999;
-        }else BurComeBackTimer -= uiDiff;
-
-        if (VisComeBackTimer < uiDiff)
-        {
-            m_creature->SetVisibility(VISIBILITY_ON);
-            IsBackTimer = 3000;
-
-            VisComeBackTimer = 9999999;
-        }else VisComeBackTimer -= uiDiff;
-
-        if (IsBackTimer < uiDiff)
-        {
-            phase66 = false;
-            phase33 = false;
-            phase15 = false;
-            i = 0;
-
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-            IsBackTimer = 9999999;
-        }else IsBackTimer -= uiDiff;
-
-        if (SummonCreatureTimer < uiDiff)
-        {
-            if (phase66 || phase33 || phase15)
-            {
-                switch(i)
+                if (m_uiBurronStepTimer < uiDiff)
                 {
-                    case 0:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        if (phase15)
-                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                                m_lBettleGUIDList.push_back(pTemp->GetGUID());
-
-                        SummonCreatureTimer = 2000;
-                        break;
-                    case 1:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        SummonCreatureTimer = phase33 ? 10000 : 6000;
-                        if (phase15)
+                    switch (m_uiBurrowStepCount)
+                    {
+                        case 0:
                         {
-                            i += 3;
-                            SummonCreatureTimer = 10000;
-                        }
-                        break;
-                    case 2:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        if (phase66)
-                        {
-                            SummonCreatureTimer = 9999999;
+                            m_creature->SetVisibility(VISIBILITY_OFF);
+                            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            m_creature->GetMotionMaster()->MoveIdle();
+                            switch (countInvisiblePhases)
+                            {
+                                case 0: m_uiBurronStepTimer = 7000; break;
+                                case 1: m_uiBurronStepTimer = 15000; break;
+                                case 2: m_uiBurronStepTimer = 25000; break;
+                                default: m_uiBurronStepTimer = 2000;
+                            }
                             break;
                         }
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-
-                        SummonCreatureTimer = 1000;
-                        break;
-                    case 3:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        SummonCreatureTimer = 7000;
-                        break;
-                    case 4:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        
-                        SummonCreatureTimer = 9999999;
-                        break;
-                    case 5:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        
-                        SummonCreatureTimer = 2500;
-                        break;
-                    case 6:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 120000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        
-                        SummonCreatureTimer = 2000;
-                        break;
-                    case 7:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        SummonCreatureTimer = 3000;
-                        break;
-                    case 8:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-
-                        SummonCreatureTimer = 8000;
-                        break;
-                    case 9:
-                        if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
-                            m_lBettleGUIDList.push_back(pTemp->GetGUID());
-                        
-                        SummonCreatureTimer = 9999999;
-                        break;
-                    default:
-                        break;
+                        case 1:
+                        {
+                            DoCastSpellIfCan(m_creature, SPELL_BURROW);
+                            m_uiBurronStepTimer = 8000;
+                            break;
+                        }
+                        case 2:
+                        {
+                            m_uiPhase = PHASE_NORMAL;
+                            m_creature->SetVisibility(VISIBILITY_ON);
+                            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            m_uiBurronStepTimer = 2000;
+                            break;
+                        }
+                        default:
+                        {
+                            m_uiBurrowStepCount = 1;
+                            m_uiBurronStepTimer = 2000;
+                        }
+                    }
+                     ++m_uiBurrowStepCount;
                 }
-                i++;
+                else
+                    m_uiBurronStepTimer -= uiDiff;
+
+                if (m_uiSummonCreatureTimer < uiDiff)
+                {
+                    switch(m_uiWaveStepCount)
+                    {
+                        case 0:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            if (countInvisiblePhases == 3)
+                                if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                    m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+
+                            m_uiSummonCreatureTimer = 2000;
+                            break;
+                        }
+                        case 1:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            switch (countInvisiblePhases)
+                            {
+                                case 1:
+                                    m_uiSummonCreatureTimer = 6000;
+                                    break;
+                                case 2:
+                                    m_uiSummonCreatureTimer = 10000;
+                                    break;
+                                case 3:
+                                    m_uiSummonCreatureTimer = 10000;
+                                    m_uiWaveStepCount += 3;
+                                    break;
+                            }
+                            break;
+                        }
+                        case 2:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            if (countInvisiblePhases == 1)
+                            {
+                                m_uiWaveStepCount = 10; // END
+                                break;
+                            }
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+
+                            m_uiSummonCreatureTimer = 1000;
+                            break;
+                        }
+                        case 3:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            m_uiSummonCreatureTimer = 7000;
+                            break;
+                        }
+                        case 4:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                        
+                            m_uiWaveStepCount = 10; // END
+                            break;
+                        }
+                        case 5:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                        
+                            m_uiSummonCreatureTimer = 2500;
+                            break;
+                        }
+                        case 6:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_1_X, ELITE_SPAWN_1_Y, ELITE_SPAWN_1_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 120000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                        
+                            m_uiSummonCreatureTimer = 2000;
+                            break;
+                        }
+                        case 7:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                            m_uiSummonCreatureTimer = 3000;
+                            break;
+                        }
+                        case 8:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+
+                            m_uiSummonCreatureTimer = 8000;
+                            break;
+                        }
+                        case 9:
+                        {
+                            if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
+                                m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
+                        
+                            m_uiSummonCreatureTimer = 9999999;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                    m_uiWaveStepCount++;
+                    
+                }
+                else
+                    m_uiSummonCreatureTimer -= uiDiff;
             }
-        }else SummonCreatureTimer -= uiDiff;
- 
-        if (!phase66 && !phase33 && !phase15)
-            DoMeleeAttackIfReady();
+        }
     }
 };
 

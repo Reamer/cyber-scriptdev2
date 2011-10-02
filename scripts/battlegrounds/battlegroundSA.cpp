@@ -57,7 +57,7 @@ struct MANGOS_DLL_DECL npc_sa_demolisherAI : public ScriptedAI
                 else
                 {
                     pPlayer->EnterVehicle(vehicle);
-                    pPlayer->CastSpell(pCreature, 60968, true);
+                    //pPlayer->CastSpell(pCreature, 60968, true);
                 }
             }
         }
@@ -154,7 +154,7 @@ struct MANGOS_DLL_DECL npc_sa_cannonAI : public ScriptedAI
                 else
                 {
                     pPlayer->EnterVehicle(vehicle);
-                    pPlayer->CastSpell(pCreature, 60968, true);
+                    //pPlayer->CastSpell(pCreature, 60968, true);
                 }
             }
         }

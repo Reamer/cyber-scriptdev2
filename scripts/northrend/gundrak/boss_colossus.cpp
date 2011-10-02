@@ -197,7 +197,6 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_EMERGE) == CAST_OK)
                     {
-                        //SetCombatMovement(false);
                         m_uiPhase = PHASE_ELEMENTAR;
                         m_uiEmergeTimer = 15000;
                         return;
@@ -214,8 +213,7 @@ struct MANGOS_DLL_DECL boss_colossusAI : public ScriptedAI
                 
                 if (m_uiElementarTimer < uiDiff)
                 {
-                    //SetCombatMovement(true);
-                    //m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_creature->RemoveAurasDueToSpell(SPELL_STUN);
                     m_uiPhase = PHASE_NORMAL;
                     m_uiElementarTimer = 26000;
                 }

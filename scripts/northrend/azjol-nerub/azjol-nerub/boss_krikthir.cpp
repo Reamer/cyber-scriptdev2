@@ -54,12 +54,12 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
 {
     boss_krikthirAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_azjol_nerub*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_azjol_nerub* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 CurseTimer;
@@ -108,18 +108,14 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
         
-        if ((m_creature->GetHealth() < m_creature->GetMaxHealth() / 5) && !Enrage)
+        if ((m_creature->GetHealthPercent() < 20) && !Enrage)
         {
-            Enrage = true;
-            DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
-            EnrageRefreshTimer = 600000;
+            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            {
+                Enrage = true;
+                EnrageRefreshTimer = 600000;
+            }
         }
-
-        if (EnrageRefreshTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
-            EnrageRefreshTimer = 600000;
-        }else EnrageRefreshTimer -= uiDiff;
 
         if (CurseTimer < uiDiff)
         {
@@ -128,10 +124,11 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
             if (!pTarget)
                 return;
             
-            m_bIsRegularMode ? DoCastSpellIfCan(pTarget, SPELL_CURSE_OF_FATIGUE): DoCastSpellIfCan(pTarget, SPELL_CURSE_OF_FATIGUE_H);
-
-            CurseTimer = urand(11000, 13000);
-        }else CurseTimer -= uiDiff;
+            if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CURSE_OF_FATIGUE: SPELL_CURSE_OF_FATIGUE_H) == CAST_OK)
+               CurseTimer = urand(11000, 13000);
+        }
+        else
+            CurseTimer -= uiDiff;
 
         if (MindFlayTimer < uiDiff)
         {
@@ -139,11 +136,12 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
             
             if (!pTarget)
                 return;
-            
-            m_bIsRegularMode ? DoCastSpellIfCan(pTarget, SPELL_MIND_FLAY): DoCastSpellIfCan(pTarget, SPELL_MIND_FLAY_H);
 
-            MindFlayTimer = urand(14000, 18000);  
-        }else MindFlayTimer -= uiDiff;
+            if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_MIND_FLAY : SPELL_MIND_FLAY_H) == CAST_OK)
+                MindFlayTimer = urand(14000, 18000);  
+        }
+        else
+            MindFlayTimer -= uiDiff;
 
         if (SwarmTimer < uiDiff)
         {
@@ -168,8 +166,8 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
                 float x = pTarget->GetPositionX() + urand(3.0f, 15.0f);
                 float y = pTarget->GetPositionY() + urand(3.0f, 15.0f);
 
-                Creature* pSwarm = m_creature->SummonCreature(NPC_SWARM, x, y, pTarget->GetPositionZ(), pTarget->GetOrientation(), TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
-                pSwarm->SetInCombatWith(pTarget);
+                if (Creature* pSwarm = m_creature->SummonCreature(NPC_SWARM, x, y, pTarget->GetPositionZ(), pTarget->GetOrientation(), TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000))
+                    pSwarm->SetInCombatWith(pTarget);
                 i++;
             }while (m_bIsRegularMode ? i <= 5 : i <= 12);
             SwarmTimer = urand(3000, 5000);
