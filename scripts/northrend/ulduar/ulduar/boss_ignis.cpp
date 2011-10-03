@@ -147,7 +147,7 @@ struct MANGOS_DLL_DECL mob_iron_constructAI : public ScriptedAI
             if (Unit *pVictim = ((Creature*)pCaster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0) )
                 m_creature->AI()->AttackStart(pVictim);
 
-            m_creature->CastSpell(pCaster, SPELL_STRENGTH_OF_THE_CREATOR, true, 0, 0, pCaster->GetObjectGuid());
+            m_creature->CastSpell(pCaster, SPELL_STRENGTH_OF_THE_CREATOR, true);
         }
         else if (spellInfo->Id == SPELL_HEAT_AURA)
         {
