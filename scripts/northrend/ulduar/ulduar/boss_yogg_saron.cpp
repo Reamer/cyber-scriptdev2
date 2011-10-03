@@ -140,8 +140,6 @@ enum
     SPELL_PHYCHOSIS_H           = 63795,
     SPELL_MALADY_OF_THE_MIND    = 63830,    // in core fix
     SPELL_BRAIN_LINK            = 63802,    // in core fix, BUT visual mistake
-    //SPELL_BRAIN_LINK_DMG        = 63803,  // fix in core
-    //SPELL_BRAIN_LINK_NON_DMG    = 63804,  // fix in core
     SPELL_DEATH_RAY_SUMMON      = 63891,    //summons orb
     SPELL_DEATH_RAY_TRIGG       = 63883,
     SPELL_DEATH_RAY_VISUAL_W    = 63882,
@@ -685,8 +683,8 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public ScriptedAI
                 else
                     m_uiSummonGuardianTimer -= uiDiff;
 
+                break;
             }
-            break;
             case PHASE_TENTACLES:
             {
                 // Yogg Saron is Stun, no timer change and no summon
@@ -1424,7 +1422,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
         if(m_pInstance->GetData(TYPE_YOGG_PHASE) == PHASE_IDLE)
         {
             if (pWho->isTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature) && !m_bIsIntro && !m_bIsIntroDone &&
-                pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 110) && m_creature->IsWithinLOSInMap(pWho))
+                pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 60) && m_creature->IsWithinLOSInMap(pWho))
                 m_bIsIntro = true;
         }
     }
