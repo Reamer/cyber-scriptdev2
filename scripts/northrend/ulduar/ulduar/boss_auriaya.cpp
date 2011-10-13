@@ -276,7 +276,7 @@ struct MANGOS_DLL_DECL mob_feral_defenderAI : public ScriptedAI
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);            
                 // remove 1 stack of the aura
-                if(SpellAuraHolder* strenght = m_creature->GetSpellAuraHolder(SPELL_FERAL_ESSENCE))
+                if(SpellAuraHolderPtr strenght = m_creature->GetSpellAuraHolder(SPELL_FERAL_ESSENCE))
                 {
                     if(strenght->ModStackAmount(-1))
                         m_creature->RemoveAurasDueToSpell(SPELL_FERAL_ESSENCE);

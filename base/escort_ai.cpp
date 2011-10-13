@@ -82,6 +82,9 @@ void npc_escortAI::AttackStart(Unit* pWho)
 
 void npc_escortAI::EnterCombat(Unit* pEnemy)
 {
+    // Store combat start position
+    m_creature->SetCombatStartPosition(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+
     if (!pEnemy)
         return;
 
@@ -219,10 +222,11 @@ void npc_escortAI::EnterEvadeMode()
 
     if (HasEscortState(STATE_ESCORT_ESCORTING))
     {
-        debug_log("SD2: EscortAI has left combat and is now returning to CombatStartPosition.");
-
-        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+        // We have left our path
+        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE)
         {
+            debug_log("SD2: EscortAI has left combat and is now returning to CombatStartPosition.");
+
             AddEscortState(STATE_ESCORT_RETURNING);
 
             float fPosX, fPosY, fPosZ;
@@ -231,10 +235,7 @@ void npc_escortAI::EnterEvadeMode()
         }
     }
     else
-    {
-        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-            m_creature->GetMotionMaster()->MoveTargetedHome();
-    }
+        m_creature->GetMotionMaster()->MoveTargetedHome();
 
     Reset();
 }
@@ -265,57 +266,67 @@ bool npc_escortAI::IsPlayerOrGroupInRange()
     return false;
 }
 
+// Returns false, if npc is despawned
+bool npc_escortAI::MoveToNextWaypoint()
+{
+    // Do nothing if escorting is paused
+    if (HasEscortState(STATE_ESCORT_PAUSED))
+        return true;
+
+    // Final Waypoint reached (and final wait time waited)
+    if (CurrentWP == WaypointList.end())
+    {
+        debug_log("SD2: EscortAI reached end of waypoints");
+
+        if (m_bCanReturnToStart)
+        {
+            float fRetX, fRetY, fRetZ;
+            m_creature->GetRespawnCoord(fRetX, fRetY, fRetZ);
+
+            m_creature->GetMotionMaster()->MovePoint(POINT_HOME, fRetX, fRetY, fRetZ);
+
+            m_uiWPWaitTimer = 0;
+
+            debug_log("SD2: EscortAI are returning home to spawn location: %u, %f, %f, %f", POINT_HOME, fRetX, fRetY, fRetZ);
+            return true;
+        }
+
+        if (m_bCanInstantRespawn)
+        {
+            m_creature->SetDeathState(JUST_DIED);
+            m_creature->Respawn();
+        }
+        else
+            m_creature->ForcedDespawn();
+
+        return false;
+    }
+
+    m_creature->GetMotionMaster()->MovePoint(CurrentWP->uiId, CurrentWP->fX, CurrentWP->fY, CurrentWP->fZ);
+    debug_log("SD2: EscortAI start waypoint %u (%f, %f, %f).", CurrentWP->uiId, CurrentWP->fX, CurrentWP->fY, CurrentWP->fZ);
+
+    WaypointStart(CurrentWP->uiId);
+
+    m_uiWPWaitTimer = 0;
+
+    return true;
+}
+
 void npc_escortAI::UpdateAI(const uint32 uiDiff)
 {
-    //Waypoint Updating
+    // Waypoint Updating
     if (HasEscortState(STATE_ESCORT_ESCORTING) && !m_creature->getVictim() && m_uiWPWaitTimer && !HasEscortState(STATE_ESCORT_RETURNING))
     {
         if (m_uiWPWaitTimer <= uiDiff)
         {
-            //End of the line
-            if (CurrentWP == WaypointList.end())
-            {
-                debug_log("SD2: EscortAI reached end of waypoints");
-
-                if (m_bCanReturnToStart)
-                {
-                    float fRetX, fRetY, fRetZ;
-                    m_creature->GetRespawnCoord(fRetX, fRetY, fRetZ);
-
-                    m_creature->GetMotionMaster()->MovePoint(POINT_HOME, fRetX, fRetY, fRetZ);
-
-                    m_uiWPWaitTimer = 0;
-
-                    debug_log("SD2: EscortAI are returning home to spawn location: %u, %f, %f, %f", POINT_HOME, fRetX, fRetY, fRetZ);
-                    return;
-                }
-
-                if (m_bCanInstantRespawn)
-                {
-                    m_creature->SetDeathState(JUST_DIED);
-                    m_creature->Respawn();
-                }
-                else
-                    m_creature->ForcedDespawn();
-
+            if (!MoveToNextWaypoint())
                 return;
-            }
-
-            if (!HasEscortState(STATE_ESCORT_PAUSED))
-            {
-                m_creature->GetMotionMaster()->MovePoint(CurrentWP->uiId, CurrentWP->fX, CurrentWP->fY, CurrentWP->fZ);
-                debug_log("SD2: EscortAI start waypoint %u (%f, %f, %f).", CurrentWP->uiId, CurrentWP->fX, CurrentWP->fY, CurrentWP->fZ);
-
-                WaypointStart(CurrentWP->uiId);
-
-                m_uiWPWaitTimer = 0;
-            }
         }
         else
             m_uiWPWaitTimer -= uiDiff;
     }
 
-    //Check if player or any member of his group is within range
+    // Check if player or any member of his group is within range
     if (HasEscortState(STATE_ESCORT_ESCORTING) && m_playerGuid && !m_creature->getVictim() && !HasEscortState(STATE_ESCORT_RETURNING))
     {
         if (m_uiPlayerCheckTimer < uiDiff)
@@ -346,7 +357,7 @@ void npc_escortAI::UpdateAI(const uint32 uiDiff)
 
 void npc_escortAI::UpdateEscortAI(const uint32 uiDiff)
 {
-    //Check if we have a current target
+    // Check if we have a current target
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
         return;
 
@@ -365,34 +376,43 @@ void npc_escortAI::MovementInform(uint32 uiMoveType, uint32 uiPointId)
 
         m_creature->SetWalk(!m_bIsRunning);
         RemoveEscortState(STATE_ESCORT_RETURNING);
-
-        if (!m_uiWPWaitTimer)
-            m_uiWPWaitTimer = 1;
     }
     else if (uiPointId == POINT_HOME)
     {
         debug_log("SD2: EscortAI has returned to original home location and will continue from beginning of waypoint list.");
 
         CurrentWP = WaypointList.begin();
-        m_uiWPWaitTimer = 1;
+        m_uiWPWaitTimer = 0;
     }
     else
     {
         //Make sure that we are still on the right waypoint
         if (CurrentWP->uiId != uiPointId)
         {
-            error_log("SD2: EscortAI reached waypoint out of order %u, expected %u.", uiPointId, CurrentWP->uiId);
+            error_log("SD2: EscortAI for Npc %u reached waypoint out of order %u, expected %u.", m_creature->GetEntry(), uiPointId, CurrentWP->uiId);
             return;
         }
 
         debug_log("SD2: EscortAI waypoint %u reached.", CurrentWP->uiId);
 
+        // In case we were moving while in combat, we should evade back to this position
+        m_creature->SetCombatStartPosition(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+
         //Call WP function
         WaypointReached(CurrentWP->uiId);
 
-        m_uiWPWaitTimer = CurrentWP->uiWaitTime + 1;
+        m_uiWPWaitTimer = CurrentWP->uiWaitTime;
 
         ++CurrentWP;
+    }
+
+    if (!m_uiWPWaitTimer)
+    {
+        // Continue WP Movement if Can
+        if (HasEscortState(STATE_ESCORT_ESCORTING) && !HasEscortState(STATE_ESCORT_PAUSED | STATE_ESCORT_RETURNING) && !m_creature->getVictim())
+            MoveToNextWaypoint();
+        else
+            m_uiWPWaitTimer = 1;
     }
 }
 

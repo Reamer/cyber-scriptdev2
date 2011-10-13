@@ -215,8 +215,8 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
 
             if (m_uiRescureTimer < uiDiff)
             {
-                m_creature->RemoveAurasDueToSpell(SPELL_SPOTLIGHT, 0);
-                m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH, 0);
+                m_creature->RemoveAurasDueToSpell(SPELL_SPOTLIGHT);
+                m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
                 m_creature->SetDisplayId(PHASE_2_DISPLAY_ID);
                 m_creature->SetHealth(m_creature->GetMaxHealth());
                 m_creature->CastSpell(m_creature, SPELL_SCOURGE_RES_HEAL, false);
