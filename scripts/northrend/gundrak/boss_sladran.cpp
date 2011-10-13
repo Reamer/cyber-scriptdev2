@@ -345,7 +345,7 @@ struct MANGOS_DLL_DECL mob_sladran_constrictorAI : public ScriptedAI
                         {
                             if (auracaster->GetGUID() == m_creature->GetGUID())
                             {
-                                if (SpellAuraHolder* holder = aura->GetHolder())
+                                if (SpellAuraHolderPtr holder = aura->GetHolder())
                                 {
                                     if (holder->GetStackAmount() >= 4)
                                     {

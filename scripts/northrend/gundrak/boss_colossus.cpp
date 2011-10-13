@@ -271,7 +271,7 @@ struct MANGOS_DLL_DECL mob_colossus_elementalAI : public ScriptedAI
 
         if (m_uiSurgeTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 1))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, 0.0f, SELECT_FLAG_PLAYER))
             {
                 m_creature->SetFacingToObject(pTarget);
                 if (DoCastSpellIfCan(pTarget, SPELL_SURGE) == CAST_OK)

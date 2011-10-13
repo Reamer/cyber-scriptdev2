@@ -434,7 +434,7 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
                     m_uiBrundirPhase = PHASE_TENDRILS;
                     DoCast(m_creature, LIGHTNING_TENDRILS_VISUAL, true);
                     DoCast(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_TENDRILS : SPELL_LIGHTNING_TENDRILS_H,true);
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 0.0f, SELECT_FLAG_PLAYER))
                         m_creature->GetMotionMaster()->MovePoint(1, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ() + 5, false);
 		            m_uiTendrilsTimer = 4000;
                     m_uiTendrilsEndTimer = 40000;
@@ -446,7 +446,7 @@ struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
             case PHASE_TENDRILS:
                 if (m_uiTendrilsTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 0.0f, SELECT_FLAG_PLAYER))
                         m_creature->GetMotionMaster()->MovePoint(1, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ() + 5, false);
 		            m_uiTendrilsTimer = 4000;
                 }
@@ -651,7 +651,7 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
         {
             if (m_uiRune_Death_Timer < uiDiff)
 		    {
-			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
+			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 0.0f, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_RUNE_OF_DEATH : SPELL_RUNE_OF_DEATH_H) == CAST_OK)
                     {
@@ -669,7 +669,7 @@ struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
 		        if (m_uiRune_Summon_Timer < uiDiff)
 		        {
 			        m_creature->CastStop();
-			        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 0))
+			        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 0.0f, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_RUNE_OF_SUMMONING) == CAST_OK)
                         {
@@ -833,7 +833,7 @@ struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
         {
             if (m_uiStatic_Disruption_Timer < uiDiff)
 		    {
-			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM_PLAYER, 1))
+			    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, 0.0f, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_STATIC_DISRUPTION : SPELL_STATIC_DISRUPTION_H) == CAST_OK)
                         m_uiStatic_Disruption_Timer = 60000;
 		    }
