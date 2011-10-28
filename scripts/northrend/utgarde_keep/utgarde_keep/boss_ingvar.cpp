@@ -88,12 +88,12 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
 {
     boss_ingvarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_utgarde_keep*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_utgarde_keep* m_pInstance;
     bool m_bIsRegularMode;
 
     bool m_bIsResurrected;
@@ -131,7 +131,15 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
 
     void Aggro(Unit* pWho)
     {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_INGVAR, IN_PROGRESS);
         DoScriptText(m_bIsResurrected ? SAY_AGGRO_SECOND : SAY_AGGRO_FIRST, m_creature);
+    }
+
+    void JustReachedHome()
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_INGVAR, FAIL);
     }
 
     
@@ -161,6 +169,8 @@ struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
 
     void JustDied(Unit* pKiller)
     {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_INGVAR, DONE);
         DoScriptText(SAY_DEATH_SECOND, m_creature);
         if (Player* pPlayerKiller = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
             pPlayerKiller->RewardPlayerAndGroupAtEvent(NPC_INGVAR_ACHIEVEMENT, m_creature);
@@ -315,12 +325,12 @@ struct MANGOS_DLL_DECL npc_annhyldeAI : public ScriptedAI
 {
     npc_annhyldeAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_utgarde_keep*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_utgarde_keep* m_pInstance;
     bool m_bIsRegularMode;
     
     uint32 SpeakTimer;
