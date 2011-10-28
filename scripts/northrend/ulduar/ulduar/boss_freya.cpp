@@ -738,7 +738,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
         {
             x = (rand_norm() * 30.0f) - 15.0f;
             y = (rand_norm() * 30.0f) - 15.0f;
-            if(Creature* pLasher = DoSpawnCreature(NPC_DETONATING_LASHER, x, y, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+            if(Creature* pLasher = DoSpawnCreature(NPC_DETONATING_LASHER, x, y, 0, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
             {
                 pLasher->setFaction(m_creature->getFaction());
                 if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -752,7 +752,7 @@ struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
     {
         float x = (rand_norm() * 30.0f) - 15.0f;
         float y = (rand_norm() * 30.0f) - 15.0f;
-        if(Creature* pAdd = DoSpawnCreature(NPC_ANCIENT_CONSERVATOR, x, y, 0, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+        if(Creature* pAdd = DoSpawnCreature(NPC_ANCIENT_CONSERVATOR, x, y, 0, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
         {
             pAdd->setFaction(m_creature->getFaction());
             if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -1263,33 +1263,16 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
     instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
-    bool m_bAncientConservator;
-    bool m_bDetonatingLasher;
-    bool m_bAncientWaterSpirit;
-    bool m_bStormLasher;
-    bool m_bSnaplasher;
-    bool m_bHasExploded;
-
     uint32 m_uiTidalWave_Timer;
     uint32 m_uiStormbolt_Timer;
     uint32 m_uiLightningLash_Timer;
     uint32 m_uiFlameLash_Timer;
     uint32 m_uiResetAggro_Timmer;
     uint32 m_uiNaturesFury_Timer;
-    uint32 m_uiWave3_DeathCountdown;
     uint32 m_uiRespawnSpores_Timer;
-    uint32 m_uiDieTimer;
-    uint8 m_uiHealthMultiplier;
 
     void Reset()
     {
-        m_bAncientWaterSpirit       = false;
-        m_bStormLasher              = false;
-        m_bSnaplasher               = false;
-        m_bAncientConservator       = false;
-        m_bDetonatingLasher         = false;
-        m_bHasExploded              = false;
-
         m_uiTidalWave_Timer         = urand(2000,4000);
         m_uiStormbolt_Timer         = 1000;
         m_uiLightningLash_Timer     = urand(11000,14000);        
@@ -1297,43 +1280,39 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
         m_uiResetAggro_Timmer       = 5000;
         m_uiNaturesFury_Timer       = urand(8000,10000);
         m_uiRespawnSpores_Timer     = 5000;
-        m_uiDieTimer                = 500;
-        m_uiHealthMultiplier        = 1;
 
         switch(m_creature->GetEntry())
         {
             case NPC_ANCIENT_CONSERVATOR:
-                m_bAncientConservator = true;
-                DoCast(m_creature, SPELL_CONSERVATORS_GRIP);
                 DoSpores(10);
                 break;
-            case NPC_DETONATING_LASHER:
-                m_bDetonatingLasher = true;
-                break;
             case NPC_WATER_SPIRIT:
-                m_bAncientWaterSpirit = true;
-                break;
             case NPC_SNAPLASHER:
-                m_bSnaplasher = true;
-                DoCast(m_creature, m_bIsRegularMode ? SPELL_HARDENED_BARK : SPELL_HARDENED_BARK_H);
-                break;
             case NPC_STORM_LASHER:
-                m_bStormLasher = true;
+                m_creature->SetCorpseDelay(30 * IN_MILLISECONDS);
+                break;
+            default:
                 break;
         }
-        m_creature->SetRespawnDelay(DAY);
-        m_creature->SetCorpseDelay(30 * IN_MILLISECONDS);
     }
 
     void JustDied(Unit* Killer)
     {
-        // remove some stacks from Freya's aura
-        if (m_bAncientConservator)
-            DoCast(m_creature, SPELL_ATTUNED_25_STACKS, true);
-        if (m_bDetonatingLasher)
+        switch (m_creature->GetEntry())
         {
-            DoCast(m_creature, m_bIsRegularMode ? SPELL_DETONATE : SPELL_DETONATE_H, true);
-            DoCast(m_creature, SPELL_ATTUNED_2_STACKS, true);
+            case NPC_ANCIENT_CONSERVATOR:
+            {
+                DoCast(m_creature, SPELL_ATTUNED_25_STACKS, true);
+                break;
+            }
+            case NPC_DETONATING_LASHER:
+            {
+                DoCast(m_creature, m_bIsRegularMode ? SPELL_DETONATE : SPELL_DETONATE_H, true);
+                DoCast(m_creature, SPELL_ATTUNED_2_STACKS, true);
+                break;
+            }
+            default:
+                break;
         }
     }
 
@@ -1355,67 +1334,89 @@ struct MANGOS_DLL_DECL mob_freya_spawnedAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // DETONATING LASHERS
-        if(m_bDetonatingLasher)
+        switch(m_creature->GetEntry())
         {
-            if(m_uiFlameLash_Timer < uiDiff)
+            case NPC_DETONATING_LASHER:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLAME_LASH) == CAST_OK)
-                    m_uiFlameLash_Timer = urand(5000,10000);
-            }else m_uiFlameLash_Timer -= uiDiff;
+                if(m_uiFlameLash_Timer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLAME_LASH) == CAST_OK)
+                        m_uiFlameLash_Timer = urand(5000,10000);
+                }
+                else
+                    m_uiFlameLash_Timer -= uiDiff;
             
-            if(m_uiResetAggro_Timmer < uiDiff)
-            {
-                DoResetThreat();
-                m_uiResetAggro_Timmer = 5000;
-            }else m_uiResetAggro_Timmer -= uiDiff;
-        }
+                if(m_uiResetAggro_Timmer < uiDiff)
+                {
+                    DoResetThreat();
+                    m_uiResetAggro_Timmer = 5000;
+                }
+                else
+                    m_uiResetAggro_Timmer -= uiDiff;
 
-        // CONSERVATOR
-        if(m_bAncientConservator)
-        {
-            if(m_uiNaturesFury_Timer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, 0.0f, SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_NATURES_FURY : SPELL_NATURES_FURY_H) == CAST_OK)
-                        m_uiNaturesFury_Timer = urand(5000,6000);
-            }else m_uiNaturesFury_Timer -= uiDiff;
-
-            if(m_uiRespawnSpores_Timer < uiDiff)
-            {
-                DoSpores(3);
-                m_uiRespawnSpores_Timer = 5000;
-            }else m_uiRespawnSpores_Timer -= uiDiff;
-        }
-
-        // ELEMENTAL ADDS
-        // waterspirit
-        if(m_bAncientWaterSpirit && m_uiTidalWave_Timer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_TIDAL_WAVE : SPELL_TIDAL_WAVE_H) == CAST_OK)
-                m_uiTidalWave_Timer = urand(7000,9000);
-        }else m_uiTidalWave_Timer -= uiDiff;
-
-        // stormlasher
-        if(m_bStormLasher)
-        {
-            if (m_uiLightningLash_Timer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_LIGHTNING_LASH : SPELL_LIGHTNING_LASH_H) == CAST_OK)
-                    m_uiLightningLash_Timer = urand(11000,14000);
+                break;
             }
-            else
-                m_uiLightningLash_Timer -= uiDiff;
-
-            if (m_uiStormbolt_Timer < uiDiff)
+            case NPC_ANCIENT_CONSERVATOR:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_STORMBOLT : SPELL_STORMBOLT_H) == CAST_OK)
-                    m_uiStormbolt_Timer = 2000;
-            }
-            else
-                m_uiStormbolt_Timer -= uiDiff;
-        }
+                DoCastSpellIfCan(m_creature, SPELL_CONSERVATORS_GRIP, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                if(m_uiNaturesFury_Timer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, 0.0f, SELECT_FLAG_PLAYER))
+                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_NATURES_FURY : SPELL_NATURES_FURY_H) == CAST_OK)
+                            m_uiNaturesFury_Timer = urand(5000,6000);
+                }
+                else
+                    m_uiNaturesFury_Timer -= uiDiff;
 
+                if(m_uiRespawnSpores_Timer < uiDiff)
+                {
+                    DoSpores(3);
+                    m_uiRespawnSpores_Timer = 5000;
+                }
+                else
+                    m_uiRespawnSpores_Timer -= uiDiff;
+
+                break;
+            }
+            case NPC_WATER_SPIRIT:
+            {
+                if (m_uiTidalWave_Timer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_TIDAL_WAVE : SPELL_TIDAL_WAVE_H) == CAST_OK)
+                        m_uiTidalWave_Timer = urand(7000,9000);
+                }
+                else
+                    m_uiTidalWave_Timer -= uiDiff;
+
+                break;
+            }
+            case NPC_STORM_LASHER:
+            {
+                if (m_uiLightningLash_Timer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_LIGHTNING_LASH : SPELL_LIGHTNING_LASH_H) == CAST_OK)
+                        m_uiLightningLash_Timer = urand(11000,14000);
+                }
+                else
+                    m_uiLightningLash_Timer -= uiDiff;
+
+                if (m_uiStormbolt_Timer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_STORMBOLT : SPELL_STORMBOLT_H) == CAST_OK)
+                        m_uiStormbolt_Timer = 2000;
+                }
+                else
+                    m_uiStormbolt_Timer -= uiDiff;
+
+                break;
+            }
+            case NPC_SNAPLASHER:
+            {
+                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HARDENED_BARK : SPELL_HARDENED_BARK_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            }
+            default:
+                break;
+        }
         DoMeleeAttackIfReady();
     }
 };
