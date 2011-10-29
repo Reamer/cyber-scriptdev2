@@ -46,6 +46,22 @@ void instance_pinnacle::OnObjectCreate(GameObject* pGo)
     }
 }
 
+void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
+{
+    switch(pCreature->GetEntry())
+    {
+        case NPC_YMIRON:
+        case NPC_FURBOLG:
+        case NPC_WORGEN:
+        case NPC_JORMUNGAR:
+        case NPC_RHINO:
+            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        case NPC_FLAME_BRAZIER:
+            m_lFlameBraziersList.push_back(pCreature->GetObjectGuid());
+            break;
+    }
+}
 void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)
@@ -113,6 +129,16 @@ void instance_pinnacle::Load(const char* chrIn)
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
+}
+
+
+void instance_pinnacle::DoProcessCallFlamesEvent()
+{
+    for (GUIDList::const_iterator itr = m_lFlameBraziersList.begin(); itr != m_lFlameBraziersList.end(); ++itr)
+    {
+        if (Creature* pFlame = instance->GetCreature(*itr))
+            pFlame->CastSpell(pFlame, SPELL_BALL_OF_FLAME, true);
+    }
 }
 
 InstanceData* GetInstanceData_instance_pinnacle(Map* pMap)
