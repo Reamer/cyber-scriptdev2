@@ -20,7 +20,12 @@ enum
     NPC_FURBOLG                     = 26684,
     NPC_WORGEN                      = 26683,
     NPC_JORMUNGAR                   = 26685,
-    NPC_RHINO                       = 26686
+    NPC_RHINO                       = 26686,
+
+    NPC_FLAME_BRAZIER               = 27273,            // throw flames at players on Svalna event
+    NPC_YMIRON                      = 26861,
+
+    SPELL_BALL_OF_FLAME             = 48246,            // spell used by the flame braziers
 };
 
 class MANGOS_DLL_DECL instance_pinnacle : public ScriptedInstance
@@ -31,6 +36,7 @@ class MANGOS_DLL_DECL instance_pinnacle : public ScriptedInstance
         void Initialize();
 
         void OnObjectCreate(GameObject* pGo);
+        void OnCreatureCreate(Creature* pCreature);
 
         void SetData(uint32 uiType, uint32 uiData);
         uint32 GetData(uint32 uiType);
@@ -38,9 +44,13 @@ class MANGOS_DLL_DECL instance_pinnacle : public ScriptedInstance
         const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);
 
+        void DoProcessCallFlamesEvent();
+
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
+
+        GUIDList m_lFlameBraziersList;
 };
 
 #endif

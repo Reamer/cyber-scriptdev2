@@ -39,7 +39,28 @@ enum
     SPELL_WITHERING_ROAR    = 48256,
     SPELL_WITHERING_ROAR_H  = 59267,
 
-    SPELL_ARCING_SMASH      = 48260
+    SPELL_ARCING_SMASH      = 48260,
+
+    SPELL_ORB_VISUAL        = 48044, // not used
+
+    SPELL_FREEZE            = 16245
+};
+
+enum Phase
+{
+    PHASE_BEGIN             = 0,
+    PHASE_FRENZIED_WORGEN   = 1,
+    PHASE_RAVENOUS_FURLBORG = 2,
+    PHASE_MASSIVE_JORMUNGAR = 3,
+    PHASE_FEROCIOUS_RHINO   = 4,
+    PHASE_GORTOK_PALEHOOF   = 5,
+};
+
+enum SubBossSteps
+{
+    PHASE_SUB_BOSS_BEGIN    = 0,
+    PHASE_SUB_BOSS_INFIGHT  = 1,
+    PHASE_SUB_BOSS_END      = 2,
 };
 
 /*######
@@ -50,21 +71,60 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
 {
     boss_gortokAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_pinnacle*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_pinnacle* m_pInstance;
     bool m_bIsRegularMode;
+
+    uint8 m_uiPhase;
+    uint8 m_uiSubBossSteps;
+    uint8 m_uiSubBossCount;
+    uint8 m_uiSubBossMax;
+
+    uint32 m_uiCheckForDeathSubBoss;
+
+    uint32 m_uiWitheringRoar;
+    uint32 m_uiImpale;
+    uint32 m_uiArcingSmash;
 
     void Reset()
     {
+        m_uiPhase = PHASE_BEGIN;
+        m_uiSubBossSteps =  PHASE_SUB_BOSS_BEGIN;
+        m_uiSubBossCount = 0;
+        m_uiSubBossMax = m_bIsRegularMode ? 2 : 4;
+        m_uiCheckForDeathSubBoss = 2000;
+
+        m_uiWitheringRoar = urand(7000,11000);
+        m_uiImpale = 9000;
+        m_uiArcingSmash = 5000;
     }
 
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
+    }
+
+    void MoveInLineOfSight(Unit* pWho)
+    {
+        ScriptedAI::MoveInLineOfSight(pWho);
+        if (m_uiPhase==PHASE_BEGIN)
+        {
+            if (m_pInstance)
+            {
+                switch(urand(0,3))
+                {
+                    case 0: m_uiPhase = PHASE_FRENZIED_WORGEN; break;
+                    case 1: m_uiPhase = PHASE_RAVENOUS_FURLBORG; break;
+                    case 2: m_uiPhase = PHASE_MASSIVE_JORMUNGAR; break;
+                    case 3: m_uiPhase = PHASE_FEROCIOUS_RHINO; break;
+                    default: m_uiPhase = PHASE_FRENZIED_WORGEN; break;
+                }
+            }
+        }
     }
 
     void KilledUnit(Unit* pVictim)
@@ -80,12 +140,178 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
             m_pInstance->SetData(TYPE_GORTOK, DONE);
     }
 
+    void BeginSubBossPhase()
+    {
+        if (m_pInstance)
+        {
+            switch(m_uiPhase)
+            {
+                case PHASE_FRENZIED_WORGEN:
+                {
+                    if (Creature* pWorg = m_pInstance->GetSingleCreatureFromStorage(NPC_WORGEN))
+                        pWorg->RemoveAurasDueToSpell(SPELL_FREEZE);
+                    break;
+                }
+                case PHASE_RAVENOUS_FURLBORG:
+                {
+                    if (Creature* pFurbolg = m_pInstance->GetSingleCreatureFromStorage(NPC_FURBOLG))
+                        pFurbolg->RemoveAurasDueToSpell(SPELL_FREEZE);
+                    break;
+                }
+                case PHASE_MASSIVE_JORMUNGAR:
+                {
+                    if (Creature* pJormungar = m_pInstance->GetSingleCreatureFromStorage(NPC_JORMUNGAR))
+                        pJormungar->RemoveAurasDueToSpell(SPELL_FREEZE);
+                    break;
+                }
+                case PHASE_FEROCIOUS_RHINO:
+                {
+                    if (Creature* pRhino = m_pInstance->GetSingleCreatureFromStorage(NPC_RHINO))
+                        pRhino->RemoveAurasDueToSpell(SPELL_FREEZE);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    }
+
+    uint8 getValityPhase()
+    {
+        uint8 result = m_uiPhase;
+        if (result > PHASE_FEROCIOUS_RHINO)
+            result = PHASE_FRENZIED_WORGEN;
+        return result;
+    }
+
+    bool IsSubBossDead()
+    {
+        bool result = false;
+        if (m_pInstance)
+        {
+            Creature* pTemp;
+            switch(m_uiPhase)
+            {
+                case PHASE_FRENZIED_WORGEN:
+                {
+                    pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_WORGEN);
+                    break;
+                }
+                case PHASE_RAVENOUS_FURLBORG:
+                {
+                    pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_FURBOLG);
+                    break;
+                }
+                case PHASE_MASSIVE_JORMUNGAR:
+                {
+                    pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_JORMUNGAR);
+                    break;
+                }
+                case PHASE_FEROCIOUS_RHINO:
+                {
+                    pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_RHINO);
+                    break;
+                }
+                default:
+                    break;
+            }
+            if (pTemp)
+            {
+                if (pTemp->isDead())
+                    result = true;
+            }
+        }
+        return result;
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        DoMeleeAttackIfReady();
+        switch(m_uiPhase)
+        {
+            case PHASE_BEGIN:
+                // Nothing
+                break;
+            case PHASE_FRENZIED_WORGEN:
+            case PHASE_RAVENOUS_FURLBORG:
+            case PHASE_MASSIVE_JORMUNGAR:
+            case PHASE_FEROCIOUS_RHINO:
+                switch(m_uiSubBossSteps)
+                {
+                    case PHASE_SUB_BOSS_BEGIN:
+                    {
+                        ++m_uiSubBossCount;
+                        BeginSubBossPhase();
+                        m_uiSubBossSteps = PHASE_SUB_BOSS_INFIGHT;
+                        break;
+                    }
+                    case PHASE_SUB_BOSS_INFIGHT:
+                    {
+                        if (m_uiCheckForDeathSubBoss < uiDiff)
+                        {
+                            if (IsSubBossDead())
+                            {
+                                m_uiSubBossSteps = PHASE_SUB_BOSS_END;
+                            }
+                            m_uiCheckForDeathSubBoss = 2000;
+                        }
+                        else
+                            m_uiCheckForDeathSubBoss -= uiDiff;
+
+                        break;                        
+                    }
+                    case PHASE_SUB_BOSS_END:
+                    {
+                        if (m_uiSubBossCount >= m_uiSubBossMax)
+                        {
+                            m_uiPhase = PHASE_GORTOK_PALEHOOF;
+                            return; // VIELLEICHT BOSS ENTEISEN!!!
+                        }
+                        m_uiPhase = getValityPhase();
+                        m_uiSubBossSteps = PHASE_SUB_BOSS_BEGIN;
+                        break;
+                    }
+                    default:
+                        m_uiSubBossSteps = PHASE_SUB_BOSS_BEGIN;
+
+                }
+                break;
+            case PHASE_GORTOK_PALEHOOF:
+
+                if (m_uiWitheringRoar < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WITHERING_ROAR : SPELL_WITHERING_ROAR_H) == CAST_OK)
+                        m_uiWitheringRoar = urand(7000,11000);
+                }
+                else
+                    m_uiWitheringRoar -= uiDiff;
+                
+                if (m_uiImpale < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 0.0f, SELECT_FLAG_PLAYER))
+                    {
+                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H) == CAST_OK)
+                            m_uiImpale = 9000;
+                    }
+                }
+                else
+                    m_uiImpale -= uiDiff;
+
+                if (m_uiArcingSmash < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCING_SMASH) == CAST_OK)
+                        m_uiArcingSmash = 5000;
+                }
+                else
+                    m_uiArcingSmash -= uiDiff;
+                        
+                DoMeleeAttackIfReady();
+                break;
+            default:
+                m_uiPhase = PHASE_BEGIN;
+        }
     }
 };
 
