@@ -92,6 +92,7 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
 
     void Reset()
     {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_uiPhase = PHASE_BEGIN;
         m_uiSubBossSteps =  PHASE_SUB_BOSS_BEGIN;
         m_uiSubBossCount = 0;
@@ -124,6 +125,14 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
                     default: m_uiPhase = PHASE_FRENZIED_WORGEN; break;
                 }
             }
+        }
+    }
+
+    void AttackStart(Unit* pWho)
+    {
+        if (m_uiPhase==PHASE_GORTOK_PALEHOOF)
+        {
+            ScriptedAI::AttackStart(pWho);
         }
     }
 
@@ -270,7 +279,8 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
                         if (m_uiSubBossCount >= m_uiSubBossMax)
                         {
                             m_uiPhase = PHASE_GORTOK_PALEHOOF;
-                            return; // VIELLEICHT BOSS ENTEISEN!!!
+                            m_creature->RemoveAurasDueToSpell(SPELL_FREEZE);
+                            m_creature->SetInCombatWithZone();
                         }
                         m_uiPhase = getValityPhase();
                         m_uiSubBossSteps = PHASE_SUB_BOSS_BEGIN;
