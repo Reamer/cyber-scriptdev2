@@ -144,34 +144,37 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
     {
         if (m_pInstance)
         {
+            Creature* pTemp;
             switch(m_uiPhase)
             {
                 case PHASE_FRENZIED_WORGEN:
                 {
-                    if (Creature* pWorg = m_pInstance->GetSingleCreatureFromStorage(NPC_WORGEN))
-                        pWorg->RemoveAurasDueToSpell(SPELL_FREEZE);
+                    pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_WORGEN);
                     break;
                 }
                 case PHASE_RAVENOUS_FURLBORG:
                 {
-                    if (Creature* pFurbolg = m_pInstance->GetSingleCreatureFromStorage(NPC_FURBOLG))
-                        pFurbolg->RemoveAurasDueToSpell(SPELL_FREEZE);
+                    pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_FURBOLG);
                     break;
                 }
                 case PHASE_MASSIVE_JORMUNGAR:
                 {
-                    if (Creature* pJormungar = m_pInstance->GetSingleCreatureFromStorage(NPC_JORMUNGAR))
-                        pJormungar->RemoveAurasDueToSpell(SPELL_FREEZE);
+                    pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_JORMUNGAR);
                     break;
                 }
                 case PHASE_FEROCIOUS_RHINO:
                 {
-                    if (Creature* pRhino = m_pInstance->GetSingleCreatureFromStorage(NPC_RHINO))
-                        pRhino->RemoveAurasDueToSpell(SPELL_FREEZE);
+                    pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_RHINO);
                     break;
                 }
                 default:
                     break;
+            }
+            if (pTemp)
+            {
+                pTemp->RemoveAurasDueToSpell(SPELL_FREEZE);
+                pTemp->SetInCombatWithZone();
+                pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
         }
     }
