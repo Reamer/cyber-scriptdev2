@@ -71,6 +71,17 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_GORTOK:
             m_auiEncounter[uiType] = uiData;
+            if (uiData == FAIL)
+            {
+                if (Creature* pFurbolg = GetSingleCreatureFromStorage(NPC_FURBOLG))
+                    pFurbolg->Respawn();
+                if (Creature* pWorg = GetSingleCreatureFromStorage(NPC_WORGEN))
+                    pWorg->Respawn();
+                if (Creature* pJormungar = GetSingleCreatureFromStorage(NPC_JORMUNGAR))
+                    pJormungar->Respawn();
+                if (Creature* pRhino = GetSingleCreatureFromStorage(NPC_RHINO))
+                    pRhino->Respawn();
+            }
             break;
         case TYPE_SKADI:
             if (uiData == DONE)
