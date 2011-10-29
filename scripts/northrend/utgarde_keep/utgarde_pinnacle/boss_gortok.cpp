@@ -149,6 +149,13 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
             m_pInstance->SetData(TYPE_GORTOK, DONE);
     }
 
+    void EnterEvadeMode()
+    {
+        ScriptedAI::EnterEvadeMode();
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_GORTOK, FAIL);
+    }
+
     void BeginSubBossPhase()
     {
         if (m_pInstance)
@@ -191,6 +198,7 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
     uint8 getValityPhase()
     {
         uint8 result = m_uiPhase;
+        ++result;
         if (result > PHASE_FEROCIOUS_RHINO)
             result = PHASE_FRENZIED_WORGEN;
         return result;
