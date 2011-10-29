@@ -238,9 +238,6 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
         switch(m_uiPhase)
         {
             case PHASE_BEGIN:
@@ -292,6 +289,9 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
                 }
                 break;
             case PHASE_GORTOK_PALEHOOF:
+
+                if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                    return;
 
                 if (m_uiWitheringRoar < uiDiff)
                 {
