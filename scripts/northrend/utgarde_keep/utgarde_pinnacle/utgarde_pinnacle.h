@@ -22,10 +22,18 @@ enum
     NPC_JORMUNGAR                   = 26685,
     NPC_RHINO                       = 26686,
 
+    NPC_GRAUF                       = 26893,
+    NPC_SKADI                       = 26693,
+    NPC_YMIRJAR_WARRIOR             = 26690,
+    NPC_YMIRJAR_WITCH_DOCTOR        = 26691,
+    NPC_YMIRJAR_HARPOONER           = 26692,
+
     NPC_FLAME_BRAZIER               = 27273,            // throw flames at players on Svalna event
+    NPC_FLAME_BREATH_TRIGGER        = 28351,
     NPC_YMIRON                      = 26861,
 
     SPELL_BALL_OF_FLAME             = 48246,            // spell used by the flame braziers
+    SPELL_FREEZING_CLOUD            = 47579,
 };
 
 class MANGOS_DLL_DECL instance_pinnacle : public ScriptedInstance
@@ -45,12 +53,15 @@ class MANGOS_DLL_DECL instance_pinnacle : public ScriptedInstance
         void Load(const char* chrIn);
 
         void DoProcessCallFlamesEvent();
+        void DoMakeFreezingCloud();
 
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
         GUIDList m_lFlameBraziersList;
+
+        GUIDList m_lFlameBreathTrigger;
 };
 
 #endif

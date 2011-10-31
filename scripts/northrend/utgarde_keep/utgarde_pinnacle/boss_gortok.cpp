@@ -79,7 +79,7 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
     instance_pinnacle* m_pInstance;
     bool m_bIsRegularMode;
 
-    uint8 m_uiPhase;
+    Phase m_uiPhase;
     uint8 m_uiSubBossSteps;
     uint8 m_uiSubBossCount;
     uint8 m_uiSubBossMax;
@@ -92,7 +92,6 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
 
     void Reset()
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_uiPhase = PHASE_BEGIN;
         m_uiSubBossSteps =  PHASE_SUB_BOSS_BEGIN;
         m_uiSubBossCount = 0;
@@ -112,17 +111,20 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho)
     {
         ScriptedAI::MoveInLineOfSight(pWho);
-        if (m_uiPhase==PHASE_BEGIN)
+        if (m_creature->GetDistance(pWho) < 40)
         {
-            if (m_pInstance)
+            if (m_uiPhase==PHASE_BEGIN)
             {
-                switch(urand(0,3))
+                if (m_pInstance)
                 {
-                    case 0: m_uiPhase = PHASE_FRENZIED_WORGEN; break;
-                    case 1: m_uiPhase = PHASE_RAVENOUS_FURLBORG; break;
-                    case 2: m_uiPhase = PHASE_MASSIVE_JORMUNGAR; break;
-                    case 3: m_uiPhase = PHASE_FEROCIOUS_RHINO; break;
-                    default: m_uiPhase = PHASE_FRENZIED_WORGEN; break;
+                    switch(urand(0,3))
+                    {
+                        case 0: m_uiPhase = PHASE_FRENZIED_WORGEN; break;
+                        case 1: m_uiPhase = PHASE_RAVENOUS_FURLBORG; break;
+                        case 2: m_uiPhase = PHASE_MASSIVE_JORMUNGAR; break;
+                        case 3: m_uiPhase = PHASE_FEROCIOUS_RHINO; break;
+                        default: m_uiPhase = PHASE_FRENZIED_WORGEN; break;
+                    }
                 }
             }
         }
@@ -132,6 +134,7 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
     {
         if (m_uiPhase==PHASE_GORTOK_PALEHOOF)
         {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             ScriptedAI::AttackStart(pWho);
         }
     }
@@ -152,6 +155,7 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
     void EnterEvadeMode()
     {
         ScriptedAI::EnterEvadeMode();
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GORTOK, FAIL);
     }
@@ -195,13 +199,13 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
         }
     }
 
-    uint8 getValityPhase()
+    Phase getValityPhase()
     {
-        uint8 result = m_uiPhase;
+        uint32 result = m_uiPhase;
         ++result;
         if (result > PHASE_FEROCIOUS_RHINO)
             result = PHASE_FRENZIED_WORGEN;
-        return result;
+        return (Phase)result;
     }
 
     bool IsSubBossDead()
@@ -285,6 +289,7 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
                         {
                             m_uiPhase = PHASE_GORTOK_PALEHOOF;
                             m_creature->RemoveAurasDueToSpell(SPELL_FREEZE);
+                            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             m_creature->SetInCombatWithZone();
                         }
                         m_uiPhase = getValityPhase();

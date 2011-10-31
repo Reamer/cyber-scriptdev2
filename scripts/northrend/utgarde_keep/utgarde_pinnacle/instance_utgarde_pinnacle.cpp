@@ -50,6 +50,8 @@ void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
 {
     switch(pCreature->GetEntry())
     {
+        case NPC_GRAUF:
+        case NPC_SKADI:
         case NPC_YMIRON:
         case NPC_FURBOLG:
         case NPC_WORGEN:
@@ -60,6 +62,11 @@ void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
         case NPC_FLAME_BRAZIER:
             m_lFlameBraziersList.push_back(pCreature->GetObjectGuid());
             break;
+        case NPC_FLAME_BREATH_TRIGGER:
+        {
+            m_lFlameBreathTrigger.push_back(pCreature->GetObjectGuid());
+            break;
+        }
     }
 }
 void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
@@ -74,13 +81,25 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
             if (uiData == FAIL)
             {
                 if (Creature* pFurbolg = GetSingleCreatureFromStorage(NPC_FURBOLG))
+                {
                     pFurbolg->Respawn();
+                    pFurbolg->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
                 if (Creature* pWorg = GetSingleCreatureFromStorage(NPC_WORGEN))
+                {
                     pWorg->Respawn();
+                    pWorg->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
                 if (Creature* pJormungar = GetSingleCreatureFromStorage(NPC_JORMUNGAR))
+                {
                     pJormungar->Respawn();
+                    pJormungar->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
                 if (Creature* pRhino = GetSingleCreatureFromStorage(NPC_RHINO))
+                {
                     pRhino->Respawn();
+                    pRhino->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
             }
             break;
         case TYPE_SKADI:
@@ -149,6 +168,15 @@ void instance_pinnacle::DoProcessCallFlamesEvent()
     {
         if (Creature* pFlame = instance->GetCreature(*itr))
             pFlame->CastSpell(pFlame, SPELL_BALL_OF_FLAME, true);
+    }
+}
+
+void instance_pinnacle::DoMakeFreezingCloud()
+{
+    for (GUIDList::const_iterator itr = m_lFlameBreathTrigger.begin(); itr != m_lFlameBreathTrigger.end(); ++itr)
+    {
+        if (Creature* pFlame = instance->GetCreature(*itr))
+            pFlame->CastSpell(pFlame, SPELL_FREEZING_CLOUD, true);
     }
 }
 
