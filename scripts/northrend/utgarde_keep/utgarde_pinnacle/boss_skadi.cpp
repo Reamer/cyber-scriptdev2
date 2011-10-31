@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "utgarde_pinnacle.h"
+#include "Vehicle.h"
 
 enum
 {
@@ -48,6 +49,8 @@ enum
     SPELL_POISONED_SPEAR            = 50255,
     SPELL_POISONED_SPEAR_H          = 59331,
 
+    SPELL_SKADI_TELEPORT            = 61790,
+
     // casted with base of creature 22515 (World Trigger), so we must make sure
     // to use the close one by the door leading further in to instance.
     SPELL_SUMMON_GAUNTLET_MOBS      = 48630,                // tick every 30 sec
@@ -55,38 +58,94 @@ enum
 
     SPELL_GAUNTLET_PERIODIC         = 47546,                // what is this? Unknown use/effect, but probably related
 
-    SPELL_LAUNCH_HARPOON            = 48642,                // this spell hit drake to reduce HP (force triggered from 48641)
+    SPELL_LAUNCH_HARPOON            = 48641,                // this spell hit drake to reduce HP (force triggered from 48641)
+
+    SPELL_SUMMON_1                  = 48631,
+    SPELL_SUMMON_2                  = 48632,
+    SPELL_SUMMON_3                  = 48633,
+    SPELL_SUMMON_4                  = 48634,
+    SPELL_SUMMON_5                  = 48635,
+    SPELL_SUMMON_6                  = 48636,
 };
 
 /*######
 ## boss_skadi
 ######*/
 
+enum CombatPhase
+{
+    FLYING,
+    SKADI
+};
+
+struct FlightPositionSkadi
+{
+    float x, y,z;
+};
+
+static FlightPositionSkadi FlightPosition[]=
+{
+       {341.740997f, -516.955017f, 104.668999f},   // Start
+       {293.299f, -505.95f, 142.03f},              // kurz nach Start
+       {301.664f, -535.164f, 146.097f},            // Wendeposition
+       {526.896f, -546.387f, 119.209f},            // AbschussPosition
+       // PONTOS DO BREACH
+       {485.4577f, -511.2515f, 115.3011f}, // Breath 1
+       {435.1892f, -514.5232f, 118.6719f}, // Breath 1
+
+       {413.9327f, -540.9407f, 138.2614f}, // Wegflug über die Mauer
+
+       {477.311981f, -509.296814f, 104.723083f},   // Boden, dort wo skadi nachm drachentod steht
+};
+
 struct MANGOS_DLL_DECL boss_skadiAI : public ScriptedAI
 {
     boss_skadiAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_pinnacle*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_pinnacle* m_pInstance;
     bool m_bIsRegularMode;
+
+    CombatPhase m_CombatPhase;
+
+    uint32 m_uiCrush;
+    uint32 m_uiWhirlwind;
+    uint32 m_uiPoisonedSpear;
+
+    uint32 m_uiSummon;
 
     void Reset()
     {
-    }
-
-    void JustReachedHome()
-    {
+        m_CombatPhase = SKADI;
+        m_uiCrush = 10000;
+        m_uiWhirlwind = urand(2000, 5000);
+        m_uiPoisonedSpear = 6000;
+        m_uiSummon = 5000;
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SKADI, NOT_STARTED);
+        {
+            m_pInstance->SetData(TYPE_SKADI, FAIL);
+            if (Creature* pGrauf = m_pInstance->GetSingleCreatureFromStorage(NPC_GRAUF))
+            {
+                pGrauf->Respawn();
+            }
+        }
     }
 
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
+        if (m_pInstance)
+        {
+            if (Creature* pGrauf = m_pInstance->GetSingleCreatureFromStorage(NPC_GRAUF))
+            {
+                m_creature->EnterVehicle(pGrauf->GetVehicleKit(),0);
+                m_CombatPhase = FLYING;
+            }
+        }
     }
 
     void KilledUnit(Unit* pVictim)
@@ -112,7 +171,57 @@ struct MANGOS_DLL_DECL boss_skadiAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        DoMeleeAttackIfReady();
+        switch (m_CombatPhase)
+        {
+            case FLYING:
+                // Nothing
+                break;
+            case SKADI:
+            {
+                
+                if (m_uiCrush < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_CRUSH : SPELL_CRUSH_H) == CAST_OK)
+                        m_uiCrush = 10000;
+                }
+                else
+                    m_uiCrush -= uiDiff;
+
+                if (m_uiWhirlwind < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WHIRLWIND : SPELL_WHIRLWIND_H) == CAST_OK)
+                        m_uiWhirlwind = urand(15000, 20000);
+                }
+                else
+                    m_uiWhirlwind -= uiDiff;
+
+                if (m_uiPoisonedSpear < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 0.0f, SELECT_FLAG_PLAYER))
+                    {
+                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POISONED_SPEAR : SPELL_POISONED_SPEAR_H) == CAST_OK)
+                            m_uiPoisonedSpear = 6000;
+                    }
+                }
+                else
+                    m_uiPoisonedSpear -= uiDiff;
+
+                DoMeleeAttackIfReady();
+            }
+        }
+        if (m_uiSummon < uiDiff)
+        {
+            if (Creature* pTemp = m_creature->SummonCreature(NPC_YMIRJAR_WARRIOR, 471.0f +irand(-5,5), -506.0f+irand(-5,5), 105.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
+                pTemp->SetInCombatWithZone();
+            if (Creature* pTemp = m_creature->SummonCreature(NPC_YMIRJAR_HARPOONER, 471.0f+irand(-5,5), -506.0f+irand(-5,5), 105.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
+                pTemp->SetInCombatWithZone();
+            if (Creature* pTemp = m_creature->SummonCreature(NPC_YMIRJAR_WITCH_DOCTOR, 471.0f+irand(-5,5), -506.0f+irand(-5,5), 105.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
+                pTemp->SetInCombatWithZone();
+            m_uiSummon = m_bIsRegularMode ? 30000 : 25000;
+        }
+        else
+            m_uiSummon -= uiDiff;
+
     }
 };
 
@@ -121,15 +230,189 @@ CreatureAI* GetAI_boss_skadi(Creature* pCreature)
     return new boss_skadiAI(pCreature);
 }
 
+struct boss_skadi_graufAI : public ScriptedAI
+{
+    boss_skadi_graufAI(Creature *pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_pinnacle*)pCreature->GetInstanceData();
+        /*m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);*/
+        vehicle = m_creature->GetVehicleKit();
+    }
+      
+    instance_pinnacle* m_pInstance;
+    VehicleKit* vehicle;
+
+    bool isInFlight;
+    uint32 uiWaypointId;
+    uint32 uiMovementTimer;
+
+    uint8 m_uiHarpoonHitCounter;
+      
+    void Reset()
+    {
+        isInFlight = false;
+        uiWaypointId = 0;
+        uiMovementTimer = 1000;
+        SetCombatMovement(false);
+        m_uiHarpoonHitCounter = 0;
+    }
+
+    void JustReachedHome()
+    {
+        if (Unit* passenger = vehicle->GetPassenger(0))
+        {
+            passenger->ExitVehicle();
+            if (passenger->GetTypeId() != TYPEID_PLAYER)
+                ((Creature*)passenger)->AI()->EnterEvadeMode();
+        }
+        // make boss land
+        m_creature->SetLevitate(false);
+        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
+        m_creature->SetWalk(true);
+    }
+
+    void MovementInform(uint32 uiMovementType, uint32 uiData)
+    {
+        switch(uiData)
+        {
+            case 1: // kurz nach Start
+            case 2: // Wendeposition
+                ++uiWaypointId;
+                uiMovementTimer = 1000;
+                break;             
+            case 3: // Abschusspositon
+                ++uiWaypointId;
+                uiMovementTimer = 15000;
+                break;
+            case 4: // Breath 1
+                ++uiWaypointId;
+                if (m_pInstance)
+                {
+                    if (Creature* pSkadi = m_pInstance->GetSingleCreatureFromStorage(NPC_SKADI))
+                        DoScriptText(SAY_DRAKEBREATH_1, pSkadi);
+                    m_pInstance->DoMakeFreezingCloud();
+                }
+                uiMovementTimer = 1000;
+                break;
+            case 5: // Breath 2
+                ++uiWaypointId;
+                if (m_pInstance)
+                {
+                    if (Creature* pSkadi = m_pInstance->GetSingleCreatureFromStorage(NPC_SKADI))
+                        DoScriptText(SAY_DRAKEBREATH_2, pSkadi);
+                }
+                uiMovementTimer = 1000;
+                break;
+            case 6: // über Mauer
+                uiWaypointId= 3;
+                if (m_pInstance)
+                {
+                    if (Creature* pSkadi = m_pInstance->GetSingleCreatureFromStorage(NPC_SKADI))
+                        DoScriptText(SAY_DRAKEBREATH_3, pSkadi);
+                }
+                uiMovementTimer = 1000;
+                break;
+            default:
+                uiWaypointId = 0;
+                uiMovementTimer = 1000;
+        }
+    }
+
+    void JustDied(Unit* pTarget)
+    {
+        if (m_pInstance)
+        {
+            if (Creature* pSkadi = m_pInstance->GetSingleCreatureFromStorage(NPC_SKADI))
+            {
+                DoScriptText(SAY_DRAKE_DEATH, pSkadi);
+            }
+        }
+    }
+
+    void HarpoonHit()
+    {
+        ++m_uiHarpoonHitCounter;
+        if (m_uiHarpoonHitCounter > 6)
+        {
+            if (m_pInstance)
+            {
+                if (Creature* pSkadi = m_pInstance->GetSingleCreatureFromStorage(NPC_SKADI))
+                {
+                    pSkadi->ExitVehicle();
+                    pSkadi->CastSpell(pSkadi, SPELL_SKADI_TELEPORT, true);
+                    if (boss_skadiAI* skadiAI = dynamic_cast<boss_skadiAI*> (pSkadi->AI()))
+                    {
+                        skadiAI->m_CombatPhase = SKADI;
+                    }
+                }
+            }
+            m_creature->DealDamage(m_creature, m_creature->GetHealth(),  NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+        }
+    }
+      
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (vehicle->GetPassenger(0) && !isInFlight)
+        {
+            isInFlight = true;
+            m_creature->SetLevitate(true);
+            m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+            m_creature->SetWalk(false);
+            uiWaypointId = 1;
+            uiMovementTimer = 1000;
+        }
+        if (isInFlight)
+        {
+            if (uiMovementTimer < uiDiff)
+            {
+                m_creature->GetMotionMaster()->Clear();
+                m_creature->GetMotionMaster()->MovePoint(uiWaypointId, FlightPosition[uiWaypointId].x, FlightPosition[uiWaypointId].y, FlightPosition[uiWaypointId].z, false);
+                uiMovementTimer = 20000;
+            }
+            else
+                uiMovementTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_boss_skadi_grauf(Creature* pCreature)
+{
+    return new boss_skadi_graufAI(pCreature);
+}
+
 bool AreaTrigger_at_skadi(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (ScriptedInstance* pInstance = (ScriptedInstance*)pPlayer->GetInstanceData())
+    if (instance_pinnacle* pInstance = (instance_pinnacle*)pPlayer->GetInstanceData())
     {
         if (pInstance->GetData(TYPE_SKADI) == NOT_STARTED)
             pInstance->SetData(TYPE_SKADI, SPECIAL);
     }
 
     return false;
+}
+
+bool GOHello_go_harpoon_launcher(Player *pPlayer, GameObject *pGO)
+{
+    if (instance_pinnacle* pInstance = (instance_pinnacle*)pGO->GetInstanceData())
+    {
+        if (Creature* pGrauf = pInstance->GetSingleCreatureFromStorage(NPC_GRAUF))
+        {
+            if (pGO->HasInArc(M_PI_F, pGrauf))
+            {
+                if (boss_skadi_graufAI* graufAI = (boss_skadi_graufAI*)pGrauf->AI())
+                {
+                    graufAI->HarpoonHit();
+                    pPlayer->MonsterSay("Ich habe den Grauf getroffen",0);
+                }
+            }
+        }
+    }
+      
+
+    return true;
 }
 
 void AddSC_boss_skadi()
@@ -142,7 +425,17 @@ void AddSC_boss_skadi()
     newscript->RegisterSelf();
 
     newscript = new Script;
+    newscript->Name = "npc_skadi_grauf";
+    newscript->GetAI = &GetAI_boss_skadi_grauf;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
     newscript->Name = "at_skadi";
     newscript->pAreaTrigger = &AreaTrigger_at_skadi;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "harpoon_Skadi";
+    newscript->pGOUse = &GOHello_go_harpoon_launcher;
     newscript->RegisterSelf();
 }
