@@ -116,15 +116,12 @@ struct MANGOS_DLL_DECL boss_skadiAI : public ScriptedAI
     uint32 m_uiWhirlwind;
     uint32 m_uiPoisonedSpear;
 
-    uint32 m_uiSummon;
-
     void Reset()
     {
         m_CombatPhase = SKADI;
         m_uiCrush = 10000;
         m_uiWhirlwind = urand(2000, 5000);
         m_uiPoisonedSpear = 6000;
-        m_uiSummon = 5000;
         if (m_pInstance)
         {
             m_pInstance->SetData(TYPE_SKADI, FAIL);
@@ -209,19 +206,6 @@ struct MANGOS_DLL_DECL boss_skadiAI : public ScriptedAI
                 DoMeleeAttackIfReady();
             }
         }
-        if (m_uiSummon < uiDiff)
-        {
-            if (Creature* pTemp = m_creature->SummonCreature(NPC_YMIRJAR_WARRIOR, 471.0f +irand(-5,5), -506.0f+irand(-5,5), 105.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
-                pTemp->SetInCombatWithZone();
-            if (Creature* pTemp = m_creature->SummonCreature(NPC_YMIRJAR_HARPOONER, 471.0f+irand(-5,5), -506.0f+irand(-5,5), 105.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
-                pTemp->SetInCombatWithZone();
-            if (Creature* pTemp = m_creature->SummonCreature(NPC_YMIRJAR_WITCH_DOCTOR, 471.0f+irand(-5,5), -506.0f+irand(-5,5), 105.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
-                pTemp->SetInCombatWithZone();
-            m_uiSummon = m_bIsRegularMode ? 30000 : 25000;
-        }
-        else
-            m_uiSummon -= uiDiff;
-
     }
 };
 
@@ -235,7 +219,6 @@ struct boss_skadi_graufAI : public ScriptedAI
     boss_skadi_graufAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_pinnacle*)pCreature->GetInstanceData();
-        /*m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);*/
         vehicle = m_creature->GetVehicleKit();
     }
       
@@ -247,6 +230,7 @@ struct boss_skadi_graufAI : public ScriptedAI
     uint32 uiMovementTimer;
 
     uint8 m_uiHarpoonHitCounter;
+    uint32 m_uiSummon;
       
     void Reset()
     {
@@ -255,6 +239,7 @@ struct boss_skadi_graufAI : public ScriptedAI
         uiMovementTimer = 1000;
         SetCombatMovement(false);
         m_uiHarpoonHitCounter = 0;
+        m_uiSummon = 5000;
     }
 
     void JustReachedHome()
@@ -374,6 +359,19 @@ struct boss_skadi_graufAI : public ScriptedAI
             }
             else
                 uiMovementTimer -= uiDiff;
+
+            if (m_uiSummon < uiDiff)
+            {
+                if (Creature* pTemp = m_creature->SummonCreature(NPC_YMIRJAR_WARRIOR, 471.0f +irand(-5,5), -506.0f+irand(-5,5), 105.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
+                    pTemp->SetInCombatWithZone();
+                if (Creature* pTemp = m_creature->SummonCreature(NPC_YMIRJAR_HARPOONER, 471.0f+irand(-5,5), -506.0f+irand(-5,5), 105.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
+                    pTemp->SetInCombatWithZone();
+                if (Creature* pTemp = m_creature->SummonCreature(NPC_YMIRJAR_WITCH_DOCTOR, 471.0f+irand(-5,5), -506.0f+irand(-5,5), 105.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN, 120000))
+                    pTemp->SetInCombatWithZone();
+                m_uiSummon = m_bIsRegularMode ? 30000 : 25000;
+            }
+            else
+                m_uiSummon -= uiDiff;
         }
     }
 };
