@@ -111,7 +111,7 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho)
     {
         ScriptedAI::MoveInLineOfSight(pWho);
-        if (m_creature->GetDistance(pWho) < 40)
+        if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
         {
             if (m_uiPhase==PHASE_BEGIN)
             {
@@ -134,6 +134,7 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
     {
         if (m_uiPhase==PHASE_GORTOK_PALEHOOF)
         {
+            m_creature->RemoveAurasDueToSpell(SPELL_FREEZE);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             ScriptedAI::AttackStart(pWho);
         }
@@ -241,6 +242,7 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
             }
             if (pTemp)
             {
+                pTemp->RemoveAurasDueToSpell(SPELL_FREEZE);
                 if (pTemp->isDead())
                     result = true;
             }
@@ -288,9 +290,8 @@ struct MANGOS_DLL_DECL boss_gortokAI : public ScriptedAI
                         if (m_uiSubBossCount >= m_uiSubBossMax)
                         {
                             m_uiPhase = PHASE_GORTOK_PALEHOOF;
-                            m_creature->RemoveAurasDueToSpell(SPELL_FREEZE);
-                            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             m_creature->SetInCombatWithZone();
+                            return;
                         }
                         m_uiPhase = getValityPhase();
                         m_uiSubBossSteps = PHASE_SUB_BOSS_BEGIN;
