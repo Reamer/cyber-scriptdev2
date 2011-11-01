@@ -220,10 +220,12 @@ struct boss_skadi_graufAI : public ScriptedAI
     {
         m_pInstance = (instance_pinnacle*)pCreature->GetInstanceData();
         vehicle = m_creature->GetVehicleKit();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
     }
       
     instance_pinnacle* m_pInstance;
     VehicleKit* vehicle;
+    bool m_bIsRegularMode;
 
     bool isInFlight;
     uint32 uiWaypointId;
