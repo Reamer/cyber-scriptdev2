@@ -122,6 +122,8 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
 
         uint32 m_uiSpecialCast;
 
+        GUIDList addsList;
+
         void Reset()
         {
             m_uiFetidRot = urand(8000, 13000);
@@ -129,9 +131,14 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
             m_uiDarkSlash = urand(28000, 33000);
 
             m_uiSpecialCast = 4000;
+            addsList.clear();
 
-            ghost = BJORN;
             m_fPrecentLifeNextBoat = 80.0f;
+        }
+
+        void JustSummoned(Creature* pSummoned)
+        {
+            addsList.push_back(pSummoned->GetObjectGuid());
         }
 
         Ghost GetNextActiveBoot()
@@ -173,6 +180,13 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
             if (m_pInstance)
             {
                 m_pInstance->SetData(TYPE_YMIRON, FAIL);
+            }
+            for(GUIDList::iterator itr = addsList.begin(); itr != addsList.end(); ++itr)
+            {
+                if (Creature * pTemp = m_creature->GetMap()->GetCreature(*itr))
+                {
+                    pTemp->ForcedDespawn(120000);
+                }
             }
         }
 
@@ -296,6 +310,39 @@ CreatureAI* GetAI_boss_ymiron(Creature* pCreature)
     return new boss_ymironAI(pCreature);
 }
 
+struct MANGOS_DLL_DECL npc_spirit_fountAI: public ScriptedAI
+{
+        npc_spirit_fountAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            Reset();
+        }
+
+        bool m_bIsRegularMode;
+
+        void Reset()
+        {
+            m_creature->SetSpeedRate(MOVE_WALK, 0.4f);
+            m_creature->SetSpeedRate(MOVE_RUN, 0.4f);
+        }
+
+        void EnterEvadeMode()
+        {
+            ScriptedAI::EnterEvadeMode();
+            m_creature->ForcedDespawn(120000);
+        }
+
+        void UpdateAI(const uint32  uiDiff)
+        {
+            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SPIRIT_FOUNT : SPELL_SPIRIT_FOUNT_H, CAST_AURA_NOT_PRESENT);
+        }
+};
+
+CreatureAI* GetAI_npc_spirit_fount(Creature* pCreature)
+{
+    return new npc_spirit_fountAI(pCreature);
+}
+
 void AddSC_boss_ymiron()
 {
     Script *newscript;
@@ -303,5 +350,10 @@ void AddSC_boss_ymiron()
     newscript = new Script;
     newscript->Name = "boss_ymiron";
     newscript->GetAI = &GetAI_boss_ymiron;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_spirit_fount";
+    newscript->GetAI = &GetAI_npc_spirit_fount;
     newscript->RegisterSelf();
 }
