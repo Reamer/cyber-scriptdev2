@@ -270,9 +270,10 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
             {
                 if (m_uiSpecialCast <= uiDiff)
                 {
+                    CanCastResult result;
                     switch(ghost)
                     {
-                        CanCastResult result;
+                        
                         case BJORN:
                         {
                             result = DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUMMON_SPIRIT_FOUNT);
@@ -293,9 +294,12 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
                             result = DoCastSpellIfCan(m_creature, SPELL_SUMMON_AVENGING_SPIRIT);
                             break;
                         }
-                        if (result = CAST_OK)
-                            m_uiSpecialCast = 5000;
+                        default:
+                            result = CAST_OK; // better for Timer
+                            break;
                     }
+                    if (result = CAST_OK)
+                        m_uiSpecialCast = 5000;
                 }
                 else
                     m_uiSpecialCast -= uiDiff;
