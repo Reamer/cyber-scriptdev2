@@ -143,7 +143,18 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
 
         Ghost GetNextActiveBoot()
         {
-            return (Ghost)urand(0, 3);
+            if (!ghost)
+                return (Ghost) urand(1,4);
+            else
+            {
+                uint32 result = ghost;
+                ++result;
+                if (result > TORGYN)
+                {
+                    result = BJORN;
+                }
+                return (Ghost) result;
+            }
         }
 
         void Aggro(Unit* pWho)
