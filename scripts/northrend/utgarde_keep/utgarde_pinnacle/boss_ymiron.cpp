@@ -60,6 +60,7 @@ enum
 };
 
 enum Ghost{
+    NO_GHOST = 0,
     BJORN = 1,
     HALDOR = 2,
     RANULF = 3,
@@ -113,7 +114,6 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
         Ghost ghost;
 
         float m_fPrecentLifeNextBoat;
-        uint32 activeGhost;
         ObjectGuid m_ghostGUID;
 
         uint32 m_uiBane;
@@ -132,6 +132,8 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
 
             m_uiSpecialCast = 4000;
             addsList.clear();
+
+            ghost = NO_GHOST;
 
             m_fPrecentLifeNextBoat = 80.0f;
         }
@@ -216,7 +218,7 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
             {
                 pOldGhost->ForcedDespawn();
             }
-            if (Creature* pGhost = m_creature->SummonCreature(ActiveBot[activeGhost].npc, ActiveBot[activeGhost].SpawnX, ActiveBot[activeGhost].SpawnY,ActiveBot[activeGhost].SpawnZ,ActiveBot[activeGhost].SpawnO, TEMPSUMMON_CORPSE_DESPAWN, 0))
+            if (Creature* pGhost = m_creature->SummonCreature(ActiveBot[ghost].npc, ActiveBot[ghost].SpawnX, ActiveBot[ghost].SpawnY,ActiveBot[ghost].SpawnZ,ActiveBot[ghost].SpawnO, TEMPSUMMON_CORPSE_DESPAWN, 0))
             {
                 m_ghostGUID = pGhost->GetObjectGuid();
                 DoCast(pGhost, SPELL_CHANNEL_YMIRON_TO_SPIRIT);
@@ -245,9 +247,9 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
                     m_fPrecentLifeNextBoat -= 20.0f;
                     m_uiBane = urand(15000, 18000);
                     ghost = GetNextActiveBoot();
-                    DoScriptText(ActiveBot[activeGhost].say, m_creature);
+                    DoScriptText(ActiveBot[ghost].say, m_creature);
                     m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MovePoint(0, ActiveBot[activeGhost].MoveX, ActiveBot[activeGhost].MoveY, ActiveBot[activeGhost].MoveZ, true);
+                    m_creature->GetMotionMaster()->MovePoint(0, ActiveBot[ghost].MoveX, ActiveBot[ghost].MoveY, ActiveBot[ghost].MoveZ, true);
                 }
             }
 
@@ -277,40 +279,40 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
                 m_uiDarkSlash -= uiDiff;
 
             // Special spells ------------------------------------------------------------------------
-            if (ghost)
+            if (ghost != NO_GHOST)
             {
                 if (m_uiSpecialCast <= uiDiff)
                 {
-                    CanCastResult result;
                     switch(ghost)
                     {
                         
                         case BJORN:
                         {
-                            result = DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUMMON_SPIRIT_FOUNT);
+                            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUMMON_SPIRIT_FOUNT) == CAST_OK)
+                                m_uiSpecialCast = 5000;
                             break;
                         }
                         case HALDOR:
                         {
-                            result = DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SPIRIT_STRIKE : SPELL_SPIRIT_STRIKE_H);
+                            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SPIRIT_STRIKE : SPELL_SPIRIT_STRIKE_H) == CAST_OK)
+                                m_uiSpecialCast = 5000;
                             break;
                         }
                         case RANULF:
                         {
-                            result = DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SPIRIT_BURST : SPELL_SPIRIT_BURST_H);
+                            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SPIRIT_BURST : SPELL_SPIRIT_BURST_H) == CAST_OK)
+                                m_uiSpecialCast = 5000;
                             break;
                         }
                         case TORGYN:
                         {
-                            result = DoCastSpellIfCan(m_creature, SPELL_SUMMON_AVENGING_SPIRIT);
+                            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_AVENGING_SPIRIT) == CAST_OK)
+                                m_uiSpecialCast = 5000;
                             break;
                         }
                         default:
-                            result = CAST_OK; // better for Timer
-                            break;
+                            break;                     
                     }
-                    if (result = CAST_OK)
-                        m_uiSpecialCast = 5000;
                 }
                 else
                     m_uiSpecialCast -= uiDiff;
