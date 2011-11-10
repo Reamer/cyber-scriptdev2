@@ -221,6 +221,7 @@ struct boss_skadi_graufAI : public ScriptedAI
         m_pInstance = (instance_pinnacle*)pCreature->GetInstanceData();
         vehicle = m_creature->GetVehicleKit();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        SetCombatMovement(false);
     }
       
     instance_pinnacle* m_pInstance;
@@ -239,7 +240,6 @@ struct boss_skadi_graufAI : public ScriptedAI
         isInFlight = false;
         uiWaypointId = 0;
         uiMovementTimer = 1000;
-        SetCombatMovement(false);
         m_uiHarpoonHitCounter = 0;
         m_uiSummon = 5000;
     }
@@ -405,7 +405,7 @@ bool GOHello_go_harpoon_launcher(Player *pPlayer, GameObject *pGO)
                 if (boss_skadi_graufAI* graufAI = (boss_skadi_graufAI*)pGrauf->AI())
                 {
                     graufAI->HarpoonHit();
-                    pPlayer->MonsterSay("Ich habe den Grauf getroffen",0);
+                    pPlayer->MonsterSay("Ich habe Grauf getroffen",1);
                 }
             }
         }
