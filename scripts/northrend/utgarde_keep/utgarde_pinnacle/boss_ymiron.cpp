@@ -198,7 +198,7 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
             {
                 if (Creature * pTemp = m_creature->GetMap()->GetCreature(*itr))
                 {
-                    pTemp->ForcedDespawn(120000);
+                    pTemp->ForcedDespawn();
                 }
             }
         }
@@ -209,6 +209,13 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
             {
                 m_pInstance->SetData(TYPE_YMIRON, DONE);
             }
+            for(GUIDList::iterator itr = addsList.begin(); itr != addsList.end(); ++itr)
+            {
+                if (Creature * pTemp = m_creature->GetMap()->GetCreature(*itr))
+                {
+                    pTemp->ForcedDespawn();
+                }
+            }
             DoScriptText(SAY_DEATH, m_creature);
         }
 
@@ -218,7 +225,7 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
             {
                 pOldGhost->ForcedDespawn();
             }
-            if (Creature* pGhost = m_creature->SummonCreature(ActiveBot[ghost].npc, ActiveBot[ghost].SpawnX, ActiveBot[ghost].SpawnY,ActiveBot[ghost].SpawnZ,ActiveBot[ghost].SpawnO, TEMPSUMMON_CORPSE_DESPAWN, 0))
+            if (Creature* pGhost = m_creature->SummonCreature(ActiveBot[ghost-1].npc, ActiveBot[ghost-1].SpawnX, ActiveBot[ghost-1].SpawnY,ActiveBot[ghost-1].SpawnZ,ActiveBot[ghost-1].SpawnO, TEMPSUMMON_CORPSE_DESPAWN, 0))
             {
                 m_ghostGUID = pGhost->GetObjectGuid();
                 DoCast(pGhost, SPELL_CHANNEL_YMIRON_TO_SPIRIT);
@@ -247,9 +254,9 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
                     m_fPrecentLifeNextBoat -= 20.0f;
                     m_uiBane = urand(15000, 18000);
                     ghost = GetNextActiveBoot();
-                    DoScriptText(ActiveBot[ghost].say, m_creature);
+                    DoScriptText(ActiveBot[ghost-1].say, m_creature);
                     m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MovePoint(0, ActiveBot[ghost].MoveX, ActiveBot[ghost].MoveY, ActiveBot[ghost].MoveZ, true);
+                    m_creature->GetMotionMaster()->MovePoint(0, ActiveBot[ghost-1].MoveX, ActiveBot[ghost-1].MoveY, ActiveBot[ghost-1].MoveZ, true);
                 }
             }
 
@@ -289,7 +296,7 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
                         case BJORN:
                         {
                             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUMMON_SPIRIT_FOUNT) == CAST_OK)
-                                m_uiSpecialCast = 5000;
+                                m_uiSpecialCast = 15000;
                             break;
                         }
                         case HALDOR:
@@ -307,7 +314,7 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
                         case TORGYN:
                         {
                             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_AVENGING_SPIRIT) == CAST_OK)
-                                m_uiSpecialCast = 5000;
+                                m_uiSpecialCast = 15000;
                             break;
                         }
                         default:
@@ -346,7 +353,7 @@ struct MANGOS_DLL_DECL npc_spirit_fountAI: public ScriptedAI
         void EnterEvadeMode()
         {
             ScriptedAI::EnterEvadeMode();
-            m_creature->ForcedDespawn(120000);
+            m_creature->ForcedDespawn();
         }
 
         void UpdateAI(const uint32  uiDiff)
