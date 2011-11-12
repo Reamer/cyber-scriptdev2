@@ -125,6 +125,7 @@ struct MANGOS_DLL_DECL boss_skadiAI : public ScriptedAI
         if (m_pInstance)
         {
             m_pInstance->SetData(TYPE_SKADI, FAIL);
+            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_MY_GIRL_LOVES_SKADI_ALL_THE_TIME, false);
             if (Creature* pGrauf = m_pInstance->GetSingleCreatureFromStorage(NPC_GRAUF))
             {
                 pGrauf->Respawn();
@@ -233,6 +234,7 @@ struct boss_skadi_graufAI : public ScriptedAI
     uint32 uiMovementTimer;
 
     uint8 m_uiHarpoonHitCounter;
+    uint8 m_uiHarpoonHitCounterAchiev;
     uint32 m_uiSummon;
       
     void Reset()
@@ -241,6 +243,7 @@ struct boss_skadi_graufAI : public ScriptedAI
         uiWaypointId = 0;
         uiMovementTimer = 1000;
         m_uiHarpoonHitCounter = 0;
+        m_uiHarpoonHitCounterAchiev = 0;
         m_uiSummon = 5000;
     }
 
@@ -268,10 +271,13 @@ struct boss_skadi_graufAI : public ScriptedAI
                 uiMovementTimer = 1000;
                 break;             
             case 3: // Abschusspositon
+            {
                 ++uiWaypointId;
                 uiMovementTimer = 15000;
                 break;
+            }
             case 4: // Breath 1
+                m_uiHarpoonHitCounterAchiev = 0;
                 ++uiWaypointId;
                 if (m_pInstance)
                 {
@@ -313,12 +319,17 @@ struct boss_skadi_graufAI : public ScriptedAI
             {
                 DoScriptText(SAY_DRAKE_DEATH, pSkadi);
             }
+            if (m_uiHarpoonHitCounterAchiev == m_uiHarpoonHitCounter)
+            {
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_MY_GIRL_LOVES_SKADI_ALL_THE_TIME, true);
+            }
         }
     }
 
     void HarpoonHit()
     {
         ++m_uiHarpoonHitCounter;
+        ++m_uiHarpoonHitCounterAchiev;
         if (m_uiHarpoonHitCounter > 6)
         {
             if (m_pInstance)
