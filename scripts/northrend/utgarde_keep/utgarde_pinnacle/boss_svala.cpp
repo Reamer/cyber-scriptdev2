@@ -160,11 +160,6 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
             ArthasGuid = pSummoned->GetObjectGuid();
             pSummoned->SetFacingToObject(m_creature);
         }
-        if (pSummoned->GetEntry() == NPC_PARALYSER)
-        {
-            m_creature->MonsterSay("ein paralyser",0);
-            pSummoned->CastSpell(pSummoned,SPELL_PARALYZE, true);
-        }
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
@@ -243,6 +238,7 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
                             case 5:
                                 DoScriptText(SAY_INTRO_5, m_creature);
                                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                                m_creature->RemoveAurasDueToSpell(SPELL_TRANSFORMING_FLOATING);
                                 m_bIsIntroDone = true;
                                 break;
                         }
@@ -312,7 +308,7 @@ struct MANGOS_DLL_DECL npc_paralyzerAI : public ScriptedAI
     {
         if (spellTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_PARALYZE, CAST_TRIGGERED) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, SPELL_PARALYZE) == CAST_OK)
                 spellTimer = 40000;
         }
         else
@@ -323,6 +319,27 @@ struct MANGOS_DLL_DECL npc_paralyzerAI : public ScriptedAI
 CreatureAI* GetAI_npc_paralyzer(Creature* pCreature)
 {
     return new npc_paralyzerAI(pCreature);
+}
+
+struct MANGOS_DLL_DECL npc_ritual_targetAI : public ScriptedAI
+{
+    npc_ritual_targetAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    void AttackStart(Unit* pWho){}
+
+    void Reset(){}
+
+    void UpdateAI(const uint32 uiDiff){}
+};
+
+
+
+CreatureAI* GetAI_ritual_target(Creature* pCreature)
+{
+    return new npc_ritual_targetAI(pCreature);
 }
 
 
@@ -359,6 +376,11 @@ void AddSC_boss_svala()
     newscript = new Script;
     newscript->Name = "npc_paralyzer";
     newscript->GetAI = &GetAI_npc_paralyzer;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_ritual_target";
+    newscript->GetAI = &GetAI_ritual_target;
     newscript->RegisterSelf();
 
     newscript = new Script;

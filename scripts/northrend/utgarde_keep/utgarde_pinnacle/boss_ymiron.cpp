@@ -164,6 +164,7 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
             if (m_pInstance)
             {
                 m_pInstance->SetData(TYPE_YMIRON, IN_PROGRESS);
+                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_KINGS_BANE, true);
             }
             DoScriptText(SAY_AGGRO, m_creature);
         }
@@ -264,7 +265,13 @@ struct MANGOS_DLL_DECL boss_ymironAI: public ScriptedAI
             if (m_uiBane <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_BANE : SPELL_BANE_H) == CAST_OK)
+                {
+                    if (m_pInstance)
+                    {
+                        m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_KINGS_BANE, false);
+                    }
                     m_uiBane = urand(20000, 25000);
+                }
             }
             else
                 m_uiBane -= uiDiff;

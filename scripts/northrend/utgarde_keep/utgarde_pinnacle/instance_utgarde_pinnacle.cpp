@@ -32,6 +32,8 @@ instance_pinnacle::instance_pinnacle(Map* pMap) : ScriptedInstance(pMap)
 void instance_pinnacle::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
+        m_abAchievCriteria[i] = false;
 }
 
 void instance_pinnacle::OnObjectCreate(GameObject* pGo)
@@ -41,9 +43,13 @@ void instance_pinnacle::OnObjectCreate(GameObject* pGo)
         case GO_DOOR_SKADI:
             if (m_auiEncounter[TYPE_SKADI] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
+        case GO_DOOR_AFTER_YMIRON:
+            break;
+        default:
+            return;
     }
+    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
@@ -103,6 +109,10 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
             }
             break;
         case TYPE_SKADI:
+            if (uiData == IN_PROGRESS)
+            {
+                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_SKADY_ID);
+            }
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_DOOR_SKADI);
 
@@ -110,6 +120,10 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_YMIRON:
             m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                DoUseDoorOrButton(GO_DOOR_AFTER_YMIRON);
+            }
             break;
         default:
             error_log("SD2: Instance Pinnacle: SetData = %u for type %u does not exist/not implemented.", uiType, uiData);
@@ -137,6 +151,43 @@ uint32 instance_pinnacle::GetData(uint32 uiType)
         return m_auiEncounter[uiType];
 
     return 0;
+}
+
+void instance_pinnacle::OnCreatureDeath(Creature * pCreature)
+{
+    if (pCreature->GetEntry() == 26555)
+    {
+        if (pCreature->HasAura(59930))
+        {
+            m_abAchievCriteria[TYPE_ACHIEV_THE_INCREDIBLE_HULK] = true;
+        }
+    }
+}
+
+bool instance_pinnacle::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1)
+{
+    switch(criteria_id)
+    {
+        case ACHIEV_CRIT_KINGS_BANE:
+        {
+            return m_abAchievCriteria[TYPE_ACHIEV_KINGS_BANE];
+        }
+        case ACHIEV_CRIT_THE_INCREDIBLE_HULK:
+        {
+            return m_abAchievCriteria[TYPE_ACHIEV_THE_INCREDIBLE_HULK];
+        }
+        case ACHIEV_CRIT_MY_GIRL_LOVES_SKADI_ALL_THE_TIME:
+        {
+            return m_abAchievCriteria[TYPE_ACHIEV_MY_GIRL_LOVES_SKADI_ALL_THE_TIME];
+        }
+    }
+    return false;
+}
+
+void instance_pinnacle::SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet)
+{
+    if (uiType < MAX_SPECIAL_ACHIEV_CRITS)
+        m_abAchievCriteria[uiType] = bIsMet;
 }
 
 void instance_pinnacle::Load(const char* chrIn)
