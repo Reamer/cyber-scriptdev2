@@ -36,7 +36,6 @@ npc_garments_of_quests   80%    NPC's related to all Garments of-quests 5621, 56
 npc_injured_patient     100%    patients for triage-quests (6622 and 6624)
 npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
 npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
-npc_kingdom_of_dalaran_quests   Misc NPC's gossip option related to quests 12791, 12794 and 12796
 npc_lunaclaw_spirit     100%    Appears at two different locations, quest 6001/6002
 npc_mount_vendor        100%    Regular mount vendors all over the world. Display gossip if player doesn't meet the requirements to buy
 npc_rogue_trainer        80%    Scripted trainers, so they are able to offer item 17126 for class quest 6681
@@ -44,6 +43,8 @@ npc_sayge               100%    Darkmoon event fortune teller, buff player based
 npc_tabard_vendor        50%    allow recovering quest related tabards, achievement related ones need core support
 npc_locksmith            75%    list of keys needs to be confirmed
 npc_death_knight_gargoyle       AI for summoned gargoyle of deathknights
+npc_horseman_fire_bunny
+npc_shade_of_horseman
 EndContentData */
 
 /*########
@@ -1102,44 +1103,6 @@ bool GossipSelect_npc_innkeeper(Player* pPlayer, Creature* pCreature, uint32 uiS
 }
 
 /*######
-## npc_kingdom_of_dalaran_quests
-######*/
-
-enum
-{
-    SPELL_TELEPORT_DALARAN  = 53360,
-    ITEM_KT_SIGNET          = 39740,
-    QUEST_MAGICAL_KINGDOM_A = 12794,
-    QUEST_MAGICAL_KINGDOM_H = 12791,
-    QUEST_MAGICAL_KINGDOM_N = 12796
-};
-
-#define GOSSIP_ITEM_TELEPORT_TO "I am ready to be teleported to Dalaran."
-
-bool GossipHello_npc_kingdom_of_dalaran_quests(Player* pPlayer, Creature* pCreature)
-{
-    if (pCreature->isQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
-
-    if (pPlayer->HasItemCount(ITEM_KT_SIGNET,1) && (!pPlayer->GetQuestRewardStatus(QUEST_MAGICAL_KINGDOM_A) ||
-        !pPlayer->GetQuestRewardStatus(QUEST_MAGICAL_KINGDOM_H) || !pPlayer->GetQuestRewardStatus(QUEST_MAGICAL_KINGDOM_N)))
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELEPORT_TO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_kingdom_of_dalaran_quests(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
-    {
-        pPlayer->CLOSE_GOSSIP_MENU();
-        pPlayer->CastSpell(pPlayer,SPELL_TELEPORT_DALARAN,false);
-    }
-    return true;
-}
-
-/*######
 ## npc_lunaclaw_spirit
 ######*/
 
@@ -1585,109 +1548,6 @@ bool GossipSelect_npc_tabard_vendor(Player* pPlayer, Creature* pCreature, uint32
 }
 
 /*######
-## npc_locksmith
-######*/
-
-enum
-{
-    QUEST_HOW_TO_BRAKE_IN_TO_THE_ARCATRAZ = 10704,
-    QUEST_DARK_IRON_LEGACY                = 3802,
-    QUEST_THE_KEY_TO_SCHOLOMANCE_A        = 5505,
-    QUEST_THE_KEY_TO_SCHOLOMANCE_H        = 5511,
-    QUEST_HOTTER_THAN_HELL_A              = 10758,
-    QUEST_HOTTER_THAN_HELL_H              = 10764,
-    QUEST_RETURN_TO_KHAGDAR               = 9837,
-    QUEST_CONTAINMENT                     = 13159,
-
-    ITEM_ARCATRAZ_KEY                     = 31084,
-    ITEM_SHADOWFORGE_KEY                  = 11000,
-    ITEM_SKELETON_KEY                     = 13704,
-    ITEM_SHATTERED_HALLS_KEY              = 28395,
-    ITEM_THE_MASTERS_KEY                  = 24490,
-    ITEM_VIOLET_HOLD_KEY                  = 42482,
-
-    SPELL_ARCATRAZ_KEY                    = 54881,
-    SPELL_SHADOWFORGE_KEY                 = 54882,
-    SPELL_SKELETON_KEY                    = 54883,
-    SPELL_SHATTERED_HALLS_KEY             = 54884,
-    SPELL_THE_MASTERS_KEY                 = 54885,
-    SPELL_VIOLET_HOLD_KEY                 = 67253
-};
-
-#define GOSSIP_LOST_ARCATRAZ_KEY         "I've lost my key to the Arcatraz."
-#define GOSSIP_LOST_SHADOWFORGE_KEY      "I've lost my key to the Blackrock Depths."
-#define GOSSIP_LOST_SKELETON_KEY         "I've lost my key to the Scholomance."
-#define GOSSIP_LOST_SHATTERED_HALLS_KEY  "I've lost my key to the Shattered Halls."
-#define GOSSIP_LOST_THE_MASTERS_KEY      "I've lost my key to the Karazhan."
-#define GOSSIP_LOST_VIOLET_HOLD_KEY      "I've lost my key to the Violet Hold."
-
-bool GossipHello_npc_locksmith(Player* pPlayer, Creature* pCreature)
-{
-
-    // Arcatraz Key
-    if (pPlayer->GetQuestRewardStatus(QUEST_HOW_TO_BRAKE_IN_TO_THE_ARCATRAZ) && !pPlayer->HasItemCount(ITEM_ARCATRAZ_KEY, 1, true))
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_ARCATRAZ_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +1);
-
-    // Shadowforge Key
-    if (pPlayer->GetQuestRewardStatus(QUEST_DARK_IRON_LEGACY) && !pPlayer->HasItemCount(ITEM_SHADOWFORGE_KEY, 1, true))
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_SHADOWFORGE_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +2);
-
-    // Skeleton Key
-    if ((pPlayer->GetQuestRewardStatus(QUEST_THE_KEY_TO_SCHOLOMANCE_A) || pPlayer->GetQuestRewardStatus(QUEST_THE_KEY_TO_SCHOLOMANCE_H)) &&
-        !pPlayer->HasItemCount(ITEM_SKELETON_KEY, 1, true))
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_SKELETON_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +3);
-
-    // Shatered Halls Key
-    if ((pPlayer->GetQuestRewardStatus(QUEST_HOTTER_THAN_HELL_A) || pPlayer->GetQuestRewardStatus(QUEST_HOTTER_THAN_HELL_H)) &&
-        !pPlayer->HasItemCount(ITEM_SHATTERED_HALLS_KEY, 1, true))
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_SHATTERED_HALLS_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +4);
-
-    // Master's Key
-    if (pPlayer->GetQuestRewardStatus(QUEST_RETURN_TO_KHAGDAR) && !pPlayer->HasItemCount(ITEM_THE_MASTERS_KEY, 1, true))
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_THE_MASTERS_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +5);
-
-    // Violet Hold Key
-    if (pPlayer->GetQuestRewardStatus(QUEST_CONTAINMENT) && !pPlayer->HasItemCount(ITEM_VIOLET_HOLD_KEY, 1, true))
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_VIOLET_HOLD_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +6);
-
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
-
-    return true;
-}
-
-bool GossipSelect_npc_locksmith(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
-{
-    switch(uiAction)
-    {
-        case GOSSIP_ACTION_INFO_DEF+1:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->CastSpell(pPlayer, SPELL_ARCATRAZ_KEY, false);
-            break;
-        case GOSSIP_ACTION_INFO_DEF+2:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->CastSpell(pPlayer, SPELL_SHADOWFORGE_KEY, false);
-            break;
-        case GOSSIP_ACTION_INFO_DEF+3:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->CastSpell(pPlayer, SPELL_SKELETON_KEY, false);
-            break;
-        case GOSSIP_ACTION_INFO_DEF+4:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->CastSpell(pPlayer, SPELL_SHATTERED_HALLS_KEY, false);
-            break;
-        case GOSSIP_ACTION_INFO_DEF+5:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->CastSpell(pPlayer, SPELL_THE_MASTERS_KEY, false);
-            break;
-        case GOSSIP_ACTION_INFO_DEF+6:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->CastSpell(pPlayer, SPELL_VIOLET_HOLD_KEY, false);
-            break;
-    }
-    return true;
-}
-
-/*######
 ## npc_mirror_image
 ######*/
 
@@ -2003,6 +1863,7 @@ CreatureAI* GetAI_npc_rune_blade(Creature* pCreature)
 {
     return new npc_rune_blade(pCreature);
 }
+
 /*########
 # mob_death_knight_gargoyle AI
 #########*/
@@ -2160,10 +2021,10 @@ struct MANGOS_DLL_DECL npc_training_dummyAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 diff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        return;
-      
+            return;
+
         if (m_creature->GetHealthPercent() < 10.0f) // allow players using finishers
-        m_creature->ModifyHealth(m_creature->GetMaxHealth());
+            m_creature->ModifyHealth(m_creature->GetMaxHealth());
 
         m_creature->SetTargetGuid(ObjectGuid()); // prevent from rotating
         combat_timer += diff;
@@ -2176,15 +2037,13 @@ struct MANGOS_DLL_DECL npc_training_dummyAI : public Scripted_NoMovementAI
 
 CreatureAI* GetAI_npc_training_dummy(Creature* pCreature)
 {
-return new npc_training_dummyAI(pCreature);
+    return new npc_training_dummyAI(pCreature);
 }
 
-bool GossipHello_npc_lightwell(Player* pPlayer, Creature* pCreature)
-{
-    pPlayer->CLOSE_GOSSIP_MENU();
-    pCreature->CastSpell(pPlayer, 60123, true);
-    return true;
-}
+/*########
+# npc_risen_ally AI
+#########*/
+
 struct MANGOS_DLL_DECL npc_risen_allyAI : public ScriptedAI
 {
     npc_risen_allyAI(Creature *pCreature) : ScriptedAI(pCreature)
@@ -2255,6 +2114,10 @@ CreatureAI* GetAI_npc_risen_ally(Creature* pCreature)
     return new npc_risen_allyAI(pCreature);
 }
 
+/*########
+# npc_explosive_decoyAI
+#########*/
+
 struct MANGOS_DLL_DECL npc_explosive_decoyAI : public ScriptedAI
 {
     npc_explosive_decoyAI(Creature *pCreature) : ScriptedAI(pCreature)
@@ -2310,6 +2173,10 @@ CreatureAI* GetAI_npc_explosive_decoy(Creature* pCreature)
     return new npc_explosive_decoyAI(pCreature);
 }
 
+/*########
+# npc_eye_of_kilroggAI
+#########*/
+
 struct MANGOS_DLL_DECL npc_eye_of_kilrogg : public ScriptedAI
 {
     npc_eye_of_kilrogg(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
@@ -2345,138 +2212,359 @@ CreatureAI* GetAI_npc_eye_of_kilrogg(Creature* pCreature)
     return new npc_eye_of_kilrogg(pCreature);
 }
 
+/*########
+# npc_fire_bunny
+#########*/
+
+enum
+{
+    NPC_FIRE_BUNNY          = 23686,
+    SPELL_THROW_BUCKET      = 42339,
+    SPELL_EXTINGUISH_VISUAL = 42348,
+    SPELL_FLAMES_LARGE      = 42075,
+    SPELL_SMOKE             = 42355,
+    SPELL_CONFLAGRATE       = 42132,
+    SPELL_HORSEMAN_MOUNT    = 48024,
+    SPELL_HORSMAN_SHADE_VIS = 43904,
+    SPELL_Q_STOP_THE_FIRE   = 42242,
+    SPELL_Q_LET_THE_FIRES_C = 47775,
+    SPELL_LAUGH_DELAYED_8   = 43893,
+
+    PHASE_INITIAL           = 0,
+    PHASE_1ST_SPEACH        = 1,
+    PHASE_2ND_SPEACH        = 2,
+    PHASE_FAIL              = 3,
+    PHASE_END               = 4,
+
+    YELL_IGNITE             = -1110001,
+    YELL_1ST                = -1110002,
+    YELL_2ND                = -1110003,
+    YELL_FAIL               = -1110004,
+    YELL_VICTORY            = -1110005,
+    YELL_CONFLAGRATION      = -1110006
+};
+
+struct MANGOS_DLL_DECL npc_horseman_fire_bunnyAI : public Scripted_NoMovementAI
+{
+    npc_horseman_fire_bunnyAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        Reset();
+        m_creature->RemoveAllAuras();
+    }
+
+    void Reset()
+    {
+        if (!m_creature->isAlive())
+            m_creature->Respawn();
+    }
+
+    void SpellHit(Unit* pWho, const SpellEntry* pSpell)
+    {
+        if (pSpell->Id == SPELL_THROW_BUCKET)
+        {
+            pWho->CastSpell(m_creature, SPELL_EXTINGUISH_VISUAL, false);
+            m_creature->RemoveAurasDueToSpell(SPELL_FLAMES_LARGE);
+        }
+        if (pSpell->Id == SPELL_CONFLAGRATE)
+        {
+            DoCastSpellIfCan(m_creature, SPELL_FLAMES_LARGE);
+            m_creature->RemoveAurasDueToSpell(SPELL_CONFLAGRATE);
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (m_creature->SelectHostileTarget() || m_creature->getVictim())
+            EnterEvadeMode(); // Dunno how to prevent them from entering combat while hit by SPELL_EXTINGUISH_VISUAL (spelleffect 2)
+    }
+};
+
+CreatureAI* GetAI_npc_horseman_fire_bunny(Creature* pCreature)
+{
+    return new npc_horseman_fire_bunnyAI (pCreature);
+};
+
+/*########
+# npc_shade of horseman
+#########*/
+
+struct MANGOS_DLL_DECL npc_shade_of_horsemanAI : public ScriptedAI
+{
+    npc_shade_of_horsemanAI(Creature* pCreature) : ScriptedAI(pCreature){Reset();}
+
+    uint8 uiPhase;
+    uint32 m_uiEventTimer;
+    uint32 m_uiConflagrationTimer;
+    uint32 m_uiConflagrationProcTimer;
+    bool bIsConflagrating;
+
+    GUIDList lFireBunnies;
+
+    void Reset()
+    {
+        if (!m_creature->isAlive())
+            m_creature->Respawn();
+
+        uiPhase = PHASE_INITIAL;
+        lFireBunnies.clear();
+        bIsConflagrating = true;
+
+        m_uiEventTimer = 2.5*MINUTE*IN_MILLISECONDS;
+
+        m_uiConflagrationTimer = 30000;
+        m_uiConflagrationProcTimer = 2000;
+
+        DoCastSpellIfCan(m_creature, SPELL_HORSEMAN_MOUNT);
+        DoCastSpellIfCan(m_creature, SPELL_HORSMAN_SHADE_VIS);
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (uiPhase == PHASE_INITIAL)
+        {
+            DoScriptText(YELL_IGNITE, m_creature);
+            ++uiPhase;
+            return;
+        }
+        else if (uiPhase == PHASE_END)
+            return;
+
+        if (!bIsConflagrating)
+        {
+            bool IsVictory = true;
+            for (GUIDList::iterator itr = lFireBunnies.begin(); itr != lFireBunnies.end(); ++itr)
+                if (Creature* pFireBunny = m_creature->GetMap()->GetCreature(*itr))
+                    if (pFireBunny->HasAura(SPELL_FLAMES_LARGE))
+                        IsVictory = false;
+            if (IsVictory)
+            {
+                DoScriptText(YELL_VICTORY, m_creature);
+                DoCastSpellIfCan(m_creature, SPELL_Q_STOP_THE_FIRE, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_Q_LET_THE_FIRES_C, CAST_TRIGGERED);
+                m_creature->ForcedDespawn(5000);
+                uiPhase = PHASE_END;
+                return;
+            }
+        }
+
+        if (m_uiEventTimer < uiDiff)
+        {
+            switch(uiPhase)
+            {
+                case PHASE_1ST_SPEACH:
+                    DoScriptText(YELL_1ST, m_creature);
+                    m_uiEventTimer = 2 *MINUTE*IN_MILLISECONDS;
+                    break;
+
+                case PHASE_2ND_SPEACH:
+                    DoScriptText(YELL_2ND, m_creature);
+                    m_uiEventTimer = 0.5 *MINUTE*IN_MILLISECONDS;
+                    break;
+                case PHASE_FAIL:
+                    DoScriptText(YELL_FAIL, m_creature);
+                    m_creature->ForcedDespawn(10000);
+                    for (GUIDList::iterator itr = lFireBunnies.begin(); itr != lFireBunnies.end(); ++itr)
+                        if (Creature* pFireBunny = m_creature->GetMap()->GetCreature(*itr))
+                        {
+                            if (pFireBunny->HasAura(SPELL_FLAMES_LARGE))
+                                pFireBunny->RemoveAurasDueToSpell(SPELL_FLAMES_LARGE);
+                            pFireBunny->CastSpell(m_creature, SPELL_SMOKE, true);
+                            pFireBunny->ForcedDespawn(60000);
+                        }
+                    break;
+            }
+            ++uiPhase;
+            DoCastSpellIfCan(m_creature, SPELL_LAUGH_DELAYED_8);
+        }
+        else
+            m_uiEventTimer -= uiDiff;
+
+        if (m_uiConflagrationTimer < uiDiff)
+        {
+            bIsConflagrating = !bIsConflagrating;
+            m_creature->GetMotionMaster()->MovementExpired();
+            m_creature->GetMotionMaster()->MoveTargetedHome();
+            m_uiConflagrationProcTimer = 2000;
+            m_uiConflagrationTimer = bIsConflagrating ? 10000 : 30000;
+            if (bIsConflagrating)
+                DoScriptText(YELL_CONFLAGRATION, m_creature);
+        }
+        else
+            m_uiConflagrationTimer -= uiDiff;
+
+        if (bIsConflagrating)
+            if (m_uiConflagrationProcTimer < uiDiff)
+            {
+                m_uiConflagrationProcTimer = 2000;
+                if (lFireBunnies.empty())
+                {
+                    std::list<Creature*> tempFireBunnies;
+                    GetCreatureListWithEntryInGrid(tempFireBunnies, m_creature, NPC_FIRE_BUNNY, 50.0f);
+                    for (std::list<Creature*>::iterator itr = tempFireBunnies.begin(); itr != tempFireBunnies.end(); ++itr)
+                        lFireBunnies.push_back((*itr)->GetObjectGuid());
+                }
+
+                if (lFireBunnies.empty())
+                {
+                    m_creature->ForcedDespawn(5000);
+                    error_log("Missing DB spawns of Fire Bunnies (Horseman Village Event)");
+                    uiPhase = PHASE_END;
+                    return;
+                }
+
+                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
+                    return;
+                
+                for (GUIDList::iterator itr = lFireBunnies.begin(); itr != lFireBunnies.end(); ++itr)
+                    if (Creature* pFireBunny = m_creature->GetMap()->GetCreature(*itr))
+                        if (!pFireBunny->HasAura(SPELL_FLAMES_LARGE))
+                        {
+                            if (DoCastSpellIfCan(pFireBunny, SPELL_CONFLAGRATE) != CAST_OK)
+                            {
+                                float x,y,z;
+                                pFireBunny->GetPosition(x,y,z);
+                                pFireBunny->GetClosePoint(x,y,z,0,5,0);
+                                m_creature->GetMotionMaster()->MovePoint(0, x,y,z+15);
+                                break;
+                            }
+                        }
+            }
+            else
+                m_uiConflagrationProcTimer -= uiDiff;
+    }
+};
+
+CreatureAI* GetAI_npc_shade_of_horseman(Creature* pCreature)
+{
+    return new npc_shade_of_horsemanAI (pCreature);
+};
+
+
 void AddSC_npcs_special()
 {
-    Script* newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "npc_air_force_bots";
-    newscript->GetAI = &GetAI_npc_air_force_bots;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_air_force_bots";
+    pNewScript->GetAI = &GetAI_npc_air_force_bots;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_chicken_cluck";
-    newscript->GetAI = &GetAI_npc_chicken_cluck;
-    newscript->pQuestAcceptNPC =   &QuestAccept_npc_chicken_cluck;
-    newscript->pQuestRewardedNPC = &QuestRewarded_npc_chicken_cluck;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_chicken_cluck";
+    pNewScript->GetAI = &GetAI_npc_chicken_cluck;
+    pNewScript->pQuestAcceptNPC =   &QuestAccept_npc_chicken_cluck;
+    pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_chicken_cluck;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_dancing_flames";
-    newscript->GetAI = &GetAI_npc_dancing_flames;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dancing_flames";
+    pNewScript->GetAI = &GetAI_npc_dancing_flames;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_injured_patient";
-    newscript->GetAI = &GetAI_npc_injured_patient;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_injured_patient";
+    pNewScript->GetAI = &GetAI_npc_injured_patient;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_doctor";
-    newscript->GetAI = &GetAI_npc_doctor;
-    newscript->pQuestAcceptNPC = &QuestAccept_npc_doctor;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_doctor";
+    pNewScript->GetAI = &GetAI_npc_doctor;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_doctor;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_garments_of_quests";
-    newscript->GetAI = &GetAI_npc_garments_of_quests;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_garments_of_quests";
+    pNewScript->GetAI = &GetAI_npc_garments_of_quests;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_guardian";
-    newscript->GetAI = &GetAI_npc_guardian;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_guardian";
+    pNewScript->GetAI = &GetAI_npc_guardian;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_innkeeper";
-    newscript->pGossipHello = &GossipHello_npc_innkeeper;
-    newscript->pGossipSelect = &GossipSelect_npc_innkeeper;
-    newscript->RegisterSelf(false);                         // script and error report disabled, but script can be used for custom needs, adding ScriptName
+    pNewScript = new Script;
+    pNewScript->Name = "npc_innkeeper";
+    pNewScript->pGossipHello = &GossipHello_npc_innkeeper;
+    pNewScript->pGossipSelect = &GossipSelect_npc_innkeeper;
+    pNewScript->RegisterSelf(false);                         // script and error report disabled, but script can be used for custom needs, adding ScriptName
 
-    newscript = new Script;
-    newscript->Name = "npc_kingdom_of_dalaran_quests";
-    newscript->pGossipHello =  &GossipHello_npc_kingdom_of_dalaran_quests;
-    newscript->pGossipSelect = &GossipSelect_npc_kingdom_of_dalaran_quests;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_lunaclaw_spirit";
+    pNewScript->pGossipHello =  &GossipHello_npc_lunaclaw_spirit;
+    pNewScript->pGossipSelect = &GossipSelect_npc_lunaclaw_spirit;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_lunaclaw_spirit";
-    newscript->pGossipHello =  &GossipHello_npc_lunaclaw_spirit;
-    newscript->pGossipSelect = &GossipSelect_npc_lunaclaw_spirit;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_mount_vendor";
+    pNewScript->pGossipHello =  &GossipHello_npc_mount_vendor;
+    pNewScript->pGossipSelect = &GossipSelect_npc_mount_vendor;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_mount_vendor";
-    newscript->pGossipHello =  &GossipHello_npc_mount_vendor;
-    newscript->pGossipSelect = &GossipSelect_npc_mount_vendor;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_rogue_trainer";
+    pNewScript->pGossipHello =  &GossipHello_npc_rogue_trainer;
+    pNewScript->pGossipSelect = &GossipSelect_npc_rogue_trainer;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_rogue_trainer";
-    newscript->pGossipHello =  &GossipHello_npc_rogue_trainer;
-    newscript->pGossipSelect = &GossipSelect_npc_rogue_trainer;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_sayge";
+    pNewScript->pGossipHello = &GossipHello_npc_sayge;
+    pNewScript->pGossipSelect = &GossipSelect_npc_sayge;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_sayge";
-    newscript->pGossipHello = &GossipHello_npc_sayge;
-    newscript->pGossipSelect = &GossipSelect_npc_sayge;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_tabard_vendor";
+    pNewScript->pGossipHello =  &GossipHello_npc_tabard_vendor;
+    pNewScript->pGossipSelect = &GossipSelect_npc_tabard_vendor;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_tabard_vendor";
-    newscript->pGossipHello =  &GossipHello_npc_tabard_vendor;
-    newscript->pGossipSelect = &GossipSelect_npc_tabard_vendor;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_mirror_image";
+    pNewScript->GetAI = &GetAI_npc_mirror_image;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_locksmith";
-    newscript->pGossipHello =  &GossipHello_npc_locksmith;
-    newscript->pGossipSelect = &GossipSelect_npc_locksmith;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_snake_trap_serpents";
+    pNewScript->GetAI = &GetAI_npc_snake_trap_serpents;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_mirror_image";
-    newscript->GetAI = &GetAI_npc_mirror_image;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_runeblade";
+    pNewScript->GetAI = &GetAI_npc_rune_blade;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_snake_trap_serpents";
-    newscript->GetAI = &GetAI_npc_snake_trap_serpents;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_death_knight_gargoyle";
+    pNewScript->GetAI = &GetAI_npc_death_knight_gargoyle;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_runeblade";
-    newscript->GetAI = &GetAI_npc_rune_blade;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_training_dummy";
+    pNewScript->GetAI = &GetAI_npc_training_dummy;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_training_dummy";
-    newscript->GetAI = &GetAI_npc_training_dummy;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_risen_ally";
+    pNewScript->GetAI = &GetAI_npc_risen_ally;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_lightwell";
-    newscript->pGossipHello =  &GossipHello_npc_lightwell;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_explosive_decoy";
+    pNewScript->GetAI = &GetAI_npc_explosive_decoy;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_death_knight_gargoyle";
-    newscript->GetAI = &GetAI_npc_death_knight_gargoyle;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_eye_of_kilrogg";
+    pNewScript->GetAI = &GetAI_npc_eye_of_kilrogg;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_risen_ally";
-    newscript->GetAI = &GetAI_npc_risen_ally;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_horseman_fire_bunny";
+    pNewScript->GetAI = &GetAI_npc_horseman_fire_bunny;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_explosive_decoy";
-    newscript->GetAI = &GetAI_npc_explosive_decoy;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "npc_eye_of_kilrogg";
-    newscript->GetAI = &GetAI_npc_eye_of_kilrogg;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_shade_of_horseman";
+    pNewScript->GetAI = &GetAI_npc_shade_of_horseman;
+    pNewScript->RegisterSelf();
 }

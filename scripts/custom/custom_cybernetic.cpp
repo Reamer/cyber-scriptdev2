@@ -54,7 +54,7 @@ enum Integer
 
 struct MANGOS_DLL_DECL custom_cyberneticAI : public ScriptedAI
 {
-	custom_cyberneticAI(Creature *c) : ScriptedAI(c) {Reset();}
+    custom_cyberneticAI(Creature *c) : ScriptedAI(c) {Reset();}
 
 void Reset(){};
 void Aggro(Unit *who){};
@@ -62,50 +62,50 @@ void Aggro(Unit *who){};
 };
 bool GossipHello_custom_cybernetic(Player *player, Creature *_Creature)
 {
-	 player->ADD_GOSSIP_ITEM( 0,"Ich wuerde gerne etwas ueber den Server erfahren."     , GOSSIP_SENDER_MAIN, 1);
-	 player->ADD_GOSSIP_ITEM( 0,"Wie lautet nochmal die Internetadresse?"     , GOSSIP_SENDER_MAIN, 2);
-	 player->ADD_GOSSIP_ITEM( 0,"Wie kann ich einen GM erreichen?"     , GOSSIP_SENDER_MAIN, 3);
-	 player->ADD_GOSSIP_ITEM( 0,"Wie steht es mit den Serverregeln?"     , GOSSIP_SENDER_MAIN, 4);
-	 player->ADD_GOSSIP_ITEM( 0,"Wie kann ich den Server unterstuetzen?"     , GOSSIP_SENDER_MAIN, 5);
-	 player->ADD_GOSSIP_ITEM( 0,"Kannst du mich vielleicht hochleveln oder mir Geld geben?"     , GOSSIP_SENDER_MAIN, 6);
-	 player->PlayerTalkClass->SendGossipMenu(468000,_Creature->GetObjectGuid());
-	 return true;
+     player->ADD_GOSSIP_ITEM( 0,"Ich wuerde gerne etwas ueber den Server erfahren."     , GOSSIP_SENDER_MAIN, 1);
+     player->ADD_GOSSIP_ITEM( 0,"Wie lautet nochmal die Internetadresse?"     , GOSSIP_SENDER_MAIN, 2);
+     player->ADD_GOSSIP_ITEM( 0,"Wie kann ich einen GM erreichen?"     , GOSSIP_SENDER_MAIN, 3);
+     player->ADD_GOSSIP_ITEM( 0,"Wie steht es mit den Serverregeln?"     , GOSSIP_SENDER_MAIN, 4);
+     player->ADD_GOSSIP_ITEM( 0,"Wie kann ich den Server unterstuetzen?"     , GOSSIP_SENDER_MAIN, 5);
+     player->ADD_GOSSIP_ITEM( 0,"Kannst du mich vielleicht hochleveln oder mir Geld geben?"     , GOSSIP_SENDER_MAIN, 6);
+     player->PlayerTalkClass->SendGossipMenu(468000,_Creature->GetObjectGuid());
+     return true;
 }
 
 bool GossipSelect_custom_cybernetic(Player *player, Creature *_Creature, uint32 sender, uint32 action )
 {
-	switch(action)
-	{
-	    case 1:
-	        player->PlayerTalkClass->SendGossipMenu(468001,_Creature->GetObjectGuid());
-	        break;
+    switch(action)
+    {
+        case 1:
+            player->PlayerTalkClass->SendGossipMenu(468001,_Creature->GetObjectGuid());
+            break;
 
-	    case 2:
-	        player->PlayerTalkClass->SendGossipMenu(468002,_Creature->GetObjectGuid());
-	        break;
+        case 2:
+            player->PlayerTalkClass->SendGossipMenu(468002,_Creature->GetObjectGuid());
+            break;
 
-	    case 3:
-	        player->PlayerTalkClass->SendGossipMenu(468003,_Creature->GetObjectGuid());
-	        break;
+        case 3:
+            player->PlayerTalkClass->SendGossipMenu(468003,_Creature->GetObjectGuid());
+            break;
 
-	    case 4:
-	        player->PlayerTalkClass->SendGossipMenu(468004,_Creature->GetObjectGuid());
-	        break;
+        case 4:
+            player->PlayerTalkClass->SendGossipMenu(468004,_Creature->GetObjectGuid());
+            break;
 
-	    case 5:
-	        player->PlayerTalkClass->SendGossipMenu(468005,_Creature->GetObjectGuid());
-	        break;
+        case 5:
+            player->PlayerTalkClass->SendGossipMenu(468005,_Creature->GetObjectGuid());
+            break;
 
-	    case 6:
-	        player->PlayerTalkClass->SendGossipMenu(468006,_Creature->GetObjectGuid());
-	        break;
+        case 6:
+            player->PlayerTalkClass->SendGossipMenu(468006,_Creature->GetObjectGuid());
+            break;
 
-	    case 7:
+        case 7:
             player->PlayerTalkClass->SendGossipMenu(468007,_Creature->GetObjectGuid());
-	        break;
+            break;
 
-	}
-	return true;
+    }
+    return true;
 }
 
 CreatureAI* GetAI_custom_cybernetic(Creature *_Creature)
@@ -156,9 +156,9 @@ bool addItem(Player* pPlayer, uint32 anzahl, uint32 itemId)
 
 void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, uint32 action )
 {
-	switch(action)
-	{
-		case GOSSIP_ACTION_INFO_DEF:
+    switch(action)
+    {
+        case GOSSIP_ACTION_INFO_DEF:
         {
             QueryResult* result = strSD2Pquery("SELECT * FROM schnellstesdungeon WHERE AmLaufen = 1;");
             if (result)
@@ -168,30 +168,30 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
             }
             else
             {
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Auchenaikrypta", GOSSIP_SENDER_MAIN, AUCHENAIKRYPTA);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Managruft", GOSSIP_SENDER_MAIN, MANAGRUFT);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Schattenlabyrinth", GOSSIP_SENDER_MAIN, SCHATTENLABYRINTH);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Sethekkhallen", GOSSIP_SENDER_MAIN, SETHEKKHALLEN);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Der Tiefensumpf", GOSSIP_SENDER_MAIN, TIEFENSUMPF);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Dampfkammer", GOSSIP_SENDER_MAIN, DAMPFKAMMER);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Sklavenunterkuenfte", GOSSIP_SENDER_MAIN, SKLAVENUNTERKUENFTE);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stuerme: Die Arkatraz", GOSSIP_SENDER_MAIN, ARKATRAZ);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stuerme: Die Botanika", GOSSIP_SENDER_MAIN, BOTANIKA);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stuerme: Die Mechanar", GOSSIP_SENDER_MAIN, MECHANAR);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Hoellenfeuerzitadelle: Die Zerschmetterten Hallen", GOSSIP_SENDER_MAIN, ZERSCHMETTERTENHALLEN);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Terrasse der Magister", GOSSIP_SENDER_MAIN, TERRASSEDERMAGISTER);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Maraudon", GOSSIP_SENDER_MAIN, MARAUDON);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Scholomance", GOSSIP_SENDER_MAIN, SCHOLOMANCE);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Stratholme", GOSSIP_SENDER_MAIN, STRATHOLME);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Burg Utgarde: Burg Utgarde", GOSSIP_SENDER_MAIN, BURG_UTGARDE);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Azjol-Nerub", GOSSIP_SENDER_MAIN, AZJOL_NERUB);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Ahn'kahet: Das Alte Koenigreich", GOSSIP_SENDER_MAIN, ALTE_KOENIGREICH);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Nexus: Der Nexus", GOSSIP_SENDER_MAIN, NEXUS);
-				pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Feste Drak'Tharon", GOSSIP_SENDER_MAIN, DRAKTARON);
-				pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE,pCreature->GetObjectGuid());
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Auchenaikrypta", GOSSIP_SENDER_MAIN, AUCHENAIKRYPTA);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Managruft", GOSSIP_SENDER_MAIN, MANAGRUFT);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Schattenlabyrinth", GOSSIP_SENDER_MAIN, SCHATTENLABYRINTH);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Auchindoun: Sethekkhallen", GOSSIP_SENDER_MAIN, SETHEKKHALLEN);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Der Tiefensumpf", GOSSIP_SENDER_MAIN, TIEFENSUMPF);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Dampfkammer", GOSSIP_SENDER_MAIN, DAMPFKAMMER);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Echsenkessel: Die Sklavenunterkuenfte", GOSSIP_SENDER_MAIN, SKLAVENUNTERKUENFTE);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stuerme: Die Arkatraz", GOSSIP_SENDER_MAIN, ARKATRAZ);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stuerme: Die Botanika", GOSSIP_SENDER_MAIN, BOTANIKA);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Festung der Stuerme: Die Mechanar", GOSSIP_SENDER_MAIN, MECHANAR);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Hoellenfeuerzitadelle: Die Zerschmetterten Hallen", GOSSIP_SENDER_MAIN, ZERSCHMETTERTENHALLEN);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Terrasse der Magister", GOSSIP_SENDER_MAIN, TERRASSEDERMAGISTER);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Maraudon", GOSSIP_SENDER_MAIN, MARAUDON);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Scholomance", GOSSIP_SENDER_MAIN, SCHOLOMANCE);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Stratholme", GOSSIP_SENDER_MAIN, STRATHOLME);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Burg Utgarde: Burg Utgarde", GOSSIP_SENDER_MAIN, BURG_UTGARDE);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Azjol-Nerub", GOSSIP_SENDER_MAIN, AZJOL_NERUB);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Azjol-Nerub: Ahn'kahet: Das Alte Koenigreich", GOSSIP_SENDER_MAIN, ALTE_KOENIGREICH);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Der Nexus: Der Nexus", GOSSIP_SENDER_MAIN, NEXUS);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Feste Drak'Tharon", GOSSIP_SENDER_MAIN, DRAKTARON);
+                pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE,pCreature->GetObjectGuid());
             }
             delete result;
-			break;
+            break;
         }
         case RESET:
         {
@@ -268,12 +268,12 @@ void SendDefaultMenu_custom_cybernetic_2(Player *pPlayer, Creature *pCreature, u
         case DRAKTARON:
         {
             pPlayer->CLOSE_GOSSIP_MENU();
-		    SetFastDungeon(action);
+            SetFastDungeon(action);
             char query[MAX_QUERY_LEN];
             sprintf(query, "UPDATE schnellstesdungeon SET Startzeit = '"UI64FMTD"', Endzeit = '"UI64FMTD"', GruppeEinsFertig = 0, AmLaufen = 1 WHERE Instanz = %u;", uint64(time(NULL)), (uint64(time(NULL)) + 4*HOUR), action);
             strSD2Pquery(query);
             break;
-	    }
+        }
     }
 }
 
@@ -290,7 +290,7 @@ bool GossipSelect_custum_cybernetic_2(Player *pPlayer, Creature *pCreature, uint
 
 bool GossipHello_custum_cybernetic_3(Player* pPlayer, Creature* pCreature)
 {
-    
+
     pPlayer->PrepareGossipMenu(pCreature, pCreature->GetCreatureInfo()->GossipMenuId);
     pPlayer->SendPreparedGossip(pCreature);
     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,"Ich will meinen Super Tollen Ring haben.", GOSSIP_SENDER_MAIN, 555);
@@ -322,10 +322,10 @@ void AddSC_custom_cybernetic()
 
     newscript = new Script;
     newscript->Name = "custom_cybernetic";
-	newscript->GetAI = &GetAI_custom_cybernetic;
+    newscript->GetAI = &GetAI_custom_cybernetic;
     newscript->pGossipHello =  &GossipHello_custom_cybernetic;
     newscript->pGossipSelect = &GossipSelect_custom_cybernetic;
-	newscript->RegisterSelf();
+    newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "custom_cybernetic_2";
