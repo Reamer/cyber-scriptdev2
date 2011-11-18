@@ -60,7 +60,7 @@ struct MANGOS_DLL_DECL boss_amnennar_the_coldbringerAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
     }
 
-    void KilledUnit()
+    void KilledUnit(Unit* pVictim)
     {
         DoScriptText(SAY_KILL, m_creature);
     }
@@ -121,9 +121,10 @@ CreatureAI* GetAI_boss_amnennar_the_coldbringer(Creature* pCreature)
 
 void AddSC_boss_amnennar_the_coldbringer()
 {
-    Script *newscript;
-    newscript = new Script;
-    newscript->Name = "boss_amnennar_the_coldbringer";
-    newscript->GetAI = &GetAI_boss_amnennar_the_coldbringer;
-    newscript->RegisterSelf();
+    Script* pNewScript;
+
+    pNewScript = new Script;
+    pNewScript->Name = "boss_amnennar_the_coldbringer";
+    pNewScript->GetAI = &GetAI_boss_amnennar_the_coldbringer;
+    pNewScript->RegisterSelf();
 }

@@ -59,11 +59,6 @@ struct MANGOS_DLL_DECL npc_cairne_bloodhoofAI : public ScriptedAI
         m_uiWarStompTimer = 25000;
     }
 
-    void Aggro(Unit* pWho)
-    {
-        m_creature->CallForHelp(100);
-    }
-
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -71,41 +66,54 @@ struct MANGOS_DLL_DECL npc_cairne_bloodhoofAI : public ScriptedAI
 
         if (BerserkerCharge_Timer < uiDiff)
         {
-            Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0);
-            if (target)
-                DoCastSpellIfCan(target,SPELL_BERSERKER_CHARGE);
-            BerserkerCharge_Timer = 25000;
-        }else BerserkerCharge_Timer -= uiDiff;
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0))
+            {
+                if (DoCastSpellIfCan(pTarget,SPELL_BERSERKER_CHARGE) == CAST_OK)
+                    BerserkerCharge_Timer = 25000;
+            }
+        }
+        else
+            BerserkerCharge_Timer -= uiDiff;
 
         if (Uppercut_Timer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_UPPERCUT);
-            Uppercut_Timer = 20000;
-        }else Uppercut_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature->getVictim(),SPELL_UPPERCUT) == CAST_OK)
+                Uppercut_Timer = 20000;
+        }
+        else
+            Uppercut_Timer -= uiDiff;
 
         if (Thunderclap_Timer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_THUNDERCLAP);
-            Thunderclap_Timer = 15000;
-        }else Thunderclap_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature->getVictim(),SPELL_THUNDERCLAP) == CAST_OK)
+                Thunderclap_Timer = 15000;
+        }
+        else
+            Thunderclap_Timer -= uiDiff;
 
         if (MortalStrike_Timer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_MORTAL_STRIKE);
-            MortalStrike_Timer = 15000;
-        }else MortalStrike_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature->getVictim(),SPELL_MORTAL_STRIKE) == CAST_OK)
+                MortalStrike_Timer = 15000;
+        }
+        else
+            MortalStrike_Timer -= uiDiff;
 
         if (Cleave_Timer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(),SPELL_CLEAVE);
-            Cleave_Timer = 7000;
-        }else Cleave_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature->getVictim(),SPELL_CLEAVE) == CAST_OK)
+                Cleave_Timer = 7000;
+        }
+        else
+            Cleave_Timer -= uiDiff;
 
         if (m_uiWarStompTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature, SPELL_WAR_STOMP);
-            m_uiWarStompTimer = urand(20000, 25000);
-        }else m_uiWarStompTimer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature, SPELL_WAR_STOMP) == CAST_OK)
+                m_uiWarStompTimer = urand(20000, 25000);
+        }
+        else
+            m_uiWarStompTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
@@ -140,12 +148,12 @@ bool GossipSelect_npc_cairne_bloodhoof(Player* pPlayer, Creature* pCreature, uin
 
 void AddSC_thunder_bluff()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "npc_cairne_bloodhoof";
-    newscript->GetAI = &GetAI_npc_cairne_bloodhoof;
-    newscript->pGossipHello = &GossipHello_npc_cairne_bloodhoof;
-    newscript->pGossipSelect = &GossipSelect_npc_cairne_bloodhoof;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_cairne_bloodhoof";
+    pNewScript->GetAI = &GetAI_npc_cairne_bloodhoof;
+    pNewScript->pGossipHello = &GossipHello_npc_cairne_bloodhoof;
+    pNewScript->pGossipSelect = &GossipSelect_npc_cairne_bloodhoof;
+    pNewScript->RegisterSelf();
 }
