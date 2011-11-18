@@ -20,8 +20,8 @@ enum EncounterState
 #define OUT_SAVE_INST_DATA             debug_log("SD2: Saving Instance Data for Instance %s (Map %d, Instance Id %d)", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 #define OUT_SAVE_INST_DATA_COMPLETE    debug_log("SD2: Saving Instance Data for Instance %s (Map %d, Instance Id %d) completed.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 #define OUT_LOAD_INST_DATA(a)          debug_log("SD2: Loading Instance Data for Instance %s (Map %d, Instance Id %d). Input is '%s'", instance->GetMapName(), instance->GetId(), instance->GetInstanceId(), a)
-#define OUT_LOAD_INST_DATA_COMPLETE    debug_log("SD2: Instance Data Load for Instance %s (Map %d, Instance Id: %d) is complete.",instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
-#define OUT_LOAD_INST_DATA_FAIL        error_log("SD2: Unable to load Instance Data for Instance %s (Map %d, Instance Id: %d).",instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
+#define OUT_LOAD_INST_DATA_COMPLETE    debug_log("SD2: Instance Data Load for Instance %s (Map %d, Instance Id: %d) is complete.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
+#define OUT_LOAD_INST_DATA_FAIL        error_log("SD2: Unable to load Instance Data for Instance %s (Map %d, Instance Id: %d).", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 
 class MANGOS_DLL_DECL ScriptedInstance : public InstanceData
 {
@@ -69,6 +69,13 @@ class MANGOS_DLL_DECL ScriptedInstance : public InstanceData
         EntryGuidMap m_mNpcEntryGuidStore;                  ///< Store unique NPC-Guids by entry
 };
 
+// Class for world maps (May need additional zone-wide functions later on)
+class MANGOS_DLL_DECL ScriptedMap : public ScriptedInstance
+{
+    public:
+        ScriptedMap(Map* pMap) : ScriptedInstance(pMap) {}
+};
+
 /// A static const array of this structure must be handled to DialogueHelper
 struct DialogueEntry
 {
@@ -96,7 +103,7 @@ class DialogueHelper
         // The array MUST be terminated by {0,0,0,0,0}
         DialogueHelper(DialogueEntryTwoSide const* aDialogueTwoSide);
 
-        /// Function that MUST be called
+        /// Function to initialize the dialogue helper for instances. If not used with instances, GetSpeakerByEntry MUST be overwritten to obtain the speakers
         void InitializeDialogueHelper(ScriptedInstance* pInstance, bool bCanSimulateText = false) { m_pInstance = pInstance; m_bCanSimulate = bCanSimulateText; }
         /// Set if take first entries or second entries
         void SetDialogueSide(bool bIsFirstSide) { m_bIsFirstSide = bIsFirstSide; }
@@ -106,7 +113,10 @@ class DialogueHelper
         void DialogueUpdate(uint32 uiDiff);
 
     protected:
+        /// Will be called when a dialogue step was done
         virtual void JustDidDialogueStep(int32 iEntry) {}
+        /// Will be called to get a speaker, MUST be implemented if not used in instances
+        virtual Creature* GetSpeakerByEntry(uint32 uiEntry) { return NULL; }
 
     private:
         void DoNextDialogueStep();
