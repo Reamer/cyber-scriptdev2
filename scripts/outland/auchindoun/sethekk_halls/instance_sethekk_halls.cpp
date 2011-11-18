@@ -46,7 +46,7 @@ void instance_sethekk_halls::OnObjectCreate(GameObject* pGo)
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT | GO_FLAG_INTERACT_COND);
             break;
         default:
-            return;            
+            return;
     }
     m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
