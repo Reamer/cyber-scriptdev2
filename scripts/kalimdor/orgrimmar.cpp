@@ -17,52 +17,17 @@
 /* ScriptData
 SDName: Orgrimmar
 SD%Complete: 100
-SDComment: Quest support: 2460, 5727, 6566
+SDComment: Quest support: 2460, 6566
 SDCategory: Orgrimmar
 EndScriptData */
 
 /* ContentData
-npc_neeru_fireblade     npc_text + gossip options text missing
 npc_shenthul
 npc_thrall_warchief
 boss_voljin
 EndContentData */
 
 #include "precompiled.h"
-
-/*######
-## npc_neeru_fireblade
-######*/
-
-#define QUEST_5727  5727
-
-bool GossipHello_npc_neeru_fireblade(Player* pPlayer, Creature* pCreature)
-{
-    if (pCreature->isQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
-
-    if (pPlayer->GetQuestStatus(QUEST_5727) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "You may speak frankly, Neeru...", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-
-    pPlayer->SEND_GOSSIP_MENU(4513, pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_neeru_fireblade(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
-{
-    switch(uiAction)
-    {
-        case GOSSIP_ACTION_INFO_DEF+1:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[PH] ...", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-            pPlayer->SEND_GOSSIP_MENU(4513, pCreature->GetObjectGuid());
-            break;
-        case GOSSIP_ACTION_INFO_DEF+2:
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pPlayer->AreaExploredOrEventHappens(QUEST_5727);
-            break;
-    }
-    return true;
-}
 
 /*######
 ## npc_shenthul
@@ -338,32 +303,25 @@ CreatureAI* GetAI_boss_voljin(Creature* pCreature)
 {
     return new boss_voljinAI(pCreature);
 }
-
 void AddSC_orgrimmar()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "npc_neeru_fireblade";
-    newscript->pGossipHello =  &GossipHello_npc_neeru_fireblade;
-    newscript->pGossipSelect = &GossipSelect_npc_neeru_fireblade;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_shenthul";
+    pNewScript->GetAI = &GetAI_npc_shenthul;
+    pNewScript->pQuestAcceptNPC =  &QuestAccept_npc_shenthul;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_shenthul";
-    newscript->GetAI = &GetAI_npc_shenthul;
-    newscript->pQuestAcceptNPC =  &QuestAccept_npc_shenthul;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_thrall_warchief";
+    pNewScript->GetAI = &GetAI_npc_thrall_warchief;
+    pNewScript->pGossipHello =  &GossipHello_npc_thrall_warchief;
+    pNewScript->pGossipSelect = &GossipSelect_npc_thrall_warchief;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_thrall_warchief";
-    newscript->GetAI = &GetAI_npc_thrall_warchief;
-    newscript->pGossipHello =  &GossipHello_npc_thrall_warchief;
-    newscript->pGossipSelect = &GossipSelect_npc_thrall_warchief;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "boss_voljin";
-    newscript->GetAI = &GetAI_boss_voljin;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_voljin";
+    pNewScript->GetAI = &GetAI_boss_voljin;
+    pNewScript->RegisterSelf();
 }

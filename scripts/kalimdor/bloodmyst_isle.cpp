@@ -33,7 +33,7 @@ EndContentData */
 ######*/
 
 //possible creatures to be spawned
-const uint32 possibleSpawns[32] = {17322, 17661, 17496, 17522, 17340, 17352, 17333, 17524, 17654, 17348, 17339, 17345, 17359, 17353, 17336, 17550, 17330, 17701, 17321, 17680, 17325, 17320, 17683, 17342, 17715, 17334, 17341, 17338, 17337, 17346, 17344, 17327};
+const uint32 possibleSpawns[31] = {17322, 17661, 17496, 17522, 17340, 17352, 17333, 17524, 17654, 17348, 17339, 17345, 17359, 17353, 17336, 17550, 17330, 17701, 17321, 17325, 17320, 17683, 17342, 17715, 17334, 17341, 17338, 17337, 17346, 17344, 17327};
 
 struct MANGOS_DLL_DECL mob_webbed_creatureAI : public ScriptedAI
 {
@@ -56,7 +56,7 @@ struct MANGOS_DLL_DECL mob_webbed_creatureAI : public ScriptedAI
                 break;
             case 1:
             case 2:
-                spawnCreatureID = possibleSpawns[urand(0, 31)];
+                spawnCreatureID = possibleSpawns[urand(0, 30)];
                 break;
         }
 
@@ -122,16 +122,16 @@ bool GossipSelect_npc_captured_sunhawk_agent(Player* pPlayer, Creature* pCreatur
 
 void AddSC_bloodmyst_isle()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "mob_webbed_creature";
-    newscript->GetAI = &GetAI_mob_webbed_creature;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_webbed_creature";
+    pNewScript->GetAI = &GetAI_mob_webbed_creature;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_captured_sunhawk_agent";
-    newscript->pGossipHello =  &GossipHello_npc_captured_sunhawk_agent;
-    newscript->pGossipSelect = &GossipSelect_npc_captured_sunhawk_agent;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_captured_sunhawk_agent";
+    pNewScript->pGossipHello =  &GossipHello_npc_captured_sunhawk_agent;
+    pNewScript->pGossipSelect = &GossipSelect_npc_captured_sunhawk_agent;
+    pNewScript->RegisterSelf();
 }

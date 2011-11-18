@@ -186,8 +186,6 @@ struct MANGOS_DLL_DECL boss_twinemperorsAI : public ScriptedAI
         #define HEAL_BROTHER_AMOUNT 30000.0f
         uint32 largerAmount = (uint32)((HEAL_BROTHER_AMOUNT * mult) - HEAL_BROTHER_AMOUNT);
 
-        uint32 myh = m_creature->GetHealth();
-        uint32 hish = pOtherBoss->GetHealth();
         if (mytotal > histotal)
         {
             uint32 h = m_creature->GetHealth()+largerAmount;
@@ -649,15 +647,15 @@ CreatureAI* GetAI_boss_veklor(Creature* pCreature)
 
 void AddSC_boss_twinemperors()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_veknilash";
-    newscript->GetAI = &GetAI_boss_veknilash;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_veknilash";
+    pNewScript->GetAI = &GetAI_boss_veknilash;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_veklor";
-    newscript->GetAI = &GetAI_boss_veklor;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_veklor";
+    pNewScript->GetAI = &GetAI_boss_veklor;
+    pNewScript->RegisterSelf();
 }

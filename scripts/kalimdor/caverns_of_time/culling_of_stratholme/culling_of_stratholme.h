@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2011 MangosR2
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,9 +18,8 @@
 
 /* ScriptData
 SDName: instance_culling_of_stratholme
-SD%Complete: ?%
-SDComment: by MaxXx2021
-SDCategory: Culling of Stratholme
+SD%Complete: %
+SDComment:
 EndScriptData */
 
 #ifndef DEF_CULLING_OF_STRATHOLME_H
@@ -39,33 +39,60 @@ enum Data
 
     DATA_TEMPSUMMON      = 10,
 
+///-> First quest stuff for CoS
     QUEST_DISPELLING_ILLUSIONS  = 13149,
-    QUEST_A_ROYAL_ESCORT        = 13151,
-    ITEM_ARCANE_DISRUPTOR       = 37888,
 
-    NPC_CHROMI01            = 26527,
-    NPC_CHROMI02            = 27915,
+    NPC_CRATE_KC_BUNNY          = 30996,
+    NPC_CHROMI01                = 26527,
+    NPC_MIKE                    = 30571,
+    NPC_MAL_CORICS              = 31017,
+    NPC_GRIAN_STONE             = 30561,
+    NPC_JAMES                   = 30553,
+    NPC_FRAS_FRASIABI           = 30552,
+    NPC_FORRESTER               = 30551,
+    NPC_ROGER                   = 27903,
+    NPC_MORIGAN                 = 27877,
+    NPC_PERELLI                 = 27876,
+    NPC_JENA                    = 27885,
+    NPC_MARTHA                  = 27884,
+    NPC_MALCOLM                 = 27891,
+    NPC_DOG                     = 27892,
+    NPC_BARTLEBY                = 27907,
+
+    SPELL_ARCANE_DISRUPTION     = 49590,
+    SPELL_CRATES_KILL_CREDIT    = 58109,
+
+    ITEM_ARCANE_DISRUPTOR       = 37888,
+    GO_CRATE_LIGHT              = 190117,
+
+    WORLD_STATE_COS_CRATE_ON    = 3479,
+    WORLD_STATE_COS_CRATE_COUNT = 3480,
+///-> end
+
+///-> Second Quest stuff
+    QUEST_A_ROYAL_ESCORT    = 13151,
+
+    NPC_MARINE              = 27745,   ///-> used to update entries
+    NPC_PRIEST              = 27747,   ///-> used to update entries
+    NPC_MARINE_1            = 70000,
+    NPC_MARINE_2            = 70001,
+    NPC_MARINE_3            = 70002,
+    NPC_MARINE_4            = 70003,
+    NPC_PRIEST_1            = 70004,
+    NPC_PRIEST_2            = 70005,
     NPC_ARTHAS              = 26499,
     NPC_JAINA               = 26497,
     NPC_UTHER               = 26528,
     NPC_KNIGHT              = 28612,
-    NPC_MIKE                = 30571,
-    NPC_MAL_CORICS          = 31017,
-    NPC_GRIAN_STONE         = 30561,
-    NPC_JAMES               = 30553,
-    NPC_FRAS_FRASIABI       = 30552,
-    NPC_FORRESTER           = 30551,
-    NPC_ROGER               = 27903,
-    NPC_CRATE               = 30996,
-    NPC_MORIGAN             = 27877,
-    NPC_PERELLI             = 27876,
-    NPC_JENA                = 27885,
-    NPC_MARTHA              = 27884,
-    NPC_MALCOLM             = 27891,
-    NPC_DOG                 = 27892,
-    NPC_BARTLEBY            = 27907,
-    NPC_MARINE              = 27745,
-    NPC_PRIEST              = 27747,
+    NPC_CHROMI02            = 27915,
+    NPC_CITY                = 28167,
+    NPC_CRAZYMAN            = 28169,
+    NPC_INVIS_STALKER       = 20562,
+    WORLD_STATE_COS_WAVE_COUNT    = 3504,
+
+///-> end
+
+    NPC_CHROMI03            = 30997,
 
     NPC_INFINITE_ADVERSARY  = 27742,
     NPC_INFINITE_HUNTER     = 27743,
@@ -75,7 +102,7 @@ enum Data
     NPC_ZOMBIE              = 27737,
     NPC_GHOUL               = 28249,
     NPC_NECROMANCER         = 28200,
-    NPC_STALKER             = 28199,
+    NPC_STALKER             = 28199,  ///->??? might be typo for invis_stalker
     NPC_FIEND               = 27734,
     NPC_GOLEM               = 28201,
     NPC_EGHOUL              = 27729,
@@ -85,10 +112,8 @@ enum Data
     NPC_SALRAMM             = 26530,
     NPC_EPOCH               = 26532,
     NPC_MALGANIS            = 26533,
-    NPC_CITY                = 28167,
     NPC_INFINITE_CORRUPTOR  = 32273,
 
-    GO_CRATE_LIGHT         = 190117,
     GO_SHKAF_GATE          = 188686,
     GO_MALGANIS_GATE1      = 187711,
     GO_MALGANIS_GATE2      = 187723,
@@ -99,9 +124,17 @@ enum Data
 
     WORLD_STATE_COS_TIME_ON       = 3932,
     WORLD_STATE_COS_TIME_COUNT    = 3931,
-    WORLD_STATE_COS_WAVE_COUNT    = 3504,
-    WORLD_STATE_COS_CRATE_ON      = 3479,
-    WORLD_STATE_COS_CRATE_COUNT   = 3480,
+
+    NPC_MAGISTRATE_BARTHILAS        = 30994,
+    NPC_STEPHANIE_SINDREE           = 31019,
+    NPC_LEEKA_TURNER                = 31027,
+    NPC_SOPHIE_AAREN                = 31021,
+    NPC_ROBERT_PIERCE               = 31025,
+    NPC_GEORGE_GOODMAN              = 31022,
+
+    NPC_EMERY_NEILL                 = 30570,
+    NPC_EDWARD_ORRICK               = 31018,
+    NPC_OLIVIA_ZENITH               = 31020,
 
     RIGHT               = 1,
     LEFT                = 2
