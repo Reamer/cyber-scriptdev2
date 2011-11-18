@@ -19,8 +19,8 @@ enum
     TYPE_COUNCIL                    = 7,
     TYPE_ILLIDAN                    = 8,
 
-    NPC_WARLORD_NAJENTUS            = 22887,
-    NPC_SUPREMUS                    = 22898,
+    // NPC_WARLORD_NAJENTUS         = 22887,
+    // NPC_SUPREMUS                 = 22898,
     NPC_SHADE_OF_AKAMA              = 22841,
     NPC_AKAMA_SHADE                 = 22990,
     NPC_ILLIDARI_COUNCIL            = 23426,

@@ -209,6 +209,7 @@ struct MANGOS_DLL_DECL boss_shade_of_akamaAI : public ScriptedAI
                 pSorcerer->SetWalk(false);
                 pSorcerer->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
                 pSorcerer->SetTargetGuid(m_creature->GetObjectGuid());
+                pSorcerer->setFaction(14);
 
                 m_lSorcerersGUIDList.push_back(pSorcerer->GetObjectGuid());
 
@@ -582,6 +583,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI
 
                         pBroken->GetMotionMaster()->MovePoint(0, wx, wy, wz);
                         pBroken->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        pBroken->setFaction(35);
 
                         m_lBrokenGUIDList.push_back(pBroken->GetObjectGuid());
                     }
@@ -861,26 +863,27 @@ CreatureAI* GetAI_mob_ashtongue_sorcerer(Creature* pCreature)
 
 void AddSC_boss_shade_of_akama()
 {
-    Script *newscript;
-    newscript = new Script;
-    newscript->Name = "boss_shade_of_akama";
-    newscript->GetAI = &GetAI_boss_shade_of_akama;
-    newscript->RegisterSelf();
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "npc_akama_shade";
-    newscript->GetAI = &GetAI_npc_akama_shade;
-    newscript->pGossipHello = &GossipHello_npc_akama;
-    newscript->pGossipSelect = &GossipSelect_npc_akama;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_shade_of_akama";
+    pNewScript->GetAI = &GetAI_boss_shade_of_akama;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_ashtongue_channeler";
-    newscript->GetAI = &GetAI_mob_ashtongue_channeler;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_akama_shade";
+    pNewScript->GetAI = &GetAI_npc_akama_shade;
+    pNewScript->pGossipHello = &GossipHello_npc_akama;
+    pNewScript->pGossipSelect = &GossipSelect_npc_akama;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_ashtongue_sorcerer";
-    newscript->GetAI = &GetAI_mob_ashtongue_sorcerer;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_ashtongue_channeler";
+    pNewScript->GetAI = &GetAI_mob_ashtongue_channeler;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "mob_ashtongue_sorcerer";
+    pNewScript->GetAI = &GetAI_mob_ashtongue_sorcerer;
+    pNewScript->RegisterSelf();
 }

@@ -24,7 +24,10 @@ EndScriptData */
 #include "precompiled.h"
 #include "shattered_halls.h"
 
-instance_shattered_halls::instance_shattered_halls(Map* pMap) : ScriptedInstance(pMap)
+instance_shattered_halls::instance_shattered_halls(Map* pMap) : ScriptedInstance(pMap),
+    m_uiExecutionTimer(55*MINUTE*IN_MILLISECONDS),
+    m_uiTeam(0),
+    m_uiExecutionStage(0)
 {
     Initialize();
 }
@@ -32,6 +35,20 @@ instance_shattered_halls::instance_shattered_halls(Map* pMap) : ScriptedInstance
 void instance_shattered_halls::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+}
+
+void instance_shattered_halls::OnPlayerEnter(Player* pPlayer)
+{
+    // Only on heroic
+    if (instance->IsRegularDifficulty() || m_uiTeam)
+        return;
+
+     m_uiTeam = pPlayer->GetTeam();
+
+     if (m_uiTeam == ALLIANCE)
+        pPlayer->SummonCreature(aSoldiersLocs[1].m_uiAllianceEntry, aSoldiersLocs[1].m_fX, aSoldiersLocs[1].m_fY, aSoldiersLocs[1].m_fZ, aSoldiersLocs[1].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+     else
+         pPlayer->SummonCreature(aSoldiersLocs[0].m_uiHordeEntry, aSoldiersLocs[0].m_fX, aSoldiersLocs[0].m_fY, aSoldiersLocs[0].m_fZ, aSoldiersLocs[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
 }
 
 void instance_shattered_halls::OnObjectCreate(GameObject* pGo)
@@ -42,7 +59,7 @@ void instance_shattered_halls::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_NETHEKURSE] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-        case GO_NETHERKURSE_ENTER_DOOR:
+        case GO_NETHEKURSE_ENTER_DOOR:
             if (m_auiEncounter[TYPE_NETHEKURSE] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
@@ -56,17 +73,17 @@ void instance_shattered_halls::OnObjectCreate(GameObject* pGo)
 
 void instance_shattered_halls::OnCreatureCreate(Creature* pCreature)
 {
-    switch(pCreature->GetEntry())
+    switch (pCreature->GetEntry())
     {
         case NPC_NETHEKURSE:
-        case NPC_DRISELLA:
-        case NPC_RANDY_WHIZZLESPROCKET:
-        case NPC_SCOUT_ORGARR:
-        case NPC_KORAG_PROUDMANE:
-        case NPC_CAPTAINBONESHATTER:
-        case NPC_PRIVATE_JACINT:
-        case NPC_RIFLEMAN_BROWNBEARD:
-        case NPC_CAPTAIN_ALINA:
+        case NPC_KARGATH_BLADEFIST:
+        case NPC_EXECUTIONER:
+        case NPC_SOLDIER_ALLIANCE_2:
+        case NPC_SOLDIER_ALLIANCE_3:
+        case NPC_OFFICER_ALLIANCE:
+        case NPC_SOLDIER_HORDE_2:
+        case NPC_SOLDIER_HORDE_3:
+        case NPC_OFFICER_HORDE:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
@@ -79,13 +96,47 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
         case TYPE_NETHEKURSE:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
+            {
                 DoUseDoorOrButton(GO_NETHEKURSE_DOOR);
+                DoUseDoorOrButton(GO_NETHEKURSE_ENTER_DOOR);
+            }
             break;
         case TYPE_OMROGG:
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_BLADEFIST:
             m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                // Make executioner attackable only after the final boss is dead
+                if (Creature* pExecutioner = GetSingleCreatureFromStorage(NPC_EXECUTIONER, true))
+                    pExecutioner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            }
+            break;
+        case TYPE_EXECUTION:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == IN_PROGRESS && !GetSingleCreatureFromStorage(NPC_EXECUTIONER, true))
+            {
+                if (Player* pPlayer = GetPlayerInMap())
+                {
+                    // summon the 3 npcs for execution
+                    for (uint8 i = 2; i < 5; ++i)
+                        pPlayer->SummonCreature(m_uiTeam == ALLIANCE ? aSoldiersLocs[i].m_uiAllianceEntry : aSoldiersLocs[i].m_uiHordeEntry, aSoldiersLocs[i].m_fX, aSoldiersLocs[i].m_fY, aSoldiersLocs[i].m_fZ, aSoldiersLocs[i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+
+                    // Summon the executioner for 80 min; ToDo: set the flags in DB
+                    if (Creature* pExecutioner = pPlayer->SummonCreature(NPC_EXECUTIONER, afExecutionerLoc[0], afExecutionerLoc[1], afExecutionerLoc[2], afExecutionerLoc[3], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 80*MINUTE*IN_MILLISECONDS, true))
+                        pExecutioner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+
+                    // cast the execution spell
+                    DoCastGroupDebuff(SPELL_KARGATH_EXECUTIONER_1);
+                }
+            }
+            if (uiData == DONE)
+            {
+                // Allow playes to complete the quest only after the executioner is dead
+                if (Creature* pOfficer = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_OFFICER_ALLIANCE : NPC_OFFICER_HORDE))
+                    pOfficer->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            }
             break;
     }
 
@@ -95,7 +146,7 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
 
         std::ostringstream saveStream;
 
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2];
+        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
         m_strInstData = saveStream.str();
 
         SaveToDB();
@@ -114,11 +165,13 @@ void instance_shattered_halls::Load(const char* chrIn)
     OUT_LOAD_INST_DATA(chrIn);
 
     std::istringstream loadStream(chrIn);
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
+    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
 
     for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    {
         if (m_auiEncounter[i] == IN_PROGRESS)
             m_auiEncounter[i] = NOT_STARTED;
+    }
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }
@@ -131,85 +184,110 @@ uint32 instance_shattered_halls::GetData(uint32 uiType)
     return 0;
 }
 
+void instance_shattered_halls::OnCreatureDeath(Creature* pCreature)
+{
+    if (pCreature->GetEntry() == NPC_EXECUTIONER)
+        SetData(TYPE_EXECUTION, DONE);
+}
+
+void instance_shattered_halls::OnCreatureEnterCombat(Creature* pCreature)
+{
+    // Set data to special in order to pause the event timer
+    // This is according to the blizz comments which say that it is possible to complete the event if you engage the npc while you have only a few seconds left
+    if (pCreature->GetEntry() == NPC_EXECUTIONER)
+        SetData(TYPE_EXECUTION, SPECIAL);
+}
+
+void instance_shattered_halls::OnCreatureEvade(Creature* pCreature)
+{
+    // If npc evades continue the counting
+    if (pCreature->GetEntry() == NPC_EXECUTIONER)
+        SetData(TYPE_EXECUTION, IN_PROGRESS);
+}
+
+void instance_shattered_halls::Update(uint32 uiDiff)
+{
+    if (m_auiEncounter[TYPE_EXECUTION] != IN_PROGRESS)
+        return;
+
+    if (m_uiExecutionTimer < uiDiff)
+    {
+        switch(m_uiExecutionStage)
+        {
+            case 0:
+                // Kill the officer
+                if (Creature* pSoldier = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_OFFICER_ALLIANCE : NPC_OFFICER_HORDE))
+                    pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+
+                // Make Kargath yell
+                DoOrSimulateScriptTextForThisInstance(m_uiTeam == ALLIANCE ? SAY_KARGATH_EXECUTE_ALLY : SAY_KARGATH_EXECUTE_HORDE, NPC_KARGATH_BLADEFIST);
+
+                // Set timer for the next execution
+                DoCastGroupDebuff(SPELL_KARGATH_EXECUTIONER_2);
+                m_uiExecutionTimer = 10*MINUTE*IN_MILLISECONDS;
+                break;
+            case 1:
+                if (Creature* pSoldier = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_SOLDIER_ALLIANCE_2 : NPC_SOLDIER_HORDE_2))
+                    pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+
+                DoCastGroupDebuff(SPELL_KARGATH_EXECUTIONER_3);
+                m_uiExecutionTimer = 15*MINUTE*IN_MILLISECONDS;
+                break;
+            case 2:
+                if (Creature* pSoldier = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_SOLDIER_ALLIANCE_3 : NPC_SOLDIER_HORDE_3))
+                    pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+
+                SetData(TYPE_EXECUTION, FAIL);
+                m_uiExecutionTimer = 0;
+                break;
+        }
+        ++m_uiExecutionStage;
+    }
+    else
+        m_uiExecutionTimer -= uiDiff;
+}
+
+// Add debuff to all players in the instance
+void instance_shattered_halls::DoCastGroupDebuff(uint32 uiSpellId)
+{
+    Map::PlayerList const& lPlayers = instance->GetPlayers();
+
+    for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+    {
+        Player* pPlayer = itr->getSource();
+        if (pPlayer && !pPlayer->HasAura(uiSpellId))
+            pPlayer->CastSpell(pPlayer, uiSpellId, true);
+    }
+}
+
 InstanceData* GetInstanceData_instance_shattered_halls(Map* pMap)
 {
     return new instance_shattered_halls(pMap);
 }
 
-enum
-{
-    QUEST_IMPRISONED_IN_THE_CITADEL_A   = 9524,
-    QUEST_IMPRISONED_IN_THE_CITADEL_H   = 9525,
-
-    AREATRIGGER_ENTER_1                 = 4183,
-    AREATRIGGER_ENTER_2                 = 4182,
-    AREATRIGGER_AFTER_NETHEKURSE        = 4524,
-
-    SPELL_KARGATHS_EXECUTIONER_1        = 39288, //55min
-    SPELL_KARGATHS_EXECUTIONER_2        = 39289, //10min
-    SPELL_KARGATHS_EXECUTIONER_3        = 39290, //15min
-};
-
 bool AreaTrigger_at_shattered_halls(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (instance_shattered_halls* pInstance = (instance_shattered_halls*)pPlayer->GetInstanceData())
-    {
-        if (!pInstance->instance->IsRegularDifficulty())
-        {
-            if (pPlayer->isGameMaster() || pPlayer->isDead())
-                return false;
-
-            if (pInstance->GetData(TYPE_NETHEKURSE) == DONE)
-            {
-                if (pPlayer->GetQuestStatus(QUEST_IMPRISONED_IN_THE_CITADEL_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_IMPRISONED_IN_THE_CITADEL_H) == QUEST_STATUS_INCOMPLETE)
-                {
-                    if (pAt->id == AREATRIGGER_AFTER_NETHEKURSE)
-                    {
-                        if (!pPlayer->HasAura(SPELL_KARGATHS_EXECUTIONER_1) || !pPlayer->HasAura(SPELL_KARGATHS_EXECUTIONER_2) || !pPlayer->HasAura(SPELL_KARGATHS_EXECUTIONER_3))
-                        {
-                            pPlayer->CastSpell(pPlayer, SPELL_KARGATHS_EXECUTIONER_1, true);
-                            if (pInstance->GetSingleCreatureFromStorage(NPC_SCOUT_ORGARR) || pInstance->GetSingleCreatureFromStorage(NPC_KORAG_PROUDMANE)  || pInstance->GetSingleCreatureFromStorage(NPC_CAPTAINBONESHATTER) || pInstance->GetSingleCreatureFromStorage(NPC_PRIVATE_JACINT) || pInstance->GetSingleCreatureFromStorage(NPC_RIFLEMAN_BROWNBEARD) || pInstance->GetSingleCreatureFromStorage(NPC_CAPTAIN_ALINA))
-                                return false;
-
-                            if (pPlayer->GetTeam() == HORDE)
-                            {
-                                pPlayer->SummonCreature(NPC_SCOUT_ORGARR, 151.040f, -91.558f, 1.936f, 1.559f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 24*HOUR*IN_MILLISECONDS);
-                                pPlayer->SummonCreature(NPC_KORAG_PROUDMANE, 150.669f, -77.015f, 1.933f, 4.705f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 24*HOUR*IN_MILLISECONDS);
-                                pPlayer->SummonCreature(NPC_CAPTAINBONESHATTER, 138.241f, -84.198f, 1.907f, 0.055f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 24*HOUR*IN_MILLISECONDS);
-                            }
-                            if (pPlayer->GetTeam() == ALLIANCE)
-                            {
-                                pPlayer->SummonCreature(NPC_PRIVATE_JACINT, 151.040f, -91.558f, 1.936f, 1.559f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 24*HOUR*IN_MILLISECONDS);
-                                pPlayer->SummonCreature(NPC_RIFLEMAN_BROWNBEARD, 150.669f, -77.015f, 1.933f, 4.705f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 24*HOUR*IN_MILLISECONDS);
-                                pPlayer->SummonCreature(NPC_CAPTAIN_ALINA, 138.241f, -84.198f, 1.907f, 0.055f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 24*HOUR*IN_MILLISECONDS);
-                            }
-                            return false;
-                        }
-                    }
-                }
-            }
-
-            if (pAt->id == AREATRIGGER_ENTER_1 || AREATRIGGER_ENTER_2)
-            {
-                if (pInstance->GetSingleCreatureFromStorage(NPC_DRISELLA) || pInstance->GetSingleCreatureFromStorage(NPC_RANDY_WHIZZLESPROCKET))
-                    return false;
-
-                if (pPlayer->GetTeam() == HORDE)
-                {
-                    pPlayer->SummonCreature(NPC_DRISELLA, 119.609f, 256.127f, -45.254f, 5.133f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 24*HOUR*IN_MILLISECONDS);
-                }
-                if (pPlayer->GetTeam() == ALLIANCE)
-                {
-                    pPlayer->SummonCreature(NPC_RANDY_WHIZZLESPROCKET, 131.106f, 254.520f, -45.236f, 3.951f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 24*HOUR*IN_MILLISECONDS);
-                }
-                return false;
-            }
-            return false;
-        }
+    if (pPlayer->isGameMaster() || pPlayer->isDead())
         return false;
-    }
-    return false;
-};
+
+    instance_shattered_halls* pInstance = (instance_shattered_halls*)pPlayer->GetInstanceData();
+
+    if (!pInstance)
+        return false;
+
+    // Only on heroic
+    if (pInstance->instance->IsRegularDifficulty())
+        return false;
+
+    // Don't allow players to cheat
+    if (pInstance->GetData(TYPE_BLADEFIST) == DONE || pInstance->GetData(TYPE_OMROGG) == DONE)
+        return false;
+
+    if (pInstance->GetData(TYPE_EXECUTION) == NOT_STARTED)
+        pInstance->SetData(TYPE_EXECUTION, IN_PROGRESS);
+
+    return true;
+}
 
 void AddSC_instance_shattered_halls()
 {

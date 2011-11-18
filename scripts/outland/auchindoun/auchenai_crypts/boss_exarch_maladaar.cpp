@@ -251,24 +251,16 @@ struct MANGOS_DLL_DECL boss_exarch_maladaarAI : public ScriptedAI
 
         if (m_uiStolenSoulTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_STOLEN_SOUL, SELECT_FLAG_PLAYER))
             {
-                if (pTarget->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (m_creature->IsNonMeleeSpellCasted(false))
-                        m_creature->InterruptNonMeleeSpells(true);
+                DoScriptText(urand(0, 1) ? SAY_ROAR : SAY_SOUL_CLEAVE, m_creature);
 
-                    DoScriptText(urand(0, 1) ? SAY_ROAR : SAY_SOUL_CLEAVE, m_creature);
+                m_targetGuid = pTarget->GetObjectGuid();
 
-                    m_targetGuid = pTarget->GetObjectGuid();
+                DoCastSpellIfCan(pTarget, SPELL_STOLEN_SOUL, CAST_INTERRUPT_PREVIOUS);
+                DoSpawnCreature(NPC_STOLEN_SOUL, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
 
-                    DoCastSpellIfCan(pTarget, SPELL_STOLEN_SOUL);
-                    DoSpawnCreature(NPC_STOLEN_SOUL, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
-
-                    m_uiStolenSoulTimer = urand(20000, 30000);
-                }
-                else
-                    m_uiStolenSoulTimer = 1000;
+                m_uiStolenSoulTimer = urand(20000, 30000);
             }
         }
         else
@@ -342,20 +334,20 @@ CreatureAI* GetAI_mob_avatar_of_martyred(Creature* pCreature)
 
 void AddSC_boss_exarch_maladaar()
 {
-    Script* newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_exarch_maladaar";
-    newscript->GetAI = &GetAI_boss_exarch_maladaar;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_exarch_maladaar";
+    pNewScript->GetAI = &GetAI_boss_exarch_maladaar;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_avatar_of_martyred";
-    newscript->GetAI = &GetAI_mob_avatar_of_martyred;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_avatar_of_martyred";
+    pNewScript->GetAI = &GetAI_mob_avatar_of_martyred;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_stolen_soul";
-    newscript->GetAI = &GetAI_mob_stolen_soul;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_stolen_soul";
+    pNewScript->GetAI = &GetAI_mob_stolen_soul;
+    pNewScript->RegisterSelf();
 }

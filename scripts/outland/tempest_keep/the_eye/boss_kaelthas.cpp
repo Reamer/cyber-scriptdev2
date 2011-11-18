@@ -152,7 +152,7 @@ struct MANGOS_DLL_DECL advisorbase_ai : public ScriptedAI
         Reset();
     }
     protected:
-    uint32 m_uiAdvisor_Speech;
+    int32 m_iAdvisor_Speech;
 
     public:
     ScriptedInstance* m_pInstance;
@@ -217,7 +217,7 @@ struct MANGOS_DLL_DECL advisorbase_ai : public ScriptedAI
     void JustDied(Unit* pKiller)
     {
         if (m_pInstance && m_pInstance->GetData(TYPE_KAELTHAS_PHASE) == PHASE_3_ADVISOR_ALL)
-            DoScriptText(m_uiAdvisor_Speech, m_creature);
+            DoScriptText(m_iAdvisor_Speech, m_creature);
     }
 
     void DamageTaken(Unit* pKiller, uint32 &damage)
@@ -1036,7 +1036,7 @@ struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisorbase_ai
 {
     boss_thaladred_the_darkenerAI(Creature* pCreature) : advisorbase_ai(pCreature)
     {
-        m_uiAdvisor_Speech = SAY_THALADRED_DEATH;
+        m_iAdvisor_Speech = SAY_THALADRED_DEATH;
     }
 
     uint32 m_uiGaze_Timer;
@@ -1117,7 +1117,7 @@ struct MANGOS_DLL_DECL boss_lord_sanguinarAI : public advisorbase_ai
 {
     boss_lord_sanguinarAI(Creature* pCreature) : advisorbase_ai(pCreature)
     {
-        m_uiAdvisor_Speech = SAY_SANGUINAR_DEATH;
+        m_iAdvisor_Speech = SAY_SANGUINAR_DEATH;
     }
 
     uint32 m_uiFear_Timer;
@@ -1169,7 +1169,7 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisorbase_a
 {
     boss_grand_astromancer_capernianAI(Creature* pCreature) : advisorbase_ai(pCreature)
     {
-        m_uiAdvisor_Speech = SAY_CAPERNIAN_DEATH;
+        m_iAdvisor_Speech = SAY_CAPERNIAN_DEATH;
     }
 
     uint32 m_uiFireball_Timer;
@@ -1264,24 +1264,9 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisorbase_a
         //m_uiArcaneExplosion_Timer
         if (m_uiArcaneExplosion_Timer < uiDiff)
         {
-            bool m_bInMeleeRange = false;
-            Unit* pTarget = NULL;
-            ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-            for (ThreatList::const_iterator i = tList.begin();i != tList.end(); ++i)
-            {
-                Unit* pUnit = m_creature->GetMap()->GetUnit((*i)->getUnitGuid());
-
-                //if in melee range
-                if (pUnit && m_creature->CanReachWithMeleeAttack(pUnit))
-                {
-                    m_bInMeleeRange = true;
-                    pTarget = pUnit;
-                    break;
-                }
-            }
-
-            if (m_bInMeleeRange)
-                DoCastSpellIfCan(pTarget, SPELL_ARCANE_EXPLOSION);
+            // if enemy is in melee range
+            if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
+                DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION);
 
             m_uiArcaneExplosion_Timer = urand(4000, 6000);
         }
@@ -1297,7 +1282,7 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisorbase_ai
 {
     boss_master_engineer_telonicusAI(Creature* pCreature) : advisorbase_ai(pCreature)
     {
-        m_uiAdvisor_Speech = SAY_TELONICUS_DEATH;
+        m_iAdvisor_Speech = SAY_TELONICUS_DEATH;
     }
 
     uint32 m_uiBomb_Timer;
@@ -1484,39 +1469,40 @@ CreatureAI* GetAI_mob_phoenix_egg_tk(Creature* pCreature)
 
 void AddSC_boss_kaelthas()
 {
-    Script *newscript;
-    newscript = new Script;
-    newscript->Name = "boss_kaelthas";
-    newscript->GetAI = &GetAI_boss_kaelthas;
-    newscript->RegisterSelf();
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_thaladred_the_darkener";
-    newscript->GetAI = &GetAI_boss_thaladred_the_darkener;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_kaelthas";
+    pNewScript->GetAI = &GetAI_boss_kaelthas;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_lord_sanguinar";
-    newscript->GetAI = &GetAI_boss_lord_sanguinar;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_thaladred_the_darkener";
+    pNewScript->GetAI = &GetAI_boss_thaladred_the_darkener;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_grand_astromancer_capernian";
-    newscript->GetAI = &GetAI_boss_grand_astromancer_capernian;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_lord_sanguinar";
+    pNewScript->GetAI = &GetAI_boss_lord_sanguinar;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_master_engineer_telonicus";
-    newscript->GetAI = &GetAI_boss_master_engineer_telonicus;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_grand_astromancer_capernian";
+    pNewScript->GetAI = &GetAI_boss_grand_astromancer_capernian;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_phoenix_tk";
-    newscript->GetAI = &GetAI_mob_phoenix_tk;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_master_engineer_telonicus";
+    pNewScript->GetAI = &GetAI_boss_master_engineer_telonicus;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_phoenix_egg_tk";
-    newscript->GetAI = &GetAI_mob_phoenix_egg_tk;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_phoenix_tk";
+    pNewScript->GetAI = &GetAI_mob_phoenix_tk;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "mob_phoenix_egg_tk";
+    pNewScript->GetAI = &GetAI_mob_phoenix_egg_tk;
+    pNewScript->RegisterSelf();
 }
