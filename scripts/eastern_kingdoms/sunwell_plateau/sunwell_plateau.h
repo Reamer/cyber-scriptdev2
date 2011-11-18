@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+ * Copyright (C) 2011 MangosR2_ScriptDev2
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -19,29 +20,33 @@ enum
     DATA_PLAYER_SPECTRAL_REALM  = 6,
     DATA_SET_SPECTRAL_CHECK     = 7,
 
+    TYPE_KILJAEDEN_PHASE        = 8,
+
     NPC_KALECGOS_DRAGON         = 24850,            // kalecgos blue dragon hostile
     NPC_KALECGOS_HUMAN          = 24891,            // kalecgos human form in spectral realm
     NPC_SATHROVARR              = 24892,
-    // NPC_BRUTALLUS            = 24882,
-    // NPC_FELMYST              = 25038,
+    NPC_BRUTALLUS               = 24882,
+    NPC_FELMYST                 = 25038,
     NPC_ALYTHESS                = 25166,
     NPC_SACROLASH               = 25165,
-    // NPC_MURU                 = 25741,
-    // NPC_KILJAEDEN            = 25315,
-    // NPC_KILJAEDEN_CONTROLLER = 25608,            // kiljaeden event controller
-    // NPC_ANVEENA              = 26046,            // related to kiljaeden event
-    // NPC_KALECGOS             = 25319,            // related to kiljaeden event
+    NPC_PORTAL_TARGET           = 25770,
+    NPC_MURU                    = 25741,
+    NPC_KILJAEDEN               = 25315,
+    NPC_KILJAEDEN_CONTROLLER    = 25608,            // kiljaeden event controller
+    NPC_ANVEENA                 = 26046,            // related to kiljaeden event
+    NPC_KALECGOS                = 25319,            // related to kiljaeden event
+    NPC_MADRIGOSA               = 25160,            // Alive and flying one 
 
     GO_FORCEFIELD               = 188421,           // kalecgos door + collisions
     GO_BOSS_COLLISION_1         = 188523,
     GO_BOSS_COLLISION_2         = 188524,
-    GO_ICE_BARRIER              = 188119,           // use unk; related to brutallus intro
+    GO_ICE_BARRIER              = 188119,           // madri or felmyst cast this after or during the fire wall is up to; related to brutallus intro
     GO_FIRE_BARRIER             = 188075,           // door after felmyst
     GO_FIRST_GATE               = 187766,           // door between felmyst and eredar twins
     GO_SECOND_GATE              = 187764,           // door after eredar twins
     GO_MURU_ENTER_GATE          = 187990,           // muru gates
-    GO_MURU_EXIT_GATE           = 188118,
-    GO_THIRD_GATE               = 187765,           // door after muru; why another?
+    GO_MURU_EXIT_GATE           = 188118,           // muru gates
+    GO_THIRD_GATE               = 187765,           // muru gates
 
     SAY_TWINS_INTRO             = -1580044,
 
@@ -50,9 +55,11 @@ enum
     // spells related to kalecgos event
     SPELL_SPECTRAL_REALM                = 46021,
     SPELL_TELEPORT_NORMAL_REALM         = 46020,
-    SPELL_TELEPORT_TO_SPECTRAL_REALM    = 46019,
     SPELL_SPECTRAL_EXHAUSTION           = 44867,
-    SPELL_SPECTRAL_REALM_FORCE_FACTION  = 44852
+    SPELL_SPECTRAL_REALM_FORCE_FACTION  = 44852,
+
+    // used by ALOT of mobs and bosses in sunwell plateau
+    SPELL_SUNWELL_RADIANCE_AURA         = 45769,
 };
 
 class MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
@@ -77,14 +84,13 @@ class MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
         void Load(const char* chrIn);
 
     protected:
-        void EjectPlayer(Player* pPlayer);
-        void EjectPlayers();
+        void DoEjectSpectralRealmPlayers();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
         // Misc
         uint32 m_uiSpectralRealmTimer;
-        GUIDList SpectralRealmList;
+        GUIDList m_lSpectralRealmList;
 };
 #endif

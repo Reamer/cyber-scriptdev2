@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
+ * Copyright (C) 2011 MangosR2_Scriptdev2
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,7 +17,7 @@
 
 /* ScriptData
 SDName: Instance_Sunwell_Plateau
-SD%Complete: 70%
+SD%Complete: 80%
 SDComment:
 SDCategory: Sunwell_Plateau
 EndScriptData */
@@ -62,8 +63,17 @@ void instance_sunwell_plateau::OnCreatureCreate(Creature* pCreature)
         case NPC_KALECGOS_DRAGON:
         case NPC_KALECGOS_HUMAN:
         case NPC_SATHROVARR:
+        case NPC_MADRIGOSA:    
+        case NPC_BRUTALLUS:
+        case NPC_FELMYST:
         case NPC_ALYTHESS:
         case NPC_SACROLASH:
+        case NPC_PORTAL_TARGET:
+        case NPC_MURU:
+        case NPC_KILJAEDEN:
+        case NPC_KILJAEDEN_CONTROLLER:
+        case NPC_ANVEENA:
+        case NPC_KALECGOS:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
@@ -74,9 +84,12 @@ void instance_sunwell_plateau::OnObjectCreate(GameObject* pGo)
     switch(pGo->GetEntry())
     {
         case GO_FORCEFIELD:
+            if (m_auiEncounter[TYPE_KALECGOS] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);   // maybe needs despawn
         case GO_BOSS_COLLISION_1:
         case GO_BOSS_COLLISION_2:
-        case GO_ICE_BARRIER:
+        case GO_ICE_BARRIER:      // spawned at madrigosa yell_ice_barrier
+              //  pGo->SetGoState(GO_STATE_ACTIVE);   // IceWall not working yet  but also not in use yet
             break;
         case GO_FIRE_BARRIER:
             if (m_auiEncounter[TYPE_KALECGOS] == DONE && m_auiEncounter[TYPE_BRUTALLUS] == DONE && m_auiEncounter[TYPE_FELMYST] == DONE)
@@ -118,7 +131,7 @@ void instance_sunwell_plateau::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_BOSS_COLLISION_1);
             DoUseDoorOrButton(GO_BOSS_COLLISION_2);
             if (uiData == IN_PROGRESS)
-                SpectralRealmList.clear();
+                m_lSpectralRealmList.clear();
             break;
         case TYPE_BRUTALLUS:
             m_auiEncounter[uiType] = uiData;
@@ -174,7 +187,7 @@ void instance_sunwell_plateau::SetData(uint32 uiType, uint32 uiData)
 void instance_sunwell_plateau::SetData64(uint32 uiType, uint64 uiData)
 {
     if (uiType == DATA_PLAYER_SPECTRAL_REALM)
-        SpectralRealmList.push_back(ObjectGuid(uiData));
+        m_lSpectralRealmList.push_back(ObjectGuid(uiData));
 }
 
 uint32 instance_sunwell_plateau::GetData(uint32 uiType)
@@ -185,56 +198,24 @@ uint32 instance_sunwell_plateau::GetData(uint32 uiType)
     return 0;
 }
 
-void instance_sunwell_plateau::EjectPlayer(Player* pPlayer)
+void instance_sunwell_plateau::DoEjectSpectralRealmPlayers()
 {
-    debug_log("SD2: Ejecting Player %s from Spectral Realm", pPlayer->GetName());
-
-    // Put player back in Kalecgos(Dragon)'s threat list
-    /*if (Creature* pKalecgos = GetSingleCreatureFromStorage(NPC_KALECGOS_DRAGON))
-    {
-        if (pKalecgos->isAlive())
-        {
-            debug_log("SD2: Adding %s in Kalecgos' threatlist", pPlayer->GetName());
-            pKalecgos->AddThreat(pPlayer);
-        }
-    }
-
-    // Remove player from Sathrovarr's threat list
-    if (Creature* pSath = instance->GetCreature(NPC_SATHROVARR))
-    {
-        if (pSath->isAlive())
-        {
-            if (HostileReference* pRef = pSath->getThreatManager().getOnlineContainer().getReferenceByTarget(pPlayer))
-            {
-                pRef->removeReference();
-                debug_log("SD2: Deleting %s from Sathrovarr's threatlist", pPlayer->GetName());
-            }
-        }
-    }*/
-
-    pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_EXHAUSTION, true);
-    pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_NORMAL_REALM, true);
-}
-
-void instance_sunwell_plateau::EjectPlayers()
-{
-    if (SpectralRealmList.empty())
+    if (m_lSpectralRealmList.empty())
         return;
 
     Map::PlayerList const& players = instance->GetPlayers();
 
     for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
     {
-        Player* plr = itr->getSource();
+        Player* pPlayer = itr->getSource();
 
-        if (plr && !plr->HasAura(SPELL_SPECTRAL_REALM))
+        if (pPlayer && !pPlayer->HasAura(SPELL_SPECTRAL_REALM))
         {
-            SpectralRealmList.remove(plr->GetObjectGuid());
-            EjectPlayer(plr);
+            m_lSpectralRealmList.remove(pPlayer->GetObjectGuid());
+            pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_EXHAUSTION, true);
+            pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_NORMAL_REALM, true);
         }
     }
-
-    //SpectralRealmList.clear();
 }
 
 void instance_sunwell_plateau::Update(uint32 uiDiff)
@@ -244,7 +225,7 @@ void instance_sunwell_plateau::Update(uint32 uiDiff)
     {
         if (m_uiSpectralRealmTimer <= uiDiff)
         {
-            EjectPlayers();
+            DoEjectSpectralRealmPlayers();
             m_uiSpectralRealmTimer = 1000;
         }
         else
@@ -275,11 +256,6 @@ void instance_sunwell_plateau::Load(const char* in)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-InstanceData* GetInstanceData_instance_sunwell_plateau(Map* pMap)
-{
-    return new instance_sunwell_plateau(pMap);
-}
-
 bool AreaTrigger_at_sunwell_plateau(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_TWINS)
@@ -294,6 +270,11 @@ bool AreaTrigger_at_sunwell_plateau(Player* pPlayer, AreaTriggerEntry const* pAt
     }
 
     return false;
+}
+
+InstanceData* GetInstanceData_instance_sunwell_plateau(Map* pMap)
+{
+    return new instance_sunwell_plateau(pMap);
 }
 
 void AddSC_instance_sunwell_plateau()

@@ -37,7 +37,6 @@ EndContentData */
 #define QUEST_REDEEMING_THE_DEAD        9685
 #define SPELL_SHIMMERING_VESSEL         31225
 #define SPELL_REVIVE_SELF               32343
-#define NPC_BLOOD_KNIGHT_STILLBLADE     17768
 
 struct MANGOS_DLL_DECL npc_blood_knight_stillbladeAI : public ScriptedAI
 {
@@ -72,8 +71,7 @@ struct MANGOS_DLL_DECL npc_blood_knight_stillbladeAI : public ScriptedAI
         if ((Spellkind->Id == SPELL_SHIMMERING_VESSEL) && !spellHit &&
             (Hitter->GetTypeId() == TYPEID_PLAYER) && (((Player*)Hitter)->IsActiveQuest(QUEST_REDEEMING_THE_DEAD)))
         {
-            //((Player*)Hitter)->AreaExploredOrEventHappens(QUEST_REDEEMING_THE_DEAD);
-            ((Player*)Hitter)->KilledMonsterCredit(NPC_BLOOD_KNIGHT_STILLBLADE);
+            ((Player*)Hitter)->AreaExploredOrEventHappens(QUEST_REDEEMING_THE_DEAD);
             DoCastSpellIfCan(m_creature,SPELL_REVIVE_SELF);
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             m_creature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
@@ -131,7 +129,7 @@ struct MANGOS_DLL_DECL boss_lorthemar_theronAI : public ScriptedAI
         }
         else
             m_uiArcaneShockTimer -= uiDiff;
-
+ 
         if (m_uiCleaveTimer < uiDiff)
         {
             DoCast(m_creature->getVictim(), SPELL_CLEAVE_LORTHEMAR);
@@ -139,7 +137,7 @@ struct MANGOS_DLL_DECL boss_lorthemar_theronAI : public ScriptedAI
         }
         else
             m_uiCleaveTimer -= uiDiff;
-
+ 
         if (m_uiManaBurnTimer < uiDiff)
         {
             if (Unit *pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -148,7 +146,7 @@ struct MANGOS_DLL_DECL boss_lorthemar_theronAI : public ScriptedAI
         }
         else
             m_uiManaBurnTimer -= uiDiff;
-
+ 
         if (m_uiMassCharmTimer < uiDiff)
         {
             DoCast(m_creature, SPELL_MASS_CHARM);
@@ -156,7 +154,7 @@ struct MANGOS_DLL_DECL boss_lorthemar_theronAI : public ScriptedAI
         }
         else
             m_uiMassCharmTimer -= uiDiff;
-
+ 
         DoMeleeAttackIfReady();
     }
 };
@@ -168,14 +166,15 @@ CreatureAI* GetAI_boss_lorthemar_theron(Creature* pCreature)
 
 void AddSC_silvermoon_city()
 {
-    Script *newscript;
-    newscript = new Script;
-    newscript->Name = "npc_blood_knight_stillblade";
-    newscript->GetAI = &GetAI_npc_blood_knight_stillblade;
-    newscript->RegisterSelf();
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_lorthemar_theron";
-    newscript->GetAI = &GetAI_boss_lorthemar_theron;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_blood_knight_stillblade";
+    pNewScript->GetAI = &GetAI_npc_blood_knight_stillblade;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "boss_lorthemar_theron";
+    pNewScript->GetAI = &GetAI_boss_lorthemar_theron;
+    pNewScript->RegisterSelf();
 }

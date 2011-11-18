@@ -293,26 +293,7 @@ struct MANGOS_DLL_DECL boss_moroesAI : public ScriptedAI
 
             if (m_uiBlind_Timer < uiDiff)
             {
-                Unit* pTarget = NULL;
-
-                ThreatList const& vThreatList = m_creature->getThreatManager().getThreatList();
-                if (vThreatList.empty())
-                    return;
-
-                std::vector<Unit*> vTargetList;
-
-                for (ThreatList::const_iterator itr = vThreatList.begin();itr != vThreatList.end(); ++itr)
-                {
-                    pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid());
-
-                    if (pTarget && m_creature->CanReachWithMeleeAttack(pTarget))
-                        vTargetList.push_back(pTarget);
-                }
-
-                if (!vTargetList.empty())
-                    pTarget = *(vTargetList.begin()+rand()%vTargetList.size());
-
-                if (pTarget)
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BLIND, SELECT_FLAG_PLAYER))
                     DoCastSpellIfCan(pTarget, SPELL_BLIND);
 
                 m_uiBlind_Timer = 40000;
@@ -432,8 +413,7 @@ struct MANGOS_DLL_DECL boss_baroness_dorothea_millstipeAI : public boss_moroes_g
 
         if (m_uiManaBurn_Timer < uiDiff)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-            if (pTarget && pTarget->getPowerType() == POWER_MANA)
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANABURN, SELECT_FLAG_POWER_MANA))
                 DoCastSpellIfCan(pTarget, SPELL_MANABURN);
 
             m_uiManaBurn_Timer = 5000;                      //3 sec cast
@@ -805,40 +785,40 @@ CreatureAI* GetAI_lord_crispin_ference(Creature* pCreature)
 
 void AddSC_boss_moroes()
 {
-    Script* newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_moroes";
-    newscript->GetAI = &GetAI_boss_moroes;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_moroes";
+    pNewScript->GetAI = &GetAI_boss_moroes;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_baroness_dorothea_millstipe";
-    newscript->GetAI = &GetAI_baroness_dorothea_millstipe;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_baroness_dorothea_millstipe";
+    pNewScript->GetAI = &GetAI_baroness_dorothea_millstipe;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_baron_rafe_dreuger";
-    newscript->GetAI = &GetAI_baron_rafe_dreuger;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_baron_rafe_dreuger";
+    pNewScript->GetAI = &GetAI_baron_rafe_dreuger;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_lady_catriona_von_indi";
-    newscript->GetAI = &GetAI_lady_catriona_von_indi;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_lady_catriona_von_indi";
+    pNewScript->GetAI = &GetAI_lady_catriona_von_indi;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_lady_keira_berrybuck";
-    newscript->GetAI = &GetAI_lady_keira_berrybuck;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_lady_keira_berrybuck";
+    pNewScript->GetAI = &GetAI_lady_keira_berrybuck;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_lord_robin_daris";
-    newscript->GetAI = &GetAI_lord_robin_daris;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_lord_robin_daris";
+    pNewScript->GetAI = &GetAI_lord_robin_daris;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_lord_crispin_ference";
-    newscript->GetAI = &GetAI_lord_crispin_ference;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_lord_crispin_ference";
+    pNewScript->GetAI = &GetAI_lord_crispin_ference;
+    pNewScript->RegisterSelf();
 }

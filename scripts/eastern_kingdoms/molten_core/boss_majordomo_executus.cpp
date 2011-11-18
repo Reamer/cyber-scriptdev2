@@ -124,10 +124,7 @@ struct MANGOS_DLL_DECL boss_majordomoAI : public ScriptedAI
         if (!m_bHasEncounterFinished)                        // Normal reached home, FAIL
         {
             if (m_pInstance)
-            {
                 m_pInstance->SetData(TYPE_MAJORDOMO, FAIL);
-                m_pInstance->DoHandleAdds(m_luiMajordomoAddsGUIDs);
-            }
         }
         else                                                 // Finished the encounter, DONE
         {
@@ -135,7 +132,6 @@ struct MANGOS_DLL_DECL boss_majordomoAI : public ScriptedAI
             m_creature->RemoveAllAuras();
             m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
-            m_creature->LoadCreatureAddon();
             m_creature->SetLootRecipient(NULL);
 
             // Set friendly

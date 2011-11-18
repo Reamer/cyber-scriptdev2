@@ -64,16 +64,6 @@ enum
     NPC_ARCANE_SPHERE           = 24708,
 };
 
-/** Locations **/
-static const float KaelLocations[3][2]=
-{
-    {148.744659f, 181.377426f},
-    {140.823883f, 195.403046f},
-    {156.574188f, 195.650482f},
-};
-
-static const float LOCATION_Z   = -16.727455f;
-
 struct MANGOS_DLL_DECL boss_felblood_kaelthasAI : public ScriptedAI
 {
     boss_felblood_kaelthasAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -203,9 +193,6 @@ struct MANGOS_DLL_DECL boss_felblood_kaelthasAI : public ScriptedAI
 
     void TeleportPlayersToSelf()
     {
-        float x = KaelLocations[0][0];
-        float y = KaelLocations[0][1];
-
         DoCastSpellIfCan(m_creature, SPELL_TELEPORT_CENTER, CAST_TRIGGERED);
 
         std::vector<ObjectGuid> vGuids;
@@ -614,25 +601,25 @@ CreatureAI* GetAI_mob_felkael_phoenix_egg(Creature* pCreature)
 
 void AddSC_boss_felblood_kaelthas()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_felblood_kaelthas";
-    newscript->GetAI = &GetAI_boss_felblood_kaelthas;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_felblood_kaelthas";
+    pNewScript->GetAI = &GetAI_boss_felblood_kaelthas;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_arcane_sphere";
-    newscript->GetAI = &GetAI_mob_arcane_sphere;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_arcane_sphere";
+    pNewScript->GetAI = &GetAI_mob_arcane_sphere;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_felkael_phoenix";
-    newscript->GetAI = &GetAI_mob_felkael_phoenix;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_felkael_phoenix";
+    pNewScript->GetAI = &GetAI_mob_felkael_phoenix;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_felkael_phoenix_egg";
-    newscript->GetAI = &GetAI_mob_felkael_phoenix_egg;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_felkael_phoenix_egg";
+    pNewScript->GetAI = &GetAI_mob_felkael_phoenix_egg;
+    pNewScript->RegisterSelf();
 }
