@@ -114,8 +114,10 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
 
     void JustReachedHome()
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_THERMAPLUGG, FAIL);
+        if (!m_pInstance || m_pInstance->GetData(TYPE_THERMAPLUGG) == FAIL)
+            return;
+
+        m_pInstance->SetData(TYPE_THERMAPLUGG,FAIL);
 
         // Remove remaining bombs
         for (GUIDList::const_iterator itr = m_lSummonedBombGUIDs.begin(); itr != m_lSummonedBombGUIDs.end(); ++itr)

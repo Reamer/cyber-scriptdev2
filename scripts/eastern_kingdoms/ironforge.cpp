@@ -234,21 +234,21 @@ CreatureAI* GetAI_boss_high_tinker_mekkatorque(Creature* pCreature)
 
 void AddSC_ironforge()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "npc_royal_historian_archesonus";
-    newscript->pGossipHello =  &GossipHello_npc_royal_historian_archesonus;
-    newscript->pGossipSelect = &GossipSelect_npc_royal_historian_archesonus;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_royal_historian_archesonus";
+    pNewScript->pGossipHello =  &GossipHello_npc_royal_historian_archesonus;
+    pNewScript->pGossipSelect = &GossipSelect_npc_royal_historian_archesonus;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_king_magni_bronzebreard";
-    newscript->GetAI = &GetAI_boss_king_magni_bronzebreard;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_king_magni_bronzebreard";
+    pNewScript->GetAI = &GetAI_boss_king_magni_bronzebreard;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_high_tinker_mekkatorque";
-    newscript->GetAI = &GetAI_boss_high_tinker_mekkatorque;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_high_tinker_mekkatorque";
+    pNewScript->GetAI = &GetAI_boss_high_tinker_mekkatorque;
+    pNewScript->RegisterSelf();
 }

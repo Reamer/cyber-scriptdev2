@@ -81,8 +81,6 @@ static sSpawnLocation m_aMajordomoLocations[2] =
     {NPC_MAJORDOMO, 847.103f, -816.153f, -229.775f, 4.344f}     // Summon and teleport location (near Ragnaros)
 };
 
-static const float RANGE_CALL_FOR_HELP     = 20.0f;
-
 class MANGOS_DLL_DECL instance_molten_core : public ScriptedInstance
 {
     public:
@@ -102,21 +100,11 @@ class MANGOS_DLL_DECL instance_molten_core : public ScriptedInstance
         const char* Save() { return m_strInstData.c_str(); }
         void Load(const char* chrIn);
 
-        // TODO Remove this, when creature linking implemented in MaNGOS
-        void DoHandleAdds(GUIDList &m_luiAddsGUIDs, bool bRespawn = true);
-
     protected:
         void DoSpawnMajordomoIfCan(bool bByPlayerEnter);
 
         std::string m_strInstData;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
-
-        // Adds lists
-        GUIDList m_luiProtectorGUIDs;
-        GUIDList m_luiFlamewakerGUIDs;
-        GUIDList m_luiFireswornGUIDs;
-        GUIDList m_luiPriestGUIDs;
-        GUIDList m_luiRagerGUIDs;
 };
 
 #endif

@@ -25,8 +25,7 @@ EndScriptData */
 #include "deadmines.h"
 
 instance_deadmines::instance_deadmines(Map* pMap) : ScriptedInstance(pMap),
-    m_uiIronDoorTimer(0),
-    m_uiDoorStep(0)
+    m_uiIronDoorTimer(0)
 {
     Initialize();
 }
@@ -47,21 +46,25 @@ void instance_deadmines::OnObjectCreate(GameObject* pGo)
     switch(pGo->GetEntry())
     {
         case GO_FACTORY_DOOR:
-            if (GetData(TYPE_RHAHKZOR) == DONE)
+            if (m_auiEncounter[TYPE_RHAHKZOR] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
 
             break;
         case GO_MAST_ROOM_DOOR:
-            if (GetData(TYPE_SNEED) == DONE)
+            if (m_auiEncounter[TYPE_SNEED] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
 
             break;
         case GO_FOUNDRY_DOOR:
-            if (GetData(TYPE_GILNID) == DONE)
+            if (m_auiEncounter[TYPE_GILNID] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
 
             break;
         case GO_IRON_CLAD_DOOR:
+            if (m_auiEncounter[TYPE_IRON_CLAD_DOOR] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+
+            break;
         case GO_DEFIAS_CANNON:
         case GO_SMITE_CHEST:
             break;
@@ -77,15 +80,9 @@ void instance_deadmines::OnCreatureDeath(Creature* pCreature)
 {
     switch(pCreature->GetEntry())
     {
-        case NPC_RHAHKZOR:
-            SetData(TYPE_RHAHKZOR, DONE);
-            break;
-        case NPC_SNEED:
-            SetData(TYPE_SNEED, DONE);
-            break;
-        case NPC_GILNID:
-            SetData(TYPE_GILNID, DONE);
-            break;
+        case NPC_RHAHKZOR: SetData(TYPE_RHAHKZOR, DONE); break;
+        case NPC_SNEED:    SetData(TYPE_SNEED, DONE);    break;
+        case NPC_GILNID:   SetData(TYPE_GILNID, DONE);   break;
     }
 }
 
@@ -98,7 +95,7 @@ void instance_deadmines::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_FACTORY_DOOR);
 
-            m_auiEncounter[1] = uiData;
+            m_auiEncounter[uiType] = uiData;
             break;
         }
         case TYPE_SNEED:
@@ -106,7 +103,7 @@ void instance_deadmines::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_MAST_ROOM_DOOR);
 
-            m_auiEncounter[2] = uiData;
+            m_auiEncounter[uiType] = uiData;
             break;
         }
         case TYPE_GILNID:
@@ -114,40 +111,83 @@ void instance_deadmines::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_FOUNDRY_DOOR);
 
-            m_auiEncounter[3] = uiData;
+            m_auiEncounter[uiType] = uiData;
             break;
         }
-        case TYPE_DEFIAS_ENDDOOR:
+        case TYPE_IRON_CLAD_DOOR:
         {
-            if (uiData == IN_PROGRESS)
+            if (uiData == DONE)
             {
-                if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_IRON_CLAD_DOOR))
+                DoUseDoorOrButton(GO_IRON_CLAD_DOOR, 0, true);
+                m_uiIronDoorTimer = 15000;
+
+                if (Creature* pMrSmite = GetSingleCreatureFromStorage(NPC_MR_SMITE))
+                    DoScriptText(INST_SAY_ALARM1, pMrSmite);
+
+                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_IRON_CLAD_DOOR))
                 {
-                    pGo->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
-                    m_uiIronDoorTimer = 3000;
+                    // should be static spawns, fetch the closest ones at the pier
+                    if (Creature* pi1 = GetClosestCreatureWithEntry(pDoor, NPC_PIRATE, 40.0f))
+                    {
+                        pi1->SetWalk(false);
+                        pi1->GetMotionMaster()->MovePoint(0, pDoor->GetPositionX(), pDoor->GetPositionY(), pDoor->GetPositionZ());
+                    }
+
+                    if (Creature* pi2 = GetClosestCreatureWithEntry(pDoor, NPC_SQUALLSHAPER, 40.0f))
+                    {
+                        pi2->SetWalk(false);
+                        pi2->GetMotionMaster()->MovePoint(0, pDoor->GetPositionX(), pDoor->GetPositionY(), pDoor->GetPositionZ());
+                    }
                 }
             }
-            m_auiEncounter[0] = uiData;
+
+            m_auiEncounter[uiType] = uiData;
             break;
         }
+    }
+
+    if (uiData == DONE)
+    {
+        OUT_SAVE_INST_DATA;
+
+        std::ostringstream saveStream;
+        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
+
+        m_strInstData = saveStream.str();
+
+        SaveToDB();
+        OUT_SAVE_INST_DATA_COMPLETE;
     }
 }
 
 uint32 instance_deadmines::GetData(uint32 uiType)
 {
-    switch(uiType)
-    {
-        case TYPE_DEFIAS_ENDDOOR:
-            return m_auiEncounter[0];
-        case TYPE_RHAHKZOR:
-            return m_auiEncounter[1];
-        case TYPE_SNEED:
-            return m_auiEncounter[2];
-        case TYPE_GILNID:
-            return m_auiEncounter[3];
-    }
+    if (uiType < MAX_ENCOUNTER)
+        return m_auiEncounter[uiType];
 
     return 0;
+}
+
+void instance_deadmines::Load(const char* chrIn)
+{
+    if (!chrIn)
+    {
+        OUT_LOAD_INST_DATA_FAIL;
+        return;
+    }
+
+    OUT_LOAD_INST_DATA(chrIn);
+
+    std::istringstream loadStream(chrIn);
+    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
+
+    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    {
+        if (m_auiEncounter[i] == IN_PROGRESS)
+            m_auiEncounter[i] = NOT_STARTED;
+    }
+
+    OUT_LOAD_INST_DATA_COMPLETE;
 }
 
 void instance_deadmines::Update(uint32 uiDiff)
@@ -157,46 +197,9 @@ void instance_deadmines::Update(uint32 uiDiff)
         if (m_uiIronDoorTimer <= uiDiff)
         {
             if (Creature* pMrSmite = GetSingleCreatureFromStorage(NPC_MR_SMITE))
-            {
-                switch(m_uiDoorStep)
-                {
-                    case 0:
-                        DoScriptText(INST_SAY_ALARM1,pMrSmite);
-                        m_uiIronDoorTimer = 2000;
-                        ++m_uiDoorStep;
-                        break;
-                    case 1:
-                    {
-                        if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_IRON_CLAD_DOOR))
-                        {
-                            // should be static spawns, fetch the closest ones at the pier
-                            if (Creature* pi1 = GetClosestCreatureWithEntry(pDoor, NPC_PIRATE, 40.0f))
-                            {
-                                pi1->SetWalk(false);
-                                pi1->GetMotionMaster()->MovePoint(0, pDoor->GetPositionX(), pDoor->GetPositionY(), pDoor->GetPositionZ());
-                            }
+                DoScriptText(INST_SAY_ALARM2, pMrSmite);
 
-                            if (Creature* pi2 = GetClosestCreatureWithEntry(pDoor, NPC_SQUALLSHAPER, 40.0f))
-                            {
-                                pi2->SetWalk(false);
-                                pi2->GetMotionMaster()->MovePoint(0, pDoor->GetPositionX(), pDoor->GetPositionY(), pDoor->GetPositionZ());
-                            }
-                        }
-
-                        ++m_uiDoorStep;
-                        m_uiIronDoorTimer = 10000;
-                        break;
-                    }
-                    case 2:
-                        DoScriptText(INST_SAY_ALARM2,pMrSmite);
-                        m_uiDoorStep = 0;
-                        m_uiIronDoorTimer = 0;
-                        debug_log("SD2: Instance Deadmines: Iron door event reached end.");
-                        break;
-                }
-            }
-            else
-                m_uiIronDoorTimer = 0;
+            m_uiIronDoorTimer = 0;
         }
         else
             m_uiIronDoorTimer -= uiDiff;

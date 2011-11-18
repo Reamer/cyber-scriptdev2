@@ -231,8 +231,7 @@ struct MANGOS_DLL_DECL boss_terestianAI : public ScriptedAI
 
         if (m_uiSacrifice_Timer < uiDiff)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
-            if (pTarget && pTarget->isAlive() && pTarget->GetTypeId() == TYPEID_PLAYER)
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
             {
                 DoCastSpellIfCan(pTarget, SPELL_SACRIFICE, CAST_TRIGGERED);
 
@@ -333,20 +332,20 @@ CreatureAI* GetAI_boss_terestian_illhoof(Creature* pCreature)
 
 void AddSC_boss_terestian_illhoof()
 {
-    Script* newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_terestian_illhoof";
-    newscript->GetAI = &GetAI_boss_terestian_illhoof;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_terestian_illhoof";
+    pNewScript->GetAI = &GetAI_boss_terestian_illhoof;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_fiendish_portal";
-    newscript->GetAI = &GetAI_npc_fiendish_portal;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_fiendish_portal";
+    pNewScript->GetAI = &GetAI_npc_fiendish_portal;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_demon_chain";
-    newscript->GetAI = &GetAI_mob_demon_chain;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_demon_chain";
+    pNewScript->GetAI = &GetAI_mob_demon_chain;
+    pNewScript->RegisterSelf();
 }

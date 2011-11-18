@@ -240,8 +240,8 @@ bool GossipSelect_npc_lady_katrana_prestor(Player* pPlayer, Creature* pCreature,
 }
 
 /*######
- ## King Varian
- ######*/
+## King Varian
+######*/
 
 enum
 {
@@ -297,34 +297,34 @@ CreatureAI* GetAI_boss_king_varian_wrynn(Creature* pCreature)
 
 void AddSC_stormwind_city()
 {
-    Script *newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "npc_archmage_malin";
-    newscript->pGossipHello = &GossipHello_npc_archmage_malin;
-    newscript->pGossipSelect = &GossipSelect_npc_archmage_malin;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_archmage_malin";
+    pNewScript->pGossipHello = &GossipHello_npc_archmage_malin;
+    pNewScript->pGossipSelect = &GossipSelect_npc_archmage_malin;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_bartleby";
-    newscript->GetAI = &GetAI_npc_bartleby;
-    newscript->pQuestAcceptNPC = &QuestAccept_npc_bartleby;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_bartleby";
+    pNewScript->GetAI = &GetAI_npc_bartleby;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_bartleby;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_dashel_stonefist";
-    newscript->GetAI = &GetAI_npc_dashel_stonefist;
-    newscript->pQuestAcceptNPC = &QuestAccept_npc_dashel_stonefist;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dashel_stonefist";
+    pNewScript->GetAI = &GetAI_npc_dashel_stonefist;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dashel_stonefist;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_lady_katrana_prestor";
-    newscript->pGossipHello = &GossipHello_npc_lady_katrana_prestor;
-    newscript->pGossipSelect = &GossipSelect_npc_lady_katrana_prestor;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_lady_katrana_prestor";
+    pNewScript->pGossipHello = &GossipHello_npc_lady_katrana_prestor;
+    pNewScript->pGossipSelect = &GossipSelect_npc_lady_katrana_prestor;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_king_varian_wrynn";
-    newscript->GetAI = &GetAI_boss_king_varian_wrynn;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_king_varian_wrynn";
+    pNewScript->GetAI = &GetAI_boss_king_varian_wrynn;
+    pNewScript->RegisterSelf();
 }
