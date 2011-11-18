@@ -1863,20 +1863,14 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI
             if (m_uiShadowDemonTimer < uiDiff)
             {
                 m_creature->InterruptNonMeleeSpells(false);
-                Creature* ShadowDemon = NULL;
-                for(uint8 i = 0; i < 4; ++i)
+                for (uint8 i = 0; i < 4; ++i)
                 {
-                    Unit* target = NULL;
-                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM,0);
-
-                    // only on players.
-                    if (target && target->GetTypeId() == TYPEID_PLAYER)
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER))
                     {
-                        ShadowDemon = m_creature->SummonCreature(SHADOW_DEMON, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 25000);
-                        if (ShadowDemon)
+                        if (Creature* ShadowDemon = m_creature->SummonCreature(SHADOW_DEMON, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 25000))
                         {
-                            ShadowDemon->AddThreat(target, 5000000.0f);
-                            ShadowDemon->AI()->AttackStart(target);
+                            ShadowDemon->AddThreat(pTarget, 5000000.0f);
+                            ShadowDemon->AI()->AttackStart(pTarget);
                             ShadowDemon->SetInCombatWithZone();
                         }
                     }
@@ -2503,69 +2497,69 @@ CreatureAI* GetAI_parasitic_shadowfiend(Creature* pCreature)
 
 void AddSC_boss_illidan()
 {
-    Script* newscript;
+    Script* pNewScript;
 
-    newscript = new Script;
-    newscript->Name = "boss_illidan_stormrage";
-    newscript->GetAI = &GetAI_boss_illidan_stormrage;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_illidan_stormrage";
+    pNewScript->GetAI = &GetAI_boss_illidan_stormrage;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_akama_illidan";
-    newscript->GetAI = &GetAI_npc_akama_at_illidan;
-    newscript->pGossipHello = &GossipHello_npc_akama_at_illidan;
-    newscript->pGossipSelect = &GossipSelect_npc_akama_at_illidan;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "npc_akama_illidan";
+    pNewScript->GetAI = &GetAI_npc_akama_at_illidan;
+    pNewScript->pGossipHello = &GossipHello_npc_akama_at_illidan;
+    pNewScript->pGossipSelect = &GossipSelect_npc_akama_at_illidan;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "boss_maiev_shadowsong";
-    newscript->GetAI = &GetAI_boss_maiev;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "boss_maiev_shadowsong";
+    pNewScript->GetAI = &GetAI_boss_maiev;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_flame_of_azzinoth";
-    newscript->GetAI = &GetAI_mob_flame_of_azzinoth;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_flame_of_azzinoth";
+    pNewScript->GetAI = &GetAI_mob_flame_of_azzinoth;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_blade_of_azzinoth";
-    newscript->GetAI = &GetAI_blade_of_azzinoth;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_blade_of_azzinoth";
+    pNewScript->GetAI = &GetAI_blade_of_azzinoth;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "gameobject_cage_trap";
-    newscript->pGOUse = &GOUse_go_cage_trap;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "gameobject_cage_trap";
+    pNewScript->pGOUse = &GOUse_go_cage_trap;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_cage_trap_trigger";
-    newscript->GetAI = &GetAI_cage_trap_trigger;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_cage_trap_trigger";
+    pNewScript->GetAI = &GetAI_cage_trap_trigger;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_shadow_demon";
-    newscript->GetAI = &GetAI_shadow_demon;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_shadow_demon";
+    pNewScript->GetAI = &GetAI_shadow_demon;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_flame_crash";
-    newscript->GetAI = &GetAI_flamecrash;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_flame_crash";
+    pNewScript->GetAI = &GetAI_flamecrash;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_demon_fire";
-    newscript->GetAI = &GetAI_demonfire;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_demon_fire";
+    pNewScript->GetAI = &GetAI_demonfire;
+    pNewScript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_blaze";
-    newscript->GetAI = &GetAI_blaze;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_blaze";
+    pNewScript->GetAI = &GetAI_blaze;
+    pNewScript->RegisterSelf();
 
     /* ** TODO dead code
-    newscript = new Script;
-    newscript->Name = "mob_parasitic_shadowfiend";
-    newscript->GetAI = &GetAI_parasitic_shadowfiend;
-    newscript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "mob_parasitic_shadowfiend";
+    pNewScript->GetAI = &GetAI_parasitic_shadowfiend;
+    pNewScript->RegisterSelf();
     */
 }

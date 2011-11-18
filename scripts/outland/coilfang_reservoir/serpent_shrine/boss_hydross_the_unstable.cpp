@@ -237,7 +237,7 @@ struct MANGOS_DLL_DECL boss_hydross_the_unstableAI : public ScriptedAI
             {
                 if (m_uiMarkOfHydross_Count <= 5)
                 {
-                    uint32 uiMarkSpell;
+                    uint32 uiMarkSpell = 0;
 
                     switch(m_uiMarkOfHydross_Count)
                     {
@@ -314,9 +314,10 @@ CreatureAI* GetAI_boss_hydross_the_unstable(Creature* pCreature)
 
 void AddSC_boss_hydross_the_unstable()
 {
-    Script *newscript;
-    newscript = new Script;
-    newscript->Name = "boss_hydross_the_unstable";
-    newscript->GetAI = &GetAI_boss_hydross_the_unstable;
-    newscript->RegisterSelf();
+    Script* pNewScript;
+
+    pNewScript = new Script;
+    pNewScript->Name = "boss_hydross_the_unstable";
+    pNewScript->GetAI = &GetAI_boss_hydross_the_unstable;
+    pNewScript->RegisterSelf();
 }
