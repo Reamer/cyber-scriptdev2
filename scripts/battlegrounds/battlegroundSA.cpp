@@ -30,9 +30,11 @@ struct MANGOS_DLL_DECL npc_sa_demolisherAI : public ScriptedAI
     void Reset()
     {
         done = false;
+        factionSet = false;
     }
 
     bool done;
+    bool factionSet;
     BattleGround *bg;
 
     void Aggro(Unit* who){ m_creature->CombatStop(); }
@@ -57,7 +59,7 @@ struct MANGOS_DLL_DECL npc_sa_demolisherAI : public ScriptedAI
                 else
                 {
                     pPlayer->EnterVehicle(vehicle);
-                    //pPlayer->CastSpell(pCreature, 60968, true);
+                    pPlayer->CastSpell(pCreature, 60968, true);
                 }
             }
         }
@@ -102,7 +104,12 @@ struct MANGOS_DLL_DECL npc_sa_demolisherAI : public ScriptedAI
 
             if (bg)
             {
-                m_creature->setFaction(bg->GetVehicleFaction(VEHICLE_SA_DEMOLISHER));
+                if (factionSet == false)
+                {
+                    m_creature->setFaction(bg->GetVehicleFaction(VEHICLE_BG_DEMOLISHER));
+                    factionSet = true;
+                }
+
                 if (mustDespawn(bg))
                     m_creature->ForcedDespawn();
             }
@@ -133,9 +140,11 @@ struct MANGOS_DLL_DECL npc_sa_cannonAI : public ScriptedAI
     void Reset()
     {
         done = false;
+        factionSet = false;
     }
 
     bool done;
+    bool factionSet;
     BattleGround *bg;
 
     void Aggro(Unit* who){ m_creature->CombatStop(); }
@@ -154,7 +163,7 @@ struct MANGOS_DLL_DECL npc_sa_cannonAI : public ScriptedAI
                 else
                 {
                     pPlayer->EnterVehicle(vehicle);
-                    //pPlayer->CastSpell(pCreature, 60968, true);
+                    pPlayer->CastSpell(pCreature, 60968, true);
                 }
             }
         }
@@ -189,8 +198,11 @@ struct MANGOS_DLL_DECL npc_sa_cannonAI : public ScriptedAI
                 }
             }
 
-            if (bg)
+            if ((bg) && (factionSet == false))
+            {
                 m_creature->setFaction(bg->GetVehicleFaction(VEHICLE_SA_CANNON));
+                factionSet = true;
+            }
         }
     }
 };

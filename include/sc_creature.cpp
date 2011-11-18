@@ -17,8 +17,15 @@ struct TSpellSummary
 
 ScriptedAI::ScriptedAI(Creature* pCreature) : CreatureAI(pCreature),
     m_bCombatMovement(true),
-    m_uiEvadeCheckCooldown(2500)
+    m_uiEvadeCheckCooldown(2500),
+    m_events(NULL)
 {}
+
+ScriptedAI::~ScriptedAI()
+{
+    if (m_events)
+        delete m_events;
+}
 
 /// This function shows if combat movement is enabled, overwrite for more info
 void ScriptedAI::GetAIInformation(ChatHandler& reader)
@@ -124,7 +131,6 @@ void ScriptedAI::EnterEvadeMode()
     m_creature->RemoveAllAuras();
     m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
-    m_creature->LoadCreatureAddon();
 
     if (m_creature->isAlive())
         m_creature->GetMotionMaster()->MoveTargetedHome();
@@ -196,7 +202,7 @@ Creature* ScriptedAI::DoSpawnCreature(uint32 uiId, float fX, float fY, float fZ,
     return m_creature->SummonCreature(uiId,m_creature->GetPositionX()+fX, m_creature->GetPositionY()+fY, m_creature->GetPositionZ()+fZ, fAngle, (TempSummonType)uiType, uiDespawntime);
 }
 
-SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 uiMechanic, SelectTarget selectTargets, uint32 uiPowerCostMin, uint32 uiPowerCostMax, float fRangeMin, float fRangeMax, SelectEffect selectEffects)
+SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 iMechanic, SelectTarget selectTargets, uint32 uiPowerCostMin, uint32 uiPowerCostMax, float fRangeMin, float fRangeMax, SelectEffect selectEffects)
 {
     //No target so we can't cast
     if (!pTarget)
@@ -238,7 +244,7 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 u
             continue;
 
         //Check for spell mechanic if specified
-        if (uiMechanic >= 0 && pTempSpell->Mechanic != uiMechanic)
+        if (iMechanic >= 0 && pTempSpell->Mechanic != (uint32)iMechanic)
             continue;
 
         //Make sure that the spell uses the requested amount of power
@@ -474,22 +480,22 @@ Player* ScriptedAI::GetPlayerAtMinimumRange(float fMinimumRange)
     return pPlayer;
 }
 
-void ScriptedAI::SetEquipmentSlots(bool bLoadDefault, int32 uiMainHand, int32 uiOffHand, int32 uiRanged)
+void ScriptedAI::SetEquipmentSlots(bool bLoadDefault, int32 iMainHand, int32 iOffHand, int32 iRanged)
 {
     if (bLoadDefault)
     {
-        m_creature->LoadEquipment(m_creature->GetCreatureInfo()->equipmentId,true);
+        m_creature->LoadEquipment(m_creature->GetCreatureInfo()->equipmentId, true);
         return;
     }
 
-    if (uiMainHand >= 0)
-        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, uint32(uiMainHand));
+    if (iMainHand >= 0)
+        m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, iMainHand);
 
-    if (uiOffHand >= 0)
-        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, uint32(uiOffHand));
+    if (iOffHand >= 0)
+        m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, iOffHand);
 
-    if (uiRanged >= 0)
-        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, uint32(uiRanged));
+    if (iRanged >= 0)
+        m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_2, iRanged);
 }
 
 void ScriptedAI::SetCombatMovement(bool bCombatMove)
@@ -506,6 +512,7 @@ enum
     NPC_JAN_ALAI                = 23578,
     NPC_SARTHARION              = 28860,
     NPC_TALON_KING_IKISS        = 18473,
+    NPC_KARGATH_BLADEFIST       = 16808,
 };
 
 bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
@@ -544,9 +551,15 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
                 return false;
             break;
         case NPC_TALON_KING_IKISS:
+        {
             float fX, fY, fZ;
             m_creature->GetRespawnCoord(fX, fY, fZ);
             if (m_creature->GetDistance2d(fX, fY) < 70.0f)
+                return false;
+            break;
+        }
+        case NPC_KARGATH_BLADEFIST:
+            if (fX < 255.0f && fX > 205.0f)
                 return false;
             break;
         default:
@@ -556,6 +569,15 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
 
     EnterEvadeMode();
     return true;
+}
+
+EventManager& ScriptedAI::Events()
+{
+    // use lazy initialization to save memory
+    if (!m_events)
+        m_events = new EventManager();
+
+    return *m_events;
 }
 
 void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
