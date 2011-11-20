@@ -80,25 +80,28 @@ void LoadDatabase()
 
 }
 
-struct TSpellSummary {
+struct TSpellSummary
+{
     uint8 Targets;                                          // set of enum SelectTarget
     uint8 Effects;                                          // set of enum SelectEffect
-}extern *SpellSummary;
+} extern *SpellSummary;
 
 MANGOS_DLL_EXPORT
 void FreeScriptLibrary()
 {
     // Free Spell Summary
-    delete []SpellSummary;
+    delete[] SpellSummary;
 
     // Free resources before library unload
-    for (SDScriptVec::const_iterator itr = m_scripts.begin(); itr != m_scripts.end(); ++itr)
+    for (SDScriptVec::const_iterator itr = m_scripts->begin(); itr != m_scripts->end(); ++itr)
         delete *itr;
 
-    m_scripts.clear();
+    delete m_scripts;
 
-    for (std::map<std::string, Script*>::iterator itr = m_scriptStorage.begin(); itr != m_scriptStorage.end(); ++itr)
+    for (SDScriptMap::const_iterator itr = m_scriptStorage->begin(); itr != m_scriptStorage->end(); ++itr)
         delete itr->second;
+
+    delete m_scriptStorage;
 
     num_sc_scripts = 0;
     SD2Database.HaltDelayThread();
@@ -139,10 +142,10 @@ void InitScriptLibrary()
     bar.step();
     outstring_log("");
 
-    // Resize script ids to needed ammount of assigned ScriptNames (from core)
-    m_scripts.resize(GetScriptIdsCount(), NULL);
+    // Initialize script ids to needed ammount of assigned ScriptNames (from core)
+    m_scripts = new SDScriptVec(GetScriptIdsCount(), NULL);
 
-    m_scriptStorage.clear();
+    m_scriptStorage = new SDScriptMap();
 
     FillSpellSummary();
 
@@ -151,7 +154,7 @@ void InitScriptLibrary()
     // Check existance scripts for all registered by core script names
     for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
     {
-        if (!m_scripts[i])
+        if (!m_scripts->at(i))
             error_log("SD2: No script found for ScriptName '%s'.", GetScriptName(i));
     }
 
@@ -185,7 +188,6 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
     }
 
     const StringTextData* pData = pSystemMgr.GetTextData(iTextEntry);
-
     if (!pData)
     {
         error_log("SD2: DoScriptText with source entry %u (TypeId=%u, guid=%u) could not find text entry %i.",
@@ -200,7 +202,18 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
     if (pData->uiSoundId)
     {
         if (GetSoundEntriesStore()->LookupEntry(pData->uiSoundId))
-            pSource->PlayDirectSound(pData->uiSoundId);
+        {
+            if (pData->uiType == CHAT_TYPE_ZONE_YELL)
+                pSource->GetMap()->PlayDirectSoundToMap(pData->uiSoundId, pSource->GetZoneId());
+            else if (pData->uiType == CHAT_TYPE_WHISPER || pData->uiType == CHAT_TYPE_BOSS_WHISPER)
+            {
+                // An error will be displayed for the text
+                if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
+                    pSource->PlayDirectSound(pData->uiSoundId, (Player*)pTarget);
+            }
+            else
+                pSource->PlayDirectSound(pData->uiSoundId);
+        }
         else
             error_log("SD2: DoScriptText entry %i tried to process invalid sound id %u.", iTextEntry, pData->uiSoundId);
     }
@@ -282,7 +295,6 @@ void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map*
     }
 
     const StringTextData* pData = pSystemMgr.GetTextData(iTextEntry);
-
     if (!pData)
     {
         error_log("SD2: DoOrSimulateScriptTextForMap with source entry %u for map %u could not find text entry %i.", uiCreatureEntry, pMap->GetId(), iTextEntry);
@@ -292,6 +304,12 @@ void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map*
     debug_log("SD2: DoOrSimulateScriptTextForMap: text entry=%i, Sound=%u, Type=%u, Language=%u, Emote=%u",
         iTextEntry, pData->uiSoundId, pData->uiType, pData->uiLanguage, pData->uiEmote);
 
+    if (pData->uiType != CHAT_TYPE_ZONE_YELL)
+    {
+        error_log("SD2: DoSimulateScriptTextForMap entry %i has not supported chat type %u.", iTextEntry, pData->uiType);
+        return;
+    }
+
     if (pData->uiSoundId)
     {
         if (GetSoundEntriesStore()->LookupEntry(pData->uiSoundId))
@@ -300,15 +318,10 @@ void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map*
             error_log("SD2: DoOrSimulateScriptTextForMap entry %i tried to process invalid sound id %u.", iTextEntry, pData->uiSoundId);
     }
 
-    if (pData->uiType == CHAT_TYPE_ZONE_YELL)
-    {
-        if (pCreatureSource)                                // If provided pointer for sayer, use direct version
-            pMap->MonsterYellToMap(pCreatureSource->GetObjectGuid(), iTextEntry, pData->uiLanguage, pTarget);
-        else                                                // Simulate yell
-            pMap->MonsterYellToMap(pInfo, iTextEntry, pData->uiLanguage, pTarget);
-    }
-    else
-        error_log("SD2: DoSimulateScriptTextForMap entry %i has not supported chat type %u.", iTextEntry, pData->uiType);
+    if (pCreatureSource)                                // If provided pointer for sayer, use direct version
+        pMap->MonsterYellToMap(pCreatureSource->GetObjectGuid(), iTextEntry, pData->uiLanguage, pTarget);
+    else                                                // Simulate yell
+        pMap->MonsterYellToMap(pInfo, iTextEntry, pData->uiLanguage, pTarget);
 }
 
 //*********************************
@@ -318,7 +331,7 @@ void Script::RegisterSelf(bool bReportError)
 {
     if (uint32 id = GetScriptId(Name.c_str()))
     {
-        m_scripts[id] = this;
+        m_scripts->at(id) = this;
         ++num_sc_scripts;
     }
     else
@@ -326,7 +339,7 @@ void Script::RegisterSelf(bool bReportError)
         if (bReportError)
             error_log("SD2: Script registering but ScriptName %s is not assigned in database. Script will not be used.", Name.c_str());
 
-        m_scriptStorage.insert(std::make_pair(Name.c_str(), this));
+        m_scriptStorage->insert(std::make_pair(Name.c_str(), this));
     }
 }
 
@@ -345,7 +358,7 @@ bool GossipHello(Player* pPlayer, Creature* pCreature)
     if (!pCreature)
         return false;
 
-    Script* pTempScript = m_scripts[pCreature->GetScriptId()];
+    Script* pTempScript = m_scripts->at(pCreature->GetScriptId());
 
     if (!pTempScript || !pTempScript->pGossipHello)
         return false;
@@ -361,7 +374,7 @@ bool GOGossipHello(Player* pPlayer, GameObject* pGo)
     if (!pGo)
         return false;
 
-    Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
+    Script* pTempScript = m_scripts->at(pGo->GetGOInfo()->ScriptId);
 
     if (!pTempScript || !pTempScript->pGossipHelloGO)
         return false;
@@ -379,7 +392,7 @@ bool GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 
     if (!pCreature)
         return false;
 
-    Script* pTempScript = m_scripts[pCreature->GetScriptId()];
+    Script* pTempScript = m_scripts->at(pCreature->GetScriptId());
 
     if (!pTempScript || !pTempScript->pGossipSelect)
         return false;
@@ -399,7 +412,7 @@ bool GOGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 ui
     if (!pGo)
         return false;
 
-    Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
+    Script* pTempScript = m_scripts->at(pGo->GetGOInfo()->ScriptId);
 
     if (!pTempScript || !pTempScript->pGossipSelectGO)
         return false;
@@ -417,7 +430,7 @@ bool GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender,
     if (!pCreature)
         return false;
 
-    Script* pTempScript = m_scripts[pCreature->GetScriptId()];
+    Script* pTempScript = m_scripts->at(pCreature->GetScriptId());
 
     if (!pTempScript || !pTempScript->pGossipSelectWithCode)
         return false;
@@ -435,7 +448,7 @@ bool GOGossipSelectWithCode(Player* pPlayer, GameObject* pGo, uint32 uiSender, u
     if (!pGo)
         return false;
 
-    Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
+    Script* pTempScript = m_scripts->at(pGo->GetGOInfo()->ScriptId);
 
     if (!pTempScript || !pTempScript->pGossipSelectGOWithCode)
         return false;
@@ -451,7 +464,7 @@ bool QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
     if (!pCreature)
         return false;
 
-    Script* pTempScript = m_scripts[pCreature->GetScriptId()];
+    Script* pTempScript = m_scripts->at(pCreature->GetScriptId());
 
     if (!pTempScript || !pTempScript->pQuestAcceptNPC)
         return false;
@@ -467,7 +480,7 @@ bool QuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
     if (!pCreature)
         return false;
 
-    Script* pTempScript = m_scripts[pCreature->GetScriptId()];
+    Script* pTempScript = m_scripts->at(pCreature->GetScriptId());
 
     if (!pTempScript || !pTempScript->pQuestRewardedNPC)
         return false;
@@ -480,7 +493,7 @@ bool QuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 MANGOS_DLL_EXPORT
 uint32 GetNPCDialogStatus(Player* pPlayer, Creature* pCreature)
 {
-    Script* pTempScript = m_scripts[pCreature->GetScriptId()];
+    Script* pTempScript = m_scripts->at(pCreature->GetScriptId());
 
     if (!pTempScript || !pTempScript->pDialogStatusNPC)
         return 100;
@@ -496,7 +509,7 @@ uint32 GetGODialogStatus(Player* pPlayer, GameObject* pGo)
     if (!pGo)
         return false;
 
-    Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
+    Script* pTempScript = m_scripts->at(pGo->GetGOInfo()->ScriptId);
 
     if (!pTempScript || !pTempScript->pDialogStatusGO)
         return 100;
@@ -512,7 +525,7 @@ bool ItemQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
     if (!pItem)
         return false;
 
-    Script* pTempScript = m_scripts[pItem->GetProto()->ScriptId];
+    Script* pTempScript = m_scripts->at(pItem->GetProto()->ScriptId);
 
     if (!pTempScript || !pTempScript->pQuestAcceptItem)
         return false;
@@ -528,7 +541,7 @@ bool GOUse(Player* pPlayer, GameObject* pGo)
     if (!pGo)
         return false;
 
-    Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
+    Script* pTempScript = m_scripts->at(pGo->GetGOInfo()->ScriptId);
 
     if (!pTempScript || !pTempScript->pGOUse)
         return false;
@@ -542,7 +555,7 @@ bool GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
     if (!pGo)
         return false;
 
-    Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
+    Script* pTempScript = m_scripts->at(pGo->GetGOInfo()->ScriptId);
 
     if (!pTempScript || !pTempScript->pQuestAcceptGO)
         return false;
@@ -558,7 +571,7 @@ bool GOQuestRewarded(Player* pPlayer, GameObject* pGo, Quest const* pQuest)
     if (!pGo)
         return false;
 
-    Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
+    Script* pTempScript = m_scripts->at(pGo->GetGOInfo()->ScriptId);
 
     if (!pTempScript || !pTempScript->pQuestRewardedGO)
         return false;
@@ -571,7 +584,7 @@ bool GOQuestRewarded(Player* pPlayer, GameObject* pGo, Quest const* pQuest)
 MANGOS_DLL_EXPORT
 bool AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 {
-    Script* pTempScript = m_scripts[GetAreaTriggerScriptId(atEntry->id)];
+    Script* pTempScript = m_scripts->at(GetAreaTriggerScriptId(atEntry->id));
 
     if (!pTempScript || !pTempScript->pAreaTrigger)
         return false;
@@ -582,7 +595,7 @@ bool AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 MANGOS_DLL_EXPORT
 bool ProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)
 {
-    Script* pTempScript = m_scripts[GetEventIdScriptId(uiEventId)];
+    Script* pTempScript = m_scripts->at(GetEventIdScriptId(uiEventId));
 
     if (!pTempScript || !pTempScript->pProcessEventId)
         return false;
@@ -597,7 +610,7 @@ CreatureAI* GetCreatureAI(Creature* pCreature)
     if (!pCreature)
         return false;
 
-    Script* pTempScript = m_scripts[pCreature->GetScriptId()];
+    Script* pTempScript = m_scripts->at(pCreature->GetScriptId());
 
     if (!pTempScript || !pTempScript->GetAI)
         return NULL;
@@ -611,7 +624,7 @@ bool ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
     if (!pItem)
         return false;
 
-    Script* pTempScript = m_scripts[pItem->GetProto()->ScriptId];
+    Script* pTempScript = m_scripts->at(pItem->GetProto()->ScriptId);
 
     if (!pTempScript || !pTempScript->pItemUse)
         return false;
@@ -625,7 +638,7 @@ bool EffectDummyCreature(Unit* pCaster, uint32 spellId, SpellEffectIndex effInde
     if (!pTarget)
         return false;
 
-    Script* pTempScript = m_scripts[pTarget->GetScriptId()];
+    Script* pTempScript = m_scripts->at(pTarget->GetScriptId());
 
     if (!pTempScript || !pTempScript->pEffectDummyNPC)
         return false;
@@ -639,7 +652,7 @@ bool EffectDummyGameObject(Unit* pCaster, uint32 spellId, SpellEffectIndex effIn
     if (!pTarget)
         return false;
 
-    Script* pTempScript = m_scripts[pTarget->GetGOInfo()->ScriptId];
+    Script* pTempScript = m_scripts->at(pTarget->GetGOInfo()->ScriptId);
 
     if (!pTempScript || !pTempScript->pEffectDummyGO)
         return false;
@@ -653,7 +666,7 @@ bool EffectDummyItem(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, I
     if (!pTarget)
         return false;
 
-    Script* pTempScript = m_scripts[pTarget->GetProto()->ScriptId];
+    Script* pTempScript = m_scripts->at(pTarget->GetProto()->ScriptId);
 
     if (!pTempScript || !pTempScript->pEffectDummyItem)
         return false;
@@ -664,7 +677,7 @@ bool EffectDummyItem(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, I
 MANGOS_DLL_EXPORT
 bool AuraDummy(Aura const* pAura, bool bApply)
 {
-    Script* pTempScript = m_scripts[((Creature*)pAura->GetTarget())->GetScriptId()];
+    Script* pTempScript = m_scripts->at(((Creature*)pAura->GetTarget())->GetScriptId());
 
     if (!pTempScript || !pTempScript->pEffectAuraDummy)
         return false;
@@ -675,7 +688,7 @@ bool AuraDummy(Aura const* pAura, bool bApply)
 MANGOS_DLL_EXPORT
 InstanceData* CreateInstanceData(Map* pMap)
 {
-    Script* pTempScript = m_scripts[pMap->GetScriptId()];
+    Script* pTempScript = m_scripts->at(pMap->GetScriptId());
 
     if (!pTempScript || !pTempScript->GetInstanceData)
         return NULL;
@@ -685,8 +698,8 @@ InstanceData* CreateInstanceData(Map* pMap)
 
 Script* GetScriptByName(std::string scriptName)
 {
-    std::map<std::string, Script*>::const_iterator itr = m_scriptStorage.find(scriptName);
-    if (itr != m_scriptStorage.end())
+    SDScriptMap::const_iterator itr = m_scriptStorage->find(scriptName);
+    if (itr != m_scriptStorage->end())
         return itr->second;
     else
         return NULL;
