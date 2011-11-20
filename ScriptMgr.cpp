@@ -15,14 +15,18 @@
 #include "World.h"
 
 typedef std::vector<Script*> SDScriptVec;
+typedef std::map<std::string, Script*> SDScriptMap;
+
 int num_sc_scripts;
-SDScriptVec m_scripts;
+SDScriptVec *m_scripts = NULL;
+SDScriptMap *m_scriptStorage = NULL;    // Not registered scripts storage
 
 Config SD2Config;
 
 /**********************************************************************
 +additions for windows compiler
 **********************************************************************/
+#ifdef _WIN32
 template<> bool MaNGOS::Singleton<World>::si_destroyed;
 template<> bool MaNGOS::Singleton<ObjectMgr>::si_destroyed;
 template<> World *MaNGOS::Singleton<World>::si_instance;
@@ -35,14 +39,13 @@ World::~World()
 ObjectMgr::~ObjectMgr()
 {
 }
+#endif
 /***********************************************************************/
 
 QueryResult* strSD2Pquery(char* str)
 {
-return SD2Database.Query(str);
+    return SD2Database.Query(str);
 }
-// Not registered scripts storage
-std::map<std::string, Script*> m_scriptStorage;
 
 void FillSpellSummary();
 
