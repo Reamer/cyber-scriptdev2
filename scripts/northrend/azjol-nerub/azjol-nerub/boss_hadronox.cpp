@@ -51,17 +51,17 @@ struct MANGOS_DLL_DECL boss_hadronoxAI : public ScriptedAI
     instance_azjol_nerub* m_pInstance;
     bool m_bIsRegularMode;
 
-    uint32 LeechPoisonTimer;
-    uint32 ArmorPenetrationTimer;
-    uint32 AcidCloudTimer;
-    uint32 WebGrabTimer;
+    uint32 m_uiLeechPoisonTimer;
+    uint32 m_uiArmorPenetrationTimer;
+    uint32 m_uiAcidCloudTimer;
+    uint32 m_uiWebGrabTimer;
 
     void Reset()
     {
-        LeechPoisonTimer        = 2000;
-        ArmorPenetrationTimer   = 4000;
-        AcidCloudTimer          = 6000;
-        WebGrabTimer            = 15000;
+        m_uiLeechPoisonTimer        = 2000;
+        m_uiArmorPenetrationTimer   = 4000;
+        m_uiAcidCloudTimer          = 6000;
+        m_uiWebGrabTimer            = 15000;
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -69,38 +69,40 @@ struct MANGOS_DLL_DECL boss_hadronoxAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (LeechPoisonTimer < uiDiff)
+        if (m_uiLeechPoisonTimer < uiDiff)
         {
-            if (Unit* pVictim = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_LEECH_POISON : SPELL_LEECH_POISON_H);
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LEECH_POISON : SPELL_LEECH_POISON_H) == CAST_OK)
+                m_uiLeechPoisonTimer = urand(12000, 13000);
+        }
+        else
+            m_uiLeechPoisonTimer -= uiDiff;
 
-            LeechPoisonTimer = urand(12000, 13000);
-        }else LeechPoisonTimer -= uiDiff;
-
-        if (ArmorPenetrationTimer < uiDiff)
+        if (m_uiArmorPenetrationTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARMOR_PENETRATION);
-            ArmorPenetrationTimer = urand(7000, 11000);
-        }else ArmorPenetrationTimer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARMOR_PENETRATION) == CAST_OK)
+                m_uiArmorPenetrationTimer = urand(7000, 11000);
+        }
+        else
+            m_uiArmorPenetrationTimer -= uiDiff;
 
-        if (AcidCloudTimer < uiDiff)
+        if (m_uiAcidCloudTimer < uiDiff)
         {
-            if (Unit* pVictim = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                if (pVictim->GetTypeId() == TYPEID_PLAYER)
-                {
-                    DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_ACID_CLOUD : SPELL_ACID_CLOUD_H);
-                    AcidCloudTimer = urand(8000, 10000);
-                }
-        }else AcidCloudTimer -= uiDiff;
-
-        if (WebGrabTimer < uiDiff)
-        {
-            if (Unit* pVictim = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pVictim = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER))
             {
-                DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_WEB_GRAB : SPELL_WEB_GRAB_H);
-                WebGrabTimer = urand(16000, 20000);
+                if (DoCastSpellIfCan(pVictim, m_bIsRegularMode ? SPELL_ACID_CLOUD : SPELL_ACID_CLOUD_H) == CAST_OK)
+                    m_uiAcidCloudTimer = urand(8000, 10000);
             }
-        }else WebGrabTimer -= uiDiff;
+        }
+        else
+            m_uiAcidCloudTimer -= uiDiff;
+
+        if (m_uiWebGrabTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WEB_GRAB : SPELL_WEB_GRAB_H) == CAST_OK)
+                m_uiWebGrabTimer = urand(16000, 20000);
+        }
+        else
+            m_uiWebGrabTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

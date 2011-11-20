@@ -1,61 +1,60 @@
-/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/> 
-* This program is free software; you can redistribute it and/or modify 
-* it under the terms of the GNU General Public License as published by 
-* the Free Software Foundation; either version 2 of the License, or 
-* (at your option) any later version. 
-* 
-* This program is distributed in the hope that it will be useful, 
-* but WITHOUT ANY WARRANTY; without even the implied warranty of 
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-* GNU General Public License for more details. 
-* 
-* You should have received a copy of the GNU General Public License 
-* along with this program; if not, write to the Free Software 
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-*/ 
- 
-/* ScriptData 
-SDName: Boss_Volazj 
-SD%Complete: 20% 
-SDComment: 
-SDCategory: Ahn'kahet 
-EndScriptData */ 
- 
+/* Copyright (C) 2006 - 2011 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+/* ScriptData
+SDName: Boss_Volazj
+SD%Complete: 20%
+SDComment:
+SDCategory: Ahn'kahet
+EndScriptData */
+
 #include "precompiled.h"
 #include "ahnkahet.h"
 #include "Item.h"
 
-
-enum 
-{ 
-    SAY_AGGRO                       = -1619033, 
-    SAY_INSANITY                    = -1619034, 
-    SAY_SLAY_1                      = -1619035, 
-    SAY_SLAY_2                      = -1619036, 
-    SAY_SLAY_3                      = -1619037, 
-    SAY_DEATH                       = -1619038, 
-    WHISPER_AGGRO                   = -1619039, 
-    WHISPER_INSANITY                = -1619040, 
-    WHISPER_SLAY_1                  = -1619041, 
-    WHISPER_SLAY_2                  = -1619042, 
-    WHISPER_SLAY_3                  = -1619043, 
-    WHISPER_DEATH                   = -1619044, 
+enum
+{
+    SAY_AGGRO                       = -1619033,
+    SAY_INSANITY                    = -1619034,
+    SAY_SLAY_1                      = -1619035,
+    SAY_SLAY_2                      = -1619036,
+    SAY_SLAY_3                      = -1619037,
+    SAY_DEATH                       = -1619038,
+    WHISPER_AGGRO                   = -1619039,
+    WHISPER_INSANITY                = -1619040,
+    WHISPER_SLAY_1                  = -1619041,
+    WHISPER_SLAY_2                  = -1619042,
+    WHISPER_SLAY_3                  = -1619043,
+    WHISPER_DEATH                   = -1619044,
 
     SPELL_INSANITY                  = 57496,
-    
+
     SPELL_INSANITY_PHASE_16         = 57508,
     SPELL_INSANITY_PHASE_32         = 57509,
     SPELL_INSANITY_PHASE_64         = 57510,
     SPELL_INSANITY_PHASE_128        = 57511,
     SPELL_INSANITY_PHASE_256        = 57512,
-    
-    SPELL_SHIVER                    = 57949, 
-    SPELL_SHIVER_H                  = 59978, 
- 
-    SPELL_SHADOW_BOLT_SALVE         = 57942, 
-    SPELL_SHADOW_BOLT_SALVE_H       = 59975, 
- 
-    SPELL_MIND_FLAY                 = 57941, 
+
+    SPELL_SHIVER                    = 57949,
+    SPELL_SHIVER_H                  = 59978,
+
+    SPELL_SHADOW_BOLT_SALVE         = 57942,
+    SPELL_SHADOW_BOLT_SALVE_H       = 59975,
+
+    SPELL_MIND_FLAY                 = 57941,
     SPELL_MIND_FLAY_H               = 59974,
 
     SPELL_CLONE                     = 60352,
@@ -65,139 +64,139 @@ enum
     CLONE_H                         = 31627,
     FAC_HOSTILE                     = 16,
     ACHIEVEMENT_QUICK_DEMISE        = 1862
-}; 
- 
+};
+
 enum clonehealth
-{ 
-    CLONE_HEALTH_DRUID      = 6101, 
-    CLONE_HEALTH_DRUID_H    = CLONE_HEALTH_DRUID * 3, 
-    CLONE_HEALTH_PRIEST     = 5204, 
-    CLONE_HEALTH_PRIEST_H   = CLONE_HEALTH_PRIEST * 3, 
-    CLONE_HEALTH_PALA       = 7934, 
-    CLONE_HEALTH_PALA_H     = CLONE_HEALTH_PALA * 3, 
-    CLONE_HEALTH_HUNT       = 7399, 
-    CLONE_HEALTH_HUNT_H     = CLONE_HEALTH_HUNT * 3, 
-    CLONE_HEALTH_SHAMAN     = 7655, 
-    CLONE_HEALTH_SHAMAN_H   = CLONE_HEALTH_SHAMAN * 3, 
-    CLONE_HEALTH_ROGUE      = 6530, 
-    CLONE_HEALTH_ROGUE_H    = CLONE_HEALTH_ROGUE * 3, 
-    CLONE_HEALTH_MAGE       = 5129, 
-    CLONE_HEALTH_MAGE_H     = CLONE_HEALTH_MAGE * 3, 
-    CLONE_HEALTH_WARRIOR    = 10012, 
-    CLONE_HEALTH_WARRIOR_H  = CLONE_HEALTH_WARRIOR * 3, 
-    CLONE_HEALTH_WARLOCK    = 5477, 
-    CLONE_HEALTH_WARLOCK_H  = CLONE_HEALTH_WARLOCK * 3, 
-    CLONE_HEALTH_DK         = 9883, 
-    CLONE_HEALTH_DK_H       = CLONE_HEALTH_DK * 3, 
-}; 
- 
+{
+    CLONE_HEALTH_DRUID      = 6101,
+    CLONE_HEALTH_DRUID_H    = CLONE_HEALTH_DRUID * 3,
+    CLONE_HEALTH_PRIEST     = 5204,
+    CLONE_HEALTH_PRIEST_H   = CLONE_HEALTH_PRIEST * 3,
+    CLONE_HEALTH_PALA       = 7934,
+    CLONE_HEALTH_PALA_H     = CLONE_HEALTH_PALA * 3,
+    CLONE_HEALTH_HUNT       = 7399,
+    CLONE_HEALTH_HUNT_H     = CLONE_HEALTH_HUNT * 3,
+    CLONE_HEALTH_SHAMAN     = 7655,
+    CLONE_HEALTH_SHAMAN_H   = CLONE_HEALTH_SHAMAN * 3,
+    CLONE_HEALTH_ROGUE      = 6530,
+    CLONE_HEALTH_ROGUE_H    = CLONE_HEALTH_ROGUE * 3,
+    CLONE_HEALTH_MAGE       = 5129,
+    CLONE_HEALTH_MAGE_H     = CLONE_HEALTH_MAGE * 3,
+    CLONE_HEALTH_WARRIOR    = 10012,
+    CLONE_HEALTH_WARRIOR_H  = CLONE_HEALTH_WARRIOR * 3,
+    CLONE_HEALTH_WARLOCK    = 5477,
+    CLONE_HEALTH_WARLOCK_H  = CLONE_HEALTH_WARLOCK * 3,
+    CLONE_HEALTH_DK         = 9883,
+    CLONE_HEALTH_DK_H       = CLONE_HEALTH_DK * 3,
+};
 
-/*###### 
-## boss_volazj 
-######*/ 
- 
-struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI 
-{ 
-    boss_volazjAI(Creature* pCreature) : ScriptedAI(pCreature) 
-    { 
-        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData(); 
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty(); 
-        Reset(); 
-    } 
- 
-    instance_ahnkahet* m_pInstance; 
-    bool m_bIsRegularMode; 
- 
-    bool m_bIsInInsanity; 
-    bool phase66; 
-    bool phase33; 
-    bool clone16;
-    bool clone32;
-    bool clone64;
-    bool clone128;
-    bool clone256;
- 
-    GUIDList p_lCloneGuid; 
-    GUIDList p_lClone16Guid;
-    GUIDList p_lClone32Guid;
-    GUIDList p_lClone64Guid;
-    GUIDList p_lClone128Guid;
-    GUIDList p_lClone256Guid;
- 
-    uint32 insanityEndTimer; 
-    uint32 insanityTimer; 
-    uint32 shadowBoltSalveTimer; 
-    uint32 shiverTimer; 
-    uint32 mindFlayTimer; 
-    uint32 achievementTimer;
 
-    uint8  count;
-    float m_fHealthPercent;
- 
-    void Reset() 
+/*######
+## boss_volazj
+######*/
+
+struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
+{
+    boss_volazjAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
-        insanityEndTimer = 1000; 
-        achievementTimer = 120000; // 2minutes
-        shadowBoltSalveTimer = 6000;
-        shiverTimer = 13000;
-        mindFlayTimer = 9000;
+        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+
+    instance_ahnkahet* m_pInstance;
+    bool m_bIsRegularMode;
+
+    bool m_bIsInInsanity;
+    bool m_bPhase66;
+    bool m_bPhase33;
+    bool m_bClone16;
+    bool m_bClone32;
+    bool m_bClone64;
+    bool m_bClone128;
+    bool m_bClone256;
+
+    GUIDList p_lCloneGuid;
+    GUIDList p_lm_bClone16Guid;
+    GUIDList p_lm_bClone32Guid;
+    GUIDList p_lm_bClone64Guid;
+    GUIDList p_lm_bClone128Guid;
+    GUIDList p_lm_bClone256Guid;
+
+    uint32 m_uiInsanityEndTimer;
+    uint32 m_uiInsanityTimer;
+    uint32 m_uiShadowBoltSalveTimer;
+    uint32 m_uiShiverTimer;
+    uint32 m_uiMindFlayTimer;
+    uint32 m_uiAchievementTimer;
+
+    uint8 m_uiCount;
+    float m_fHealthPercent;
+
+    void Reset()
+    {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_uiInsanityEndTimer = 1000;
+        m_uiAchievementTimer = 120000; // 2minutes
+        m_uiShadowBoltSalveTimer = 6000;
+        m_uiShiverTimer = 13000;
+        m_uiMindFlayTimer = 9000;
         p_lCloneGuid.clear();
-        p_lClone16Guid.clear();
-        p_lClone32Guid.clear();
-        p_lClone64Guid.clear();
-        p_lClone128Guid.clear();
-        p_lClone256Guid.clear();
+        p_lm_bClone16Guid.clear();
+        p_lm_bClone32Guid.clear();
+        p_lm_bClone64Guid.clear();
+        p_lm_bClone128Guid.clear();
+        p_lm_bClone256Guid.clear();
 
         m_bIsInInsanity = false;
-        phase66 = false;
-        phase33 = false;
-        clone16 = false;
-        clone32 = false;
-        clone64 = false;
-        clone128 = false;
-        clone256 = false;
+        m_bPhase66 = false;
+        m_bPhase33 = false;
+        m_bClone16 = false;
+        m_bClone32 = false;
+        m_bClone64 = false;
+        m_bClone128 = false;
+        m_bClone256 = false;
 
-        count   = 0;
+        m_uiCount   = 0;
         m_fHealthPercent = 66.0f;
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, NOT_STARTED);
         RemoveInsanity();
-    } 
- 
-    void Aggro(Unit* pWho) 
-    { 
+    }
+
+    void Aggro(Unit* pWho)
+    {
         DoScriptText(SAY_AGGRO, m_creature);
 
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
-        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if (Player* target = itr->getSource()) 
-                DoScriptText(WHISPER_AGGRO,m_creature,target);
-        
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            if (Player* pTarget = itr->getSource())
+                DoScriptText(WHISPER_AGGRO,m_creature,pTarget);
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VOLAZJ, IN_PROGRESS);
-    } 
- 
-    void KilledUnit(Unit* pVictim) 
-    { 
+    }
+
+    void KilledUnit(Unit* pVictim)
+    {
         int32 textId = 0;
 
         switch(urand(0, 2)) 
-        { 
-            case 0: textId = SAY_SLAY_1; break; 
-            case 1: textId = SAY_SLAY_2; break; 
-            case 2: textId = SAY_SLAY_3; break; 
-        } 
+        {
+            case 0: textId = SAY_SLAY_1; break;
+            case 1: textId = SAY_SLAY_2; break;
+            case 2: textId = SAY_SLAY_3; break;
+        }
 
         DoScriptText(textId,m_creature);
 
         Map* pMap = m_creature->GetMap();
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-            if (Player* target = itr->getSource()) 
-                DoScriptText(textId-6,m_creature,target);
+            if (Player* pTarget = itr->getSource()) 
+                DoScriptText(textId-6,m_creature,pTarget);
     } 
  
     void JustDied(Unit* pKiller) 
@@ -213,58 +212,58 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         Map::PlayerList const &players = pMap->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
         { 
-            if (Player* target = itr->getSource()) 
+            if (Player* pTarget = itr->getSource()) 
             { 
-                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
-                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
-                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_64);
-                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_128);
-                target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_256);
+                pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
+                pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
+                pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_64);
+                pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_128);
+                pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_256);
             } 
         }
     }
 
-    void SpellHitTarget(Unit *target, const SpellEntry *spell)
+    void SpellHitpTarget(Unit *pTarget, const SpellEntry *spell)
     {
-        if (spell->Id == SPELL_INSANITY && target->GetTypeId() == TYPEID_PLAYER)
+        if (spell->Id == SPELL_INSANITY && pTarget->GetTypeId() == TYPEID_PLAYER)
         {
-            switch(count)
+            switch(m_uiCount)
             {
                 case 0:
                 {
-                    target->CastSpell(target, SPELL_INSANITY_PHASE_16, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                    CreateClonesForUnitInPhase((Player*)target, 16);
+                    pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_16, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)pTarget, 16);
                     break;
                 }
                 case 1:
                 {
-                    target->CastSpell(target, SPELL_INSANITY_PHASE_32, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                    CreateClonesForUnitInPhase((Player*)target, 32);
+                    pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_32, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)pTarget, 32);
                     break;
                 }
                 case 2:
                 {
-                    target->CastSpell(target, SPELL_INSANITY_PHASE_64, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                    CreateClonesForUnitInPhase((Player*)target, 64);
+                    pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_64, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)pTarget, 64);
                     break;
                 }
                 case 3:
                 {
-                    target->CastSpell(target, SPELL_INSANITY_PHASE_128, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                    CreateClonesForUnitInPhase((Player*)target, 128);
+                    pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_128, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)pTarget, 128);
                     break;
                 }
                 case 4:
                 {
-                    target->CastSpell(target, SPELL_INSANITY_PHASE_256, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
-                    CreateClonesForUnitInPhase((Player*)target, 256);
+                    pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_256, true, NULL, NULL, m_creature->GetObjectGuid(), NULL);
+                    CreateClonesForUnitInPhase((Player*)pTarget, 256);
                     break;
                 }
                 default:
-                    target->MonsterSay("Fehler",0);
+                    pTarget->MonsterSay("Fehler",0);
             }
             m_bIsInInsanity = true;
-            count++;
+            m_uiCount++;
         }
     }
 
@@ -391,23 +390,23 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                         {
                             case 16:
                                 pClone->SetPhaseMask(16, true);
-                                p_lClone16Guid.push_back(pClone->GetObjectGuid());
+                                p_lm_bClone16Guid.push_back(pClone->GetObjectGuid());
                                 break;
                             case 32:
                                 pClone->SetPhaseMask(32, true);
-                                p_lClone32Guid.push_back(pClone->GetObjectGuid());
+                                p_lm_bClone32Guid.push_back(pClone->GetObjectGuid());
                                 break;
                             case 64:
                                 pClone->SetPhaseMask(64, true);
-                                p_lClone64Guid.push_back(pClone->GetObjectGuid());
+                                p_lm_bClone64Guid.push_back(pClone->GetObjectGuid());
                                 break;
                             case 128:
                                 pClone->SetPhaseMask(128, true);
-                                p_lClone128Guid.push_back(pClone->GetObjectGuid());
+                                p_lm_bClone128Guid.push_back(pClone->GetObjectGuid());
                                 break;
                             case 256:
                                 pClone->SetPhaseMask(256, true);
-                                p_lClone256Guid.push_back(pClone->GetObjectGuid());
+                                p_lm_bClone256Guid.push_back(pClone->GetObjectGuid());
                                 break;
                             default:
                                 pTargetPhase->MonsterSay("Fehler in der Phasenzuweisung.", 0);
@@ -435,11 +434,11 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         return false;
     }
 
-    bool clone16Alive()
+    bool m_bClone16Alive()
     {
-        if (!p_lClone16Guid.empty() && m_pInstance)
+        if (!p_lm_bClone16Guid.empty() && m_pInstance)
         {
-            for (GUIDList::iterator itr = p_lClone16Guid.begin(); itr != p_lClone16Guid.end(); ++itr)
+            for (GUIDList::iterator itr = p_lm_bClone16Guid.begin(); itr != p_lm_bClone16Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -452,11 +451,11 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         return false;
     }
 
-    bool clone32Alive()
+    bool m_bClone32Alive()
     {
-        if (!p_lClone32Guid.empty() && m_pInstance)
+        if (!p_lm_bClone32Guid.empty() && m_pInstance)
         {
-            for (GUIDList::iterator itr = p_lClone32Guid.begin(); itr != p_lClone32Guid.end(); ++itr)
+            for (GUIDList::iterator itr = p_lm_bClone32Guid.begin(); itr != p_lm_bClone32Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -469,11 +468,11 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         return false;
     }
 
-    bool clone64Alive()
+    bool m_bClone64Alive()
     {
-        if (!p_lClone64Guid.empty() && m_pInstance)
+        if (!p_lm_bClone64Guid.empty() && m_pInstance)
         {
-            for (GUIDList::iterator itr = p_lClone64Guid.begin(); itr != p_lClone64Guid.end(); ++itr)
+            for (GUIDList::iterator itr = p_lm_bClone64Guid.begin(); itr != p_lm_bClone64Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -486,11 +485,11 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         return false;
     }
 
-    bool clone128Alive()
+    bool m_bClone128Alive()
     {
-        if (!p_lClone128Guid.empty() && m_pInstance)
+        if (!p_lm_bClone128Guid.empty() && m_pInstance)
         {
-            for (GUIDList::iterator itr = p_lClone128Guid.begin(); itr != p_lClone128Guid.end(); ++itr)
+            for (GUIDList::iterator itr = p_lm_bClone128Guid.begin(); itr != p_lm_bClone128Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -503,11 +502,11 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
         return false;
     }
 
-    bool clone256Alive()
+    bool m_bClone256Alive()
     {
-        if (!p_lClone256Guid.empty() && m_pInstance)
+        if (!p_lm_bClone256Guid.empty() && m_pInstance)
         {
-            for (GUIDList::iterator itr = p_lClone256Guid.begin(); itr != p_lClone256Guid.end(); ++itr)
+            for (GUIDList::iterator itr = p_lm_bClone256Guid.begin(); itr != p_lm_bClone256Guid.end(); ++itr)
             {
                 if (Creature* pClone = m_pInstance->instance->GetCreature(*itr))
                 {
@@ -528,153 +527,153 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
  
         if (m_bIsInInsanity) 
         { 
-            if (insanityEndTimer < uiDiff) 
+            if (m_uiInsanityEndTimer < uiDiff) 
             { 
                 if (!cloneAlive()) 
                 {  
                     m_bIsInInsanity = false; 
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim()); 
                     m_creature->Attack(m_creature->getVictim(), true); 
-                    insanityEndTimer = 1000; 
-                    clone16 = clone32 = clone64 = clone128 = clone256 = false;
+                    m_uiInsanityEndTimer = 1000; 
+                    m_bClone16 = m_bClone32 = m_bClone64 = m_bClone128 = m_bClone256 = false;
                     return;
                 }else 
-                    insanityEndTimer = 1000; 
-            }else insanityEndTimer -= uiDiff;
+                    m_uiInsanityEndTimer = 1000; 
+            }else m_uiInsanityEndTimer -= uiDiff;
 
-            if (!clone16Alive() && !clone16)
+            if (!m_bClone16Alive() && !m_bClone16)
             {
                 Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
                 { 
-                    if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+                    if (Unit *pTarget = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
                     { 
-                        if (target->HasAura(SPELL_INSANITY_PHASE_16))
+                        if (pTarget->HasAura(SPELL_INSANITY_PHASE_16))
                         {
-                            if (!clone32)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
-                            else if (!clone64)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
-                            else if (!clone128)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
-                            else if (!clone256)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
+                            if (!m_bClone32)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_32, true);
+                            else if (!m_bClone64)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_64, true);
+                            else if (!m_bClone128)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_128, true);
+                            else if (!m_bClone256)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_256, true);
+                            pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_16);
                         }
                     } 
                 }
 
-                clone16 = true;
+                m_bClone16 = true;
             }
 
-            if (!clone32Alive() && !clone32)
+            if (!m_bClone32Alive() && !m_bClone32)
             {
                 Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
                 { 
-                    if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+                    if (Unit *pTarget = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
                     { 
-                        if (target->HasAura(SPELL_INSANITY_PHASE_32))
+                        if (pTarget->HasAura(SPELL_INSANITY_PHASE_32))
                         {
-                            if (!clone16)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
-                            else if (!clone64)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
-                            else if (!clone128)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
-                            else if (!clone256)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
+                            if (!m_bClone16)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_16, true);
+                            else if (!m_bClone64)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_64, true);
+                            else if (!m_bClone128)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_128, true);
+                            else if (!m_bClone256)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_256, true);
+                            pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_32);
                         }
                     } 
                 }
 
-                clone32 = true;
+                m_bClone32 = true;
             }
 
-            if (!clone64Alive() && !clone64)
+            if (!m_bClone64Alive() && !m_bClone64)
             {
                 Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
                 { 
-                    if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+                    if (Unit *pTarget = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
                     { 
-                        if (target->HasAura(SPELL_INSANITY_PHASE_64))
+                        if (pTarget->HasAura(SPELL_INSANITY_PHASE_64))
                         {
-                            if (!clone16)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
-                            else if (!clone32)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
-                            else if (!clone128)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
-                            else if (!clone256)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_64);
+                            if (!m_bClone16)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_16, true);
+                            else if (!m_bClone32)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_32, true);
+                            else if (!m_bClone128)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_128, true);
+                            else if (!m_bClone256)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_256, true);
+                            pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_64);
                         }
                     } 
                 }
 
-                clone64 = true;
+                m_bClone64 = true;
             }
 
-            if (!clone128Alive() && !clone128)
+            if (!m_bClone128Alive() && !m_bClone128)
             {
                 Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
                 { 
-                    if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+                    if (Unit *pTarget = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
                     { 
-                        if (target->HasAura(SPELL_INSANITY_PHASE_128))
+                        if (pTarget->HasAura(SPELL_INSANITY_PHASE_128))
                         {
-                            if (!clone16)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
-                            else if (!clone32)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
-                            else if (!clone64)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
-                            else if (!clone256)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_256, true);
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_128);
+                            if (!m_bClone16)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_16, true);
+                            else if (!m_bClone32)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_32, true);
+                            else if (!m_bClone64)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_64, true);
+                            else if (!m_bClone256)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_256, true);
+                            pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_128);
                         }
                     } 
                 }
 
-                clone128 = true;
+                m_bClone128 = true;
             }
 
-            if (!clone256Alive() && !clone256)
+            if (!m_bClone256Alive() && !m_bClone256)
             {
                 Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
                 { 
-                    if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+                    if (Unit *pTarget = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
                     { 
-                        if (target->HasAura(SPELL_INSANITY_PHASE_256))
+                        if (pTarget->HasAura(SPELL_INSANITY_PHASE_256))
                         {
-                            if (!clone16)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_16, true);
-                            else if (!clone32)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_32, true);
-                            else if (!clone64)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_64, true);
-                            else if (!clone128)
-                                target->CastSpell(target, SPELL_INSANITY_PHASE_128, true);
-                            target->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_256);
+                            if (!m_bClone16)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_16, true);
+                            else if (!m_bClone32)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_32, true);
+                            else if (!m_bClone64)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_64, true);
+                            else if (!m_bClone128)
+                                pTarget->CastSpell(pTarget, SPELL_INSANITY_PHASE_128, true);
+                            pTarget->RemoveAurasDueToSpell(SPELL_INSANITY_PHASE_256);
                         }
                     } 
                 }
 
-                clone256 = true;
+                m_bClone256 = true;
             }
         } 
         else 
         { 
-            if (m_creature->GetHealthPercent() < m_fHealthPercent && (!phase66 || !phase33)) 
+            if (m_creature->GetHealthPercent() < m_fHealthPercent && (!m_bPhase66 || !m_bPhase33)) 
             {
                 m_fHealthPercent = m_fHealthPercent - 33.0f;
                 DoScriptText(SAY_INSANITY, m_creature);
@@ -682,39 +681,39 @@ struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
                 Map* pMap = m_creature->GetMap();
                 Map::PlayerList const &players = pMap->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr) 
-                    if (Unit *target = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
-                        DoScriptText(WHISPER_INSANITY,m_creature,target);
+                    if (Unit *pTarget = m_creature->GetMap()->GetUnit(itr->getSource()->GetGUID())) 
+                        DoScriptText(WHISPER_INSANITY,m_creature,pTarget);
 
                 m_creature->InterruptNonMeleeSpells(true);
                 
-                if (phase66)
-                    phase33 = true;
+                if (m_bPhase66)
+                    m_bPhase33 = true;
                 else
-                    phase66 = true;
+                    m_bPhase66 = true;
 
                 DoCastSpellIfCan(m_creature, SPELL_INSANITY); 
-                count = 0;
+                m_uiCount = 0;
                 m_creature->GetMotionMaster()->Clear(); 
                 m_creature->GetMotionMaster()->MoveIdle(); 
             } 
  
-            if (mindFlayTimer < uiDiff) 
+            if (m_uiMindFlayTimer < uiDiff) 
             { 
                 if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), m_bIsRegularMode ? SPELL_MIND_FLAY : SPELL_MIND_FLAY_H) == CAST_OK)
-                    mindFlayTimer = urand(10000, 12000); 
-            }else mindFlayTimer -= uiDiff; 
+                    m_uiMindFlayTimer = urand(10000, 12000); 
+            }else m_uiMindFlayTimer -= uiDiff; 
  
-            if (shadowBoltSalveTimer < uiDiff) 
+            if (m_uiShadowBoltSalveTimer < uiDiff) 
             { 
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHADOW_BOLT_SALVE : SPELL_SHADOW_BOLT_SALVE_H) == CAST_OK)
-                    shadowBoltSalveTimer = urand(5000, 10000); 
-            }else shadowBoltSalveTimer -= uiDiff; 
+                    m_uiShadowBoltSalveTimer = urand(5000, 10000); 
+            }else m_uiShadowBoltSalveTimer -= uiDiff; 
  
-            if (shiverTimer < uiDiff) 
+            if (m_uiShiverTimer < uiDiff) 
             { 
                 if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), m_bIsRegularMode ? SPELL_SHIVER : SPELL_SHIVER_H) == CAST_OK)
-                    shiverTimer = urand(13000, 14000); 
-            }else shiverTimer -= uiDiff;
+                    m_uiShiverTimer = urand(13000, 14000); 
+            }else m_uiShiverTimer -= uiDiff;
             
             DoMeleeAttackIfReady();     
         }    

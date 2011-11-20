@@ -42,6 +42,7 @@ void instance_ahnkahet::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_ELDER_NADOX:
         case NPC_JEDOGA_SHADOWSEEKER:
+        case NPC_TALDARAM:
             break;
         case NPC_TWILIGHT_INITIATE:
             m_lTwilightInitiate.push_back(pCreature->GetObjectGuid());
@@ -91,6 +92,11 @@ void instance_ahnkahet::SetData(uint32 uiType, uint32 uiData)
 
                 if (m_uiDevicesActivated == 2)
                 {
+                    if (Unit* pTaldaram = GetSingleCreatureFromStorage(NPC_TALDARAM))
+                    {
+                        pTaldaram->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        pTaldaram->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                    }
                     m_auiEncounter[uiType] = uiData;
                     DoUseDoorOrButton(GO_VORTEX);
                 }
