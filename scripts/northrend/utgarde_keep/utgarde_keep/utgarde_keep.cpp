@@ -149,10 +149,10 @@ CreatureAI* GetAI_mob_dragonflayer_forge_master(Creature* pCreature)
 
 void AddSC_utgarde_keep()
 {
-    Script *newscript;
+    Script* pNewscript;
 
-    newscript = new Script;
-    newscript->Name = "mob_dragonflayer_forge_master";
-    newscript->GetAI = &GetAI_mob_dragonflayer_forge_master;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "mob_dragonflayer_forge_master";
+    pNewscript->GetAI = &GetAI_mob_dragonflayer_forge_master;
+    pNewscript->RegisterSelf();
 }
