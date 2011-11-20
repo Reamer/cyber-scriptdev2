@@ -30,87 +30,87 @@ EndScriptData */
 enum
 {
   /*INTRO - Pre Uther*/
-  SAY_JAINA_INTRO_01                 = -1594433,
-  SAY_SYLVANA_INTRO_01               = -1594434,
-  SAY_JAINA_INTRO_02                 = -1594435,
-  SAY_JAINA_INTRO_03                 = -1594436,
-  SAY_SYLVANA_INTRO_03               = -1594437,
-  SAY_JAINA_INTRO_04                 = -1594438,
-  SAY_SYLVANA_INTRO_04               = -1594439,
+  SAY_JAINA_INTRO_01                 = -1668433,
+  SAY_SYLVANA_INTRO_01               = -1668434,
+  SAY_JAINA_INTRO_02                 = -1668435,
+  SAY_JAINA_INTRO_03                 = -1668436,
+  SAY_SYLVANA_INTRO_03               = -1668437,
+  SAY_JAINA_INTRO_04                 = -1668438,
+  SAY_SYLVANA_INTRO_04               = -1668439,
 
   /*INTRO - Uther Dialog*/
-  SAY_UTHER_A_01                     = -1594440, 
-  SAY_UTHER_H_01                     = -1594441,
-  SAY_JAINA_02                       = -1594442,
-  SAY_SYLVANA_02                     = -1594443,
-  SAY_UTHER_A_03                     = -1594444,
-  SAY_UTHER_H_03                     = -1594445,
-  SAY_JAINA_04                       = -1594446,
-  SAY_SYLVANA_04                     = -1594447,
-  SAY_UTHER_A_05                     = -1594448,
-  SAY_UTHER_H_05                     = -1594449,
-  SAY_JAINA_06                       = -1594450,
-  SAY_SYLVANA_06                     = -1594451,
-  SAY_UTHER_A_07                     = -1594452,
-  SAY_UTHER_H_07                     = -1594453,
-  SAY_JAINA_08                       = -1594454,
-  SAY_SYLVANA_08                     = -1594455,
-  SAY_UTHER_A_09                     = -1594456,
-  SAY_UTHER_H_09                     = -1594457,
-  SAY_JAINA_10                       = -1594458,
-  SAY_UTHER_A_11                     = -1594459,
-  SAY_UTHER_H_11                     = -1594460,
-  SAY_JAINA_12                       = -1594461,
-  SAY_SYLVANA_12                     = -1594462,
-  SAY_UTHER_A_13                     = -1594463,
-  SAY_UTHER_A_14                     = -1594464,
-  SAY_JAINA_15                       = -1594465,
+  SAY_UTHER_A_01                     = -1668440,
+  SAY_UTHER_H_01                     = -1668441,
+  SAY_JAINA_02                       = -1668442,
+  SAY_SYLVANA_02                     = -1668443,
+  SAY_UTHER_A_03                     = -1668444,
+  SAY_UTHER_H_03                     = -1668445,
+  SAY_JAINA_04                       = -1668446,
+  SAY_SYLVANA_04                     = -1668447,
+  SAY_UTHER_A_05                     = -1668448,
+  SAY_UTHER_H_05                     = -1668449,
+  SAY_JAINA_06                       = -1668450,
+  SAY_SYLVANA_06                     = -1668451,
+  SAY_UTHER_A_07                     = -1668452,
+  SAY_UTHER_H_07                     = -1668453,
+  SAY_JAINA_08                       = -1668454,
+  SAY_SYLVANA_08                     = -1668455,
+  SAY_UTHER_A_09                     = -1668456,
+  SAY_UTHER_H_09                     = -1668457,
+  SAY_JAINA_10                       = -1668458,
+  SAY_UTHER_A_11                     = -1668459,
+  SAY_UTHER_H_11                     = -1668660,
+  SAY_JAINA_12                       = -1668461,
+  SAY_SYLVANA_12                     = -1668462,
+  SAY_UTHER_A_13                     = -1668463,
+  SAY_UTHER_A_14                     = -1668464,
+  SAY_JAINA_15                       = -1668465,
 
   /*INTRO - Lich King Arrive*/
-  SAY_UTHER_A_16                     = -1594466,
-  SAY_UTHER_H_16                     = -1594467,
-  SAY_LICH_KING_17                   = -1594468,
-  SAY_LICH_KING_18                   = -1594469,
-  SAY_LICH_KING_19                   = -1594470,
-  SAY_JAINA_20                       = -1594471,
-  SAY_SYLVANA_20                     = -1594472,
-  SAY_LICH_KING_A_21                 = -1594473,
-  SAY_LICH_KING_H_21                 = -1594474,
-  SAY_FALRIC_INTRO                   = -1594475,
-  SAY_MARWYN_INTRO                   = -1594476,
-  SAY_FALRIC_INTRO2                  = -1594505,
+  SAY_UTHER_A_16                     = -1668466,
+  SAY_UTHER_H_16                     = -1668467,
+  SAY_LICH_KING_17                   = -1668468,
+  SAY_LICH_KING_18                   = -1668469,
+  SAY_LICH_KING_19                   = -1668470,
+  SAY_JAINA_20                       = -1668471,
+  SAY_SYLVANA_20                     = -1668472,
+  SAY_LICH_KING_A_21                 = -1668473,
+  SAY_LICH_KING_H_21                 = -1668474,
+  SAY_FALRIC_INTRO                   = -1668475,
+  SAY_MARWYN_INTRO                   = -1668476,
+  SAY_FALRIC_INTRO2                  = -1668505,
 
   /*INTRO - Pre Escape*/
-  SAY_LICH_KING_AGGRO_A              = -1594477,
-  SAY_LICH_KING_AGGRO_H              = -1594478,
-  SAY_JAINA_AGGRO                    = -1594479,
-  SAY_SYLVANA_AGGRO                  = -1594480,
+  SAY_LICH_KING_AGGRO_A              = -1668477,
+  SAY_LICH_KING_AGGRO_H              = -1668478,
+  SAY_JAINA_AGGRO                    = -1668479,
+  SAY_SYLVANA_AGGRO                  = -1668480,
 
   /*ESCAPE*/
-  SAY_JAINA_WALL_01                  = -1594487,
-  SAY_SYLVANA_WALL_01                = -1594488,
-  SAY_JAINA_WALL_02                  = -1594489,
-  SAY_SYLVANA_WALL_02                = -1594490,
-  SAY_LICH_KING_WALL_02              = -1594491,
-  SAY_LICH_KING_WALL_03              = -1594492,
-  SAY_LICH_KING_WALL_04              = -1594493,
-  SAY_JAINA_WALL_03                  = -1594494,
-  SAY_JAINA_WALL_04                  = -1594495,
-  SAY_SYLVANA_WALL_03                = -1594496,
-  SAY_SYLVANA_WALL_04                = -1594497,
-  SAY_JAINA_ESCAPE_01                = -1594498,
-  SAY_JAINA_ESCAPE_02                = -1594499,
-  SAY_SYLVANA_ESCAPE_01              = -1594500,
-  SAY_SYLVANA_ESCAPE_02              = -1594501,
-  SAY_JAINA_TRAP                     = -1594502,
-  SAY_SYLVANA_TRAP                   = -1594503,
-  SAY_LICH_KING_END_01               = -1594506,
-  SAY_LICH_KING_END_02               = -1594507,
-  SAY_LICH_KING_END_03               = -1594508,
+  SAY_JAINA_WALL_01                  = -1668487,
+  SAY_SYLVANA_WALL_01                = -1668488,
+  SAY_JAINA_WALL_02                  = -1668489,
+  SAY_SYLVANA_WALL_02                = -1668490,
+  SAY_LICH_KING_WALL_02              = -1668491,
+  SAY_LICH_KING_WALL_03              = -1668492,
+  SAY_LICH_KING_WALL_04              = -1668493,
+  SAY_JAINA_WALL_03                  = -1668494,
+  SAY_JAINA_WALL_04                  = -1668495,
+  SAY_SYLVANA_WALL_03                = -1668496,
+  SAY_SYLVANA_WALL_04                = -1668497,
+  SAY_JAINA_ESCAPE_01                = -1668498,
+  SAY_JAINA_ESCAPE_02                = -1668499,
+  SAY_SYLVANA_ESCAPE_01              = -1668500,
+  SAY_SYLVANA_ESCAPE_02              = -1668501,
+  SAY_JAINA_TRAP                     = -1668502,
+  SAY_SYLVANA_TRAP                   = -1668503,
+  SAY_LICH_KING_END_01               = -1668506,
+  SAY_LICH_KING_END_02               = -1668507,
+  SAY_LICH_KING_END_03               = -1668508,
 
-  SAY_ESCAPE_01                      = -1594531,
-  SAY_ESCAPE_02                      = -1594532,
-  SAY_ESCAPE_03                      = -1594533,
+  SAY_ESCAPE_01                      = -1668531,
+  SAY_ESCAPE_02                      = -1668532,
+  SAY_ESCAPE_03                      = -1668533,
 
 
   /*SPELLS AND VISUAL EFFECTS*/
@@ -188,7 +188,7 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_HRintroAI : public ScriptedAI
                     m_pInstance->SetNextEvent(3,m_creature->GetEntry(),8000);
                 }
                 break;
-            case 3: 
+            case 3:
                 if (m_creature->GetEntry() == NPC_JAINA)
                 {
                     DoScriptText(SAY_JAINA_INTRO_02, m_creature);
@@ -303,7 +303,7 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_HRintroAI : public ScriptedAI
                 }
                 else if (m_creature->GetEntry() == NPC_SYLVANA && pUther)
                 {
-                    DoScriptText(SAY_UTHER_H_05, pUther); 
+                    DoScriptText(SAY_UTHER_H_05, pUther);
                     m_pInstance->SetNextEvent(14,m_creature->GetEntry(),19000);
                 }
                 break;
@@ -315,14 +315,14 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_HRintroAI : public ScriptedAI
                 }
                 else if (m_creature->GetEntry() == NPC_SYLVANA)
                 {
-                    DoScriptText(SAY_SYLVANA_06, m_creature); 
+                    DoScriptText(SAY_SYLVANA_06, m_creature);
                     m_pInstance->SetNextEvent(15,m_creature->GetEntry(),2000);
                 }
                 break;
             case 15:
                 if (m_creature->GetEntry() == NPC_JAINA && pUther)
                 {
-                    DoScriptText(SAY_UTHER_A_07, pUther); 
+                    DoScriptText(SAY_UTHER_A_07, pUther);
                     m_pInstance->SetNextEvent(16,m_creature->GetEntry(),12000);
                 }
                 else if (m_creature->GetEntry() == NPC_SYLVANA && pUther)
@@ -334,7 +334,7 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_HRintroAI : public ScriptedAI
             case 16:
                 if (m_creature->GetEntry() == NPC_JAINA)
                 {
-                    DoScriptText(SAY_JAINA_08, m_creature); 
+                    DoScriptText(SAY_JAINA_08, m_creature);
                     m_pInstance->SetNextEvent(17,m_creature->GetEntry(),6000);
                 }
                 else if (m_creature->GetEntry() == NPC_SYLVANA)
@@ -393,7 +393,7 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_HRintroAI : public ScriptedAI
             case 21:
                 if (m_creature->GetEntry() == NPC_JAINA && pUther)
                 {
-                    DoScriptText(SAY_UTHER_A_13, pUther); 
+                    DoScriptText(SAY_UTHER_A_13, pUther);
                     m_pInstance->SetNextEvent(22,m_creature->GetEntry(),5000);
                 }
                 else if (m_creature->GetEntry() == NPC_SYLVANA)
@@ -404,7 +404,7 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_HRintroAI : public ScriptedAI
             case 22:
                 if (m_creature->GetEntry() == NPC_JAINA && pUther)
                 {
-                    DoScriptText(SAY_UTHER_A_14, pUther); 
+                    DoScriptText(SAY_UTHER_A_14, pUther);
                     m_pInstance->SetNextEvent(23,m_creature->GetEntry(),12000);
                 }
                 else if (m_creature->GetEntry() == NPC_SYLVANA)
@@ -486,7 +486,7 @@ bool GossipHello_npc_jaina_and_sylvana_HRintro(Player* pPlayer, Creature* pCreat
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, -3594536, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, -3594537, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
             break;
-       case NPC_SYLVANA: 
+       case NPC_SYLVANA:
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, -3594538, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, -3594539, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
             break;
@@ -534,7 +534,7 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_HRextroAI : public npc_escortAI
     BSWScriptedInstance* m_pInstance;
 
     uint32 CastTimer;
-    int32 HoldTimer;
+    uint32 HoldTimer;
     uint8 m_wallNum;
     bool Fight;
     ObjectGuid wallTarget;
@@ -566,10 +566,10 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_HRextroAI : public npc_escortAI
        if (!who)
            return;
 
-       if (m_creature->GetEntry() != NPC_SYLVANA_OUTRO) 
+       if (m_creature->GetEntry() != NPC_SYLVANA_OUTRO)
            return;
 
-       if (m_pInstance->GetData(TYPE_LICH_KING) == IN_PROGRESS || Fight != true) 
+       if (m_pInstance->GetData(TYPE_LICH_KING) == IN_PROGRESS || Fight != true)
            return;
 
        npc_escortAI::AttackStart(who);
@@ -804,7 +804,7 @@ struct MANGOS_DLL_DECL npc_jaina_and_sylvana_HRextroAI : public npc_escortAI
                     m_creature->GetMotionMaster()->MovePoint(0, (m_creature->GetPositionX()-5)+rand()%10, (m_creature->GetPositionY()-5)+rand()%10, m_creature->GetPositionZ());
                     m_pInstance->SetNextEvent(106,m_creature->GetEntry(),3000);
                 }
-                else 
+                else
                     m_pInstance->SetNextEvent(106,m_creature->GetEntry(),12000);
                 break;
            case 106:
@@ -1039,7 +1039,7 @@ struct MANGOS_DLL_DECL npc_frostworn_generalAI : public ScriptedAI
 
    void Reset()
    {
-        if (!m_pInstance) 
+        if (!m_pInstance)
             return;
         m_uiShieldTimer = 5000;
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -1047,18 +1047,18 @@ struct MANGOS_DLL_DECL npc_frostworn_generalAI : public ScriptedAI
 
     void JustDied(Unit* pKiller)
     {
-        if (!m_pInstance) 
+        if (!m_pInstance)
             return;
         DoScriptText(SAY_DEATH, m_creature);
         m_pInstance->SetData(TYPE_FROST_GENERAL, DONE);
     }
 
-    void MoveInLineOfSight(Unit* pWho) 
+    void MoveInLineOfSight(Unit* pWho)
     {
-        if (!m_pInstance) 
+        if (!m_pInstance)
             return;
 
-        if (m_creature->getVictim()) 
+        if (m_creature->getVictim())
             return;
 
         if (pWho->GetTypeId() != TYPEID_PLAYER
@@ -1076,7 +1076,7 @@ struct MANGOS_DLL_DECL npc_frostworn_generalAI : public ScriptedAI
 
     void Aggro(Unit* pVictim)
     {
-        if (!m_pInstance) 
+        if (!m_pInstance)
             return;
         DoScriptText(SAY_AGGRO, m_creature);
         m_pInstance->SetData(TYPE_FROST_GENERAL, IN_PROGRESS);
@@ -1148,7 +1148,7 @@ struct MANGOS_DLL_DECL npc_spiritual_reflectionAI : public BSWScriptedAI
 
     void Reset()
     {
-        if (!m_pInstance) 
+        if (!m_pInstance)
             return;
         isMirror = false;
         victimGuid = ObjectGuid();
@@ -1177,7 +1177,7 @@ struct MANGOS_DLL_DECL npc_spiritual_reflectionAI : public BSWScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!m_pInstance || m_pInstance->GetData(TYPE_FROST_GENERAL) != IN_PROGRESS) 
+        if (!m_pInstance || m_pInstance->GetData(TYPE_FROST_GENERAL) != IN_PROGRESS)
             m_creature->ForcedDespawn();
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -1302,7 +1302,7 @@ struct MANGOS_DLL_DECL npc_queldelar_horAI : public ScriptedAI
 //        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, 63135);
     }
 
-    void AttackStart(Unit* who) 
+    void AttackStart(Unit* who)
     {
          return;
     }
