@@ -115,7 +115,6 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
     GUIDVector m_vVolunteerGuid;
 
     ObjectGuid pChosenVolunteerGuid;
-    ObjectGuid pVisualTriggerGuid;
 
     uint32 volunteerDeathTimer;
     uint32 volunteerReachedTimer;
@@ -140,16 +139,12 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
         thundershockTimer = 6000;
         cycloneStrikeTimer = 8000;
 
-        pChosenVolunteerGuid = 0;
-        pVisualTriggerGuid = 0;
-
         if(m_pInstance)
         {
             m_pInstance->SetData(TYPE_JEDOGA,NOT_STARTED);
             m_pInstance->SetAchiev(TYPE_JEDOGA, true);
         }
-
-
+        
         m_creature->NearTeleportTo(START_X,START_Y,START_Z,START_O);
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->CastSpell(m_creature,SPELL_SPHERE_VISUAL,true);
@@ -204,7 +199,6 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
             }
             m_vVolunteerGuid.clear();
         }
-        
     }
 
     void MoveVolunteer()
@@ -224,7 +218,6 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
                         pVisualTrigger->GetMotionMaster()->MoveIdle();
                         pVisualTrigger->SetVisibility(VISIBILITY_ON);
                         pVisualTrigger->CastSpell(pVisualTrigger, SPELL_SACRIFICE_VISUAL, true);
-                        pVisualTriggerGuid = pVisualTrigger->GetObjectGuid();
                     }
                     pVolunteer->GetMotionMaster()->Clear();
                     pVolunteer->GetMotionMaster()->MovePoint(0, CORD_CENTER_X, CORD_CENTER_Y, CORD_CENTER_Z);
@@ -236,7 +229,6 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
                         case 0: DoScriptText(SAY_CALL_SACRIFICE_1, pVolunteer); break;
                         case 1: DoScriptText(SAY_CALL_SACRIFICE_2, pVolunteer); break;
                     }
-
                 }
                 else
                 {
@@ -300,25 +292,33 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
                     volunteerPhaseTimer = 32000;
                     volunteerDeathTimer = 16000;
                     volunteerReachedTimer = 14500;
-                }else volunteerPhaseTimer -= uiDiff;
+                }
+                else
+                    volunteerPhaseTimer -= uiDiff;
 
                 if (lightingBallTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_LIGHTING_BALL : SPELL_LIGHTING_BALL_H) == CAST_OK)
                         lightingBallTimer = urand(4000, 6000);
-                }else lightingBallTimer -= uiDiff;
+                }
+                else
+                    lightingBallTimer -= uiDiff;
         
                 if (thundershockTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), m_bIsRegularMode ? SPELL_THUNDERSHOCK : SPELL_THUNDERSHOCK_H) == CAST_OK)
                         thundershockTimer = urand(12000, 18000);
-                }else thundershockTimer -= uiDiff;
+                }
+                else
+                    thundershockTimer -= uiDiff;
 
                 if (cycloneStrikeTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CYCLONE_STRIKE : SPELL_CYCLONE_STRIKE_H)  == CAST_OK)
                         cycloneStrikeTimer = urand(14000, 20000);
-                }else cycloneStrikeTimer -= uiDiff;
+                }
+                else
+                    cycloneStrikeTimer -= uiDiff;
 
                 DoMeleeAttackIfReady();
                 break;
@@ -373,18 +373,16 @@ struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
                         m_creature->GetMotionMaster()->MoveChase(pTarget);
                         m_creature->Attack(pTarget, true);
                     }
-
-                    if (Creature* pVisualTrigger = m_creature->GetMap()->GetCreature(pVisualTriggerGuid))
-                        pVisualTrigger->ForcedDespawn();
                     
                     victimCounter++;
                     volunteerDeathTimer = 60000;
                     m_uiPhase = PHASE_GROUND;
                     
-                }else volunteerDeathTimer -= uiDiff;
+                }
+                else
+                    volunteerDeathTimer -= uiDiff;
 
                 break;
-
             }
         }
     }

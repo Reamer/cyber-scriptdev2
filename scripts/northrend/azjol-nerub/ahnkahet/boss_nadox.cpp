@@ -40,7 +40,6 @@ enum
     SPELL_BERSERK                 = 26662,
     SPELL_BROOD_RAGE              = 59465,
 
-    
     SPELL_GUARDIAN_AURA           = 56151,
     SPELL_GUARDIAN_AURA_TRIGGERED = 56153,
     SPELL_GUARDIAN_SPRINT         = 56354,
@@ -62,11 +61,8 @@ struct MANGOS_DLL_DECL mob_ahnkahar_eggAI : public ScriptedAI
 {
     mob_ahnkahar_eggAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         Reset();
     }
-
-    instance_ahnkahet* m_pInstance;
 
     void Reset() {}
 
@@ -101,20 +97,19 @@ struct MANGOS_DLL_DECL boss_nadoxAI : public ScriptedAI
     bool m_bIsRegularMode;
 
     bool   m_bBerserk;
-    bool   m_bGuardianSummoned;
     uint32 m_uiBroodPlagueTimer;
     uint32 m_uiBroodRageTimer;
     uint32 m_uiSummonTimer;
-    uint8 m_uiGuardCount;
+
+    float m_fGuardHealthNext;
 
     void Reset()
     {
         m_bBerserk = false;
-        m_bGuardianSummoned = false;
         m_uiSummonTimer = 5000;
         m_uiBroodPlagueTimer = 15000;
         m_uiBroodRageTimer = 20000;
-        m_uiGuardCount = 0;
+        m_fGuardHealthNext = 75.0f;
         if(m_pInstance)
         {
             m_pInstance->SetData(TYPE_NADOX,NOT_STARTED);
@@ -165,16 +160,12 @@ struct MANGOS_DLL_DECL boss_nadoxAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if ((m_uiGuardCount == 0 && m_creature->GetHealthPercent() < 75.0f) ||
-            (m_uiGuardCount == 1 && m_creature->GetHealthPercent() < 50.0f) ||
-            (m_uiGuardCount == 2 && m_creature->GetHealthPercent() < 25.0f))
+        if (m_creature->GetHealthPercent() < m_fGuardHealthNext)
         {
-            // guardian is summoned at 75, 50 and 25% of boss HP
             if (Creature* pGuardianEgg = GetClosestCreatureWithEntry(m_creature,NPC_AHNKAHAR_GUARDIAN_EGG, 75.0f))
                 pGuardianEgg->CastSpell(pGuardianEgg, SPELL_SUMMON_SWARM_GUARDIAN, false);
- 
-            m_uiGuardCount++;
-            m_bGuardianSummoned = true;
+
+            m_fGuardHealthNext = m_fGuardHealthNext - 25.0f;
         }
 
         if (m_uiSummonTimer < uiDiff)
@@ -192,9 +183,10 @@ struct MANGOS_DLL_DECL boss_nadoxAI : public ScriptedAI
         if (m_uiBroodPlagueTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BROOD_PLAGUE : SPELL_BROOD_PLAGUE_H);
-
-            m_uiBroodPlagueTimer = 20000;
+            {
+                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BROOD_PLAGUE : SPELL_BROOD_PLAGUE_H) == CAST_OK)
+                    m_uiBroodPlagueTimer = 20000;
+            }
         }
         else
             m_uiBroodPlagueTimer -= uiDiff;
@@ -203,10 +195,8 @@ struct MANGOS_DLL_DECL boss_nadoxAI : public ScriptedAI
         {
             if (m_uiBroodRageTimer < uiDiff)
             {
-                if (Creature* pRageTarget = SelectRandomCreatureOfEntryInRange(NPC_AHNKAHAR_SWARMER, 50.0))
-                    DoCastSpellIfCan(pRageTarget, SPELL_BROOD_RAGE);
-
-                m_uiBroodRageTimer = 20000;
+                if (DoCastSpellIfCan(m_creature, SPELL_BROOD_RAGE) == CAST_OK)
+                    m_uiBroodRageTimer = 20000;
             }
             else
                 m_uiBroodRageTimer -= uiDiff;
@@ -214,8 +204,8 @@ struct MANGOS_DLL_DECL boss_nadoxAI : public ScriptedAI
 
         if (!m_bBerserk && m_creature->GetPositionZ() < 24.0)
         {
-            m_bBerserk = true;
-            DoCastSpellIfCan(m_creature, SPELL_BERSERK);
+            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                m_bBerserk = true;
         }
 
         DoMeleeAttackIfReady();
@@ -231,24 +221,31 @@ struct MANGOS_DLL_DECL mob_nadox_guardianAI : public ScriptedAI
     mob_nadox_guardianAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
     instance_ahnkahet* m_pInstance;
-    bool m_bIsRegularMode;
 
-    void Reset()
-    {
-        DoCast(m_creature, SPELL_GUARDIAN_SPRINT, true);
-        DoCast(m_creature, SPELL_GUARDIAN_AURA, false);
-    }
-    void JustDied(Unit* Killer) 
+    void Reset(){}
+
+    void JustDied(Unit* Killer)
     {
         if(m_pInstance)
             m_pInstance->SetAchiev(TYPE_NADOX, false);
     }
 
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        DoCastSpellIfCan(m_creature, SPELL_GUARDIAN_AURA, CAST_AURA_NOT_PRESENT);
+
+        if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+            DoCastSpellIfCan(m_creature, SPELL_GUARDIAN_SPRINT, CAST_AURA_NOT_PRESENT);
+
+        DoMeleeAttackIfReady();
+    }
 };
 
 
@@ -259,20 +256,20 @@ CreatureAI* GetAI_mob_nadox_guardian(Creature* pCreature)
 
 void AddSC_boss_nadox()
 {
-    Script* newscript;
+    Script* pNewscript;
 
-    newscript = new Script;
-    newscript->Name = "boss_nadox";
-    newscript->GetAI = &GetAI_boss_nadox;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "boss_nadox";
+    pNewscript->GetAI = &GetAI_boss_nadox;
+    pNewscript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_ahnkahar_egg";
-    newscript->GetAI = &GetAI_mob_ahnkahar_egg;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "mob_ahnkahar_egg";
+    pNewscript->GetAI = &GetAI_mob_ahnkahar_egg;
+    pNewscript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "mob_nadox_guardian";
-    newscript->GetAI = &GetAI_mob_nadox_guardian;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "mob_nadox_guardian";
+    pNewscript->GetAI = &GetAI_mob_nadox_guardian;
+    pNewscript->RegisterSelf();
 }

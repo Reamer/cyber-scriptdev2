@@ -77,6 +77,7 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
         entanglingRootsTimer = urand(12000, 15000);
         venomBoltVolleyTimer = urand(4000, 6000);
     }
+
     void despawnMushroom()
     {
         if (!m_lMushroomGUIDList.empty())
@@ -89,19 +90,22 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
 
     void spawnMushroom()
     {
-        for (int i = 0; i < 8;i++)
+        for (int i = 0; i < 8;++i)
+        {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
-                float posX = urand(1,100)%30;
-                float posY = urand(1,100)%30;
+                float posX = rand()%30;
+                float posY = rand()%30;
                 posX = pTarget->GetPositionX() + (urand(0,1)? (posX) : (-posX));
                 posY = pTarget->GetPositionY() + (urand(0,1)? (posY) : (-posY));
                 float posZ = pTarget->GetTerrain()->GetWaterOrGroundLevel(posX,posY,pTarget->GetPositionZ()+3);
 
-                Creature* pMushroom = m_creature->SummonCreature(roll_chance_i(75) ? NPC_POISONOUS_MUSHROOM : NPC_HEALTHY_MUSHROOM, posX, posY, posZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000);
-                m_lMushroomGUIDList.push_back(pMushroom->GetObjectGuid());
-            }     
+                if (Creature* pMushroom = m_creature->SummonCreature(roll_chance_i(75) ? NPC_POISONOUS_MUSHROOM : NPC_HEALTHY_MUSHROOM, posX, posY, posZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000))
+                    m_lMushroomGUIDList.push_back(pMushroom->GetObjectGuid());
+            }
+        }
     }
+
     void RemoveMiniAura()
     {
         Map::PlayerList const& plList = m_pInstance->instance->GetPlayers();
@@ -122,14 +126,21 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_AMANITAR, IN_PROGRESS);
-        for( int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; ++i)
             spawnMushroom();
     }
     void JustReachedHome()
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_AMANITAR, FAIL);
+    }
 
+    void JustDied(Unit* pKiller)
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_AMANITAR, DONE);
+        RemoveMiniAura();
+        despawnMushroom();
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -141,46 +152,44 @@ struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
         {
             spawnMushroom();
             spawnMushroomTimer = 15000;
-        }else spawnMushroomTimer -= uiDiff;
+        }
+        else
+            spawnMushroomTimer -= uiDiff;
 
         if (miniTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_MINI) == CAST_OK)
-            {   
-                // not sure about this timer
                 miniTimer = urand(20000, 25000);
-            }
-        }else miniTimer -= uiDiff;
+        }
+        else
+            miniTimer -= uiDiff;
 
         if (bashTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BASH) == CAST_OK)
                 bashTimer = urand(9000, 13000);
-        }else bashTimer -= uiDiff;
+        }
+        else
+            bashTimer -= uiDiff;
 
         if (venomBoltVolleyTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_VENOM_BOLT_VOLLEY) == CAST_OK)
                 venomBoltVolleyTimer = urand(8000, 11000);
-        }else venomBoltVolleyTimer -= uiDiff;
+        }
+        else
+            venomBoltVolleyTimer -= uiDiff;
 
         if (entanglingRootsTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_ENTANGLING_ROOTS) == CAST_OK)
                 entanglingRootsTimer = urand(12000, 15000);
-        }else entanglingRootsTimer -= uiDiff;
+        }
+        else
+            entanglingRootsTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
-
-    void JustDied(Unit* pKiller)
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_AMANITAR, DONE);
-        RemoveMiniAura();
-        despawnMushroom();
-    }
-
 };
 
 CreatureAI* GetAI_boss_amanitar(Creature* pCreature)
@@ -196,8 +205,7 @@ struct MANGOS_DLL_DECL npc_amanitar_healthy_mushroomAI : public ScriptedAI
 {
     npc_amanitar_healthy_mushroomAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        SetCombatMovement(false);
         Reset();
     }
     
@@ -209,18 +217,16 @@ struct MANGOS_DLL_DECL npc_amanitar_healthy_mushroomAI : public ScriptedAI
         }
     }
 
-    instance_ahnkahet* m_pInstance;
-    bool m_bIsRegularMode;
-
-    void Reset() 
-    {
-        SetCombatMovement(false);
-        DoCast(m_creature,SPELL_MUSHROOM_MODEL,true);
-    }
+    void Reset() {}
 
     void JustDied(Unit* pWho)
     {
         m_creature->CastSpell(m_creature, SPELL_POTENT_FUNGUS, true);
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        DoCastSpellIfCan(m_creature,SPELL_MUSHROOM_MODEL, CAST_AURA_NOT_PRESENT);
     }
 };
 
@@ -237,32 +243,31 @@ struct MANGOS_DLL_DECL npc_amanitar_poisonous_mushroomAI : public ScriptedAI
 {
     npc_amanitar_poisonous_mushroomAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        SetCombatMovement(false);
         Reset();
     }
-
-    instance_ahnkahet* m_pInstance;
-    bool m_bIsRegularMode;
 
     uint32 poisenCloudTimer;
 
     void Reset()
-    {
-        SetCombatMovement(false);
-        poisenCloudTimer = urand(4,8)*100;
-        DoCast(m_creature,SPELL_MUSHROOM_MODEL,true);
-        DoCast(m_creature,SPELL_POISONOUS_MUSHROOM_VISUAL,true);
+    {        
+        poisenCloudTimer = urand(400,800);
     }
  
     void UpdateAI(const uint32 uiDiff)
     {
+        DoCastSpellIfCan(m_creature,SPELL_POISONOUS_MUSHROOM_VISUAL, CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature,SPELL_MUSHROOM_MODEL, CAST_AURA_NOT_PRESENT);
         if (poisenCloudTimer < uiDiff)
         {
-            DoCast(m_creature,SPELL_POISONOUS_MUSHROOM_VISUAL2,true);
-            DoCastSpellIfCan(m_creature, SPELL_POISON_CLOUD);
-            poisenCloudTimer = urand(2,5)*1000;
-        }else poisenCloudTimer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature, SPELL_POISON_CLOUD) == CAST_OK)
+            {
+                DoCast(m_creature,SPELL_POISONOUS_MUSHROOM_VISUAL2,true);
+                poisenCloudTimer = urand(2000,5000);
+            }
+        }
+        else
+            poisenCloudTimer -= uiDiff;
     }
 };
 
@@ -273,20 +278,20 @@ CreatureAI* GetAI_npc_amanitar_poisonous_mushroom(Creature* pCreature)
 
 void AddSC_boss_amanitar()
 {
-    Script *newscript;
+    Script *pNewscript;
 
-    newscript = new Script;
-    newscript->Name = "boss_amanitar";
-    newscript->GetAI = &GetAI_boss_amanitar;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "boss_amanitar";
+    pNewscript->GetAI = &GetAI_boss_amanitar;
+    pNewscript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_amanitar_healthy_mushroom";
-    newscript->GetAI = &GetAI_npc_amanitar_healthy_mushroom;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "npc_amanitar_healthy_mushroom";
+    pNewscript->GetAI = &GetAI_npc_amanitar_healthy_mushroom;
+    pNewscript->RegisterSelf();
 
-    newscript = new Script;
-    newscript->Name = "npc_amanitar_poisonous_mushroom";
-    newscript->GetAI = &GetAI_npc_amanitar_poisonous_mushroom;
-    newscript->RegisterSelf();
+    pNewscript = new Script;
+    pNewscript->Name = "npc_amanitar_poisonous_mushroom";
+    pNewscript->GetAI = &GetAI_npc_amanitar_poisonous_mushroom;
+    pNewscript->RegisterSelf();
 }

@@ -62,19 +62,15 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
     instance_azjol_nerub* m_pInstance;
     bool m_bIsRegularMode;
 
-    uint32 CurseTimer;
-    uint32 MindFlayTimer;
-    uint32 SwarmTimer;
-    uint32 EnrageRefreshTimer;
-
-    bool Enrage;
+    uint32 m_uiCurseTimer;
+    uint32 m_uiMindFlayTimer;
+    uint32 m_uiSwarmTimer;
 
     void Reset()
     {
-        CurseTimer = 20000;
-        MindFlayTimer = 10000;
-        SwarmTimer = urand(6000, 10000);
-        Enrage = false;
+        m_uiCurseTimer = 20000;
+        m_uiMindFlayTimer = 10000;
+        m_uiSwarmTimer = urand(6000, 10000);
 
         m_pInstance->SetData(TYPE_KRIKTHIR, NOT_STARTED);
     }
@@ -108,42 +104,29 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
         
-        if ((m_creature->GetHealthPercent() < 20) && !Enrage)
+        if (m_creature->GetHealthPercent() < 20)
+            DoCastSpellIfCan(m_creature, SPELL_ENRAGE, CAST_AURA_NOT_PRESENT);
+
+        if (m_uiCurseTimer < uiDiff)
+        {    
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CURSE_OF_FATIGUE: SPELL_CURSE_OF_FATIGUE_H) == CAST_OK)
+                m_uiCurseTimer = urand(11000, 13000);
+        }
+        else
+            m_uiCurseTimer -= uiDiff;
+
+        if (m_uiMindFlayTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER))
             {
-                Enrage = true;
-                EnrageRefreshTimer = 600000;
+                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_MIND_FLAY : SPELL_MIND_FLAY_H) == CAST_OK)
+                    m_uiMindFlayTimer = urand(14000, 18000);
             }
         }
-
-        if (CurseTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-            
-            if (!pTarget)
-                return;
-            
-            if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CURSE_OF_FATIGUE: SPELL_CURSE_OF_FATIGUE_H) == CAST_OK)
-               CurseTimer = urand(11000, 13000);
-        }
         else
-            CurseTimer -= uiDiff;
+            m_uiMindFlayTimer -= uiDiff;
 
-        if (MindFlayTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-            
-            if (!pTarget)
-                return;
-
-            if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_MIND_FLAY : SPELL_MIND_FLAY_H) == CAST_OK)
-                MindFlayTimer = urand(14000, 18000);  
-        }
-        else
-            MindFlayTimer -= uiDiff;
-
-        if (SwarmTimer < uiDiff)
+        if (m_uiSwarmTimer < uiDiff)
         {
             if (!urand(0, 1))
             {
@@ -170,8 +153,8 @@ struct MANGOS_DLL_DECL boss_krikthirAI : public ScriptedAI
                     pSwarm->SetInCombatWith(pTarget);
                 i++;
             }while (m_bIsRegularMode ? i <= 5 : i <= 12);
-            SwarmTimer = urand(3000, 5000);
-        }else SwarmTimer -= uiDiff;
+            m_uiSwarmTimer = urand(3000, 5000);
+        }else m_uiSwarmTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

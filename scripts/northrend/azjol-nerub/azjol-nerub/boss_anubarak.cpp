@@ -105,7 +105,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
     uint32 m_uiCarrionSwarmTimer;
     
     uint32 m_uiWaveStepCount;
-    uint32 countInvisiblePhases;
+    uint32 m_uiCountInvisiblePhases;
     uint32 m_uiBurrowStepCount;
     uint32 m_uiBurronStepTimer;
 
@@ -114,7 +114,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
     void Reset()
     {
         m_uiPhase               = PHASE_NORMAL;
-        countInvisiblePhases    = 0;
+        m_uiCountInvisiblePhases= 0;
         m_uiBurrowStepCount     = 0;
         m_uiBurronStepTimer     = 0;
         m_uiWaveStepCount       = 0;
@@ -201,9 +201,9 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
         {
             case PHASE_NORMAL:
             {
-                if (m_creature->GetHealthPercent() < aPercentOfLife[countInvisiblePhases])
+                if (m_creature->GetHealthPercent() < aPercentOfLife[m_uiCountInvisiblePhases])
                 {
-                    ++countInvisiblePhases;
+                    ++m_uiCountInvisiblePhases;
                     m_uiPhase = PHASE_ADDS;
                     DoCastSpellIfCan(m_creature, SPELL_BURROW);
                     m_uiSummonCreatureTimer = 2000;
@@ -261,7 +261,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
                             m_creature->SetVisibility(VISIBILITY_OFF);
                             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             m_creature->GetMotionMaster()->MoveIdle();
-                            switch (countInvisiblePhases)
+                            switch (m_uiCountInvisiblePhases)
                             {
                                 case 0: m_uiBurronStepTimer = 7000; break;
                                 case 1: m_uiBurronStepTimer = 15000; break;
@@ -308,7 +308,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
                                 m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
                             if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
                                 m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
-                            if (countInvisiblePhases == 3)
+                            if (m_uiCountInvisiblePhases == 3)
                                 if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD2, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
                                     m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
 
@@ -319,7 +319,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
                         {
                             if (Creature* pTemp = m_creature->SummonCreature(NPC_ELITE_ADD, ELITE_SPAWN_2_X, ELITE_SPAWN_2_Y, ELITE_SPAWN_2_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
                                 m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
-                            switch (countInvisiblePhases)
+                            switch (m_uiCountInvisiblePhases)
                             {
                                 case 1:
                                     m_uiSummonCreatureTimer = 6000;
@@ -340,7 +340,7 @@ struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
                                 m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
                             if (Creature* pTemp = m_creature->SummonCreature(NPC_ADD1, MIDDLE_CORD_X + urand(0.0f, 10.0f), MIDDLE_CORD_Y + urand(0.0f, 10.0f), MIDDLE_CORD_Z, m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 30000))
                                 m_lBettleGUIDList.push_back(pTemp->GetObjectGuid());
-                            if (countInvisiblePhases == 1)
+                            if (m_uiCountInvisiblePhases == 1)
                             {
                                 m_uiWaveStepCount = 10; // END
                                 break;
@@ -448,23 +448,25 @@ enum
 struct MANGOS_DLL_DECL npc_elite_anubAI : public ScriptedAI
 {
     npc_elite_anubAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {Reset();}
+    {
+        Reset();
+    }
     
 
-    uint32 moveWpTimer;
-    uint32 moveMiddleTimer;
-    uint32 strikeTimer;
-    uint32 cleaveTimer;
+    uint32 m_uiMoveWpTimer;
+    uint32 m_uiMoveMiddleTimer;
+    uint32 m_uiStrikeTimer;
+    uint32 m_uiCleaveTimer;
 
-    bool setSpeed;
+    bool m_uiSetSpeed;
 
     void Reset()
     {
-        moveWpTimer = 100;
-        moveMiddleTimer = 7000;
-        strikeTimer = urand(9000,12000);
-        cleaveTimer = urand(4000,7000);
-        setSpeed = false;
+        m_uiMoveWpTimer = 100;
+        m_uiMoveMiddleTimer = 7000;
+        m_uiStrikeTimer = urand(9000,12000);
+        m_uiCleaveTimer = urand(4000,7000);
+        m_uiSetSpeed = false;
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -476,67 +478,67 @@ struct MANGOS_DLL_DECL npc_elite_anubAI : public ScriptedAI
 
             if (m_creature->GetPositionX() < 550.0f)
             {
-                if (moveWpTimer < uiDiff)
+                if (m_uiMoveWpTimer < uiDiff)
                 {
                     m_creature->GetMotionMaster()->MovePoint(0, ELITE_WP_1_X, ELITE_WP_1_Y, ELITE_WP_1_Z);
-                    moveWpTimer = 9999999;
+                    m_uiMoveWpTimer = 9999999;
                     return;
-                }else moveWpTimer -= uiDiff;
+                }else m_uiMoveWpTimer -= uiDiff;
             }
             else
             {
-                if (moveWpTimer < uiDiff)
+                if (m_uiMoveWpTimer < uiDiff)
                 {
                     m_creature->GetMotionMaster()->MovePoint(0, ELITE_WP_2_X, ELITE_WP_2_Y, ELITE_WP_2_Z);
-                    moveWpTimer = 9999999;
+                    m_uiMoveWpTimer = 9999999;
                     return;
-                }else moveWpTimer -= uiDiff;
+                }else m_uiMoveWpTimer -= uiDiff;
             }
 
             if (m_creature->GetPositionX() < 550.0f)
             {
-                if (moveMiddleTimer < uiDiff)
+                if (m_uiMoveMiddleTimer < uiDiff)
                 {
                     m_creature->GetMotionMaster()->MovePoint(0, ELITE_SPAWN_2_X_END, ELITE_SPAWN_2_Y_END, ELITE_SPAWN_2_Z_END);
-                    moveMiddleTimer = 9999999;
+                    m_uiMoveMiddleTimer = 9999999;
                     return;
-                }else moveMiddleTimer -= uiDiff;
+                }else m_uiMoveMiddleTimer -= uiDiff;
             }
             else
             {
-                if (moveMiddleTimer < uiDiff)
+                if (m_uiMoveMiddleTimer < uiDiff)
                 {
                     m_creature->GetMotionMaster()->MovePoint(0, ELITE_SPAWN_1_X_END, ELITE_SPAWN_1_Y_END, ELITE_SPAWN_1_Z_END);
-                    moveMiddleTimer = 9999999;
+                    m_uiMoveMiddleTimer = 9999999;
                     return;
-                }else moveMiddleTimer -= uiDiff;
+                }else m_uiMoveMiddleTimer -= uiDiff;
             }
             return;
 
-            if (!setSpeed)
+            if (!m_uiSetSpeed)
             {
                 m_creature->SetSpeedRate(MOVE_WALK, 1.7f);
                 m_creature->SetSpeedRate(MOVE_RUN, 1.7f);
-                setSpeed = true;
+                m_uiSetSpeed = true;
             }
         } 
         else
         {
-            if (strikeTimer < uiDiff)
+            if (m_uiStrikeTimer < uiDiff)
             {
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_STRIKE);
-                strikeTimer = urand(5000,7000);
+                m_uiStrikeTimer = urand(5000,7000);
             }                
             else
-                strikeTimer -= uiDiff;
+                m_uiStrikeTimer -= uiDiff;
 
-            if (cleaveTimer < uiDiff)
+            if (m_uiCleaveTimer < uiDiff)
             {
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE);
-                cleaveTimer = urand(14000,17000);
+                m_uiCleaveTimer = urand(14000,17000);
             }
             else
-                cleaveTimer -= uiDiff;
+                m_uiCleaveTimer -= uiDiff;
         }
         DoMeleeAttackIfReady();
     }  
