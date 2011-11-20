@@ -35,14 +35,14 @@ enum
     SPELL_CRUSH                     = 49639,
     SPELL_INFECTED_WOUND            = 49367,
     SPELL_CORPSE_EXPLODE            = 49555,
-    H_SPELL_CORPSE_EXPLODE          = 59807,
+    SPELL_CORPSE_EXPLODE_H          = 59807,
     SPELL_CONSUME                   = 49380,
-    H_SPELL_CONSUME                 = 59803,
+    SPELL_CONSUME_H                 = 59803,
     SPELL_CONSUME_BUFF              = 49381,
-    H_SPELL_CONSUME_BUFF            = 59805,
+    SPELL_CONSUME_BUFF_H            = 59805,
 
     SPELL_CORPSE_EXPLODE_PROC       = 49618,
-    H_SPELL_CORPSE_EXPLODE_PROC     = 59809,
+    SPELL_CORPSE_EXPLODE_PROC_H     = 59809,
 
     NPC_DRAKKARI_INVADER            = 27753,
     NPC_TROLLGORE                   = 26630
@@ -61,12 +61,12 @@ struct MANGOS_DLL_DECL boss_trollgoreAI : public ScriptedAI
 {
     boss_trollgoreAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_draktharon_keep*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_draktharon_keep* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 Consume_Timer;
@@ -81,7 +81,7 @@ struct MANGOS_DLL_DECL boss_trollgoreAI : public ScriptedAI
         Consume_Timer = 5000;
         Crush_Timer = 10000;
         InfectedWound_Timer = 30000;
-        Wave_Timer = 10000;
+        Wave_Timer = 2000;
     }
 
     void Aggro(Unit* pWho)
@@ -125,43 +125,53 @@ struct MANGOS_DLL_DECL boss_trollgoreAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff)
     {
-        // Summon npcs
-        if (Wave_Timer < uiDiff)
-        {
-            SummonWaves();
-            Wave_Timer = 15000;
-        }else Wave_Timer -= uiDiff;
-
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         // Crush
         if (Crush_Timer < uiDiff)
         {
-            DoCast(m_creature->getVictim(), SPELL_CRUSH);
-            Crush_Timer = 10000;
-        }else Crush_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSH) == CAST_OK)
+                Crush_Timer = 10000;
+        }
+        else
+            Crush_Timer -= uiDiff;
 
         // Infected Wound
         if (InfectedWound_Timer < uiDiff)
         {
-            DoCast(m_creature->getVictim(), SPELL_CRUSH);
-            InfectedWound_Timer = 30000;
-        }else InfectedWound_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSH) == CAST_OK)
+                InfectedWound_Timer = 30000;
+        }
+        else
+            InfectedWound_Timer -= uiDiff;
+
+        // Summon npcs
+        if (Wave_Timer < uiDiff)
+        {
+            SummonWaves();
+            Wave_Timer = 15000;
+        }
+        else
+            Wave_Timer -= uiDiff;
 
         // Consume
         if (Consume_Timer < uiDiff)
         {
-            m_creature->CastSpell(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_CONSUME : H_SPELL_CONSUME, true);
-            Consume_Timer = 15000;
-        }else Consume_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature,  m_bIsRegularMode ? SPELL_CONSUME : SPELL_CONSUME_H) == CAST_OK)
+                Consume_Timer = 15000;
+        }
+        else
+            Consume_Timer -= uiDiff;
 
         //Corpse Explosion
         if (CorpseExplode_Timer < uiDiff)
         {
-            DoCast(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_CORPSE_EXPLODE : H_SPELL_CORPSE_EXPLODE);
-            CorpseExplode_Timer = 15000;
-        }else CorpseExplode_Timer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_CORPSE_EXPLODE : SPELL_CORPSE_EXPLODE_H) == CAST_OK)
+                CorpseExplode_Timer = 15000;
+        }
+        else
+            CorpseExplode_Timer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

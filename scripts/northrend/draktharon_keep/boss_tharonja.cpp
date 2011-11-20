@@ -40,9 +40,9 @@ enum
     H_SPELL_CURSE_OF_LIFE           = 59972,
 
     SPELL_SHADOW_VOLLEY             = 49528,
-    H_SPELL_SHADOW_VOLLEY           = 59973,
+    SPELL_SHADOW_VOLLEY_H           = 59973,
     SPELL_RAIN_OF_FIRE              = 49518,
-    H_SPELL_RAIN_OF_FIRE            = 59971,
+    SPELL_RAIN_OF_FIRE_H            = 59971,
     
     SPELL_DECAY_FLESH               = 49356,            //not working
 
@@ -50,12 +50,12 @@ enum
     SPELL_GIFT_OF_THARONJA          = 52509,
 
     SPELL_LIGHTNING_BREATH          = 49537,
-    H_SPELL_LIGHTNING_BREATH        = 59936,
+    SPELL_LIGHTNING_BREATH_H        = 59936,
     SPELL_EYE_BEAM                  = 49544,
-    H_SPELL_EYE_BEAM                = 59965,
+    SPELL_EYE_BEAM_H                = 59965,
 
     SPELL_POISON_CLOUD              = 49548,
-    H_SPELL_POSION_CLOUD            = 59969,
+    SPELL_POSION_CLOUD_H            = 59969,
     
     SPELL_RETURN_FLESH              = 53463,                //not working
 
@@ -132,13 +132,7 @@ struct MANGOS_DLL_DECL boss_tharonjaAI : public ScriptedAI
         DoCastSpellIfCan(pKiller, SPELL_ACHIEV_CHECK, CAST_TRIGGERED);
 
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_THARONJA, DONE);
-            if (m_bIsRegularMode)
-                m_pInstance->DoCompleteAchievement(ACHIEVEMENT_NORMAL);
-            else
-                m_pInstance->DoCompleteAchievement(ACHIEVEMENT_HEROIC);
-        }
     }
 
     void JustReachedHome()
@@ -165,9 +159,9 @@ struct MANGOS_DLL_DECL boss_tharonjaAI : public ScriptedAI
                 switch(urand(0, 1))
                 {
                     case 0: 
-                        DoCast(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_SHADOW_VOLLEY : H_SPELL_SHADOW_VOLLEY);
+                        DoCast(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_SHADOW_VOLLEY : SPELL_SHADOW_VOLLEY_H);
                     case 1: 
-                        DoCast(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : H_SPELL_RAIN_OF_FIRE);
+                        DoCast(m_creature->getVictim(),  m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : SPELL_RAIN_OF_FIRE_H);
                 }
                 SkeletonSpells_Timer = urand (5000, 10000);
             }else SkeletonSpells_Timer -= uiDiff;
@@ -206,7 +200,7 @@ struct MANGOS_DLL_DECL boss_tharonjaAI : public ScriptedAI
 
             if (PoisonCloud_Timer < uiDiff)
             {
-                DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_POISON_CLOUD : H_SPELL_POSION_CLOUD);
+                DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_POISON_CLOUD : SPELL_POSION_CLOUD_H);
                 PoisonCloud_Timer = 10000;
             }else PoisonCloud_Timer -= uiDiff;
 
@@ -217,10 +211,10 @@ struct MANGOS_DLL_DECL boss_tharonjaAI : public ScriptedAI
                     case 0:
                     case 1:
                     case 2:
-                        DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_LIGHTNING_BREATH : H_SPELL_LIGHTNING_BREATH);
+                        DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_LIGHTNING_BREATH : SPELL_LIGHTNING_BREATH_H);
                         break;
                     case 3: 
-                        DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_EYE_BEAM : H_SPELL_EYE_BEAM);
+                        DoCast(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0),  m_bIsRegularMode ? SPELL_EYE_BEAM : SPELL_EYE_BEAM_H);
                         break;
                 }
                 FleshSpells_Timer = 1500;
